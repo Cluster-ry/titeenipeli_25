@@ -1,0 +1,15 @@
+# Global owners 
+# These people will be requested if nothing else later matches
+*               @ekosfin @softgitron
+
+# Infra folder needs approval from ekosfin
+infra/          @ekosfin
+
+# Backend folder needs approval from someone in backend-devs
+src/backend/    @Cluster-ry/backend-devs
+
+# Frontend folder needs approval from someone in front-devs
+src/frontend/   @Cluster-ry/front-devs
+
+# Github folder needs approval from someone in devops-engineers
+.github/        @Cluster-ry/devops-engineers
