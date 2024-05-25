@@ -3,7 +3,7 @@ name: Run eslint on frontend
 on:
   pull_request:
     paths:
-      - "scr/frontend/**"
+      - "src/frontend/**"
     branches:
       - main
 
