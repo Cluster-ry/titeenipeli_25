@@ -1,0 +1,35 @@
+name: Run eslint on frontend
+
+on:
+  pull_request:
+    paths:
+      - "scr/frontend/**"
+    branches:
+      - main
+
+env:
+  node-version: "22.2" # This is as of creation the latest
+
+jobs:
+  eslint:
+    name: Lint check on frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.node-version }}
+
+      - name: Install pnpm modules
+        run: npm install -g pnpm
+
+      - name: Install dev modules
+        working-directory: src/frontend/
+        run: pnpm install -D
+
+      - name: Lint check
+        working-directory: src/frontend/
+        run: pnpm eslint .
