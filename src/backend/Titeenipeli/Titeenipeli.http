@@ -1,0 +1,11 @@
+@Titeenipeli_HostAddress = http://localhost:5129
+
+GET {{Titeenipeli_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+GET {{Titeenipeli_HostAddress}}/ping/
+Accept: text/plain
+
+###
