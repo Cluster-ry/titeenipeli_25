@@ -4,6 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -37,6 +38,20 @@ app.MapGet("/weatherforecast", () =>
     .WithOpenApi();
 
 app.MapGet("/ping", () => "pong").WithName("Ping").WithOpenApi();
+
+// <snippet_UseWebSockets>
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+
+app.UseWebSockets(webSocketOptions);
+// </snippet_UseWebSockets>
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.MapControllers();
 
 app.Run();
 
