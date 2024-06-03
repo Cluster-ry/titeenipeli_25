@@ -1,0 +1,48 @@
+openapi: "3.1.0"
+info:
+  description: "Titeenipeli 25 API specification"
+  version: "0.0.1"
+  title: "Titeenipeli 25 API"
+  contact:
+    email: "roni.juntunen@gmail.com"
+  license:
+    name: "Unlicense"
+    url: "https://unlicense.org/"
+servers:
+  - url: https://{domain}:{port}/api/{version}
+    variables:
+      domain:
+        default: pixel-hunt
+        description: Example server
+      port:
+        enum:
+          - "8443"
+          - "443"
+        default: "443"
+      version:
+        enum:
+          - "v1"
+        default: "v1"
+tags:
+  - name: "map"
+    description: "Endpoint for interacting with map"
+
+paths:
+  /map/pixels:
+    $ref: "./paths/map/pixels.yaml"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: "./components/securitySchemas/bearerAuth.yaml"
+
+  schemas:
+    Pixel:
+      $ref: "./components/schemas/pixel.yaml"
+
+    Error:
+      $ref: "./components/schemas/error.yaml"
+
+  responses:
+    401Unauthorized:
+      $ref: "./components/responses/401Unauthorized.yaml"
