@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
     <title></title>
     <style>
         table {
@@ -28,15 +28,15 @@
 <p id="stateLabel">Ready to connect...</p>
 <div>
     <label for="connectionUrl">WebSocket Server URL:</label>
-    <input id="connectionUrl" />
+    <input id="connectionUrl"/>
     <button id="connectButton" type="submit">Connect</button>
 </div>
 <p></p>
 <div>
     <label for="sendMessage">Message to send:</label>
-    <input id="sendMessage" disabled />
-    <button id="sendButton" type="submit" disabled>Send</button>
-    <button id="closeButton" disabled>Close Socket</button>
+    <input disabled id="sendMessage"/>
+    <button disabled id="sendButton" type="submit">Send</button>
+    <button disabled id="closeButton">Close Socket</button>
 </div>
 
 <h2>Communication Log</h2>
@@ -65,7 +65,7 @@
     var scheme = document.location.protocol === "https:" ? "wss" : "ws";
     var port = document.location.port ? (":" + document.location.port) : "";
 
-    connectionUrl.value = scheme + "://" + document.location.hostname + port + "/ws" ;
+    connectionUrl.value = scheme + "://" + document.location.hostname + port + "/ws";
 
     function updateState() {
         function disable() {
@@ -73,6 +73,7 @@
             sendButton.disabled = true;
             closeButton.disabled = true;
         }
+
         function enable() {
             sendMessage.disabled = false;
             sendButton.disabled = false;
@@ -131,7 +132,7 @@
             '<td class="commslog-data">' + htmlEscape(data) + '</td></tr>';
     };
 
-    connectButton.onclick = function() {
+    connectButton.onclick = function () {
         stateLabel.innerHTML = "Connecting";
         socket = new WebSocket(connectionUrl.value);
         socket.onopen = function (event) {
