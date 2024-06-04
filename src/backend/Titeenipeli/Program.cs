@@ -1,3 +1,5 @@
+using Titeenipeli.Middleware;
+
 namespace Titeenipeli;
 
 public static class Program
@@ -14,6 +16,9 @@ public static class Program
 
         builder.Services.AddControllers();
         WebApplication app = builder.Build();
+        
+        app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
+        app.UsePathBase(new PathString("/api/v1"));
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

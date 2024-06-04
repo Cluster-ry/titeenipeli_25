@@ -5,7 +5,7 @@ namespace Titeenipeli.Controllers;
 
 public class WebSocketController : ControllerBase
 {
-    [HttpGet("/ws")]
+    [HttpGet("~/ws")]
     public async Task Get()
     {
         if (HttpContext.WebSockets.IsWebSocketRequest)

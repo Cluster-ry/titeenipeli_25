@@ -4,7 +4,6 @@ using Titeenipeli.Models;
 namespace Titeenipeli.Controllers;
 
 [ApiController]
-[Route("api")]
 public class WeatherForecastController : ControllerBase
 {
     private static readonly string[] Summaries =
