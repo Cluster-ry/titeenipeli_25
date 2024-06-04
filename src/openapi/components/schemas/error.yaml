@@ -1,0 +1,12 @@
+type: object
+properties:
+  title:
+    type: string
+    example: "Error title"
+  code:
+    type: integer
+    example: "1"
+  description:
+    type: string
+    example: "Some error description."
+readOnly: true

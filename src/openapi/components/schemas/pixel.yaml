@@ -1,0 +1,10 @@
+type: object
+properties:
+  x:
+    type: integer
+    readOnly: false
+    example: 1
+  y:
+    type: integer
+    readOnly: false
+    example: 1
