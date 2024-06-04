@@ -1,0 +1,5 @@
+description: "All pixels of the map."
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/pixels.yaml"

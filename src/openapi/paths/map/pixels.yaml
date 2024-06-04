@@ -1,3 +1,16 @@
+get:
+  tags:
+    - map
+  summary: "Receives whole map for the player."
+  operationId: "getPixels"
+  responses:
+    "200":
+      $ref: "../../components/responses/200GetPixels.yaml"
+    "401":
+      $ref: "../../components/responses/401Unauthorized.yaml"
+  security:
+    - bearerAuth: []
+
 post:
   tags:
     - map
@@ -9,7 +22,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: "../../components/schemas/pixel.yaml"
+          $ref: "../../components/schemas/relativeCoordinate.yaml"
   responses:
     "200":
       description: Pixel conquered!

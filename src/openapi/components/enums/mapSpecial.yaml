@@ -1,0 +1,10 @@
+codeGen: namedEnum
+type: integer
+example: 1
+oneOf:
+  - const: 1
+    title: NONE
+    description: NONE
+  - const: 2
+    title: SPAWN
+    description: SPAWN

@@ -12,7 +12,3 @@ properties:
     example: 1
     minimum: -100
     maximum: 100
-  owner:
-    $ref: "../enums/mapOwners.yaml"
-  specialStatus:
-    $ref: "../enums/mapSpecial.yaml"

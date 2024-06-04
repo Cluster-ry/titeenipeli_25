@@ -1,0 +1,24 @@
+codeGen: namedEnum
+type: integer
+oneOf:
+  - const: 1
+    title: TIETOKILTA
+    description: TIETOKILTA
+  - const: 2
+    title: ALGO
+    description: ALGO
+  - const: 3
+    title: CLUSTER
+    description: CLUSTER
+  - const: 4
+    title: OULUN_TIETOTEEKKARIT
+    description: OULUN_TIETOTEEKKARIT
+  - const: 5
+    title: TIETOTEEKKARIKILTA
+    description: TIETOTEEKKARIKILTA
+  - const: 6
+    title: DIGIT
+    description: DIGIT
+  - const: 7
+    title: DATATEKNOLOGERNA
+    description: DATATEKNOLOGERNA
