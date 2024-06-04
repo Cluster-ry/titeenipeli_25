@@ -1,0 +1,2 @@
+exclude:
+  [infra/, src/backend/, src/frontend/, CODEOWNERS, src/Readme.md, Readme.md]
