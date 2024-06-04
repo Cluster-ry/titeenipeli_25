@@ -15,13 +15,28 @@ public class DbConnector
         _connection = new NpgsqlConnection(_connectionString);
     }
 
-    public DataSet ExecuteCommand(string command)
+    public DataSet ExecuteCommand(string commandString)
     {
         DataSet dataSet = new DataSet("ResultDataSet");
 
-        using NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command, _connection);
+        using NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(commandString, _connection);
 
         adapter.Fill(dataSet);
         return dataSet;
+    }
+
+    public DataSet ExecuteCommand(NpgsqlCommand command)
+    {
+        DataSet dataSet = new DataSet("ResultDataSet");
+
+        using NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command);
+
+        adapter.Fill(dataSet);
+        return dataSet;
+    }
+
+    public NpgsqlConnection GetConnection()
+    {
+        return _connection;
     }
 }
