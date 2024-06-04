@@ -1,3 +1,6 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 
@@ -15,9 +18,29 @@ public static class Program
         builder.Services.AddSwaggerGen();
         builder.Services.AddControllers();
 
-        builder.Services.AddControllers();
+        builder.Services.AddAuthentication(opt =>
+        {
+            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                // TODO: Move JWT settings and secrets to a better place
+                ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+                ValidAudience = builder.Configuration["JWT:ValidAudience"],
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"] ?? string.Empty))
+            };
+        });
+
         WebApplication app = builder.Build();
-        
+
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
         app.UsePathBase(new PathString("/api/v1"));
 
@@ -26,7 +49,7 @@ public static class Program
         {
             DbFiller.ClearDatabase();
             DbFiller.CreateAndFillCtfTable();
-            
+
             app.UseSwagger();
             app.UseSwaggerUI();
         }
@@ -45,7 +68,8 @@ public static class Program
         app.UseDefaultFiles();
         app.UseStaticFiles();
 
-
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.MapControllers();
 
         app.Run();
