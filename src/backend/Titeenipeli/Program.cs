@@ -1,3 +1,4 @@
+using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 
 namespace Titeenipeli;
@@ -23,6 +24,9 @@ public static class Program
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
+            DbFiller.ClearDatabase();
+            DbFiller.CreateAndFillCtfTable();
+            
             app.UseSwagger();
             app.UseSwaggerUI();
         }
