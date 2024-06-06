@@ -1,35 +1,30 @@
-using System.Data;
-using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
-using Titeenipeli.Connectors;
+using Titeenipeli.Context;
+using Titeenipeli.Models;
 
 namespace Titeenipeli.Controllers;
 
 [ApiController, Authorize]
 public class CtfController : ControllerBase
 {
+    private readonly ApiDbContext _context;
+
+    public CtfController(ApiDbContext context)
+    {
+        _context = context;
+    }
+    
     [HttpPost("ctf/{flag}")]
     public IActionResult PostCtf(string flag)
     {
-        DbConnector connector = new DbConnector();
-        NpgsqlCommand command;
-        
-        string sql = """
-                     SELECT * FROM "CtfFlags"
-                     WHERE flag = @flag
-                     """;
+        CtfFlag? ctfFlag = _context.Flags!.FirstOrDefault(ctfFlag => ctfFlag.Flag == flag);
 
-        command = new NpgsqlCommand(sql, connector.GetConnection());
-        command.Parameters.AddWithValue("@flag", flag);
-        DataSet dataSet = connector.ExecuteCommand(command);
-
-        if (dataSet.Tables[0].Rows.Count == 0)
+        if (ctfFlag == null)
         {
             return BadRequest();
         }
-
+        
         return Ok();
     }
 }
