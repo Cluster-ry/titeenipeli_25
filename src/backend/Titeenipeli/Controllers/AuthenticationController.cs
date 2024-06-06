@@ -1,8 +1,5 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+using Titeenipeli.Handlers;
 using Titeenipeli.Models;
 
 namespace Titeenipeli.Controllers;
@@ -10,11 +7,11 @@ namespace Titeenipeli.Controllers;
 [ApiController]
 public class AuthenticationController : ControllerBase
 {
-    private readonly IConfiguration Configuration;
+    private readonly IConfiguration _configuration;
 
     public AuthenticationController(IConfiguration configuration)
     {
-        Configuration = configuration;
+        _configuration = configuration;
     }
 
     [HttpPost("login")]
@@ -25,18 +22,7 @@ public class AuthenticationController : ControllerBase
             return Unauthorized();
         }
 
-        SymmetricSecurityKey secretKey =
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:Secret"] ?? string.Empty));
 
-        SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-        JwtSecurityToken tokeOptions = new JwtSecurityToken(Configuration["JWT:ValidIssuer"],
-            Configuration["JWT:ValidAudience"], new List<Claim>(),
-            expires: DateTime.Now.AddHours(6), signingCredentials: signinCredentials);
-
-        string tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
-        return Ok(new JwtToken
-        {
-            Token = tokenString
-        });
+        return Ok(new LoginHandler(_configuration).GetJwtToken());
     }
 }
