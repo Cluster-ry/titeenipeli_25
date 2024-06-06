@@ -14,11 +14,11 @@ public class CtfController : ControllerBase
     {
         _context = context;
     }
-    
-    [HttpPost("ctf/{flag}")]
-    public IActionResult PostCtf(string flag)
+
+    [HttpPost("ctf")]
+    public IActionResult PostCtf([FromBody] Flag flag)
     {
-        CtfFlag? ctfFlag = _context.Flags!.FirstOrDefault(ctfFlag => ctfFlag.Flag == flag);
+        CtfFlag? ctfFlag = _context.Flags!.FirstOrDefault(ctfFlag => ctfFlag.Flag == flag.FlagCode);
 
         if (ctfFlag == null)
         {
