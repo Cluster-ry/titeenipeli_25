@@ -1,7 +1,9 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Titeenipeli.Context;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 
@@ -13,12 +15,16 @@ public static class Program
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddDbContext<ApiDbContext>(options =>
+            options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
+
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
         {
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
                 Scheme = "Bearer",
                 BearerFormat = "JWT",
                 In = ParameterLocation.Header,
@@ -26,18 +32,23 @@ public static class Program
                 Description = "Bearer Authentication with JWT Token",
                 Type = SecuritySchemeType.Http
             });
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement {
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
                 {
-                    new OpenApiSecurityScheme {
-                        Reference = new OpenApiReference {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
                             Id = "Bearer",
                             Type = ReferenceType.SecurityScheme
                         }
                     },
-                    new List < string > ()
+                    new List<string>()
                 }
             });
         });
+
         builder.Services.AddControllers();
 
         builder.Services.AddAuthentication(opt =>
@@ -52,16 +63,22 @@ public static class Program
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                // TODO: Move JWT settings and secrets to a better place
                 ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
                 ValidAudience = builder.Configuration["JWT:ValidAudience"],
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"] ?? string.Empty))
+                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]!))
             };
         });
 
         WebApplication app = builder.Build();
+
+        using (IServiceScope scope = app.Services.CreateScope())
+        {
+            IServiceProvider services = scope.ServiceProvider;
+            ApiDbContext context = services.GetRequiredService<ApiDbContext>();
+            context.Database.EnsureCreated();
+        }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
         app.UsePathBase(new PathString("/api/v1"));
