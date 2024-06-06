@@ -9,15 +9,15 @@ public static class DbFiller
         DbConnector connector = new DbConnector();
         string sql = """
                      CREATE TABLE IF NOT EXISTS "CtfFlags" (
-                         id     SERIAL PRIMARY KEY,
-                         flag   VARCHAR NOT NULL
+                         "Id"     SERIAL PRIMARY KEY,
+                         "Flag"   VARCHAR NOT NULL
                      );
                      """;
         
         connector.ExecuteCommand(sql);
 
         sql = """
-              INSERT INTO "CtfFlags" (flag)
+              INSERT INTO "CtfFlags" ("Flag")
               VALUES ('#TEST_FLAG');
               """;
         
