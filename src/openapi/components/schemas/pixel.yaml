@@ -1,18 +1,9 @@
 type: object
 properties:
-  x:
-    type: integer
-    readOnly: true
-    example: -1
-    minimum: -100
-    maximum: 100
-  y:
-    type: integer
-    readOnly: true
-    example: 1
-    minimum: -100
-    maximum: 100
+  type:
+    $ref: "../enums/pixelTypes.yaml"
   owner:
-    $ref: "../enums/mapOwners.yaml"
-  specialStatus:
-    $ref: "../enums/mapSpecial.yaml"
+    $ref: "../enums/pixelOwners.yaml"
+  ownPixel:
+    type: boolean
+    example: false

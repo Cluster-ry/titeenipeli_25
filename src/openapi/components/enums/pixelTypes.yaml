@@ -1,0 +1,12 @@
+codeGen: namedEnum
+type: string
+oneOf:
+  - const: Normal
+    title: Normal
+    description: Normal pixel without any special functionalities.
+  - const: MapBorder
+    title: MapBorder
+    description: Pixel, which is outside of the map.
+  - const: Spawn
+    title: Spawn
+    description: Pixel, which is spawn of some player.

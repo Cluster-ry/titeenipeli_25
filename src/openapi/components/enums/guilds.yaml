@@ -1,24 +1,27 @@
 codeGen: namedEnum
-type: integer
+type: string
 oneOf:
-  - const: 1
-    title: TIETOKILTA
-    description: TIETOKILTA
-  - const: 2
-    title: ALGO
-    description: ALGO
-  - const: 3
-    title: CLUSTER
-    description: CLUSTER
-  - const: 4
-    title: OULUN_TIETOTEEKKARIT
-    description: OULUN_TIETOTEEKKARIT
-  - const: 5
-    title: TIETOTEEKKARIKILTA
-    description: TIETOTEEKKARIKILTA
-  - const: 6
-    title: DIGIT
-    description: DIGIT
-  - const: 7
-    title: DATATEKNOLOGERNA
-    description: DATATEKNOLOGERNA
+  - const: Tietokilta
+    title: Tietokilta
+    description: Tietokilta
+  - const: Algo
+    title: Algo
+    description: Algo
+  - const: Cluster
+    title: Cluster
+    description: Cluster
+  - const: OulunTietoteekkarit
+    title: OulunTietoteekkarit
+    description: Oulun Tietoteekkarit
+  - const: TietoTeekkarikilta
+    title: TietoTeekkarikilta
+    description: TietoTeekkarikilta TiTe
+  - const: Digit
+    title: Digit
+    description: Digit
+  - const: Datateknologerna
+    title: Datateknologerna
+    description: Datateknologerna
+  - const: Sosa
+    title: Sosa
+    description: Software Students Association

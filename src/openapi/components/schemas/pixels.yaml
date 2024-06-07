@@ -1,3 +1,10 @@
-type: array
-items:
-  $ref: "./pixel.yaml"
+type: object
+properties:
+  playerSpawn:
+    $ref: "./relativeCoordinate.yaml"
+  pixels:
+    type: array
+    items:
+      type: array
+      items:
+        $ref: "./pixel.yaml"
