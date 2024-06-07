@@ -1,0 +1,5 @@
+enum PixelTypes {
+    NORMAL = 0;
+    MAP_BORDER = 1;
+    SPAWN = 2;
+}

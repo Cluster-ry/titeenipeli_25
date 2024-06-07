@@ -1,0 +1,11 @@
+enum PixelOwners {
+    NOBODY = 0;
+    TIETOKILTA = 1;
+    ALGO = 2;
+    CLUSTER = 3;
+    OULUN_TIETOTEEKKARIT = 4;
+    TIETO_TEEKKARIKILTA = 5;
+    DIGIT = 6;
+    DATATEKNOLOGERNA = 7;
+    SOSA = 8;
+}

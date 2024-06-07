@@ -1,0 +1,23 @@
+import "components/enums/pixelOwners.proto";
+import "components/enums/pixelTypes.proto";
+import "components/schemas/relativeCoordinate.proto";
+
+message IncrementalMapUpdateRequest {
+  repeated IncrementalMapUpdate updates = 1;
+
+  message IncrementalMapUpdate {
+    required RelativeCoordinate spawnRelativeCoordinate = 1;
+    required PixelTypes type = 2;
+    required PixelOwners owner = 3;
+    required bool ownPixel = 4;
+  }
+
+}
+
+message IncrementalMapUpdateResponse {
+  
+}
+
+service IncrementalMapUpdateService {
+  rpc IncrementalMapUpdate(IncrementalMapUpdateRequest) returns (IncrementalMapUpdateResponse);
+}
