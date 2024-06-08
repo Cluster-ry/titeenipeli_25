@@ -23,6 +23,6 @@ public class AuthenticationController : ControllerBase
         }
 
 
-        return Ok(new LoginHandler(_configuration).GetJwtToken());
+        return Ok(new JwtHandler(_configuration).GetJwtToken(user));
     }
 }
