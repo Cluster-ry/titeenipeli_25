@@ -78,6 +78,8 @@ public static class Program
             IServiceProvider services = scope.ServiceProvider;
             ApiDbContext context = services.GetRequiredService<ApiDbContext>();
             context.Database.EnsureCreated();
+
+            DbFiller.Initialize(context, true);
         }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
@@ -86,9 +88,6 @@ public static class Program
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
-            DbFiller.ClearDatabase();
-            DbFiller.CreateAndFillCtfTable();
-
             app.UseSwagger();
             app.UseSwaggerUI();
         }

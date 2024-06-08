@@ -1,37 +1,29 @@
-using Titeenipeli.Connectors;
+using Microsoft.EntityFrameworkCore;
+using Titeenipeli.Context;
+using Titeenipeli.Models;
 
 namespace Titeenipeli.Helpers;
 
 public static class DbFiller
 {
-    public static void CreateAndFillCtfTable()
+    public static void Initialize(ApiDbContext context, bool clearDatabase = false)
     {
-        DbConnector connector = new DbConnector();
-        string sql = """
-                     CREATE TABLE IF NOT EXISTS "CtfFlags" (
-                         "Id"     SERIAL PRIMARY KEY,
-                         "Flag"   VARCHAR NOT NULL
-                     );
-                     """;
-        
-        connector.ExecuteCommand(sql);
+        if (context.Flags.Any() && !clearDatabase)
+        {
+            return;
+        }
 
-        sql = """
-              INSERT INTO "CtfFlags" ("Flag")
-              VALUES ('#TEST_FLAG');
-              """;
-        
-        connector.ExecuteCommand(sql);
-    }
+        if (clearDatabase)
+        {
+            context.Flags.ExecuteDelete();
+        }
 
-    public static void ClearDatabase()
-    {
-        DbConnector connector = new DbConnector();
-        string sql = """
-                     DROP TABLE IF EXISTS "CtfFlags";
-                     """;
+        context.Flags.Add(new CtfFlag
+        {
+            Flag = "#TEST_FLAG",
+            Id = 0
+        });
 
-        connector.ExecuteCommand(sql);
-
+        context.SaveChanges();
     }
 }
