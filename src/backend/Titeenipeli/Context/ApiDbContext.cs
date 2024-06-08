@@ -9,7 +9,7 @@ public class ApiDbContext : DbContext
     {
     }
 
-    public DbSet<CtfFlag>? Flags { get; init; }
+    public required DbSet<CtfFlag> Flags { get; init; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

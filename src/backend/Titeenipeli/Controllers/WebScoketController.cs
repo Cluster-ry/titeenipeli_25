@@ -21,7 +21,7 @@ public class WebSocketController : ControllerBase
 
     private static async Task Echo(WebSocket webSocket)
     {
-        var buffer = new byte[1024 * 4];
+        byte[] buffer = new byte[1024 * 4];
         WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(
             new ArraySegment<byte>(buffer), CancellationToken.None);
 

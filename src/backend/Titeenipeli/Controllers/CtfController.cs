@@ -5,7 +5,8 @@ using Titeenipeli.Models;
 
 namespace Titeenipeli.Controllers;
 
-[ApiController, Authorize]
+[ApiController]
+[Authorize]
 public class CtfController : ControllerBase
 {
     private readonly ApiDbContext _context;
@@ -24,7 +25,7 @@ public class CtfController : ControllerBase
         {
             return BadRequest();
         }
-        
+
         return Ok();
     }
 }
