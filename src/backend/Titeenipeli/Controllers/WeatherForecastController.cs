@@ -4,14 +4,13 @@ using Titeenipeli.Models;
 namespace Titeenipeli.Controllers;
 
 [ApiController]
-[Route("api")]
 public class WeatherForecastController : ControllerBase
 {
-    private static readonly string[] Summaries = new[]
-    {
+    private static readonly string[] Summaries =
+    [
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-    
+    ];
+
 
     [HttpGet("weatherforecast")]
     public IEnumerable<WeatherForecast> Get()

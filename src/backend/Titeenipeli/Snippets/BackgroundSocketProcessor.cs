@@ -4,5 +4,7 @@ namespace Titeenipeli.Snippets;
 
 internal class BackgroundSocketProcessor
 {
-    internal static void AddSocket(WebSocket webSocket, TaskCompletionSource<object> socketFinishedTcs) { }
+    internal static void AddSocket(WebSocket webSocket, TaskCompletionSource<object> socketFinishedTcs)
+    {
+    }
 }
