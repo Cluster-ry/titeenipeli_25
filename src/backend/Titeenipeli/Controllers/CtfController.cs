@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Context;
 using Titeenipeli.Models;
+using Titeenipeli.Schema;
 
 namespace Titeenipeli.Controllers;
 

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Titeenipeli.Models;
+namespace Titeenipeli.Schema;
 
 public class CtfFlag
 {

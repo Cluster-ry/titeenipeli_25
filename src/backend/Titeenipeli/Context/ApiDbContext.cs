@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Titeenipeli.Models;
+using Titeenipeli.Schema;
 
 namespace Titeenipeli.Context;
 

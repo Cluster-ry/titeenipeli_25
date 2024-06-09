@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
-using Titeenipeli.Models;
+using Titeenipeli.Schema;
 
 namespace Titeenipeli.Helpers;
 
