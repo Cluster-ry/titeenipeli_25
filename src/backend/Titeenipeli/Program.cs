@@ -77,7 +77,7 @@ public static class Program
         {
             IServiceProvider services = scope.ServiceProvider;
             ApiDbContext dbContext = services.GetRequiredService<ApiDbContext>();
-            
+
             DbFiller.Clear(dbContext);
             dbContext.Database.EnsureCreated();
             DbFiller.Initialize(dbContext);
