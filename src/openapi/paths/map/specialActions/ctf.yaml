@@ -1,0 +1,22 @@
+post:
+  tags:
+    - "map"
+    - "map special actions"
+  summary: "Use CTF token to enable special action for a guild."
+  operationId: "useCtfToken"
+  requestBody:
+    description: "CTF token to enable special action"
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../../components/schemas/ctf.yaml"
+  responses:
+    "200":
+      description: CTF token accepted!
+    "400":
+      $ref: "../../../components/responses/400ClientError.yaml"
+    "401":
+      $ref: "../../../components/responses/401Unauthorized.yaml"
+  security:
+    - bearerAuth: []
