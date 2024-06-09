@@ -9,17 +9,17 @@ namespace Titeenipeli.Controllers;
 [Authorize]
 public class CtfController : ControllerBase
 {
-    private readonly ApiDbContext _context;
+    private readonly ApiDbContext _dbContext;
 
-    public CtfController(ApiDbContext context)
+    public CtfController(ApiDbContext dbContext)
     {
-        _context = context;
+        _dbContext = dbContext;
     }
 
     [HttpPost("ctf")]
     public IActionResult PostCtf([FromBody] Flag flag)
     {
-        CtfFlag? ctfFlag = _context.Flags!.FirstOrDefault(ctfFlag => ctfFlag.Flag == flag.FlagCode);
+        CtfFlag? ctfFlag = _dbContext.Flags.FirstOrDefault(ctfFlag => ctfFlag.Flag == flag.FlagCode);
 
         if (ctfFlag == null)
         {
