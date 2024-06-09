@@ -1,0 +1,22 @@
+post:
+  tags:
+    - "map"
+    - "map special actions"
+  summary: "Fill area of pixels for the guild."
+  operationId: "fillPixels"
+  requestBody:
+    description: "Starting coordinate for the fill."
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/relativeCoordinate.yaml"
+  responses:
+    "200":
+      description: Pixels filled!
+    "400":
+      $ref: "../../components/responses/400ClientError.yaml"
+    "401":
+      $ref: "../../components/responses/401Unauthorized.yaml"
+  security:
+    - bearerAuth: []

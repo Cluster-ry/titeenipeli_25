@@ -25,11 +25,17 @@ servers:
         default: "v1"
 tags:
   - name: "map"
-    description: "Endpoint for interacting with map"
+    description: "Endpoint for interacting with map."
+  - name: "pixels"
+    description: "Endpoint for interacting with map pixels."
+  - name: "map special actions"
+    description: "Special actions for setting pixels."
 
 paths:
   /map/pixels:
     $ref: "./paths/map/pixels.yaml"
+  /map/specialActions:
+    $ref: "./paths/map/specialActions.yaml"
 
 components:
   securitySchemes:
