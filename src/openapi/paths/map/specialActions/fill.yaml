@@ -10,13 +10,13 @@ post:
     content:
       application/json:
         schema:
-          $ref: "../../components/schemas/relativeCoordinate.yaml"
+          $ref: "../../../components/schemas/relativeCoordinate.yaml"
   responses:
     "200":
       description: Pixels filled!
     "400":
-      $ref: "../../components/responses/400ClientError.yaml"
+      $ref: "../../../components/responses/400ClientError.yaml"
     "401":
-      $ref: "../../components/responses/401Unauthorized.yaml"
+      $ref: "../../../components/responses/401Unauthorized.yaml"
   security:
     - bearerAuth: []

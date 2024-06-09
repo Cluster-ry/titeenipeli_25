@@ -34,8 +34,8 @@ tags:
 paths:
   /map/pixels:
     $ref: "./paths/map/pixels.yaml"
-  /map/specialActions:
-    $ref: "./paths/map/specialActions.yaml"
+  /map/specialActions/fill:
+    $ref: "./paths/map/specialActions/fill.yaml"
 
 components:
   securitySchemes:
