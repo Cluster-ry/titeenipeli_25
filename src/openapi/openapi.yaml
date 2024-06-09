@@ -35,14 +35,3 @@ components:
   securitySchemes:
     bearerAuth:
       $ref: "./components/securitySchemas/bearerAuth.yaml"
-
-  schemas:
-    Pixel:
-      $ref: "./components/schemas/pixel.yaml"
-
-    Error:
-      $ref: "./components/schemas/error.yaml"
-
-  responses:
-    401Unauthorized:
-      $ref: "./components/responses/401Unauthorized.yaml"

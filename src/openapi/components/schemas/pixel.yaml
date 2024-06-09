@@ -1,10 +1,9 @@
 type: object
 properties:
-  x:
-    type: integer
-    readOnly: false
-    example: 1
-  y:
-    type: integer
-    readOnly: false
-    example: 1
+  type:
+    $ref: "../enums/pixelTypes.yaml"
+  owner:
+    $ref: "../enums/pixelOwners.yaml"
+  ownPixel:
+    type: boolean
+    example: false
