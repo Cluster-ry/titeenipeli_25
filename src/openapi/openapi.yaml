@@ -26,10 +26,14 @@ servers:
 tags:
   - name: "map"
     description: "Endpoint for interacting with map"
+  - name: "users"
+    description: "Endpoint for interacting with users"
 
 paths:
   /map/pixels:
     $ref: "./paths/map/pixels.yaml"
+  /users:
+    $ref: "./paths/users.yaml"
 
 components:
   securitySchemes:

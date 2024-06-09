@@ -1,0 +1,12 @@
+type: object
+properties:
+  firstName:
+    type: string
+  lastName:
+    type: string
+  username:
+    type: string
+  photoUrl:
+    type: string
+  guild:
+    $ref: "../enums/guilds.yaml"
