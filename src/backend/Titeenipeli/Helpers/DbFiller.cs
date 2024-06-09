@@ -1,8 +1,5 @@
-using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using Npgsql;
 using Titeenipeli.Context;
 using Titeenipeli.Schema;
 
@@ -28,10 +25,19 @@ public static class DbFiller
 
         if (!dbContext.Guilds.Any())
         {
-            dbContext.Guilds.Add(new Guild
-            {
-                Color = 1
-            });
+            Guild[] guilds =
+            [
+                new Guild { Color = 0 },
+                new Guild { Color = 1 },
+                new Guild { Color = 2 },
+                new Guild { Color = 3 },
+                new Guild { Color = 4 },
+                new Guild { Color = 5 },
+                new Guild { Color = 6 },
+                new Guild { Color = 7 }
+            ];
+
+            dbContext.Guilds.AddRange(guilds);
 
             dbContext.SaveChanges();
         }
@@ -52,18 +58,14 @@ public static class DbFiller
         if (!dbContext.Map.Any())
         {
             for (int x = 0; x < 100; x++)
-            {
-                for (int y = 0; y < 100; y++)
+            for (int y = 0; y < 100; y++)
+                dbContext.Map.Add(new Pixel
                 {
-                    dbContext.Map.Add(new Pixel
-                    {
-                        X = x,
-                        Y = y
-                    });
-                }
-            }
+                    X = x,
+                    Y = y
+                });
         }
-        
+
         dbContext.SaveChanges();
     }
 
