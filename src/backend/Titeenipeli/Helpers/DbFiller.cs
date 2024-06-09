@@ -6,24 +6,24 @@ namespace Titeenipeli.Helpers;
 
 public static class DbFiller
 {
-    public static void Initialize(ApiDbContext context, bool clearDatabase = false)
+    public static void Initialize(ApiDbContext dbContext)
     {
-        if (context.Flags.Any() && !clearDatabase)
+        if (dbContext.Flags.Any())
         {
             return;
         }
 
-        if (clearDatabase)
-        {
-            context.Flags.ExecuteDelete();
-        }
-
-        context.Flags.Add(new CtfFlag
+        dbContext.Flags.Add(new CtfFlag
         {
             Flag = "#TEST_FLAG",
             Id = 0
         });
 
-        context.SaveChanges();
+        dbContext.SaveChanges();
+    }
+
+    public static void Clear(ApiDbContext dbContext)
+    {
+        dbContext.Flags.ExecuteDelete();
     }
 }

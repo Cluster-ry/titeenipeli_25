@@ -76,10 +76,11 @@ public static class Program
         using (IServiceScope scope = app.Services.CreateScope())
         {
             IServiceProvider services = scope.ServiceProvider;
-            ApiDbContext context = services.GetRequiredService<ApiDbContext>();
-            context.Database.EnsureCreated();
+            ApiDbContext dbContext = services.GetRequiredService<ApiDbContext>();
+            dbContext.Database.EnsureCreated();
 
-            DbFiller.Initialize(context, true);
+            DbFiller.Clear(dbContext);
+            DbFiller.Initialize(dbContext);
         }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
