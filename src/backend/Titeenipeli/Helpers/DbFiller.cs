@@ -69,24 +69,6 @@ public static class DbFiller
 
     public static void Clear(ApiDbContext dbContext)
     {
-        try
-        {
-            dbContext.CtfFlags.ExecuteDelete();
-        }
-        catch (PostgresException e)
-        {
-            Debug.WriteLine("Flag table empty");
-            Debug.WriteLine(e);
-        }
-
-        try
-        {
-            dbContext.Guilds.ExecuteDelete();
-        }
-        catch (PostgresException e)
-        {
-            Debug.WriteLine("Guild table empty");
-            Debug.WriteLine(e);
-        }
+        dbContext.Database.EnsureDeleted();
     }
 }
