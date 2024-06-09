@@ -30,8 +30,8 @@ public class ApiDbContext : DbContext
 
     private void AddTimestamps()
     {
-        var entities = ChangeTracker.Entries()
-            .Where(x => x is { Entity: Entity, State: EntityState.Added });
+        IEnumerable<EntityEntry> entities = ChangeTracker.Entries()
+            .Where(x => x is { Entity: Entity, State: EntityState.Added or EntityState.Modified });
 
         foreach (EntityEntry entity in entities)
         {
@@ -41,6 +41,8 @@ public class ApiDbContext : DbContext
             {
                 ((Entity)entity.Entity).CreatedDateTime = now;
             }
+
+            ((Entity)entity.Entity).UpdatedDateTime = now;
         }
     }
 }
