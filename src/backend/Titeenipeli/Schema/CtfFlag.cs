@@ -1,11 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Titeenipeli.Schema;
 
-public class CtfFlag
+public class CtfFlag : Entity
 {
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public required int Id { get; init; }
-
+    [Column(TypeName = "VARCHAR")]
+    [StringLength(64)]
     public required string Flag { get; init; }
 }

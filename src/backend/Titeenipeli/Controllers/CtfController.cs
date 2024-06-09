@@ -20,7 +20,7 @@ public class CtfController : ControllerBase
     [HttpPost("ctf")]
     public IActionResult PostCtf([FromBody] Flag flag)
     {
-        CtfFlag? ctfFlag = _dbContext.Flags.FirstOrDefault(ctfFlag => ctfFlag.Flag == flag.FlagCode);
+        CtfFlag? ctfFlag = _dbContext.CtfFlags.FirstOrDefault(ctfFlag => ctfFlag.Flag == flag.FlagCode);
 
         if (ctfFlag == null)
         {
