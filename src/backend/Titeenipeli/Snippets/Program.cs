@@ -42,7 +42,7 @@ public static class Program
         app.Run(async context =>
         {
             using WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-            var socketFinishedTcs = new TaskCompletionSource<object>();
+            TaskCompletionSource<object> socketFinishedTcs = new TaskCompletionSource<object>();
 
             BackgroundSocketProcessor.AddSocket(webSocket, socketFinishedTcs);
 

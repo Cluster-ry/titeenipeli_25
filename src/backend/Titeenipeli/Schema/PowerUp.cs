@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Titeenipeli.Schema;
 
-public class CtfFlag : Entity
+public class PowerUp : Entity
 {
     [Column(TypeName = "VARCHAR")]
-    [StringLength(64)]
-    public required string Flag { get; init; }
+    [StringLength(32)]
+    public required string Name { get; init; }
 }
