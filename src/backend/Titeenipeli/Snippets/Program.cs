@@ -20,7 +20,7 @@ public static class Program
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                    using WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
                     await Echo(webSocket);
                 }
                 else
@@ -32,7 +32,6 @@ public static class Program
             {
                 await next(context);
             }
-
         });
         // </snippet_AcceptWebSocketAsync>
     }
@@ -40,10 +39,10 @@ public static class Program
     public static void AcceptWebSocketAsyncBackgroundSocketProcessor(WebApplication app)
     {
         // <snippet_AcceptWebSocketAsyncBackgroundSocketProcessor>
-        app.Run(async (context) =>
+        app.Run(async context =>
         {
-            using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-            var socketFinishedTcs = new TaskCompletionSource<object>();
+            using WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+            TaskCompletionSource<object> socketFinishedTcs = new TaskCompletionSource<object>();
 
             BackgroundSocketProcessor.AddSocket(webSocket, socketFinishedTcs);
 
@@ -55,7 +54,7 @@ public static class Program
     public static void UseWebSocketsOptionsAllowedOrigins(WebApplication app)
     {
         // <snippet_UseWebSocketsOptionsAllowedOrigins>
-        var webSocketOptions = new WebSocketOptions
+        WebSocketOptions webSocketOptions = new WebSocketOptions
         {
             KeepAliveInterval = TimeSpan.FromMinutes(2)
         };
@@ -70,8 +69,8 @@ public static class Program
     // <snippet_Echo>
     private static async Task Echo(WebSocket webSocket)
     {
-        var buffer = new byte[1024 * 4];
-        var receiveResult = await webSocket.ReceiveAsync(
+        byte[] buffer = new byte[1024 * 4];
+        WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(
             new ArraySegment<byte>(buffer), CancellationToken.None);
 
         while (!receiveResult.CloseStatus.HasValue)

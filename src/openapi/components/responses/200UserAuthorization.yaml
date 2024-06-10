@@ -1,0 +1,9 @@
+description: Set authorization token and provide user details.
+headers:
+  Set-Cookie:
+    schema:
+      type: string
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/guild.yaml"

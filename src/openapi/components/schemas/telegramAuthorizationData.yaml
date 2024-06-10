@@ -1,0 +1,15 @@
+type: object
+properties:
+  id: integer
+  firstName:
+    type: string
+  lastName:
+    type: string
+  username:
+    type: string
+  photoUrl:
+    type: string
+  authDate:
+    type: string
+  hash:
+    type: string

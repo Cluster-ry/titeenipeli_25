@@ -10,7 +10,7 @@ public class ApiControllerTest
     [Fact]
     public void TestGet()
     {
-        var api = new ApiController();
+        ApiController api = new ApiController();
         Assert.True(api.Get() == "pong", "Ping should return pong");
     }
 }

@@ -30,12 +30,16 @@ tags:
     description: "Endpoint for interacting with map pixels."
   - name: "map special actions"
     description: "Special actions for setting pixels."
+  - name: "users"
+    description: "Endpoint for interacting with users"
 
 paths:
   /map/pixels:
     $ref: "./paths/map/pixels.yaml"
   /map/specialActions/ctf:
     $ref: "./paths/map/specialActions/ctf.yaml"
+  /users:
+    $ref: "./paths/users.yaml"
 
 components:
   securitySchemes:

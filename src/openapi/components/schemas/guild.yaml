@@ -1,0 +1,4 @@
+type: object
+properties:
+  guild:
+    $ref: "../enums/guilds.yaml"

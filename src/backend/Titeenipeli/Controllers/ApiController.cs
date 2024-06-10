@@ -3,7 +3,6 @@ using Titeenipeli.Models;
 
 namespace Titeenipeli.Controllers;
 
-[Route("/api/")]
 public class ApiController : ControllerBase
 {
     [HttpGet("ping")]

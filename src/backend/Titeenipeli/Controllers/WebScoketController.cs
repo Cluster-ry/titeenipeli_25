@@ -5,12 +5,12 @@ namespace Titeenipeli.Controllers;
 
 public class WebSocketController : ControllerBase
 {
-    [HttpGet("/ws")]
+    [HttpGet("~/ws")]
     public async Task Get()
     {
         if (HttpContext.WebSockets.IsWebSocketRequest)
         {
-            using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+            using WebSocket webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
             await Echo(webSocket);
         }
         else
@@ -21,8 +21,8 @@ public class WebSocketController : ControllerBase
 
     private static async Task Echo(WebSocket webSocket)
     {
-        var buffer = new byte[1024 * 4];
-        var receiveResult = await webSocket.ReceiveAsync(
+        byte[] buffer = new byte[1024 * 4];
+        WebSocketReceiveResult receiveResult = await webSocket.ReceiveAsync(
             new ArraySegment<byte>(buffer), CancellationToken.None);
 
         while (!receiveResult.CloseStatus.HasValue)
