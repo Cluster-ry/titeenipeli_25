@@ -42,27 +42,31 @@ public static class DbFiller
             dbContext.SaveChanges();
         }
 
+        User testUser = new User
+        {
+            Code = "test",
+            Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
+            SpawnX = 0,
+            SpawnY = 0
+        };
+
         if (!dbContext.Users.Any())
         {
-            dbContext.Users.Add(new User
-            {
-                Code = "test",
-                Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
-                SpawnX = 0,
-                SpawnY = 0
-            });
+            dbContext.Users.Add(testUser);
 
             dbContext.SaveChanges();
         }
 
         if (!dbContext.Map.Any())
         {
-            for (int x = 0; x < 100; x++)
-            for (int y = 0; y < 100; y++)
+            Random random = new Random();
+            for (int x = 0; x < 10; x++)
+            for (int y = 0; y < 10; y++)
                 dbContext.Map.Add(new Pixel
                 {
                     X = x,
-                    Y = y
+                    Y = y,
+                    User = random.Next(10) == 5 ? testUser : null
                 });
         }
 
