@@ -29,8 +29,9 @@ public class MapController : ControllerBase
             .OrderBy(pixel => pixel.Y).ToArray();
 
         int width = _dbContext.Map.Max(pixel => pixel.X) + 1;
+        int height = _dbContext.Map.Max(pixel => pixel.Y) + 1;
 
-        List<PixelModel[]> mapPixels = [];
+        MapModel map = new MapModel{Pixels = new PixelModel[height][]};
         PixelModel[] mapRow = new PixelModel[width];
         int lastRow = 0;
 
@@ -38,7 +39,7 @@ public class MapController : ControllerBase
         {
             if (pixel.Y != lastRow)
             {
-                mapPixels.Add(mapRow);
+                map.Pixels[pixel.Y] = mapRow;
                 mapRow = new PixelModel[width];
                 lastRow = pixel.Y;
             }
@@ -54,6 +55,6 @@ public class MapController : ControllerBase
             mapRow[pixel.X] = mapPixel;
         }
 
-        return Ok(mapPixels);
+        return Ok(map);
     }
 }
