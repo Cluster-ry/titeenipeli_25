@@ -8,6 +8,7 @@ infra/          @ekosfin
 # Backend folder needs approval from someone in backend-devs
 src/backend/    @Cluster-ry/backend-devs
 src/openapi/    @Cluster-ry/backend-devs
+src/protobuf/   @Cluster-ry/backend-devs
 
 # Frontend folder needs approval from someone in front-devs
 src/frontend/   @Cluster-ry/front-devs
