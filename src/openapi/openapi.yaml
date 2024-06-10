@@ -24,20 +24,20 @@ servers:
           - "v1"
         default: "v1"
 tags:
+  - name: "ctf"
+    description: "Everything related to Capture The Flag (CTF) tokens."
   - name: "map"
     description: "Endpoint for interacting with map."
   - name: "pixels"
     description: "Endpoint for interacting with map pixels."
-  - name: "map special actions"
-    description: "Special actions for setting pixels."
   - name: "users"
     description: "Endpoint for interacting with users"
 
 paths:
+  /ctf:
+    $ref: "./paths/ctf.yaml"
   /map/pixels:
     $ref: "./paths/map/pixels.yaml"
-  /map/specialActions/ctf:
-    $ref: "./paths/map/specialActions/ctf.yaml"
   /users:
     $ref: "./paths/users.yaml"
 
