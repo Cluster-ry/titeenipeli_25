@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
-using Titeenipeli.Enums;
 using Titeenipeli.Models;
 using Titeenipeli.Schema;
 
@@ -23,6 +22,7 @@ public class MapController : ControllerBase
     {
         // TODO: Remove temporary testing user
         User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
+        User[] users = _dbContext.Users.ToArray();
         Pixel[] pixels = _dbContext.Map
             .Include(pixel => pixel.User)
             .ThenInclude(user => user!.Guild)
@@ -31,29 +31,12 @@ public class MapController : ControllerBase
         int width = _dbContext.Map.Max(pixel => pixel.X) + 1;
         int height = _dbContext.Map.Max(pixel => pixel.Y) + 1;
 
-        MapModel map = new MapModel{Pixels = new PixelModel[height][]};
-        PixelModel[] mapRow = new PixelModel[width];
-        int lastRow = 0;
+        MapModel map = new MapModel(pixels, width, height, testUser);
+        map.MarkSpawns(users);
 
-        foreach (Pixel pixel in pixels)
-        {
-            if (pixel.Y != lastRow)
-            {
-                map.Pixels[pixel.Y] = mapRow;
-                mapRow = new PixelModel[width];
-                lastRow = pixel.Y;
-            }
 
-            PixelModel mapPixel = new PixelModel
-            {
-                Type = PixelTypeEnum.Normal,
-                Owner = (GuildEnum?)pixel.User?.Guild.Color,
-                // TODO: Verify owning status of pixel, this can be done when we get user information from JWT
-                OwnPixel = pixel.User == testUser
-            };
-
-            mapRow[pixel.X] = mapPixel;
-        }
+        map.CalculateFogOfWar();
+        
 
         return Ok(map);
     }

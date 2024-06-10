@@ -46,13 +46,23 @@ public static class DbFiller
         {
             Code = "test",
             Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
-            SpawnX = 0,
-            SpawnY = 0
+            SpawnX = 5,
+            SpawnY = 5
         };
+
+        User testOpponent = new User
+        {
+            Code = "opponent",
+            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Color == 4) ?? throw new InvalidOperationException(),
+            SpawnX = 3,
+            SpawnY = 2
+        };
+        
 
         if (!dbContext.Users.Any())
         {
             dbContext.Users.Add(testUser);
+            dbContext.Users.Add(testOpponent);
 
             dbContext.SaveChanges();
         }
@@ -60,14 +70,34 @@ public static class DbFiller
         if (!dbContext.Map.Any())
         {
             Random random = new Random();
-            for (int x = 0; x < 10; x++)
-            for (int y = 0; y < 10; y++)
+            for (int x = 0; x < 20; x++)
+            for (int y = 0; y < 20; y++)
                 dbContext.Map.Add(new Pixel
                 {
                     X = x,
                     Y = y,
-                    User = random.Next(10) == 5 ? testUser : null
+                    User = random.Next(10) < 1 ? testUser : testOpponent
                 });
+
+            dbContext.SaveChanges();
+
+            Pixel? testUserSpawn =
+                dbContext.Map.FirstOrDefault(pixel => pixel.X == testUser.SpawnX && pixel.Y == testUser.SpawnY);
+
+            Pixel? testOpponentSpawn = dbContext.Map.FirstOrDefault(pixel =>
+                pixel.X == testOpponent.SpawnX && pixel.Y == testOpponent.SpawnY);
+
+            if (testUserSpawn != null)
+            {
+                testUserSpawn.User = testUser;
+            }
+
+            if (testOpponentSpawn != null)
+            {
+                testOpponentSpawn.User = testOpponent;
+            }
+
+            dbContext.SaveChanges();
         }
 
         dbContext.SaveChanges();
