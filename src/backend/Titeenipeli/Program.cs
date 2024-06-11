@@ -3,6 +3,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Titeenipeli.Context;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
@@ -17,6 +22,51 @@ public static class Program
 
         builder.Services.AddDbContext<ApiDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
+
+        // Adding OpenTelemetry tracing and metrics
+        var otel = builder.Services.AddOpenTelemetry();
+
+        string otelEnpoint = builder.Configuration["OpenTelemetryEndpoint"] ?? "localhost:4318";
+
+        otel.ConfigureResource(resource => resource
+                .AddService(serviceName: builder.Environment.ApplicationName));
+
+        otel.WithMetrics(metrics =>
+            {
+                metrics
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddMeter("Microsoft.AspNetCore.Hosting")
+                    .AddMeter("Microsoft.AspNetCore.Server.Kestrel");
+
+                metrics.AddOtlpExporter((exporterOptions, metricReaderOptions) =>
+                {
+                    exporterOptions.Endpoint = new Uri(otelEnpoint);
+                    exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
+                    metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
+                });
+            });
+
+        otel.WithTracing(tracing =>
+            {
+                tracing
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation();
+
+                tracing.AddOtlpExporter((exporterOptions) =>
+                {
+                    exporterOptions.Endpoint = new Uri(otelEnpoint);
+                    exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
+                });
+            });
+
+        // Adding OpenTelemetry logging
+        builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter((exporterOptions) =>
+                {
+                    exporterOptions.Endpoint = new Uri(otelEnpoint);
+                    exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
+                }));
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
