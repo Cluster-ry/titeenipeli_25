@@ -69,14 +69,14 @@ public static class DbFiller
 
         if (!dbContext.Map.Any())
         {
-            Random random = new Random();
+            Random random = new Random(1);
             for (int x = 0; x < 20; x++)
             for (int y = 0; y < 20; y++)
                 dbContext.Map.Add(new Pixel
                 {
                     X = x,
                     Y = y,
-                    User = random.Next(10) < 1 ? testUser : testOpponent
+                    User = random.Next(10) < 1 && x > 3 && y > 3 && x < 17 && y < 17 ? testUser : testOpponent
                 });
 
             dbContext.SaveChanges();
