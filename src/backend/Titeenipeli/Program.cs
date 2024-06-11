@@ -25,7 +25,8 @@ public static class Program
 
         // Adding OpenTelemetry tracing and metrics
         var otel = builder.Services.AddOpenTelemetry();
-        string otelEnpoint = Environment.GetEnvironmentVariable("OPENTELEMERTY_ENDPOINT") ?? "localhost:4318";
+
+        string otelEnpoint = builder.Configuration["OpenTelemetryEndpoint"] ?? "localhost:4318";
 
         otel.ConfigureResource(resource => resource
                 .AddService(serviceName: builder.Environment.ApplicationName));
