@@ -57,4 +57,30 @@ public class MapController : ControllerBase
 
         return Ok(map);
     }
+
+    [HttpPost("pixels")]
+    public IActionResult PostPixels([FromBody] Coordinate pixelCoordinate)
+    {
+        // TODO: Map relative coordinates to global coordinates
+        // TODO: Remove temporary testing user
+        User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
+        Pixel? pixelToUpdate =
+            _dbContext.Map.Include(pixel => pixel.User)
+                .FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
+
+        switch (pixelToUpdate)
+        {
+            case null:
+                return BadRequest();
+            case { User: not null } when
+                pixelToUpdate.User.SpawnX == pixelCoordinate.X &&
+                pixelToUpdate.User.SpawnY == pixelCoordinate.Y:
+                return BadRequest();
+        }
+
+        pixelToUpdate.User = testUser;
+        _dbContext.SaveChanges();
+
+        return Ok();
+    }
 }
