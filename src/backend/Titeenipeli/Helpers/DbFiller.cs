@@ -57,7 +57,7 @@ public static class DbFiller
             SpawnX = 3,
             SpawnY = 2
         };
-        
+
 
         if (!dbContext.Users.Any())
         {

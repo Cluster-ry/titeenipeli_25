@@ -5,17 +5,14 @@ namespace Titeenipeli.Models;
 
 public class MapModel
 {
-    // ReSharper disable once MemberCanBePrivate.Global
-    public PixelModel[][] Pixels { get; set; }
-
     private const int FogOfWarDistance = 2;
-    private readonly int _width;
     private readonly int _height;
+    private readonly int _width;
+    private int _maxViewableX;
+    private int _maxViewableY;
 
     private int _minViewableX;
     private int _minViewableY;
-    private int _maxViewableX;
-    private int _maxViewableY;
 
     public MapModel(IEnumerable<Pixel> pixels, int width, int height, User? user)
     {
@@ -42,6 +39,9 @@ public class MapModel
         }
     }
 
+    // ReSharper disable once MemberCanBePrivate.Global
+    public PixelModel[][] Pixels { get; set; }
+
     public void MarkSpawns(IEnumerable<User> users)
     {
         foreach (User user in users) Pixels[user.SpawnY][user.SpawnX].Type = PixelTypeEnum.Spawn;
@@ -53,13 +53,11 @@ public class MapModel
         for (int y = 0; y < Pixels.Length; y++) fogOfWarMap[y] = new PixelModel[Pixels[0].Length];
 
         for (int i = 0; i < Pixels.Length; i++)
-        {
-            for (int j = 0; j < Pixels[0].Length; j++)
-                if (Pixels[i][j].OwnPixel)
-                {
-                    fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, j, i);
-                }
-        }
+        for (int j = 0; j < Pixels[0].Length; j++)
+            if (Pixels[i][j].OwnPixel)
+            {
+                fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, j, i);
+            }
 
         Pixels = TrimMap(fogOfWarMap);
     }
@@ -75,14 +73,11 @@ public class MapModel
         _minViewableY = int.Min(minY - 1, _minViewableY);
         _maxViewableX = int.Max(maxX + 1, _maxViewableX);
         _maxViewableY = int.Max(maxY + 1, _maxViewableY);
-        
+
         for (int i = minY; i <= maxY; i++)
-        {
-            for (int j = minX; j <= maxX; j++)
-            {
-                fogOfWarMap[i][j] = Pixels[i][j];
-            }
-        }
+        for (int j = minX; j <= maxX; j++)
+            fogOfWarMap[i][j] = Pixels[i][j];
+
         return fogOfWarMap;
     }
 
