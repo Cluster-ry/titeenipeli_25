@@ -18,9 +18,9 @@ public class CtfController : ControllerBase
     }
 
     [HttpPost("ctf")]
-    public IActionResult PostCtf([FromBody] Flag flag)
+    public IActionResult PostCtf([FromBody] CtfTokenModel ctfToken)
     {
-        CtfFlag? ctfFlag = _dbContext.CtfFlags.FirstOrDefault(ctfFlag => ctfFlag.Flag == flag.FlagCode);
+        CtfFlag? ctfFlag = _dbContext.CtfFlags.FirstOrDefault(ctfFlag => ctfFlag.Token == ctfToken.Token);
 
         if (ctfFlag == null)
         {

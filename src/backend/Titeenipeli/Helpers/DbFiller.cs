@@ -16,7 +16,7 @@ public static class DbFiller
         {
             dbContext.CtfFlags.Add(new CtfFlag
             {
-                Flag = "#TEST_FLAG",
+                Token = "#TEST_FLAG",
                 Id = 0
             });
 
