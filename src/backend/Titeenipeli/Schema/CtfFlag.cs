@@ -7,5 +7,5 @@ public class CtfFlag : Entity
 {
     [Column(TypeName = "VARCHAR")]
     [StringLength(64)]
-    public required string Flag { get; init; }
+    public required string Token { get; init; }
 }
