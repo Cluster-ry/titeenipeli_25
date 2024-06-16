@@ -14,7 +14,7 @@ using Titeenipeli.Middleware;
 
 namespace Titeenipeli;
 
-publaic static class Program
+public static class Program
 {
     public static void Main(string[] args)
     {
