@@ -36,3 +36,4 @@ jobs:
         with:
           dotnet_format: true
           dotnet_format_dir: src/backend/
+          continue_on_error: false
