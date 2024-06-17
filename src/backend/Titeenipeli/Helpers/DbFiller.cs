@@ -27,14 +27,38 @@ public static class DbFiller
         {
             Guild[] guilds =
             [
-                new Guild { Color = 0 },
-                new Guild { Color = 1 },
-                new Guild { Color = 2 },
-                new Guild { Color = 3 },
-                new Guild { Color = 4 },
-                new Guild { Color = 5 },
-                new Guild { Color = 6 },
-                new Guild { Color = 7 }
+                new Guild
+                {
+                    Color = 0
+                },
+                new Guild
+                {
+                    Color = 1
+                },
+                new Guild
+                {
+                    Color = 2
+                },
+                new Guild
+                {
+                    Color = 3
+                },
+                new Guild
+                {
+                    Color = 4
+                },
+                new Guild
+                {
+                    Color = 5
+                },
+                new Guild
+                {
+                    Color = 6
+                },
+                new Guild
+                {
+                    Color = 7
+                }
             ];
 
             dbContext.Guilds.AddRange(guilds);
@@ -71,13 +95,17 @@ public static class DbFiller
         {
             Random random = new Random(1);
             for (int x = 0; x < 20; x++)
-            for (int y = 0; y < 20; y++)
-                dbContext.Map.Add(new Pixel
+            {
+                for (int y = 0; y < 20; y++)
                 {
-                    X = x,
-                    Y = y,
-                    User = random.Next(10) < 1 && x > 3 && y > 3 && x < 17 && y < 17 ? testUser : testOpponent
-                });
+                    dbContext.Map.Add(new Pixel
+                    {
+                        X = x,
+                        Y = y,
+                        User = random.Next(10) < 1 && x > 3 && y > 3 && x < 17 && y < 17 ? testUser : testOpponent
+                    });
+                }
+            }
 
             dbContext.SaveChanges();
 
