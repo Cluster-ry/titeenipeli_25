@@ -37,7 +37,6 @@ public class MapController : ControllerBase
 
         map.CalculateFogOfWar();
 
-
         return Ok(map);
     }
 }

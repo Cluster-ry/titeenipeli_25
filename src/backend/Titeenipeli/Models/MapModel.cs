@@ -8,7 +8,7 @@ public class MapModel
     private const int FogOfWarDistance = 2;
     
     // ReSharper disable once MemberCanBePrivate.Global
-    public PixelModel[][] Pixels { get; set; }
+    public PixelModel[,] Pixels { get; set; }
     
     private readonly int _height;
     private readonly int _width;
@@ -26,8 +26,7 @@ public class MapModel
         _minViewableY = height;
         _maxViewableX = 0;
         _maxViewableY = 0;
-        Pixels = new PixelModel[height][];
-        for (int y = 0; y < height; y++) Pixels[y] = new PixelModel[width];
+        Pixels = new PixelModel[width, height];
 
         foreach (Pixel pixel in pixels)
         {
@@ -39,31 +38,30 @@ public class MapModel
                 OwnPixel = pixel.User == user
             };
 
-            Pixels[pixel.Y][pixel.X] = mapPixel;
+            Pixels[pixel.X, pixel.Y] = mapPixel;
         }
     }
 
     public void MarkSpawns(IEnumerable<User> users)
     {
-        foreach (User user in users) Pixels[user.SpawnY][user.SpawnX].Type = PixelTypeEnum.Spawn;
+        foreach (User user in users) Pixels[user.SpawnX, user.SpawnY].Type = PixelTypeEnum.Spawn;
     }
 
     public void CalculateFogOfWar()
     {
-        PixelModel[][] fogOfWarMap = new PixelModel[Pixels.Length][];
-        for (int y = 0; y < Pixels.Length; y++) fogOfWarMap[y] = new PixelModel[Pixels[0].Length];
+        PixelModel[,] fogOfWarMap = new PixelModel[_width, _height];
 
-        for (int y = 0; y < Pixels.Length; y++)
-        for (int x = 0; x < Pixels[0].Length; x++)
-            if (Pixels[y][x].OwnPixel)
+        for (int x = 0; x < _width; x++)
+        for (int y = 0; y < _height; y++)
+            if (Pixels[x, y].OwnPixel)
             {
-                fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, x, y);
+                fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, y, y);
             }
 
         Pixels = TrimMap(fogOfWarMap);
     }
 
-    private PixelModel[][] MarkPixelsInFogOfWar(PixelModel[][] fogOfWarMap, int pixelX, int pixelY)
+    private PixelModel[,] MarkPixelsInFogOfWar(PixelModel[,] fogOfWarMap, int pixelX, int pixelY)
     {
         int minX = int.Clamp(pixelX - FogOfWarDistance, 0, _width - 1);
         int minY = int.Clamp(pixelY - FogOfWarDistance, 0, _width - 1);
@@ -75,16 +73,39 @@ public class MapModel
         _maxViewableX = int.Max(maxX + 1, _maxViewableX);
         _maxViewableY = int.Max(maxY + 1, _maxViewableY);
 
-        for (int y = minY; y <= maxY; y++)
-        for (int x = minX; x <= maxX; x++)
-            fogOfWarMap[y][x] = Pixels[y][x];
+        for (int x = minY; x <= maxY; x++)
+        for (int y = minX; y <= maxX; y++)
+            fogOfWarMap[x, y] = Pixels[x, y];
 
         return fogOfWarMap;
     }
 
-    private PixelModel[][] TrimMap(PixelModel[][] map)
+    private PixelModel[,] TrimMap(PixelModel[,] map)
     {
-        return map.Where((_, i) => _minViewableY < i && i < _maxViewableY)
-            .Select(row => row.Where((_, i) => _minViewableX < i && i < _maxViewableX).ToArray()).ToArray();
+        PixelModel[,] trimmedMap =
+            new PixelModel[_maxViewableX - (_minViewableX + 1), _maxViewableY - (_minViewableY + 1)];
+
+        for (int x = 0, trimmedX = 0; x < _width; x++)
+        {
+            if (_minViewableX >= x || x >= _maxViewableX)
+            {
+                continue;
+            }
+
+            for (int y = 0, trimmedY = 0; y < _height; y++)
+            {
+                if (_minViewableY >= y || y >= _maxViewableY)
+                {
+                    continue;
+                }
+
+                trimmedMap[trimmedX, trimmedY] = map[x, y];
+                trimmedY++;
+            }
+
+            trimmedX++;
+        }
+
+        return trimmedMap;
     }
 }
