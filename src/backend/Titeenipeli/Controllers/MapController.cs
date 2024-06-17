@@ -29,8 +29,8 @@ public class MapController : ControllerBase
             .ThenInclude(user => user!.Guild)
             .OrderBy(pixel => pixel.Y).ToArray();
 
-        int width = _dbContext.Map.Max(pixel => pixel.X) + 1;
-        int height = _dbContext.Map.Max(pixel => pixel.Y) + 1;
+        int width = _dbContext.Map.Max(pixel => pixel.X) + 3;
+        int height = _dbContext.Map.Max(pixel => pixel.Y) + 3;
 
         MapModel map = ConstructMap(pixels, width, height, testUser);
         map = MarkSpawns(map, users);
@@ -48,6 +48,17 @@ public class MapController : ControllerBase
             Height = height
         };
 
+        for (int x = 0; x < width; x++)
+        for (int y = 0; y < height; y++)
+            if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
+            {
+                map.Pixels[x, y] = new PixelModel
+                {
+                    OwnPixel = false,
+                    Type = PixelTypeEnum.MapBorder
+                };
+            }
+
         foreach (Pixel pixel in pixels)
         {
             PixelModel mapPixel = new PixelModel
@@ -58,7 +69,7 @@ public class MapController : ControllerBase
                 OwnPixel = pixel.User == user
             };
 
-            map.Pixels[pixel.X, pixel.Y] = mapPixel;
+            map.Pixels[pixel.X + 1, pixel.Y + 1] = mapPixel;
         }
 
         return map;
