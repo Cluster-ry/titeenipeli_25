@@ -69,15 +69,18 @@ public class MapController : ControllerBase
             _dbContext.Map.Include(pixel => pixel.User)
                 .FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
 
-        switch (pixelToUpdate)
+        if (pixelToUpdate == null)
         {
-            case null:
-                return BadRequest();
-            case { User: not null } when
-                pixelToUpdate.User.SpawnX == pixelCoordinate.X &&
-                pixelToUpdate.User.SpawnY == pixelCoordinate.Y:
-                return BadRequest();
+            return BadRequest();
         }
+
+        if (pixelToUpdate.User != null &&
+            pixelToUpdate.User.SpawnX == pixelCoordinate.X &&
+            pixelToUpdate.User.SpawnY == pixelCoordinate.Y)
+        {
+            return BadRequest();
+        }
+        
 
         pixelToUpdate.User = testUser;
         if (testUser != null)
