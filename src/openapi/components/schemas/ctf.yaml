@@ -1,0 +1,8 @@
+type: object
+properties:
+  token:
+    type: string
+    readOnly: false
+    example: "FGSTLBGXM3YB7USWS28KE2JV9Z267L48"
+    minimum: 32
+    maximum: 32
