@@ -31,7 +31,7 @@ public class MapController : ControllerBase
         int width = _dbContext.Map.Max(pixel => pixel.X) + 1;
         int height = _dbContext.Map.Max(pixel => pixel.Y) + 1;
 
-        MapModel map = new MapModel{Pixels = new PixelModel[height][]};
+        MapModel map = new MapModel { Pixels = new PixelModel[height][] };
         PixelModel[] mapRow = new PixelModel[width];
         int lastRow = 0;
 
