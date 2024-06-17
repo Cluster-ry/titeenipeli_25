@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
@@ -56,5 +57,50 @@ public class MapController : ControllerBase
         }
 
         return Ok(map);
+    }
+
+    [HttpPost("pixels")]
+    public IActionResult PostPixels([FromBody] Coordinate pixelCoordinate)
+    {
+        // TODO: Map relative coordinates to global coordinates
+        // TODO: Remove temporary testing user
+        User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
+        Pixel? pixelToUpdate =
+            _dbContext.Map.Include(pixel => pixel.User)
+                .FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
+
+        if (pixelToUpdate == null)
+        {
+            return BadRequest();
+        }
+
+        if (pixelToUpdate.User != null &&
+            pixelToUpdate.User.SpawnX == pixelCoordinate.X &&
+            pixelToUpdate.User.SpawnY == pixelCoordinate.Y)
+        {
+            return BadRequest();
+        }
+        
+
+        pixelToUpdate.User = testUser;
+        if (testUser != null)
+        {
+            _dbContext.GameEvents.Add(new GameEvent
+            {
+                User = testUser,
+                // TODO: This is only temporary, fix this when GameEvent structure is more clear
+                Event = JsonSerializer.Serialize("{ " +
+                                                 "   'eventType': 'SetPixel'," +
+                                                 "   'coordinates': {" +
+                                                 "       'x': " + pixelCoordinate.X + "," +
+                                                 "       'y': " + pixelCoordinate.Y + "," +
+                                                 "   }" +
+                                                 "}")
+            });
+        }
+
+        _dbContext.SaveChanges();
+
+        return Ok();
     }
 }
