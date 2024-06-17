@@ -26,9 +26,9 @@ public class MapController : ControllerBase
         User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
         User[] users = _dbContext.Users.ToArray();
         Pixel[] pixels = _dbContext.Map
-            .Include(pixel => pixel.User)
-            .ThenInclude(user => user!.Guild)
-            .OrderBy(pixel => pixel.Y).ToArray();
+                                   .Include(pixel => pixel.User)
+                                   .ThenInclude(user => user!.Guild)
+                                   .OrderBy(pixel => pixel.Y).ToArray();
 
         int width = _dbContext.Map.Max(pixel => pixel.X) + 3;
         int height = _dbContext.Map.Max(pixel => pixel.Y) + 3;
@@ -50,15 +50,19 @@ public class MapController : ControllerBase
         };
 
         for (int x = 0; x < width; x++)
-        for (int y = 0; y < height; y++)
-            if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
+        {
+            for (int y = 0; y < height; y++)
             {
-                map.Pixels[x, y] = new PixelModel
+                if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
                 {
-                    OwnPixel = false,
-                    Type = PixelTypeEnum.MapBorder
-                };
+                    map.Pixels[x, y] = new PixelModel
+                    {
+                        OwnPixel = false,
+                        Type = PixelTypeEnum.MapBorder
+                    };
+                }
             }
+        }
 
         foreach (Pixel pixel in pixels)
         {
@@ -94,17 +98,21 @@ public class MapController : ControllerBase
         };
 
         for (int x = 0; x < width; x++)
-        for (int y = 0; y < height; y++)
-            if (map.Pixels[x, y].OwnPixel)
+        {
+            for (int y = 0; y < height; y++)
             {
-                fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, y, y, 2);
+                if (map.Pixels[x, y].OwnPixel)
+                {
+                    fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, y, y, 2);
+                }
             }
+        }
 
         return TrimMap(fogOfWarMap);
     }
 
     private static MapModel MarkPixelsInFogOfWar(MapModel fogOfWarMap, MapModel map, int pixelX, int pixelY,
-        int fogOfWarDistance)
+                                                 int fogOfWarDistance)
     {
         int minX = int.Clamp(pixelX - fogOfWarDistance, 0, map.Width - 1);
         int minY = int.Clamp(pixelY - fogOfWarDistance, 0, map.Height - 1);
@@ -117,8 +125,12 @@ public class MapController : ControllerBase
         fogOfWarMap.MaxViewableY = int.Max(maxY + 1, fogOfWarMap.MaxViewableY);
 
         for (int x = minY; x <= maxY; x++)
-        for (int y = minX; y <= maxX; y++)
-            fogOfWarMap.Pixels[x, y] = map.Pixels[x, y];
+        {
+            for (int y = minX; y <= maxX; y++)
+            {
+                fogOfWarMap.Pixels[x, y] = map.Pixels[x, y];
+            }
+        }
 
         return fogOfWarMap;
     }
@@ -165,7 +177,7 @@ public class MapController : ControllerBase
         User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
         Pixel? pixelToUpdate =
             _dbContext.Map.Include(pixel => pixel.User)
-                .FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
+                      .FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
 
         if (pixelToUpdate == null)
         {
