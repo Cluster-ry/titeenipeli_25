@@ -61,13 +61,13 @@ public static class DbFiller
         {
             Random random = new Random();
             for (int x = 0; x < 10; x++)
-            for (int y = 0; y < 10; y++)
-                dbContext.Map.Add(new Pixel
-                {
-                    X = x,
-                    Y = y,
-                    User = random.Next(10) == 5 ? testUser : null
-                });
+                for (int y = 0; y < 10; y++)
+                    dbContext.Map.Add(new Pixel
+                    {
+                        X = x,
+                        Y = y,
+                        User = random.Next(10) == 5 ? testUser : null
+                    });
         }
 
         dbContext.SaveChanges();
