@@ -178,7 +178,7 @@ public class MapController : ControllerBase
         {
             return BadRequest();
         }
-        
+
 
         pixelToUpdate.User = testUser;
         if (testUser != null)
