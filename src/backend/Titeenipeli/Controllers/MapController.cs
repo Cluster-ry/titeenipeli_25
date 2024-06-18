@@ -25,14 +25,18 @@ public class MapController : ControllerBase
         // TODO: Remove temporary testing user
         User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
         Pixel[] pixels = _dbContext.Map
-            .Include(pixel => pixel.User)
-            .ThenInclude(user => user!.Guild)
-            .OrderBy(pixel => pixel.Y).ToArray();
+                                   .Include(pixel => pixel.User)
+                                   .ThenInclude(user => user!.Guild)
+                                   .OrderBy(pixel => pixel.Y).ToArray();
 
         int width = _dbContext.Map.Max(pixel => pixel.X) + 1;
         int height = _dbContext.Map.Max(pixel => pixel.Y) + 1;
 
-        MapModel map = new MapModel { Pixels = new PixelModel[height][] };
+        MapModel map = new MapModel
+        {
+            Pixels = new PixelModel[height][]
+        };
+
         PixelModel[] mapRow = new PixelModel[width];
         int lastRow = 0;
 
@@ -67,7 +71,7 @@ public class MapController : ControllerBase
         User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
         Pixel? pixelToUpdate =
             _dbContext.Map.Include(pixel => pixel.User)
-                .FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
+                      .FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
 
         if (pixelToUpdate == null)
         {
@@ -80,7 +84,7 @@ public class MapController : ControllerBase
         {
             return BadRequest();
         }
-        
+
 
         pixelToUpdate.User = testUser;
         if (testUser != null)
