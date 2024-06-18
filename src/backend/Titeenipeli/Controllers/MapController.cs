@@ -160,6 +160,11 @@ public class MapController : ControllerBase
                 }
 
                 trimmedMap.Pixels[trimmedX, trimmedY] = map.Pixels[x, y];
+                trimmedMap.PlayerSpawn = new CoordinateModel
+                {
+                    X = trimmedX,
+                    Y = trimmedY
+                };
                 trimmedY++;
             }
 
