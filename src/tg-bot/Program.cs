@@ -48,7 +48,7 @@ ReplyKeyboardMarkup guildKeyboard =
     );
 guildKeyboard.OneTimeKeyboard = true;
 
-// TODO: hide Token  
+// TODO: hide Token
 var bot = new TelegramBotClient("7007777487:AAHVhkUG8OuTWn5urWbixmuGXOieNh1RO6o");
 
 using var cts = new CancellationTokenSource();
@@ -238,7 +238,6 @@ async Task HandleUserSignup(long userid)
 
 async Task SendGuildMenu(long userId)
 {
-    
     // this prevents sequence breaks
     if (!user_created)
     {
@@ -249,7 +248,7 @@ async Task SendGuildMenu(long userId)
         return;
     }
 
-    if (GuildSelected) 
+    if (GuildSelected)
     {
         // NOTE: could print the chosen guild?
         await bot.SendTextMessageAsync(userId, "Guild already chosen. Start the game with /game.");
@@ -268,11 +267,15 @@ async Task SendGuildMenu(long userId)
     );
 }
 
-async Task SendGuildData(long userid, string guild) 
-{ 
+async Task SendGuildData(long userid, string guild)
+{
     // TODO: send guid data to application
     choosing_guild = false;
-    await bot.SendTextMessageAsync(userid, "Guild Selected! Now start the game with /game.", replyMarkup: new ReplyKeyboardRemove());
+    await bot.SendTextMessageAsync(
+        userid,
+        "Guild Selected! Now start the game with /game.",
+        replyMarkup: new ReplyKeyboardRemove()
+    );
     return;
 }
 
@@ -288,11 +291,9 @@ async Task SendGame(long userId)
         return;
     }
 
-    if (!GuildSelected) {
-        await bot.SendTextMessageAsync(
-            userId,
-            "You haven't selected your guild yet. Use /guild."
-        );
+    if (!GuildSelected)
+    {
+        await bot.SendTextMessageAsync(userId, "You haven't selected your guild yet. Use /guild.");
         return;
     }
 
