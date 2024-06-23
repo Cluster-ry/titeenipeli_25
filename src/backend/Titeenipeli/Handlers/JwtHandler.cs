@@ -21,13 +21,24 @@ public class JwtHandler
         SymmetricSecurityKey secretKey =
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]!));
 
-        SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-        JwtSecurityToken tokeOptions = new JwtSecurityToken(_configuration["JWT:ValidIssuer"],
-            _configuration["JWT:ValidAudience"], new List<Claim>
-            {
-                new Claim("data", JsonSerializer.Serialize(jwtClaim))
-            },
-            expires: DateTime.Now.AddHours(6), signingCredentials: signinCredentials);
+        SymmetricSecurityKey encryptionKey =
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Encryption"]!));
+
+        SigningCredentials signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+        EncryptingCredentials encryptingCredentials = new EncryptingCredentials(encryptionKey,
+            SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256CbcHmacSha512);
+
+        List<Claim> claims = [new Claim("data", JsonSerializer.Serialize(jwtClaim))];
+
+        JwtSecurityToken tokeOptions = new JwtSecurityTokenHandler().CreateJwtSecurityToken(
+            _configuration["JWT:ValidIssuer"],
+            _configuration["JWT:ValidAudience"],
+            new ClaimsIdentity(claims),
+            DateTime.Now,
+            DateTime.Now.AddHours(6),
+            DateTime.Now,
+            signingCredentials,
+            encryptingCredentials);
 
         string tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
 
