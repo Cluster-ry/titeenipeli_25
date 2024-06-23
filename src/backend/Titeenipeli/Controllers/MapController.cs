@@ -15,6 +15,8 @@ public class MapController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly ApiDbContext _dbContext;
 
+    private const int BorderWidth = 1;
+
     public MapController(IConfiguration configuration, ApiDbContext dbContext)
     {
         _configuration = configuration;
@@ -33,8 +35,8 @@ public class MapController : ControllerBase
                                    .OrderBy(pixel => pixel.Y).ToArray();
 
         // +2 to account for the borders
-        int width = int.Parse(_configuration["Game:Width"] ?? "20") + 2;
-        int height = int.Parse(_configuration["Game:Height"] ?? "20") + 2;
+        int width = int.Parse(_configuration["Game:Width"] ?? "20") + 2 * BorderWidth;
+        int height = int.Parse(_configuration["Game:Height"] ?? "20") + 2 * BorderWidth;
 
         MapModel map = ConstructMap(pixels, width, height, testUser);
         MarkSpawns(map, users);
