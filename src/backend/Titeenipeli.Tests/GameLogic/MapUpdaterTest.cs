@@ -126,8 +126,8 @@ public class MapUpdaterTest
             map[y, 0] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.MapBorder };
             for (var x = 1; x < xSize + 1; x++)
             {
-                map[y, x] = new PixelModel
-                    { OwnPixel = false, Type = PixelTypeEnum.Normal, Owner = owners[y - 1, x - 1] };
+                map[y, x] = 
+                    new PixelModel { OwnPixel = false, Type = PixelTypeEnum.Normal, Owner = owners[y - 1, x - 1] };
             }
 
             map[y, xSize + 1] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.MapBorder };
