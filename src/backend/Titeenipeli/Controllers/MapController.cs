@@ -12,10 +12,14 @@ namespace Titeenipeli.Controllers;
 [Route("map")]
 public class MapController : ControllerBase
 {
+    private readonly IConfiguration _configuration;
     private readonly ApiDbContext _dbContext;
 
-    public MapController(ApiDbContext dbContext)
+    private const int BorderWidth = 1;
+
+    public MapController(IConfiguration configuration, ApiDbContext dbContext)
     {
+        _configuration = configuration;
         _dbContext = dbContext;
     }
 
@@ -24,47 +28,158 @@ public class MapController : ControllerBase
     {
         // TODO: Remove temporary testing user
         User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
+        User[] users = _dbContext.Users.ToArray();
         Pixel[] pixels = _dbContext.Map
                                    .Include(pixel => pixel.User)
                                    .ThenInclude(user => user!.Guild)
                                    .OrderBy(pixel => pixel.Y).ToArray();
 
-        int width = _dbContext.Map.Max(pixel => pixel.X) + 1;
-        int height = _dbContext.Map.Max(pixel => pixel.Y) + 1;
+        // +2 to account for the borders
+        int width = int.Parse(_configuration["Game:Width"] ?? "20") + 2 * BorderWidth;
+        int height = int.Parse(_configuration["Game:Height"] ?? "20") + 2 * BorderWidth;
 
+        MapModel map = ConstructMap(pixels, width, height, testUser);
+        MarkSpawns(map, users);
+        map = CalculateFogOfWar(map);
+
+        return Ok(map);
+    }
+
+    private static MapModel ConstructMap(IEnumerable<Pixel> pixels, int width, int height, User? user)
+    {
         MapModel map = new MapModel
         {
-            Pixels = new PixelModel[height][]
+            Pixels = new PixelModel[width, height],
+            Width = width,
+            Height = height
         };
 
-        PixelModel[] mapRow = new PixelModel[width];
-        int lastRow = 0;
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
+                {
+                    map.Pixels[x, y] = new PixelModel
+                    {
+                        OwnPixel = false,
+                        Type = PixelTypeEnum.MapBorder
+                    };
+                }
+            }
+        }
 
         foreach (Pixel pixel in pixels)
         {
-            if (pixel.Y != lastRow)
-            {
-                map.Pixels[pixel.Y] = mapRow;
-                mapRow = new PixelModel[width];
-                lastRow = pixel.Y;
-            }
-
             PixelModel mapPixel = new PixelModel
             {
                 Type = PixelTypeEnum.Normal,
                 Owner = (GuildEnum?)pixel.User?.Guild.Color,
                 // TODO: Verify owning status of pixel, this can be done when we get user information from JWT
-                OwnPixel = pixel.User == testUser
+                OwnPixel = pixel.User == user
             };
 
-            mapRow[pixel.X] = mapPixel;
+            map.Pixels[pixel.X + 1, pixel.Y + 1] = mapPixel;
         }
 
-        return Ok(map);
+        return map;
+    }
+
+    private static void MarkSpawns(MapModel map, IEnumerable<User> users)
+    {
+        foreach (User user in users) map.Pixels[user.SpawnX, user.SpawnY].Type = PixelTypeEnum.Spawn;
+    }
+
+    private MapModel CalculateFogOfWar(MapModel map)
+    {
+        int width = map.Pixels.GetLength(0);
+        int height = map.Pixels.GetLength(1);
+        MapModel fogOfWarMap = new MapModel
+        {
+            Pixels = new PixelModel[width, height],
+            Width = width,
+            Height = height
+        };
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (map.Pixels[x, y].OwnPixel)
+                {
+                    fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new CoordinateModel
+                    {
+                        X = x,
+                        Y = y
+                    }, int.Parse(_configuration["Game:FogOfWarDistance"]!));
+                }
+            }
+        }
+
+        return TrimMap(fogOfWarMap);
+    }
+
+    private static MapModel MarkPixelsInFogOfWar(MapModel fogOfWarMap, MapModel map, CoordinateModel pixel,
+                                                 int fogOfWarDistance)
+    {
+        int minX = int.Clamp(pixel.X - fogOfWarDistance, 0, map.Width - 1);
+        int minY = int.Clamp(pixel.Y - fogOfWarDistance, 0, map.Height - 1);
+        int maxX = int.Clamp(pixel.X + fogOfWarDistance, 0, map.Width - 1);
+        int maxY = int.Clamp(pixel.Y + fogOfWarDistance, 0, map.Height - 1);
+
+        fogOfWarMap.MinViewableX = int.Min(minX - 1, fogOfWarMap.MinViewableX);
+        fogOfWarMap.MinViewableY = int.Min(minY - 1, fogOfWarMap.MinViewableY);
+        fogOfWarMap.MaxViewableX = int.Max(maxX + 1, fogOfWarMap.MaxViewableX);
+        fogOfWarMap.MaxViewableY = int.Max(maxY + 1, fogOfWarMap.MaxViewableY);
+
+        for (int x = minY; x <= maxY; x++)
+        {
+            for (int y = minX; y <= maxX; y++)
+            {
+                fogOfWarMap.Pixels[x, y] = map.Pixels[x, y];
+            }
+        }
+
+        return fogOfWarMap;
+    }
+
+    private static MapModel TrimMap(MapModel map)
+    {
+        MapModel trimmedMap = new MapModel
+        {
+            Pixels = new PixelModel[map.MaxViewableX - (map.MinViewableX + 1),
+                map.MaxViewableY - (map.MinViewableY + 1)],
+            Width = map.MaxViewableX - (map.MinViewableX + 1),
+            Height = map.MaxViewableY - (map.MinViewableY + 1)
+        };
+
+        int offsetX = map.MinViewableX + 1;
+        int offsetY = map.MinViewableY + 1;
+
+        for (int x = 0; x < map.Width; x++)
+        {
+            if (map.MinViewableX >= x || x >= map.MaxViewableX)
+            {
+                continue;
+            }
+
+            for (int y = 0; y < map.Height; y++)
+            {
+                if (map.MinViewableY >= y || y >= map.MaxViewableY)
+                {
+                    continue;
+                }
+
+                trimmedMap.Pixels[x - offsetX, y - offsetY] = map.Pixels[x, y];
+            }
+
+        }
+
+        return trimmedMap;
     }
 
     [HttpPost("pixels")]
-    public IActionResult PostPixels([FromBody] Coordinate pixelCoordinate)
+    public IActionResult PostPixels([FromBody] CoordinateModel pixelCoordinate)
     {
         // TODO: Map relative coordinates to global coordinates
         // TODO: Remove temporary testing user

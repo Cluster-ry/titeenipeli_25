@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -123,6 +124,12 @@ public static class Program
             };
         });
 
+        builder.Services.AddControllers()
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+            });
+
         WebApplication app = builder.Build();
 
         using (IServiceScope scope = app.Services.CreateScope())
@@ -132,7 +139,7 @@ public static class Program
 
             DbFiller.Clear(dbContext);
             dbContext.Database.EnsureCreated();
-            DbFiller.Initialize(dbContext);
+            DbFiller.Initialize(dbContext, builder.Configuration);
         }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
