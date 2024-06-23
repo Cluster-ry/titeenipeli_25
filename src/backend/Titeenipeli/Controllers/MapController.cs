@@ -31,19 +31,10 @@ public class MapController : ControllerBase
         int width = _dbContext.Map.Max(pixel => pixel.X) + 1;
         int height = _dbContext.Map.Max(pixel => pixel.Y) + 1;
 
-        MapModel map = new MapModel{Pixels = new PixelModel[height][]};
-        PixelModel[] mapRow = new PixelModel[width];
-        int lastRow = 0;
+        MapModel map = new MapModel{Pixels = new PixelModel[height, width]};
 
         foreach (Pixel pixel in pixels)
         {
-            if (pixel.Y != lastRow)
-            {
-                map.Pixels[pixel.Y] = mapRow;
-                mapRow = new PixelModel[width];
-                lastRow = pixel.Y;
-            }
-
             PixelModel mapPixel = new PixelModel
             {
                 Type = PixelTypeEnum.Normal,
@@ -52,7 +43,7 @@ public class MapController : ControllerBase
                 OwnPixel = pixel.User == testUser
             };
 
-            mapRow[pixel.X] = mapPixel;
+            map.Pixels[pixel.Y, pixel.X] = mapPixel;
         }
 
         return Ok(map);
