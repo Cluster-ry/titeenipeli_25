@@ -4,11 +4,6 @@ using Titeenipeli.Models;
 
 namespace Titeenipeli.GameLogic;
 
-// This class is meant to encapsulate all the complexity of map updating. We prefer raw data types and arrays to
-// object based approaches to gain more speed. The sharp cut point for low-level code vs. high level code is the
-// PlacePixel interface - no raw data type etc. complexity should bleed above it.
-
-using GameMap = GuildEnum?[,];
 using Coordinates = (int, int);
 using AreaNodes = Dictionary<int, Node>;
 
@@ -20,18 +15,19 @@ public class MapUpdater
 
     public MapModel PlacePixel(MapModel map, Coordinates pixelCoordinates, GuildEnum placingGuild)
     {
-        AreaNodes nodes;
-        int justAddedNode;
         map.Pixels[pixelCoordinates.Item2, pixelCoordinates.Item1] = new PixelModel
             { Owner = placingGuild, Type = PixelTypeEnum.Normal };
-        if (_cachedNodes is null)
-        {
-            (nodes, justAddedNode) = _ConstructMapAdjacencyNodes(map, pixelCoordinates, placingGuild);
-        }
-        else
-        {
-            (nodes, justAddedNode) = _PlaceWithCache(map, pixelCoordinates, placingGuild);
-        }
+        // TODO uncomment once _PlaceWithCache is implemented
+        // TODO  - this should drop time complexity to O(log n) from O(n) if done right (MIT approved)
+        // if (_cachedNodes is null)
+        // {
+        //     (nodes, justAddedNode) = _ConstructMapAdjacencyNodes(map, pixelCoordinates, placingGuild);
+        // }
+        // else
+        // {
+        //     (nodes, justAddedNode) = _PlaceWithCache(map, pixelCoordinates, placingGuild);
+        // }
+        var (nodes, justAddedNode) = _ConstructMapAdjacencyNodes(map, pixelCoordinates, placingGuild);
 
         var nonHangingNodeIndexes = new HashSet<int>();
         _TraverseNodeTree(0, nodes, justAddedNode, nonHangingNodeIndexes);
@@ -65,34 +61,18 @@ public class MapUpdater
         {
             for (var x = 1; x < xSize; x++)
             {
-                var leftNode = nodeMap[y, x - 1];
-                var aboveNode = nodeMap[y - 1, x];
+                var (leftNode, aboveNode) = TryMerge(placingGuild, nodeMap, y, x, nodes);
+                
                 var currentPixelGuild = map.Pixels[y, x].Owner;
                 var isSpawnNode = map.Pixels[y, x].Type == PixelTypeEnum.Spawn;
-                if (leftNode != aboveNode) {
-                    var leftNodeGuild = nodes[leftNode].guild;
-                    var aboveNodeGuild = nodes[aboveNode].guild;
-                    if (leftNodeGuild == aboveNodeGuild)
-                    {
-                        leftNode = _MergeNodes(leftNode, aboveNode, nodes, nodeMap);
-                        aboveNode = leftNode;
-                    }
-                }
 
                 if (nodes[leftNode].guild == currentPixelGuild)
                 {
-                    nodes[leftNode].pixels.Add((x, y));
-                    nodes[leftNode].hasSpawn = nodes[leftNode].hasSpawn || isSpawnNode;
-                    nodes[leftNode].neighbours.Add(aboveNode);
-                    nodes[aboveNode].neighbours.Add(leftNode);
-                    nodeMap[y, x] = leftNode;
+                    AddPixelToNodeWithNeighbour(nodes, leftNode, x, y, isSpawnNode, aboveNode, nodeMap);
                 }
                 else if (nodes[aboveNode].guild == currentPixelGuild)
                 {
-                    nodes[aboveNode].pixels.Add((x, y));
-                    nodes[aboveNode].hasSpawn = nodes[aboveNode].hasSpawn || isSpawnNode;
-                    nodes[aboveNode].neighbours.Add(leftNode);
-                    nodes[leftNode].neighbours.Add(aboveNode);
+                    AddPixelToNodeWithNeighbour(nodes, aboveNode, x, y, isSpawnNode, leftNode, nodeMap);
                 }
                 else
                 {
@@ -113,6 +93,39 @@ public class MapUpdater
 
         var justAddedNode = nodeMap[pixelCoordinates.Item1, pixelCoordinates.Item2];
         return (nodes, justAddedNode);
+    }
+
+    private static void AddPixelToNodeWithNeighbour(AreaNodes nodes, int destinationNode, int x, int y, bool isSpawnNode,
+        int neighbourNode, int[,] nodeMap)
+    {
+        nodes[destinationNode].pixels.Add((x, y));
+        nodes[destinationNode].hasSpawn = nodes[destinationNode].hasSpawn || isSpawnNode;
+        nodes[destinationNode].neighbours.Add(neighbourNode);
+        nodes[neighbourNode].neighbours.Add(destinationNode);
+        nodeMap[y, x] = destinationNode;
+    }
+
+    private (int, int) TryMerge(GuildEnum placingGuild, int[,] nodeMap, int y, int x, AreaNodes nodes)
+    {
+        var leftNode = nodeMap[y, x - 1];
+        var aboveNode = nodeMap[y - 1, x];
+        
+        if (leftNode == aboveNode)
+        {
+            return (leftNode, aboveNode);
+        }
+        
+        var leftNodeGuild = nodes[leftNode].guild;
+        var aboveNodeGuild = nodes[aboveNode].guild;
+        if (leftNodeGuild != aboveNodeGuild || leftNodeGuild != placingGuild)
+        {
+            return (leftNode, aboveNode);
+        }
+        
+        leftNode = _MergeNodes(leftNode, aboveNode, nodes, nodeMap);
+        aboveNode = leftNode;
+
+        return (leftNode, aboveNode);
     }
 
     private Node _CreateOutsideNode(int ySize, int xSize)
@@ -140,8 +153,8 @@ public class MapUpdater
         nodes[largerNodeIndex].neighbours.Remove(largerNodeIndex);
         foreach (var neighbourNodeIndex in nodes[largerNodeIndex].neighbours)
         {
-            nodes[neighbourNodeIndex]?.neighbours.Remove(largerNodeIndex);
-            nodes[neighbourNodeIndex]?.neighbours.Add(smallerNodeIndex);
+            nodes[neighbourNodeIndex].neighbours.Remove(largerNodeIndex);
+            nodes[neighbourNodeIndex].neighbours.Add(smallerNodeIndex);
         }
 
         foreach (var (x, y) in nodes[largerNodeIndex].pixels)
@@ -151,12 +164,18 @@ public class MapUpdater
         
         nodes[smallerNodeIndex].pixels.UnionWith(nodes[largerNodeIndex].pixels);
         nodes[smallerNodeIndex].neighbours.UnionWith(nodes[largerNodeIndex].neighbours);
-        nodes[largerNodeIndex] = null;
+        nodes.Remove(largerNodeIndex);
         return smallerNodeIndex;
     }
 
     private void _TraverseNodeTree(int currentNode, AreaNodes nodes, int justAddedNode, HashSet<int> visitedNodes)
     {
+        // This is the recursion escape clause - for some reason ReSharper doesn't realize that
+        // ReSharper disable once CanSimplifySetAddingWithSingleCall
+        if (visitedNodes.Contains(currentNode))
+        {
+            return;
+        }
         visitedNodes.Add(currentNode);
         if (currentNode == justAddedNode)
         {
@@ -184,7 +203,7 @@ public class MapUpdater
 
     private void _CutNodesWithoutSpawn(MapModel map, AreaNodes nodes)
     {
-        foreach (var node in nodes.Values.Where(node => !node.hasSpawn))
+        foreach (var node in nodes.Values.Where(node => node is { hasSpawn: false, guild: not null }))
         {
             _FillNode(map, node, null);
         }
