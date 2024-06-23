@@ -137,7 +137,7 @@ public static class Program
 
             DbFiller.Clear(dbContext);
             dbContext.Database.EnsureCreated();
-            DbFiller.Initialize(dbContext);
+            DbFiller.Initialize(dbContext, builder.Configuration);
         }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");

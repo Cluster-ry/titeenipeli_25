@@ -32,9 +32,9 @@ public class MapController : ControllerBase
                                    .ThenInclude(user => user!.Guild)
                                    .OrderBy(pixel => pixel.Y).ToArray();
 
-        // +1 for to get size from last coordinate and +2 to account for borders
-        int width = _dbContext.Map.Max(pixel => pixel.X) + 3;
-        int height = _dbContext.Map.Max(pixel => pixel.Y) + 3;
+        // +2 to account for the borders
+        int width = int.Parse(_configuration["Game:Width"] ?? "20") + 2;
+        int height = int.Parse(_configuration["Game:Height"] ?? "20") + 2;
 
         MapModel map = ConstructMap(pixels, width, height, testUser);
         MarkSpawns(map, users);

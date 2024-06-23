@@ -7,7 +7,7 @@ namespace Titeenipeli.Helpers;
 
 public static class DbFiller
 {
-    public static void Initialize(ApiDbContext dbContext)
+    public static void Initialize(ApiDbContext dbContext, IConfiguration configuration)
     {
         RelationalDatabaseCreator databaseCreator =
             (RelationalDatabaseCreator)dbContext.Database.GetService<IDatabaseCreator>();
@@ -94,9 +94,9 @@ public static class DbFiller
         if (!dbContext.Map.Any())
         {
             Random random = new Random(1);
-            for (int x = 0; x < 20; x++)
+            for (int x = 0; x < int.Parse(configuration["Game:Width"] ?? "20"); x++)
             {
-                for (int y = 0; y < 20; y++)
+                for (int y = 0; y < int.Parse(configuration["Game:Height"] ?? "20"); y++)
                 {
                     dbContext.Map.Add(new Pixel
                     {
