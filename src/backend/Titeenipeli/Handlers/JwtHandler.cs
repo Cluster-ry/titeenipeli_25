@@ -16,14 +16,17 @@ public class JwtHandler
         _configuration = configuration;
     }
 
-    public JwtToken GetJwtToken(Login user)
+    public JwtToken GetJwtToken(JwtClaimModel jwtClaim)
     {
         SymmetricSecurityKey secretKey =
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]!));
 
         SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
         JwtSecurityToken tokeOptions = new JwtSecurityToken(_configuration["JWT:ValidIssuer"],
-            _configuration["JWT:ValidAudience"], new List<Claim> { new Claim("json", JsonSerializer.Serialize(user)) },
+            _configuration["JWT:ValidAudience"], new List<Claim>
+            {
+                new Claim("data", JsonSerializer.Serialize(jwtClaim))
+            },
             expires: DateTime.Now.AddHours(6), signingCredentials: signinCredentials);
 
         string tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
