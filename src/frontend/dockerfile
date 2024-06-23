@@ -1,0 +1,19 @@
+FROM node:latest
+
+WORKDIR /app
+
+# Installing the dependencies
+COPY pnpm-lock.yaml package.json ./
+
+RUN npm install -g pnpm
+
+RUN pnpm i
+
+COPY . .
+
+# Building the application
+RUN pnpm run build
+
+EXPOSE 5173     
+
+CMD ["pnpm", "run", "dev"]
