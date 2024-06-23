@@ -118,7 +118,9 @@ public static class Program
                 ValidAudience = builder.Configuration["JWT:ValidAudience"],
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]!))
+                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]!)),
+                TokenDecryptionKey =
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Encryption"]!))
             };
         });
 
@@ -137,7 +139,7 @@ public static class Program
 
             DbFiller.Clear(dbContext);
             dbContext.Database.EnsureCreated();
-            DbFiller.Initialize(dbContext);
+            DbFiller.Initialize(dbContext, builder.Configuration);
         }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");

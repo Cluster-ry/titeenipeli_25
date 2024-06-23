@@ -46,7 +46,7 @@ public class AuthenticationController : ControllerBase
             GuildId = user.Guild.Color
         };
 
-        return Ok(new JwtHandler(_configuration).GetJwtToken(jwtClaim));
-
+        Response.Headers.Authorization = $"Bearer {new JwtHandler(_configuration).GetJwtToken(jwtClaim).Token}";
+        return Ok();
     }
 }

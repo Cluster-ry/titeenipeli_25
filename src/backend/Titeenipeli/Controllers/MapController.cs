@@ -12,10 +12,14 @@ namespace Titeenipeli.Controllers;
 [Route("map")]
 public class MapController : ControllerBase
 {
+    private readonly IConfiguration _configuration;
     private readonly ApiDbContext _dbContext;
 
-    public MapController(ApiDbContext dbContext)
+    private const int BorderWidth = 1;
+
+    public MapController(IConfiguration configuration, ApiDbContext dbContext)
     {
+        _configuration = configuration;
         _dbContext = dbContext;
     }
 
@@ -30,11 +34,12 @@ public class MapController : ControllerBase
                                    .ThenInclude(user => user!.Guild)
                                    .OrderBy(pixel => pixel.Y).ToArray();
 
-        int width = _dbContext.Map.Max(pixel => pixel.X) + 3;
-        int height = _dbContext.Map.Max(pixel => pixel.Y) + 3;
+        // +2 to account for the borders
+        int width = int.Parse(_configuration["Game:Width"] ?? "20") + 2 * BorderWidth;
+        int height = int.Parse(_configuration["Game:Height"] ?? "20") + 2 * BorderWidth;
 
         MapModel map = ConstructMap(pixels, width, height, testUser);
-        map = MarkSpawns(map, users);
+        MarkSpawns(map, users);
         map = CalculateFogOfWar(map);
 
         return Ok(map);
@@ -80,13 +85,12 @@ public class MapController : ControllerBase
         return map;
     }
 
-    private static MapModel MarkSpawns(MapModel map, IEnumerable<User> users)
+    private static void MarkSpawns(MapModel map, IEnumerable<User> users)
     {
         foreach (User user in users) map.Pixels[user.SpawnX, user.SpawnY].Type = PixelTypeEnum.Spawn;
-        return map;
     }
 
-    private static MapModel CalculateFogOfWar(MapModel map)
+    private MapModel CalculateFogOfWar(MapModel map)
     {
         int width = map.Pixels.GetLength(0);
         int height = map.Pixels.GetLength(1);
@@ -103,7 +107,11 @@ public class MapController : ControllerBase
             {
                 if (map.Pixels[x, y].OwnPixel)
                 {
-                    fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, y, y, 2);
+                    fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new CoordinateModel
+                    {
+                        X = x,
+                        Y = y
+                    }, int.Parse(_configuration["Game:FogOfWarDistance"]!));
                 }
             }
         }
@@ -111,13 +119,13 @@ public class MapController : ControllerBase
         return TrimMap(fogOfWarMap);
     }
 
-    private static MapModel MarkPixelsInFogOfWar(MapModel fogOfWarMap, MapModel map, int pixelX, int pixelY,
+    private static MapModel MarkPixelsInFogOfWar(MapModel fogOfWarMap, MapModel map, CoordinateModel pixel,
                                                  int fogOfWarDistance)
     {
-        int minX = int.Clamp(pixelX - fogOfWarDistance, 0, map.Width - 1);
-        int minY = int.Clamp(pixelY - fogOfWarDistance, 0, map.Height - 1);
-        int maxX = int.Clamp(pixelX + fogOfWarDistance, 0, map.Width - 1);
-        int maxY = int.Clamp(pixelY + fogOfWarDistance, 0, map.Height - 1);
+        int minX = int.Clamp(pixel.X - fogOfWarDistance, 0, map.Width - 1);
+        int minY = int.Clamp(pixel.Y - fogOfWarDistance, 0, map.Height - 1);
+        int maxX = int.Clamp(pixel.X + fogOfWarDistance, 0, map.Width - 1);
+        int maxY = int.Clamp(pixel.Y + fogOfWarDistance, 0, map.Height - 1);
 
         fogOfWarMap.MinViewableX = int.Min(minX - 1, fogOfWarMap.MinViewableX);
         fogOfWarMap.MinViewableY = int.Min(minY - 1, fogOfWarMap.MinViewableY);
@@ -145,37 +153,33 @@ public class MapController : ControllerBase
             Height = map.MaxViewableY - (map.MinViewableY + 1)
         };
 
-        for (int x = 0, trimmedX = 0; x < map.Width; x++)
+        int offsetX = map.MinViewableX + 1;
+        int offsetY = map.MinViewableY + 1;
+
+        for (int x = 0; x < map.Width; x++)
         {
             if (map.MinViewableX >= x || x >= map.MaxViewableX)
             {
                 continue;
             }
 
-            for (int y = 0, trimmedY = 0; y < map.Height; y++)
+            for (int y = 0; y < map.Height; y++)
             {
                 if (map.MinViewableY >= y || y >= map.MaxViewableY)
                 {
                     continue;
                 }
 
-                trimmedMap.Pixels[trimmedX, trimmedY] = map.Pixels[x, y];
-                trimmedMap.PlayerSpawn = new CoordinateModel
-                {
-                    X = trimmedX,
-                    Y = trimmedY
-                };
-                trimmedY++;
+                trimmedMap.Pixels[x - offsetX, y - offsetY] = map.Pixels[x, y];
             }
 
-            trimmedX++;
         }
 
         return trimmedMap;
     }
 
     [HttpPost("pixels")]
-    public IActionResult PostPixels([FromBody] Coordinate pixelCoordinate)
+    public IActionResult PostPixels([FromBody] CoordinateModel pixelCoordinate)
     {
         // TODO: Map relative coordinates to global coordinates
         // TODO: Remove temporary testing user
