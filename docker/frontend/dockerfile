@@ -3,15 +3,18 @@ FROM node:latest
 WORKDIR /app
 
 # Installing the dependencies
-COPY ../../src/frontend/package*.json ./
-RUN npm ci
+COPY ../../src/frontend/pnpm-lock.yaml ../../src/frontend/package*.json ./
 
-# Copying source code files
-COPY ../../src/frontend /app
+RUN npm install -g pnpm
+
+RUN pnpm i
+
+COPY ../../src/frontend .
+
 
 # Building the application
-RUN npm run build
+RUN pnpm run build
 
 EXPOSE 5173     
 
-CMD ["npm", "run", "dev"]
+CMD ["pnpm", "run", "dev"]
