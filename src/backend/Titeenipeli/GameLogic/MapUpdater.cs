@@ -14,7 +14,7 @@ public class MapUpdater
 
     // Note - this class encapsulates the most complex part of game logic - thus I made a decision to overcomment here
     // including adding doc comments. This should enable others to modify the file should I be unavailable -Eddie
-    
+
     /// <summary>
     /// Place one pixel into the given map and calculate the resulting fill and cut operations
     /// </summary>
@@ -23,9 +23,9 @@ public class MapUpdater
     /// <param name="placingGuild">The guild placing the new pixel</param>
     public void PlacePixel(MapModel map, Coordinates pixelCoordinates, GuildEnum placingGuild)
     {
-        map.Pixels[pixelCoordinates.Item2, pixelCoordinates.Item1] = new PixelModel
-            { Owner = placingGuild, Type = PixelTypeEnum.Normal };
-        
+        map.Pixels[pixelCoordinates.Item2, pixelCoordinates.Item1]
+            = new PixelModel { Owner = placingGuild, Type = PixelTypeEnum.Normal };
+
         // TODO uncomment once _PlaceWithCache is implemented
         // TODO  - this should drop time complexity to O(log n) from O(n) if done right (MIT approved)
         // if (_cachedNodes is null)
@@ -58,7 +58,7 @@ public class MapUpdater
         throw new NotImplementedException();
     }
 
-    
+
     /// <summary>
     /// Builds a graph from all nodes (single-color areas) in the given map. Includes ownerless nodes (color = null).
     /// The outside of the map is considered an ownerless node and will always have an index of 0.
@@ -70,7 +70,8 @@ public class MapUpdater
     /// <param name="pixelCoordinates">The coordinates of the last added pixel</param>
     /// <param name="placingGuild">The guild that placed the last added pixel</param>
     /// <returns></returns>
-    private (AreaNodes, int) _ConstructMapAdjacencyNodes(MapModel map, Coordinates pixelCoordinates, GuildEnum placingGuild)
+    private (AreaNodes, int) _ConstructMapAdjacencyNodes(MapModel map, Coordinates pixelCoordinates,
+        GuildEnum placingGuild)
     {
         var ySize = map.Pixels.GetUpperBound(0) + 1;
         var xSize = map.Pixels.GetUpperBound(1) + 1;
@@ -83,7 +84,7 @@ public class MapUpdater
             for (var x = 1; x < xSize; x++)
             {
                 var (leftNode, aboveNode) = TryMerge(placingGuild, nodeMap, y, x, nodes);
-                
+
                 var currentPixelGuild = map.Pixels[y, x].Owner;
                 var isSpawnNode = map.Pixels[y, x].Type == PixelTypeEnum.Spawn;
 
@@ -116,7 +117,8 @@ public class MapUpdater
         return (nodes, justAddedNode);
     }
 
-    private static void AddPixelToNodeWithNeighbour(AreaNodes nodes, int destinationNode, int x, int y, bool isSpawnNode,
+    private static void AddPixelToNodeWithNeighbour(AreaNodes nodes, int destinationNode, int x, int y,
+        bool isSpawnNode,
         int neighbourNode, int[,] nodeMap)
     {
         nodes[destinationNode].pixels.Add((x, y));
@@ -130,19 +132,19 @@ public class MapUpdater
     {
         var leftNode = nodeMap[y, x - 1];
         var aboveNode = nodeMap[y - 1, x];
-        
+
         if (leftNode == aboveNode)
         {
             return (leftNode, aboveNode);
         }
-        
+
         var leftNodeGuild = nodes[leftNode].guild;
         var aboveNodeGuild = nodes[aboveNode].guild;
         if (leftNodeGuild != aboveNodeGuild || leftNodeGuild != placingGuild)
         {
             return (leftNode, aboveNode);
         }
-        
+
         leftNode = _MergeNodes(leftNode, aboveNode, nodes, nodeMap);
         aboveNode = leftNode;
 
@@ -151,13 +153,13 @@ public class MapUpdater
 
     private Node _CreateOutsideNode(int ySize, int xSize)
     {
-        var outsideNode = new Node{guild = null};
+        var outsideNode = new Node { guild = null };
         for (var x = 0; x < xSize; x++)
         {
             outsideNode.pixels.Add((x, 0));
             outsideNode.pixels.Add((x, ySize - 1));
         }
-        
+
         for (var y = 0; y < xSize; y++)
         {
             outsideNode.pixels.Add((0, y));
@@ -182,7 +184,7 @@ public class MapUpdater
         {
             nodeMap[y, x] = smallerNodeIndex;
         }
-        
+
         nodes[smallerNodeIndex].pixels.UnionWith(nodes[largerNodeIndex].pixels);
         nodes[smallerNodeIndex].neighbours.UnionWith(nodes[largerNodeIndex].neighbours);
         nodes.Remove(largerNodeIndex);
@@ -205,6 +207,7 @@ public class MapUpdater
         {
             return;
         }
+
         visitedNodes.Add(currentNode);
         if (currentNode == justAddedNode)
         {
@@ -225,6 +228,7 @@ public class MapUpdater
             {
                 continue;
             }
+
             map.Pixels[y, x].Owner = newGuild;
             map.Pixels[y, x].Type = PixelTypeEnum.Normal;
         }

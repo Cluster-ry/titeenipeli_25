@@ -24,7 +24,7 @@ public class MapUpdaterTest
         var map = _BuildEmptyMap(10, 10);
 
         mapUpdater.PlacePixel(map, (7, 8), GuildEnum.Cluster);
-        
+
         Assert.Equal(GuildEnum.Cluster, map.Pixels[8, 7].Owner);
     }
 
@@ -53,7 +53,7 @@ public class MapUpdaterTest
             }
         }
     }
-    
+
     [Fact]
     public void TestPlacePixel_ShouldFillSurroundedAreas_ComplexMap()
     {
@@ -126,7 +126,8 @@ public class MapUpdaterTest
             map[y, 0] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.MapBorder };
             for (var x = 1; x < xSize + 1; x++)
             {
-                map[y, x] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.Normal, Owner = owners[y - 1, x - 1]};
+                map[y, x] = new PixelModel
+                    { OwnPixel = false, Type = PixelTypeEnum.Normal, Owner = owners[y - 1, x - 1] };
             }
 
             map[y, xSize + 1] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.MapBorder };

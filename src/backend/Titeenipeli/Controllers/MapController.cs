@@ -32,7 +32,7 @@ public class MapController : ControllerBase
         int width = _dbContext.Map.Max(pixel => pixel.X) + 1;
         int height = _dbContext.Map.Max(pixel => pixel.Y) + 1;
 
-        MapModel map = new MapModel{Pixels = new PixelModel[height, width]};
+        MapModel map = new MapModel { Pixels = new PixelModel[height, width] };
 
         foreach (Pixel pixel in pixels)
         {
@@ -71,7 +71,7 @@ public class MapController : ControllerBase
         {
             return BadRequest();
         }
-        
+
 
         pixelToUpdate.User = testUser;
         if (testUser != null)
