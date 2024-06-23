@@ -21,9 +21,11 @@ public class MapUpdaterTest
     {
         var mapUpdater = new MapUpdater();
 
-        var updatedMap = mapUpdater.PlacePixel(_BuildEmptyMap(10, 10), (7, 8), GuildEnum.Cluster);
+        var map = _BuildEmptyMap(10, 10);
+
+        mapUpdater.PlacePixel(map, (7, 8), GuildEnum.Cluster);
         
-        Assert.Equal(GuildEnum.Cluster, updatedMap.Pixels[8, 7].Owner);
+        Assert.Equal(GuildEnum.Cluster, map.Pixels[8, 7].Owner);
     }
 
     [Fact]
@@ -41,9 +43,9 @@ public class MapUpdaterTest
         var map = _BuildMapFromOwnerArray(initialMap);
         map.Pixels[1, 1].Type = PixelTypeEnum.Spawn;
 
-        var updatedMap = mapUpdater.PlacePixel(map, (4, 3), GuildEnum.Cluster);
+        mapUpdater.PlacePixel(map, (4, 3), GuildEnum.Cluster);
 
-        foreach (var pixel in updatedMap.Pixels)
+        foreach (var pixel in map.Pixels)
         {
             if (pixel.Owner is not null)
             {
@@ -71,9 +73,9 @@ public class MapUpdaterTest
         var map = _BuildMapFromOwnerArray(initialMap);
         map.Pixels[1, 2].Type = PixelTypeEnum.Spawn;
 
-        var updatedMap = mapUpdater.PlacePixel(map, (7, 8), GuildEnum.Cluster);
+        mapUpdater.PlacePixel(map, (7, 8), GuildEnum.Cluster);
 
-        foreach (var pixel in updatedMap.Pixels)
+        foreach (var pixel in map.Pixels)
         {
             if (pixel.Owner is not null)
             {

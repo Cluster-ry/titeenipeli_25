@@ -12,11 +12,20 @@ public class MapUpdater
     // We can move this cache to Redis when Redis is up to eliminate state - although this is faster
     private AreaNodes? _cachedNodes;
 
-
-    public MapModel PlacePixel(MapModel map, Coordinates pixelCoordinates, GuildEnum placingGuild)
+    // Note - this class encapsulates the most complex part of game logic - thus I made a decision to overcomment here
+    // including adding doc comments. This should enable others to modify the file should I be unavailable -Eddie
+    
+    /// <summary>
+    /// Place one pixel into the given map and calculate the resulting fill and cut operations
+    /// </summary>
+    /// <param name="map">The game map - should include border pixels. Mutated according to the update event.</param>
+    /// <param name="pixelCoordinates">The coordinates of the new pixel</param>
+    /// <param name="placingGuild">The guild placing the new pixel</param>
+    public void PlacePixel(MapModel map, Coordinates pixelCoordinates, GuildEnum placingGuild)
     {
         map.Pixels[pixelCoordinates.Item2, pixelCoordinates.Item1] = new PixelModel
             { Owner = placingGuild, Type = PixelTypeEnum.Normal };
+        
         // TODO uncomment once _PlaceWithCache is implemented
         // TODO  - this should drop time complexity to O(log n) from O(n) if done right (MIT approved)
         // if (_cachedNodes is null)
@@ -29,6 +38,7 @@ public class MapUpdater
         // }
         var (nodes, justAddedNode) = _ConstructMapAdjacencyNodes(map, pixelCoordinates, placingGuild);
 
+        // Construct a set of all nodes reachable from outside node (index 0)
         var nonHangingNodeIndexes = new HashSet<int>();
         _TraverseNodeTree(0, nodes, justAddedNode, nonHangingNodeIndexes);
 
@@ -41,7 +51,6 @@ public class MapUpdater
         _CutNodesWithoutSpawn(map, nodes);
 
         _cachedNodes = nodes;
-        return map;
     }
 
     private (AreaNodes, int) _PlaceWithCache(MapModel map, Coordinates pixelCoordinates, GuildEnum placingGuild)
@@ -49,6 +58,18 @@ public class MapUpdater
         throw new NotImplementedException();
     }
 
+    
+    /// <summary>
+    /// Builds a graph from all nodes (single-color areas) in the given map. Includes ownerless nodes (color = null).
+    /// The outside of the map is considered an ownerless node and will always have an index of 0.
+    /// <remarks>
+    /// Also returns the index of the node that contains the last added pixel
+    /// </remarks>
+    /// </summary>
+    /// <param name="map">The map state to construct a graph of</param>
+    /// <param name="pixelCoordinates">The coordinates of the last added pixel</param>
+    /// <param name="placingGuild">The guild that placed the last added pixel</param>
+    /// <returns></returns>
     private (AreaNodes, int) _ConstructMapAdjacencyNodes(MapModel map, Coordinates pixelCoordinates, GuildEnum placingGuild)
     {
         var ySize = map.Pixels.GetUpperBound(0) + 1;
@@ -168,6 +189,14 @@ public class MapUpdater
         return smallerNodeIndex;
     }
 
+    /// <summary>
+    /// A recursive depth-first search for the node graph. Treats the given just added node as a dead end. This prevents
+    /// the algorithm finding nodes surrounded only by it, meaning nodes that should be filled.
+    /// </summary>
+    /// <param name="currentNode">The current node in the recursive search algorithm</param>
+    /// <param name="nodes">All nodes</param>
+    /// <param name="justAddedNode">The node containing the last added pixel</param>
+    /// <param name="visitedNodes">Nodes visited so far by the search. Mutated as a part of the algorithm.</param>
     private void _TraverseNodeTree(int currentNode, AreaNodes nodes, int justAddedNode, HashSet<int> visitedNodes)
     {
         // This is the recursion escape clause - for some reason ReSharper doesn't realize that
