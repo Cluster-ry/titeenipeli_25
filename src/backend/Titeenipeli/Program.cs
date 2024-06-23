@@ -118,7 +118,9 @@ public static class Program
                 ValidAudience = builder.Configuration["JWT:ValidAudience"],
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]!))
+                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]!)),
+                TokenDecryptionKey =
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Encryption"]!))
             };
         });
 
