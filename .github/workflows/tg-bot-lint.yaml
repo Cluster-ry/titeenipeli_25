@@ -36,4 +36,5 @@ jobs:
         with:
           dotnet_format: true
           dotnet_format_dir: src/tg-bot/
+          dotnet_format_args: Titeenipeli-bot.sln 
           continue_on_error: false
