@@ -127,7 +127,7 @@ public static class Program
         builder.Services.AddControllers()
             .AddNewtonsoftJson(options =>
             {
-                options.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             });
 
         WebApplication app = builder.Build();

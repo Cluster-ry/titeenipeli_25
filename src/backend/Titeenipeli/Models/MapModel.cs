@@ -1,13 +1,12 @@
 using System.Runtime.Serialization;
-using Newtonsoft.Json;
 
 namespace Titeenipeli.Models;
 
 [DataContract]
 public class MapModel
 {
-    // ReSharper disable once MemberCanBePrivate.Global
-    [JsonProperty("pixels")] public required PixelModel[,] Pixels { get; set; }
+    [DataMember] public CoordinateModel? PlayerSpawn { get; set; }
+    [DataMember] public required PixelModel[,] Pixels { get; set; }
 
     public required int Height { get; init; }
     public required int Width { get; init; }
