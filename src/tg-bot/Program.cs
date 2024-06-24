@@ -14,12 +14,12 @@ using Telegram.Bot.Types.ReplyMarkups;
 DotNetEnv.Env.Load();
 
 // Variables
-var tos_accepted = false; // I know its more of a privacy notice than tos but tos is easier to write :D
-var user_created = false;
-var choosing_guild = false;
-string GuildChosen = "";
-var GuildSelected = false;
-var token = DotNetEnv.Env.GetString("tgtoken");
+bool tosAccepted = false; // I know its more of a privacy notice than tos but tos is easier to write :D
+bool userCreated = false;
+bool choosingGuild = false;
+string guildChosen = "";
+bool guildSelected = false;
+string token = DotNetEnv.Env.GetString("tgtoken");
 
 Dictionary<string, string> guildDict =
     new()
@@ -68,9 +68,9 @@ ReplyKeyboardMarkup guildKeyboard =
     );
 guildKeyboard.OneTimeKeyboard = true;
 
-var bot = new TelegramBotClient(token);
+TelegramBotClient bot = new TelegramBotClient(token);
 
-using var cts = new CancellationTokenSource();
+using CancellationTokenSource cts = new CancellationTokenSource();
 
 // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool, so we use cancellation token
 bot.StartReceiving(
@@ -114,8 +114,8 @@ async Task HandleError(
 
 async Task HandleMessage(Message msg)
 {
-    var user = msg.From;
-    var text = msg.Text ?? string.Empty;
+    User? user = msg.From ?? null;
+    string text = msg.Text ?? string.Empty;
 
     if (user is null)
         return;
@@ -132,12 +132,12 @@ async Task HandleMessage(Message msg)
     {
         await HandleCommand(user.Id, text);
     }
-    else if (choosing_guild)
+    else if (choosingGuild)
     {
         if (guildDict.ContainsValue(text))
         {
-            GuildChosen = text;
-            await SendGuildData(user.Id, GuildChosen);
+            guildChosen = text;
+            await SendGuildData(user.Id, guildChosen);
             return;
         }
         else
@@ -193,11 +193,11 @@ async Task HandleButton(CallbackQuery query)
             replyMarkup: markup
         );
         // no need to accept it twice
-        if (tos_accepted)
+        if (tosAccepted)
         {
             return;
         }
-        tos_accepted = true;
+        tosAccepted = true;
         Thread.Sleep(1 * 1000);
 
         await HandleUserSignup(query.Message.Chat.Id);
@@ -212,7 +212,7 @@ async Task HandleButton(CallbackQuery query)
 async Task SendTosMenu(long userId)
 {
     // check if tos is already done, if so then skip
-    if (tos_accepted)
+    if (tosAccepted)
     {
         await HandleUserSignup(userId);
         return;
@@ -229,7 +229,7 @@ async Task SendTosMenu(long userId)
 async Task HandleUserSignup(long userid)
 {
     // this prevents sequence breaks
-    if (user_created)
+    if (userCreated)
     {
         await bot.SendTextMessageAsync(
             userid.ToString(),
@@ -240,7 +240,7 @@ async Task HandleUserSignup(long userid)
     }
 
     // TODO: User sign-in to db
-    user_created = true;
+    userCreated = true;
 
     // success message
     await bot.SendTextMessageAsync(
@@ -258,7 +258,7 @@ async Task HandleUserSignup(long userid)
 async Task SendGuildMenu(long userId)
 {
     // this prevents sequence breaks
-    if (!user_created)
+    if (!userCreated)
     {
         await bot.SendTextMessageAsync(
             userId,
@@ -267,7 +267,7 @@ async Task SendGuildMenu(long userId)
         return;
     }
 
-    if (GuildSelected)
+    if (guildSelected)
     {
         // NOTE: could print the chosen guild?
         await bot.SendTextMessageAsync(userId, "Guild already chosen. Start the game with /game.");
@@ -275,7 +275,7 @@ async Task SendGuildMenu(long userId)
     }
 
     // Starts guild selection check
-    choosing_guild = true;
+    choosingGuild = true;
 
     // select guild message (with guild keyboard)
     await bot.SendTextMessageAsync(
@@ -289,7 +289,7 @@ async Task SendGuildMenu(long userId)
 async Task SendGuildData(long userid, string guild)
 {
     // TODO: send guid data to application
-    choosing_guild = false;
+    choosingGuild = false;
     await bot.SendTextMessageAsync(
         userid,
         "Guild Selected! Now start the game with /game.",
@@ -301,7 +301,7 @@ async Task SendGuildData(long userid, string guild)
 async Task SendGame(long userId)
 {
     // this prevents sequence breaks
-    if (!user_created)
+    if (!userCreated)
     {
         await bot.SendTextMessageAsync(
             userId,
@@ -310,7 +310,7 @@ async Task SendGame(long userId)
         return;
     }
 
-    if (!GuildSelected)
+    if (!guildSelected)
     {
         await bot.SendTextMessageAsync(userId, "You haven't selected your guild yet. Use /guild.");
         return;
