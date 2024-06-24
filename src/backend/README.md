@@ -20,7 +20,7 @@ Syntax for setting secrets is `dotnet user-secrets set "<key>" "<value>" --proje
 Project name should be `"Titeenipeli"`. More [info](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets).
 
 Secrets:
-```json lines
+```js
 "JWT:Secret"      // 256 characters long
 "JWT:Encryption"  //  32 characters long
 "ConnectionStrings:Database"  // Should contain Server, Port, Userid, Database
