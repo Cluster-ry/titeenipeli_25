@@ -11,7 +11,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 // Loading enviromental variables
-DotNetEnv.Env.Load();   
+DotNetEnv.Env.Load();
 
 // Variables
 var tos_accepted = false; // I know its more of a privacy notice than tos but tos is easier to write :D
