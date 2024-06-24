@@ -29,7 +29,7 @@ const string guildMenuText = "<b>Please choose your guild from the menu below.</
 const string acceptButton = "I Accept";
 
 // pre-assigned Keyboard buttons
-KeyboardButton ClusterButton = new("Cluster (Lappeen ranta)");
+KeyboardButton ClusterButton = new("Cluster (Lappeen Ranta)");
 KeyboardButton OtitButton = new("Otit (Oulu)");
 KeyboardButton DigitButton = new("Digit (Turku)");
 KeyboardButton DateButton = new("Date (Turku)");
@@ -43,7 +43,7 @@ KeyboardButton TiTeButton = new("TiTe (Tampere)");
 InlineKeyboardMarkup tosMenuMarkup = new(InlineKeyboardButton.WithCallbackData(acceptButton));
 ReplyKeyboardMarkup guildKeyboard =
     new(
-        [ // This layout matches with how the keyboard is shown to the suer
+        [ // This layout matches with how the keyboard is shown to the user
             [ClusterButton],
             [OtitButton, DigitButton],
             [DateButton, TikButton],
