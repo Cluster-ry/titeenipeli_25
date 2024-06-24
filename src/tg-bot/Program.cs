@@ -7,6 +7,10 @@ using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using DotNetEnv;
+
+// Loading enviromental variables
+DotNetEnv.Env.Load();
 
 // Variables
 var tos_accepted = false; // I know its more of a privacy notice than tos but tos is easier to write :D
@@ -14,6 +18,7 @@ var user_created = false;
 var choosing_guild = false;
 string GuildChosen = "";
 var GuildSelected = false;
+var token = DotNetEnv.Env.GetString("tgtoken");
 
 // Pre-assign menu text
 const string tosMenu =
@@ -49,7 +54,7 @@ ReplyKeyboardMarkup guildKeyboard =
 guildKeyboard.OneTimeKeyboard = true;
 
 // TODO: hide Token
-var bot = new TelegramBotClient("7007777487:AAHVhkUG8OuTWn5urWbixmuGXOieNh1RO6o");
+var bot = new TelegramBotClient(token);
 
 using var cts = new CancellationTokenSource();
 
