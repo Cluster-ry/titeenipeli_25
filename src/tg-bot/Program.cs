@@ -1,13 +1,14 @@
-﻿using System.Formats.Asn1;
+﻿using System.Collections.Generic;
+using System.Formats.Asn1;
 using System.Runtime.CompilerServices;
 using System.Xml;
+using DotNetEnv;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using DotNetEnv;
 
 // Loading enviromental variables
 DotNetEnv.Env.Load();
@@ -19,6 +20,20 @@ var choosing_guild = false;
 string GuildChosen = "";
 var GuildSelected = false;
 var token = DotNetEnv.Env.GetString("tgtoken");
+
+Dictionary<string, string> guildDict =
+    new()
+    {
+        { "Cluster", "Cluster (Lappeen Ranta)" },
+        { "Otit", "Otit (Oulu)" },
+        { "Digit", "Digit (Turku)" },
+        { "Date", "Date (Turku)" },
+        { "Tik", "Tik (Otaniemi)" },
+        { "Algo", "Algo (Jyväskylä)" },
+        { "Tutti", "Tutti (Vaasa)" },
+        { "Sosa", "Sosa (Lahti)" },
+        { "TiTe", "TiTe (Tampere)" },
+    };
 
 // Pre-assign menu text
 const string tosMenu =
@@ -53,7 +68,6 @@ ReplyKeyboardMarkup guildKeyboard =
     );
 guildKeyboard.OneTimeKeyboard = true;
 
-// TODO: hide Token
 var bot = new TelegramBotClient(token);
 
 using var cts = new CancellationTokenSource();
@@ -120,18 +134,18 @@ async Task HandleMessage(Message msg)
     }
     else if (choosing_guild)
     {
-        // loop through guild buttons NOTE: Is there a better way to do this?
-        foreach (var row in guildKeyboard.Keyboard)
+        if (guildDict.ContainsValue(text))
         {
-            foreach (KeyboardButton button in row)
-            {
-                if (text == button.Text)
-                {
-                    GuildChosen = text;
-                    await SendGuildData(user.Id, GuildChosen);
-                    return;
-                }
-            }
+            GuildChosen = text;
+            await SendGuildData(user.Id, GuildChosen);
+            return;
+        }
+        else
+        {
+            await bot.SendTextMessageAsync(
+                user.Id,
+                "Unrecognized guild. Please select your guild by using the keyboard given."
+            );
         }
     }
     else
