@@ -46,7 +46,14 @@ public class AuthenticationController : ControllerBase
             GuildId = user.Guild.Color
         };
 
-        Response.Headers.Authorization = $"Bearer {new JwtHandler(_configuration).GetJwtToken(jwtClaim).Token}";
+        Response.Cookies.Append("X-Authorization", new JwtHandler(_configuration).GetJwtToken(jwtClaim),
+            new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Strict,
+                MaxAge = TimeSpan.FromHours(6)
+            });
+        
         return Ok();
     }
 }

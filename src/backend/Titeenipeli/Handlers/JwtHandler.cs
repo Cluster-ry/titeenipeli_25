@@ -16,7 +16,7 @@ public class JwtHandler
         _configuration = configuration;
     }
 
-    public JwtToken GetJwtToken(JwtClaimModel jwtClaim)
+    public string GetJwtToken(JwtClaimModel jwtClaim)
     {
         SymmetricSecurityKey secretKey =
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]!));
@@ -40,11 +40,6 @@ public class JwtHandler
             signingCredentials,
             encryptingCredentials);
 
-        string tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
-
-        return new JwtToken
-        {
-            Token = tokenString
-        };
+        return new JwtSecurityTokenHandler().WriteToken(tokeOptions);
     }
 }
