@@ -53,7 +53,7 @@ public class AuthenticationController : ControllerBase
                 SameSite = SameSiteMode.Strict,
                 MaxAge = TimeSpan.FromHours(6)
             });
-        
+
         return Ok();
     }
 }
