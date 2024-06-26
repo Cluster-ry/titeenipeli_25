@@ -9,6 +9,7 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Titeenipeli.BackgroundServices;
 using Titeenipeli.Context;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
@@ -130,6 +131,8 @@ public static class Program
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             });
 
+        AddBackgroundServices(builder.Services);
+
         WebApplication app = builder.Build();
 
         using (IServiceScope scope = app.Services.CreateScope())
@@ -171,5 +174,9 @@ public static class Program
         app.MapControllers();
 
         app.Run();
+    }
+
+    private static void AddBackgroundServices(IServiceCollection services) {
+        services.AddHostedService<PeriodicPrintToConsoleService>();
     }
 }
