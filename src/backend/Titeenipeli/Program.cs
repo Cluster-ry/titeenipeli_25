@@ -176,7 +176,8 @@ public static class Program
         app.Run();
     }
 
-    private static void AddBackgroundServices(IServiceCollection services) {
+    private static void AddBackgroundServices(IServiceCollection services)
+    {
         services.AddHostedService<PeriodicPrintToConsoleService>();
     }
 }
