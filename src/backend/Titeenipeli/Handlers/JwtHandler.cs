@@ -35,7 +35,7 @@ public class JwtHandler
             _configuration["JWT:ValidAudience"],
             new ClaimsIdentity(claims),
             DateTime.Now,
-            DateTime.Now.AddHours(6),
+            DateTime.Now.AddDays(int.Parse(_configuration["JWT:ExpirationDays"]!)),
             DateTime.Now,
             signingCredentials,
             encryptingCredentials);

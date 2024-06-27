@@ -51,7 +51,7 @@ public class AuthenticationController : ControllerBase
             {
                 HttpOnly = true,
                 SameSite = SameSiteMode.Strict,
-                MaxAge = TimeSpan.FromHours(6)
+                MaxAge = TimeSpan.FromDays(int.Parse(_configuration["JWT:ExpirationDays"]!))
             });
 
         return Ok();
