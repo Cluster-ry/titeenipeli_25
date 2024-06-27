@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
+using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
@@ -25,49 +26,49 @@ public static class Program
             options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
 
         // Adding OpenTelemetry tracing and metrics
-        var otel = builder.Services.AddOpenTelemetry();
+        IOpenTelemetryBuilder otel = builder.Services.AddOpenTelemetry();
 
         string otelEnpoint = builder.Configuration["OpenTelemetryEndpoint"] ?? "localhost:4318";
 
         otel.ConfigureResource(resource => resource
-                .AddService(serviceName: builder.Environment.ApplicationName));
+            .AddService(builder.Environment.ApplicationName));
 
         otel.WithMetrics(metrics =>
-            {
-                metrics
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddMeter("Microsoft.AspNetCore.Hosting")
-                    .AddMeter("Microsoft.AspNetCore.Server.Kestrel");
+        {
+            metrics
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddMeter("Microsoft.AspNetCore.Hosting")
+                .AddMeter("Microsoft.AspNetCore.Server.Kestrel");
 
-                metrics.AddOtlpExporter((exporterOptions, metricReaderOptions) =>
-                {
-                    exporterOptions.Endpoint = new Uri(otelEnpoint);
-                    exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-                    metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
-                });
+            metrics.AddOtlpExporter((exporterOptions, metricReaderOptions) =>
+            {
+                exporterOptions.Endpoint = new Uri(otelEnpoint);
+                exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
+                metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
             });
+        });
 
         otel.WithTracing(tracing =>
-            {
-                tracing
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddEntityFrameworkCoreInstrumentation();
+        {
+            tracing
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddEntityFrameworkCoreInstrumentation();
 
-                tracing.AddOtlpExporter((exporterOptions) =>
-                {
-                    exporterOptions.Endpoint = new Uri(otelEnpoint);
-                    exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-                });
+            tracing.AddOtlpExporter(exporterOptions =>
+            {
+                exporterOptions.Endpoint = new Uri(otelEnpoint);
+                exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
             });
+        });
 
         // Adding OpenTelemetry logging
         builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter((exporterOptions) =>
-                {
-                    exporterOptions.Endpoint = new Uri(otelEnpoint);
-                    exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-                }));
+        {
+            exporterOptions.Endpoint = new Uri(otelEnpoint);
+            exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
+        }));
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -78,8 +79,8 @@ public static class Program
             {
                 Scheme = "Bearer",
                 BearerFormat = "JWT",
-                In = ParameterLocation.Header,
-                Name = "Authorization",
+                In = ParameterLocation.Cookie,
+                Name = "X-Authorization",
                 Description = "Bearer Authentication with JWT Token",
                 Type = SecuritySchemeType.Http
             });
@@ -102,10 +103,10 @@ public static class Program
 
         builder.Services.AddControllers();
 
-        builder.Services.AddAuthentication(opt =>
+        builder.Services.AddAuthentication(options =>
         {
-            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(options =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
@@ -122,13 +123,22 @@ public static class Program
                 TokenDecryptionKey =
                     new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Encryption"]!))
             };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    context.Token = context.Request.Cookies["X-Authorization"];
+                    return Task.CompletedTask;
+                }
+            };
         });
 
         builder.Services.AddControllers()
-            .AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            });
+               .AddNewtonsoftJson(options =>
+               {
+                   options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+               });
 
         WebApplication app = builder.Build();
 
