@@ -12,10 +12,9 @@ namespace Titeenipeli.Controllers;
 [Route("map")]
 public class MapController : ControllerBase
 {
+    private const int BorderWidth = 1;
     private readonly IConfiguration _configuration;
     private readonly ApiDbContext _dbContext;
-
-    private const int BorderWidth = 1;
 
     public MapController(IConfiguration configuration, ApiDbContext dbContext)
     {
@@ -44,7 +43,7 @@ public class MapController : ControllerBase
 
         return Ok(map);
     }
-    
+
     [HttpPost("pixels")]
     public IActionResult PostPixels([FromBody] CoordinateModel pixelCoordinate)
     {
@@ -71,7 +70,7 @@ public class MapController : ControllerBase
         {
             return BadRequest();
         }
-        
+
         Pixel? pixelToUpdate = (from pixel in _dbContext.Map
             where pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y
             select pixel).FirstOrDefault();
@@ -235,7 +234,6 @@ public class MapController : ControllerBase
 
                 trimmedMap.Pixels[x - offsetX, y - offsetY] = map.Pixels[x, y];
             }
-
         }
 
         return trimmedMap;
