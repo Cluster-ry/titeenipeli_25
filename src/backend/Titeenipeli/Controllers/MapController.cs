@@ -60,11 +60,12 @@ public class MapController : ControllerBase
         // but remove cornering pixels and only return pixels belonging to
         // the user
         bool validPlacement = (from pixel in _dbContext.Map
-            where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
-                  Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                  Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                  pixel.User == testUser
-            select pixel).Any();
+                               where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
+                                     Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                                     Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <=
+                                     1 &&
+                                     pixel.User == testUser
+                               select pixel).Any();
 
         if (!validPlacement)
         {
@@ -72,8 +73,8 @@ public class MapController : ControllerBase
         }
 
         Pixel? pixelToUpdate = (from pixel in _dbContext.Map
-            where pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y
-            select pixel).FirstOrDefault();
+                                where pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y
+                                select pixel).FirstOrDefault();
 
         if (pixelToUpdate == null)
         {
