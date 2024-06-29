@@ -44,6 +44,69 @@ public class MapController : ControllerBase
 
         return Ok(map);
     }
+    
+    [HttpPost("pixels")]
+    public IActionResult PostPixels([FromBody] CoordinateModel pixelCoordinate)
+    {
+        // TODO: Map relative coordinates to global coordinates
+        // TODO: Remove temporary testing user
+        User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
+
+        if (testUser == null)
+        {
+            return BadRequest();
+        }
+
+        // Take neighboring pixels for the pixel the user is trying to set,
+        // but remove cornering pixels and only return pixels belonging to
+        // the user
+        bool validPlacement = (from pixel in _dbContext.Map
+            where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
+                  Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                  Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                  pixel.User == testUser
+            select pixel).Any();
+
+        if (!validPlacement)
+        {
+            return BadRequest();
+        }
+        
+        Pixel? pixelToUpdate = (from pixel in _dbContext.Map
+            where pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y
+            select pixel).FirstOrDefault();
+
+        if (pixelToUpdate == null)
+        {
+            return BadRequest();
+        }
+
+        if (pixelToUpdate.User != null &&
+            pixelToUpdate.User.SpawnX == pixelCoordinate.X &&
+            pixelToUpdate.User.SpawnY == pixelCoordinate.Y)
+        {
+            return BadRequest();
+        }
+
+
+        pixelToUpdate.User = testUser;
+        _dbContext.GameEvents.Add(new GameEvent
+        {
+            User = testUser,
+            // TODO: This is only temporary, fix this when GameEvent structure is more clear
+            Event = JsonSerializer.Serialize("{ " +
+                                             "   'eventType': 'SetPixel'," +
+                                             "   'coordinates': {" +
+                                             "       'x': " + pixelCoordinate.X + "," +
+                                             "       'y': " + pixelCoordinate.Y + "," +
+                                             "   }" +
+                                             "}")
+        });
+
+        _dbContext.SaveChanges();
+
+        return Ok();
+    }
 
     private static MapModel ConstructMap(IEnumerable<Pixel> pixels, int width, int height, User? user)
     {
@@ -176,50 +239,5 @@ public class MapController : ControllerBase
         }
 
         return trimmedMap;
-    }
-
-    [HttpPost("pixels")]
-    public IActionResult PostPixels([FromBody] CoordinateModel pixelCoordinate)
-    {
-        // TODO: Map relative coordinates to global coordinates
-        // TODO: Remove temporary testing user
-        User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
-        Pixel? pixelToUpdate =
-            _dbContext.Map.Include(pixel => pixel.User)
-                      .FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
-
-        if (pixelToUpdate == null)
-        {
-            return BadRequest();
-        }
-
-        if (pixelToUpdate.User != null &&
-            pixelToUpdate.User.SpawnX == pixelCoordinate.X &&
-            pixelToUpdate.User.SpawnY == pixelCoordinate.Y)
-        {
-            return BadRequest();
-        }
-
-
-        pixelToUpdate.User = testUser;
-        if (testUser != null)
-        {
-            _dbContext.GameEvents.Add(new GameEvent
-            {
-                User = testUser,
-                // TODO: This is only temporary, fix this when GameEvent structure is more clear
-                Event = JsonSerializer.Serialize("{ " +
-                                                 "   'eventType': 'SetPixel'," +
-                                                 "   'coordinates': {" +
-                                                 "       'x': " + pixelCoordinate.X + "," +
-                                                 "       'y': " + pixelCoordinate.Y + "," +
-                                                 "   }" +
-                                                 "}")
-            });
-        }
-
-        _dbContext.SaveChanges();
-
-        return Ok();
     }
 }
