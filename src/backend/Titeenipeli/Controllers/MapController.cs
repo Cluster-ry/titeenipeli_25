@@ -47,7 +47,6 @@ public class MapController : ControllerBase
     [HttpPost("pixels")]
     public IActionResult PostPixels([FromBody] CoordinateModel pixelCoordinate)
     {
-        // TODO: Map relative coordinates to global coordinates
         // TODO: Remove temporary testing user
         User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
 
