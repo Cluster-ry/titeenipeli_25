@@ -56,13 +56,19 @@ public class MapController : ControllerBase
             return BadRequest();
         }
 
+        CoordinateModel globalCoordinate = new CoordinateModel
+        {
+            X = testUser.SpawnX + pixelCoordinate.X,
+            Y = testUser.SpawnY + pixelCoordinate.Y
+        };
+
         // Take neighboring pixels for the pixel the user is trying to set,
         // but remove cornering pixels and only return pixels belonging to
         // the user
         bool validPlacement = (from pixel in _dbContext.Map
-                               where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
-                                     Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                                     Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <=
+                               where Math.Abs(pixel.X - globalCoordinate.X) <= 1 &&
+                                     Math.Abs(pixel.Y - globalCoordinate.Y) <= 1 &&
+                                     Math.Abs(pixel.X - globalCoordinate.X) + Math.Abs(pixel.Y - globalCoordinate.Y) <=
                                      1 &&
                                      pixel.User == testUser
                                select pixel).Any();
@@ -73,7 +79,7 @@ public class MapController : ControllerBase
         }
 
         Pixel? pixelToUpdate = (from pixel in _dbContext.Map
-                                where pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y
+                                where pixel.X == globalCoordinate.X && pixel.Y == globalCoordinate.Y
                                 select pixel).FirstOrDefault();
 
         if (pixelToUpdate == null)
@@ -82,8 +88,8 @@ public class MapController : ControllerBase
         }
 
         if (pixelToUpdate.User != null &&
-            pixelToUpdate.User.SpawnX == pixelCoordinate.X &&
-            pixelToUpdate.User.SpawnY == pixelCoordinate.Y)
+            pixelToUpdate.User.SpawnX == globalCoordinate.X &&
+            pixelToUpdate.User.SpawnY == globalCoordinate.Y)
         {
             return BadRequest();
         }
@@ -97,8 +103,8 @@ public class MapController : ControllerBase
             Event = JsonSerializer.Serialize("{ " +
                                              "   'eventType': 'SetPixel'," +
                                              "   'coordinates': {" +
-                                             "       'x': " + pixelCoordinate.X + "," +
-                                             "       'y': " + pixelCoordinate.Y + "," +
+                                             "       'x': " + globalCoordinate.X + "," +
+                                             "       'y': " + globalCoordinate.Y + "," +
                                              "   }" +
                                              "}")
         });
