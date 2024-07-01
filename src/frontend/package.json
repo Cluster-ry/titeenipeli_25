@@ -29,5 +29,5 @@
     "typescript-eslint": "^7.10.0",
     "vite": "^5.2.11"
   },
-  "proxy": "http://localhost:5173"
+  "proxy": "http://localhost:5129"
 }

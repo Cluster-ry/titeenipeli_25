@@ -10,8 +10,8 @@ function App() {
       <Router>
         <div>
           <Routes>
-            <Route path = "/authenticate" element={ <React.Fragment> <Authentication /> </React.Fragment> } />
-            <Route path = "/map" element={ <React.Fragment> <Map /> </React.Fragment>} />
+            <Route path="/authenticate" element={ <React.Fragment> <Authentication /> </React.Fragment> } />
+            <Route path="/map" element={ <React.Fragment> <Map /> </React.Fragment>} />
           </Routes>
         </div>
       </Router>
