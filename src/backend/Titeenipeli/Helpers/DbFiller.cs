@@ -1,13 +1,14 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Titeenipeli.Context;
+using Titeenipeli.Options;
 using Titeenipeli.Schema;
 
 namespace Titeenipeli.Helpers;
 
 public static class DbFiller
 {
-    public static void Initialize(ApiDbContext dbContext, IConfiguration configuration)
+    public static void Initialize(ApiDbContext dbContext, GameOptions gameOptions)
     {
         RelationalDatabaseCreator databaseCreator =
             (RelationalDatabaseCreator)dbContext.Database.GetService<IDatabaseCreator>();
@@ -94,9 +95,9 @@ public static class DbFiller
         if (!dbContext.Map.Any())
         {
             Random random = new Random(1);
-            for (int x = 0; x < int.Parse(configuration["Game:Width"] ?? "20"); x++)
+            for (int x = 0; x < gameOptions.Width; x++)
             {
-                for (int y = 0; y < int.Parse(configuration["Game:Height"] ?? "20"); y++)
+                for (int y = 0; y < gameOptions.Height; y++)
                 {
                     dbContext.Map.Add(new Pixel
                     {

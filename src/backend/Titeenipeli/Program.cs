@@ -31,6 +31,10 @@ public static class Program
         builder.Configuration.GetSection("JWT").Bind(jwtOptions);
         builder.Services.AddSingleton(jwtOptions);
 
+        GameOptions gameOptions = new GameOptions();
+        builder.Configuration.GetSection("Game").Bind(gameOptions);
+        builder.Services.AddSingleton(gameOptions);
+
         // Adding OpenTelemetry tracing and metrics
         IOpenTelemetryBuilder otel = builder.Services.AddOpenTelemetry();
 
@@ -157,7 +161,7 @@ public static class Program
 
             DbFiller.Clear(dbContext);
             dbContext.Database.EnsureCreated();
-            DbFiller.Initialize(dbContext, builder.Configuration);
+            DbFiller.Initialize(dbContext, gameOptions);
         }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
