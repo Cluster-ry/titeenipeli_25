@@ -188,6 +188,22 @@ public static class Program
 
     private static void AddBackgroundServices(IServiceCollection services)
     {
-        services.AddHostedService<PeriodicPrintToConsoleService>();
+        TimeSpan updateCumulativeScoresServicePeriod = TimeSpan.FromMinutes(1);
+
+        services.AddScoped<IUpdateCumulativeScoresService, UpdateCumulativeScoresService>();
+        services.AddHostedService(
+            serviceProvider =>
+                new AsynchronousTimedBackgroundService<
+                    IUpdateCumulativeScoresService, UpdateCumulativeScoresService>(
+                    serviceProvider,
+                    GetNonNullService<ILogger<UpdateCumulativeScoresService>>(serviceProvider),
+                    updateCumulativeScoresServicePeriod));
+    }
+
+    private static Service GetNonNullService<Service>(IServiceProvider serviceProvider)
+    {
+        return serviceProvider.GetService<Service>() ??
+            throw new Exception("Unable to discover critical service during startup. " +
+                $"Service name: {typeof(Service).Name}");
     }
 }
