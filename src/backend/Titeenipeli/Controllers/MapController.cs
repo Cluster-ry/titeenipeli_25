@@ -13,10 +13,10 @@ namespace Titeenipeli.Controllers;
 [Route("map")]
 public class MapController : ControllerBase
 {
-    private readonly GameOptions _gameOptions;
-    private readonly ApiDbContext _dbContext;
-    
     private const int BorderWidth = 1;
+
+    private readonly ApiDbContext _dbContext;
+    private readonly GameOptions _gameOptions;
 
     public MapController(GameOptions gameOptions, ApiDbContext dbContext)
     {
