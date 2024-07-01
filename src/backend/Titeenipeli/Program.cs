@@ -14,6 +14,7 @@ using Titeenipeli.BackgroundServices;
 using Titeenipeli.Context;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
+using Titeenipeli.Options;
 
 namespace Titeenipeli;
 
@@ -25,6 +26,10 @@ public static class Program
 
         builder.Services.AddDbContext<ApiDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
+
+        JwtOptions jwtOptions = new JwtOptions();
+        builder.Configuration.GetSection("JWT").Bind(jwtOptions);
+        builder.Services.AddSingleton(jwtOptions);
 
         // Adding OpenTelemetry tracing and metrics
         IOpenTelemetryBuilder otel = builder.Services.AddOpenTelemetry();
@@ -116,20 +121,20 @@ public static class Program
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-                ValidAudience = builder.Configuration["JWT:ValidAudience"],
+                ValidIssuer = jwtOptions.ValidIssuer,
+                ValidAudience = jwtOptions.ValidAudience,
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]!)),
+                        Encoding.UTF8.GetBytes(jwtOptions.Secret)),
                 TokenDecryptionKey =
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Encryption"]!))
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Encryption))
             };
 
             options.Events = new JwtBearerEvents
             {
                 OnMessageReceived = context =>
                 {
-                    context.Token = context.Request.Cookies["X-Authorization"];
+                    context.Token = context.Request.Cookies[jwtOptions.CookieName];
                     return Task.CompletedTask;
                 }
             };

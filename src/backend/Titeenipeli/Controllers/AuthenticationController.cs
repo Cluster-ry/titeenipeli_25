@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
 using Titeenipeli.Handlers;
 using Titeenipeli.Models;
+using Titeenipeli.Options;
 using Titeenipeli.Schema;
 
 namespace Titeenipeli.Controllers;
@@ -10,12 +11,12 @@ namespace Titeenipeli.Controllers;
 [ApiController]
 public class AuthenticationController : ControllerBase
 {
-    private readonly IConfiguration _configuration;
+    private readonly JwtOptions _jwtOptions;
     private readonly ApiDbContext _dbContext;
 
-    public AuthenticationController(IConfiguration configuration, ApiDbContext dbContext)
+    public AuthenticationController(JwtOptions jwtOptions, ApiDbContext dbContext)
     {
-        _configuration = configuration;
+        _jwtOptions = jwtOptions;
         _dbContext = dbContext;
     }
 
@@ -46,12 +47,12 @@ public class AuthenticationController : ControllerBase
             GuildId = user.Guild.Color
         };
 
-        Response.Cookies.Append("X-Authorization", new JwtHandler(_configuration).GetJwtToken(jwtClaim),
+        Response.Cookies.Append(_jwtOptions.CookieName, new JwtHandler(_jwtOptions).GetJwtToken(jwtClaim),
             new CookieOptions
             {
                 HttpOnly = true,
                 SameSite = SameSiteMode.Strict,
-                MaxAge = TimeSpan.FromDays(int.Parse(_configuration["JWT:ExpirationDays"]!))
+                MaxAge = TimeSpan.FromDays(_jwtOptions.ExpirationDays)
             });
 
         return Ok();

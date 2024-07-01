@@ -4,25 +4,26 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using Titeenipeli.Models;
+using Titeenipeli.Options;
 
 namespace Titeenipeli.Handlers;
 
 public class JwtHandler
 {
-    private readonly IConfiguration _configuration;
+    private readonly JwtOptions _jwtOptions;
 
-    public JwtHandler(IConfiguration configuration)
+    public JwtHandler(JwtOptions jwtOptions)
     {
-        _configuration = configuration;
+        _jwtOptions = jwtOptions;
     }
 
     public string GetJwtToken(JwtClaimModel jwtClaim)
     {
         SymmetricSecurityKey secretKey =
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]!));
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
 
         SymmetricSecurityKey encryptionKey =
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Encryption"]!));
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Encryption));
 
         SigningCredentials signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
         EncryptingCredentials encryptingCredentials = new EncryptingCredentials(encryptionKey,
@@ -31,11 +32,11 @@ public class JwtHandler
         List<Claim> claims = [new Claim("data", JsonSerializer.Serialize(jwtClaim))];
 
         JwtSecurityToken tokeOptions = new JwtSecurityTokenHandler().CreateJwtSecurityToken(
-            _configuration["JWT:ValidIssuer"],
-            _configuration["JWT:ValidAudience"],
+            _jwtOptions.ValidIssuer,
+            _jwtOptions.ValidAudience,
             new ClaimsIdentity(claims),
             DateTime.Now,
-            DateTime.Now.AddDays(int.Parse(_configuration["JWT:ExpirationDays"]!)),
+            DateTime.Now.AddDays(_jwtOptions.ExpirationDays),
             DateTime.Now,
             signingCredentials,
             encryptingCredentials);
