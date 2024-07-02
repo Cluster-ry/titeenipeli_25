@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import React from 'react'
-import Authentication from './components/Authentication'
-import Map from './components/Map'
+import Authentication from './pages/Authentication'
+import Map from './pages/Map'
 
 
 function App() {
@@ -10,8 +9,8 @@ function App() {
       <Router>
         <div>
           <Routes>
-            <Route path="/authenticate" element={ <React.Fragment> <Authentication /> </React.Fragment> } />
-            <Route path="/map" element={ <React.Fragment> <Map /> </React.Fragment>} />
+            <Route path="/authenticate" element={ <> <Authentication /> </> } />
+            <Route path="/map" element={ <> <Map /> </>} />
           </Routes>
         </div>
       </Router>
