@@ -9,5 +9,5 @@ public class JwtClaimModel
 
 
     // TODO: Switch guild id to string
-    public required int GuildId { get; set; }
+    public required int? GuildId { get; set; }
 }
