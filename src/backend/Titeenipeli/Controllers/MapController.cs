@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
 using Titeenipeli.Enums;
 using Titeenipeli.Models;
+using Titeenipeli.Options;
 using Titeenipeli.Schema;
 
 namespace Titeenipeli.Controllers;
@@ -13,12 +14,13 @@ namespace Titeenipeli.Controllers;
 public class MapController : ControllerBase
 {
     private const int BorderWidth = 1;
-    private readonly IConfiguration _configuration;
-    private readonly ApiDbContext _dbContext;
 
-    public MapController(IConfiguration configuration, ApiDbContext dbContext)
+    private readonly ApiDbContext _dbContext;
+    private readonly GameOptions _gameOptions;
+
+    public MapController(GameOptions gameOptions, ApiDbContext dbContext)
     {
-        _configuration = configuration;
+        _gameOptions = gameOptions;
         _dbContext = dbContext;
     }
 
@@ -34,8 +36,8 @@ public class MapController : ControllerBase
                                    .OrderBy(pixel => pixel.Y).ToArray();
 
         // +2 to account for the borders
-        int width = int.Parse(_configuration["Game:Width"] ?? "20") + 2 * BorderWidth;
-        int height = int.Parse(_configuration["Game:Height"] ?? "20") + 2 * BorderWidth;
+        int width = _gameOptions.Width + 2 * BorderWidth;
+        int height = _gameOptions.Height + 2 * BorderWidth;
 
         MapModel map = ConstructMap(pixels, width, height, testUser);
         MarkSpawns(map, users);
@@ -179,7 +181,7 @@ public class MapController : ControllerBase
                     {
                         X = x,
                         Y = y
-                    }, int.Parse(_configuration["Game:FogOfWarDistance"]!));
+                    }, _gameOptions.FogOfWarDistance);
                 }
             }
         }
