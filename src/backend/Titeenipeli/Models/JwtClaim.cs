@@ -1,12 +1,10 @@
 namespace Titeenipeli.Models;
 
-public class JwtClaimModel
+public class JwtClaim
 {
     public required int Id { get; set; }
 
-
     public required CoordinateModel CoordinateOffset { get; set; }
-
 
     // TODO: Switch guild id to string
     public required int GuildId { get; set; }
