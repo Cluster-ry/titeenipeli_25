@@ -27,7 +27,7 @@ public class UserController : ControllerBase
     public IActionResult PostUser([FromBody] PostUserInput input)
     {
         User? user = _dbContext.Users.Include(entity => entity.Guild).FirstOrDefault(entity =>
-            entity.TelegramId != null && entity.TelegramId == input.Id);
+            entity.TelegramId == input.Id);
 
         if (user == null)
         {

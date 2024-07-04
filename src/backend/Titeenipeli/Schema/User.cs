@@ -18,25 +18,25 @@ public class User : Entity
     #region Telegram
 
     [StringLength(64)]
-    public string? TelegramId { get; init; }
+    public required string TelegramId { get; init; }
 
     [StringLength(64)]
-    public string? FirstName { get; init; }
+    public required string FirstName { get; init; }
 
     [StringLength(64)]
-    public string? LastName { get; init; }
+    public required string LastName { get; init; }
 
     [StringLength(64)]
-    public string? Username { get; init; }
+    public required string Username { get; init; }
 
     [StringLength(64)]
-    public string? PhotoUrl { get; init; }
+    public required string PhotoUrl { get; init; }
 
     [StringLength(64)]
-    public string? AuthDate { get; init; }
+    public required string AuthDate { get; init; }
 
     [StringLength(64)]
-    public string? Hash { get; init; }
+    public required string Hash { get; init; }
 
     #endregion
 }
