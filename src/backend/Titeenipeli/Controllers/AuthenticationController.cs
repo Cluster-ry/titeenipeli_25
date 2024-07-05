@@ -44,7 +44,7 @@ public class AuthenticationController : ControllerBase
                 X = user.SpawnX,
                 Y = user.SpawnY
             },
-            GuildId = user.Guild.Color
+            GuildId = user.Guild?.Color
         };
 
         Response.Cookies.Append(_jwtOptions.CookieName, new JwtHandler(_jwtOptions).GetJwtToken(jwtClaim),

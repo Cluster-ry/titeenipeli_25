@@ -72,7 +72,14 @@ public static class DbFiller
             Code = "test",
             Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
             SpawnX = 5,
-            SpawnY = 5
+            SpawnY = 5,
+            TelegramId = "test",
+            FirstName = "",
+            LastName = "",
+            Username = "",
+            PhotoUrl = "",
+            AuthDate = "",
+            Hash = ""
         };
 
         User testOpponent = new User
@@ -80,7 +87,14 @@ public static class DbFiller
             Code = "opponent",
             Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Color == 4) ?? throw new InvalidOperationException(),
             SpawnX = 3,
-            SpawnY = 2
+            SpawnY = 2,
+            TelegramId = "opponent",
+            FirstName = "",
+            LastName = "",
+            Username = "",
+            PhotoUrl = "",
+            AuthDate = "",
+            Hash = ""
         };
 
 
