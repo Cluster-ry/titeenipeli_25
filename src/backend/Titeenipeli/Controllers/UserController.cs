@@ -93,12 +93,11 @@ public class UserController : ControllerBase
 
         Guild? guild = _dbContext.Guilds.FirstOrDefault(guild => guild.Color.ToString() == input.Guild);
 
-        if (user == null || guild == null)
+        if (user == null || guild == null || user.Guild != null)
         {
             return BadRequest();
         }
 
-        // TODO: Handle the case where user already has a guild
         user.Guild = guild;
         _dbContext.SaveChanges();
 
