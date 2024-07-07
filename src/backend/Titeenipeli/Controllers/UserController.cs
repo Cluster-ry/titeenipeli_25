@@ -27,7 +27,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult PostUser([FromBody] PostUserInput input)
+    public IActionResult PostUsers([FromBody] PostUsersInput input)
     {
         User? user = _dbContext.Users.Include(entity => entity.Guild).FirstOrDefault(entity =>
             entity.TelegramId == input.Id);
@@ -70,7 +70,7 @@ public class UserController : ControllerBase
 
     [HttpPut]
     [Authorize]
-    public IActionResult PutUser([FromBody] PutUserInput input)
+    public IActionResult PutUsers([FromBody] PutUsersInput input)
     {
         ClaimsIdentity identity = (ClaimsIdentity)HttpContext.User.Identity!;
         JwtClaim? jwtClaim = JwtHandler.GetJwtClaimFromIdentity(identity);

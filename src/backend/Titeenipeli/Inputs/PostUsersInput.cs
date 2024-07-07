@@ -1,6 +1,6 @@
 namespace Titeenipeli.Inputs;
 
-public class PostUserInput
+public class PostUsersInput
 {
     public required string Id { get; init; }
     public required string FirstName { get; init; }
