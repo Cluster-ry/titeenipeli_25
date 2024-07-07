@@ -24,7 +24,7 @@ public class JwtHandler
         return new JwtClaim
         {
             Id = user.Id,
-            CoordinateOffset = new CoordinateModel
+            CoordinateOffset = new Coordinate
             {
                 X = user.SpawnX,
                 Y = user.SpawnY

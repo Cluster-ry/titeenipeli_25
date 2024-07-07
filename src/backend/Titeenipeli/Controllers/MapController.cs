@@ -5,12 +5,13 @@ using Titeenipeli.Context;
 using Titeenipeli.Enums;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
+using Titeenipeli.Results;
 using Titeenipeli.Schema;
 
 namespace Titeenipeli.Controllers;
 
 [ApiController]
-[Route("map")]
+[Route("map/pixels")]
 public class MapController : ControllerBase
 {
     private const int BorderWidth = 1;
@@ -24,7 +25,7 @@ public class MapController : ControllerBase
         _dbContext = dbContext;
     }
 
-    [HttpGet("pixels")]
+    [HttpGet]
     public IActionResult GetPixels()
     {
         // TODO: Remove temporary testing user
@@ -39,15 +40,21 @@ public class MapController : ControllerBase
         int width = _gameOptions.Width + 2 * BorderWidth;
         int height = _gameOptions.Height + 2 * BorderWidth;
 
-        MapModel map = ConstructMap(pixels, width, height, testUser);
+        Map map = ConstructMap(pixels, width, height, testUser);
         MarkSpawns(map, users);
         map = CalculateFogOfWar(map);
 
-        return Ok(map);
+        GetPixelsResult result = new GetPixelsResult
+        {
+            PlayerSpawn = map.PlayerSpawn,
+            Pixels = map.Pixels
+        };
+        
+        return Ok(result);
     }
 
-    [HttpPost("pixels")]
-    public IActionResult PostPixels([FromBody] CoordinateModel pixelCoordinate)
+    [HttpPost]
+    public IActionResult PostPixels([FromBody] Coordinate pixelCoordinate)
     {
         // TODO: Remove temporary testing user
         User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
@@ -57,7 +64,7 @@ public class MapController : ControllerBase
             return BadRequest();
         }
 
-        CoordinateModel globalCoordinate = new CoordinateModel
+        Coordinate globalCoordinate = new Coordinate
         {
             X = testUser.SpawnX + pixelCoordinate.X,
             Y = testUser.SpawnY + pixelCoordinate.Y
@@ -115,9 +122,9 @@ public class MapController : ControllerBase
         return Ok();
     }
 
-    private static MapModel ConstructMap(IEnumerable<Pixel> pixels, int width, int height, User? user)
+    private static Map ConstructMap(IEnumerable<Pixel> pixels, int width, int height, User? user)
     {
-        MapModel map = new MapModel
+        Map map = new Map
         {
             Pixels = new PixelModel[width, height],
             Width = width,
@@ -155,16 +162,16 @@ public class MapController : ControllerBase
         return map;
     }
 
-    private static void MarkSpawns(MapModel map, IEnumerable<User> users)
+    private static void MarkSpawns(Map map, IEnumerable<User> users)
     {
         foreach (User user in users) map.Pixels[user.SpawnX, user.SpawnY].Type = PixelTypeEnum.Spawn;
     }
 
-    private MapModel CalculateFogOfWar(MapModel map)
+    private Map CalculateFogOfWar(Map map)
     {
         int width = map.Pixels.GetLength(0);
         int height = map.Pixels.GetLength(1);
-        MapModel fogOfWarMap = new MapModel
+        Map fogOfWarMap = new Map
         {
             Pixels = new PixelModel[width, height],
             Width = width,
@@ -177,7 +184,7 @@ public class MapController : ControllerBase
             {
                 if (map.Pixels[x, y].OwnPixel)
                 {
-                    fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new CoordinateModel
+                    fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new Coordinate
                     {
                         X = x,
                         Y = y
@@ -189,7 +196,7 @@ public class MapController : ControllerBase
         return TrimMap(fogOfWarMap);
     }
 
-    private static MapModel MarkPixelsInFogOfWar(MapModel fogOfWarMap, MapModel map, CoordinateModel pixel,
+    private static Map MarkPixelsInFogOfWar(Map fogOfWarMap, Map map, Coordinate pixel,
                                                  int fogOfWarDistance)
     {
         int minX = int.Clamp(pixel.X - fogOfWarDistance, 0, map.Width - 1);
@@ -213,9 +220,9 @@ public class MapController : ControllerBase
         return fogOfWarMap;
     }
 
-    private static MapModel TrimMap(MapModel map)
+    private static Map TrimMap(Map map)
     {
-        MapModel trimmedMap = new MapModel
+        Map trimmedMap = new Map
         {
             Pixels = new PixelModel[map.MaxViewableX - (map.MinViewableX + 1),
                 map.MaxViewableY - (map.MinViewableY + 1)],
