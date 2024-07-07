@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -74,7 +73,7 @@ public class UserController : ControllerBase
     {
         ClaimsIdentity identity = (ClaimsIdentity)HttpContext.User.Identity!;
         JwtClaim? jwtClaim = JwtHandler.GetJwtClaimFromIdentity(identity);
-        
+
         User? user = _dbContext.Users.Include(user => user.Guild)
                                .FirstOrDefault(user => jwtClaim != null && user.Id == jwtClaim.Id);
 
