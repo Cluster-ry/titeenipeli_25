@@ -11,8 +11,8 @@ namespace Titeenipeli.Controllers;
 [ApiController]
 public class AuthenticationController : ControllerBase
 {
-    private readonly ApiDbContext _dbContext;
     private readonly JwtOptions _jwtOptions;
+    private readonly ApiDbContext _dbContext;
 
     public AuthenticationController(JwtOptions jwtOptions, ApiDbContext dbContext)
     {
