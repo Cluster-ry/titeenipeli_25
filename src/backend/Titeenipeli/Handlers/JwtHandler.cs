@@ -29,7 +29,7 @@ public class JwtHandler
                 X = user.SpawnX,
                 Y = user.SpawnY
             },
-            GuildId = user.Guild.Color
+            GuildId = user.Guild?.Color
         };
     }
 
