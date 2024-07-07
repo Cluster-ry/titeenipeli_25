@@ -76,7 +76,7 @@ public class JwtHandler
         };
     }
 
-    public JwtClaim? GetJwtClaimFromIdentity(ClaimsIdentity identity, string claimName = "data")
+    public static JwtClaim? GetJwtClaimFromIdentity(ClaimsIdentity identity, string claimName = "data")
     {
         string? json = identity.FindFirst("data")?.Value;
         return json != null ? JsonSerializer.Deserialize<JwtClaim>(json) : null;
