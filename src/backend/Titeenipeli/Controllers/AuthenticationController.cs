@@ -36,24 +36,10 @@ public class AuthenticationController : ControllerBase
             return BadRequest();
         }
 
-        JwtClaimModel jwtClaim = new JwtClaimModel
-        {
-            Id = user.Id,
-            CoordinateOffset = new CoordinateModel
-            {
-                X = user.SpawnX,
-                Y = user.SpawnY
-            },
-            GuildId = user.Guild?.Color
-        };
+        JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
 
-        Response.Cookies.Append(_jwtOptions.CookieName, new JwtHandler(_jwtOptions).GetJwtToken(jwtClaim),
-            new CookieOptions
-            {
-                HttpOnly = true,
-                SameSite = SameSiteMode.Strict,
-                MaxAge = TimeSpan.FromDays(_jwtOptions.ExpirationDays)
-            });
+        Response.Cookies.Append(_jwtOptions.CookieName, jwtHandler.GetJwtToken(user),
+            jwtHandler.GetAuthorizationCookieOptions());
 
         return Ok();
     }

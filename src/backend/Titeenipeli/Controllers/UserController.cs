@@ -57,24 +57,10 @@ public class UserController : ControllerBase
             _dbContext.SaveChanges();
         }
 
-        JwtClaimModel jwtClaim = new JwtClaimModel
-        {
-            Id = user.Id,
-            CoordinateOffset = new CoordinateModel
-            {
-                X = user.SpawnX,
-                Y = user.SpawnY
-            },
-            GuildId = user.Guild?.Color
-        };
+        JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
 
-        Response.Cookies.Append(_jwtOptions.CookieName, new JwtHandler(_jwtOptions).GetJwtToken(jwtClaim),
-            new CookieOptions
-            {
-                HttpOnly = true,
-                SameSite = SameSiteMode.Strict,
-                MaxAge = TimeSpan.FromDays(_jwtOptions.ExpirationDays)
-            });
+        Response.Cookies.Append(_jwtOptions.CookieName, jwtHandler.GetJwtToken(user),
+            jwtHandler.GetAuthorizationCookieOptions());
 
         return Ok(new PostUserResult
         {
@@ -87,7 +73,8 @@ public class UserController : ControllerBase
     public IActionResult PutUser([FromBody] PutUserInput input)
     {
         ClaimsIdentity identity = (ClaimsIdentity)HttpContext.User.Identity!;
-        JwtClaimModel? jwtClaim = JsonSerializer.Deserialize<JwtClaimModel>(identity.FindFirst("data")!.Value);
+        JwtClaim? jwtClaim = JwtHandler.GetJwtClaimFromIdentity(identity);
+        
         User? user = _dbContext.Users.Include(user => user.Guild)
                                .FirstOrDefault(user => jwtClaim != null && user.Id == jwtClaim.Id);
 
@@ -103,24 +90,10 @@ public class UserController : ControllerBase
 
 
         // Update the claim because users guild has changed
-        JwtClaimModel newJwtClaim = new JwtClaimModel
-        {
-            Id = user.Id,
-            CoordinateOffset = new CoordinateModel
-            {
-                X = user.SpawnX,
-                Y = user.SpawnY
-            },
-            GuildId = user.Guild?.Color
-        };
+        JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
 
-        Response.Cookies.Append(_jwtOptions.CookieName, new JwtHandler(_jwtOptions).GetJwtToken(newJwtClaim),
-            new CookieOptions
-            {
-                HttpOnly = true,
-                SameSite = SameSiteMode.Strict,
-                MaxAge = TimeSpan.FromDays(_jwtOptions.ExpirationDays)
-            });
+        Response.Cookies.Append(_jwtOptions.CookieName, jwtHandler.GetJwtToken(user),
+            jwtHandler.GetAuthorizationCookieOptions());
 
         return Ok();
     }

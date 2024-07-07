@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
+using Titeenipeli.Schema;
 
 namespace Titeenipeli.Handlers;
 
@@ -17,7 +18,23 @@ public class JwtHandler
         _jwtOptions = jwtOptions;
     }
 
-    public string GetJwtToken(JwtClaimModel jwtClaim)
+    // ReSharper disable once MemberCanBePrivate.Global
+    public static JwtClaim CreateJwtClaim(User user)
+    {
+        return new JwtClaim
+        {
+            Id = user.Id,
+            CoordinateOffset = new CoordinateModel
+            {
+                X = user.SpawnX,
+                Y = user.SpawnY
+            },
+            GuildId = user.Guild?.Color
+        };
+    }
+
+    // ReSharper disable once MemberCanBePrivate.Global
+    public string GetJwtToken(JwtClaim jwtClaim, string claimName = "data")
     {
         SymmetricSecurityKey secretKey =
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
@@ -29,7 +46,7 @@ public class JwtHandler
         EncryptingCredentials encryptingCredentials = new EncryptingCredentials(encryptionKey,
             SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256CbcHmacSha512);
 
-        List<Claim> claims = [new Claim("data", JsonSerializer.Serialize(jwtClaim))];
+        List<Claim> claims = [new Claim(claimName, JsonSerializer.Serialize(jwtClaim))];
 
         JwtSecurityToken tokeOptions = new JwtSecurityTokenHandler().CreateJwtSecurityToken(
             _jwtOptions.ValidIssuer,
@@ -42,5 +59,26 @@ public class JwtHandler
             encryptingCredentials);
 
         return new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+    }
+
+    public string GetJwtToken(User user)
+    {
+        return GetJwtToken(CreateJwtClaim(user));
+    }
+
+    public CookieOptions GetAuthorizationCookieOptions()
+    {
+        return new CookieOptions
+        {
+            HttpOnly = true,
+            SameSite = SameSiteMode.Strict,
+            MaxAge = TimeSpan.FromDays(_jwtOptions.ExpirationDays)
+        };
+    }
+
+    public static JwtClaim? GetJwtClaimFromIdentity(ClaimsIdentity identity, string claimName = "data")
+    {
+        string? json = identity.FindFirst("data")?.Value;
+        return json != null ? JsonSerializer.Deserialize<JwtClaim>(json) : null;
     }
 }
