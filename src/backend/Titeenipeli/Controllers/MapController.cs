@@ -50,7 +50,7 @@ public class MapController : ControllerBase
             PlayerSpawn = map.PlayerSpawn,
             Pixels = map.Pixels
         };
-        
+
         return Ok(result);
     }
 
@@ -152,7 +152,7 @@ public class MapController : ControllerBase
             PixelModel mapPixel = new PixelModel
             {
                 Type = PixelTypeEnum.Normal,
-                Owner = (GuildEnum?)pixel.User?.Guild.Color,
+                Owner = (GuildEnum?)pixel.User?.Guild?.Color,
                 // TODO: Verify owning status of pixel, this can be done when we get user information from JWT
                 OwnPixel = pixel.User == user
             };
@@ -198,7 +198,7 @@ public class MapController : ControllerBase
     }
 
     private static Map MarkPixelsInFogOfWar(Map fogOfWarMap, Map map, Coordinate pixel,
-                                                 int fogOfWarDistance)
+                                            int fogOfWarDistance)
     {
         int minX = int.Clamp(pixel.X - fogOfWarDistance, 0, map.Width - 1);
         int minY = int.Clamp(pixel.Y - fogOfWarDistance, 0, map.Height - 1);
