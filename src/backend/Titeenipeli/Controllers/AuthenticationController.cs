@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
 using Titeenipeli.Handlers;
+using Titeenipeli.Inputs;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Schema;
@@ -21,15 +22,15 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("login")]
-    public IActionResult PostLogin([FromBody] Login login)
+    public IActionResult PostLogin([FromBody] PostLoginInput input)
     {
         // TODO: Actual login validation 
-        if (login is not { Username: "test", Password: "test123" })
+        if (input is not { Username: "test", Password: "test123" })
         {
             return Unauthorized();
         }
 
-        User? user = _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Code == login.Username);
+        User? user = _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Code == input.Username);
 
         if (user == null)
         {
