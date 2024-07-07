@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
 using Titeenipeli.Enums;
+using Titeenipeli.Inputs;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Results;
@@ -54,7 +55,7 @@ public class MapController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult PostPixels([FromBody] Coordinate pixelCoordinate)
+    public IActionResult PostPixels([FromBody] PostPixelsInput input)
     {
         // TODO: Remove temporary testing user
         User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
@@ -66,8 +67,8 @@ public class MapController : ControllerBase
 
         Coordinate globalCoordinate = new Coordinate
         {
-            X = testUser.SpawnX + pixelCoordinate.X,
-            Y = testUser.SpawnY + pixelCoordinate.Y
+            X = testUser.SpawnX + input.X,
+            Y = testUser.SpawnY + input.Y
         };
 
         // Take neighboring pixels for the pixel the user is trying to set,
