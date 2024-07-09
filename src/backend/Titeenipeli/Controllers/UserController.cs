@@ -1,3 +1,6 @@
+using System.Security.Claims;
+using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
@@ -77,5 +80,48 @@ public class UserController : ControllerBase
         {
             Guild = user.Guild?.Color.ToString()
         });
+    }
+
+    [HttpPut]
+    [Authorize]
+    public IActionResult PutUser([FromBody] PutUserInput input)
+    {
+        ClaimsIdentity identity = (ClaimsIdentity)HttpContext.User.Identity!;
+        JwtClaimModel? jwtClaim = JsonSerializer.Deserialize<JwtClaimModel>(identity.FindFirst("data")!.Value);
+        User? user = _dbContext.Users.Include(user => user.Guild)
+                               .FirstOrDefault(user => jwtClaim != null && user.Id == jwtClaim.Id);
+
+        Guild? guild = _dbContext.Guilds.FirstOrDefault(guild => guild.Color.ToString() == input.Guild);
+
+        if (user == null || guild == null || user.Guild != null)
+        {
+            return BadRequest();
+        }
+
+        user.Guild = guild;
+        _dbContext.SaveChanges();
+
+
+        // Update the claim because users guild has changed
+        JwtClaimModel newJwtClaim = new JwtClaimModel
+        {
+            Id = user.Id,
+            CoordinateOffset = new CoordinateModel
+            {
+                X = user.SpawnX,
+                Y = user.SpawnY
+            },
+            GuildId = user.Guild?.Color
+        };
+
+        Response.Cookies.Append(_jwtOptions.CookieName, new JwtHandler(_jwtOptions).GetJwtToken(newJwtClaim),
+            new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Strict,
+                MaxAge = TimeSpan.FromDays(_jwtOptions.ExpirationDays)
+            });
+
+        return Ok();
     }
 }
