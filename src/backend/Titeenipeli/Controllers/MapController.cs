@@ -55,7 +55,7 @@ public class MapController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult PostPixels([FromBody] PostPixelsInput input)
+    public IActionResult PostPixels([FromBody] PostPixelsInput pixelsInput)
     {
         // TODO: Remove temporary testing user
         User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
@@ -67,8 +67,8 @@ public class MapController : ControllerBase
 
         Coordinate globalCoordinate = new Coordinate
         {
-            X = testUser.SpawnX + input.X,
-            Y = testUser.SpawnY + input.Y
+            X = testUser.SpawnX + pixelsInput.X,
+            Y = testUser.SpawnY + pixelsInput.Y
         };
 
         // Take neighboring pixels for the pixel the user is trying to set,

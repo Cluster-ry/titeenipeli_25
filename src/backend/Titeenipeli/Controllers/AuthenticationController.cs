@@ -22,15 +22,15 @@ public class AuthenticationController : ControllerBase
     }
 
     [HttpPost("login")]
-    public IActionResult PostLogin([FromBody] PostLoginInput input)
+    public IActionResult PostLogin([FromBody] PostLoginInput loginInput)
     {
         // TODO: Actual login validation 
-        if (input is not { Username: "test", Password: "test123" })
+        if (loginInput is not { Username: "test", Password: "test123" })
         {
             return Unauthorized();
         }
 
-        User? user = _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Code == input.Username);
+        User? user = _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Code == loginInput.Username);
 
         if (user == null)
         {
