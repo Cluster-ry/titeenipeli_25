@@ -30,7 +30,7 @@ public class JwtHandler
                 X = user.SpawnX,
                 Y = user.SpawnY
             },
-            GuildId = user.Guild.Color
+            GuildId = user.Guild?.Color
         };
     }
 
@@ -77,9 +77,9 @@ public class JwtHandler
         };
     }
 
-    public JwtClaim? GetJwtClaimFromIdentity(ClaimsIdentity identity, string claimName = "data")
+    public static JwtClaim? GetJwtClaimFromIdentity(ClaimsIdentity identity, string claimName = "data")
     {
-        string? json = identity.FindFirst("data")?.Value;
+        string? json = identity.FindFirst(claimName)?.Value;
         return json != null ? JsonSerializer.Deserialize<JwtClaim>(json) : null;
     }
 }

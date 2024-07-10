@@ -7,5 +7,5 @@ public class JwtClaim
     public required CoordinateModel CoordinateOffset { get; set; }
 
     // TODO: Switch guild id to string
-    public required int GuildId { get; set; }
+    public required int? GuildId { get; set; }
 }
