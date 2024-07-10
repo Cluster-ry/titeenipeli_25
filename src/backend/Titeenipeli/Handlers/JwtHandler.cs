@@ -19,7 +19,8 @@ public class JwtHandler
     }
 
     // ReSharper disable once MemberCanBePrivate.Global
-    public static JwtClaim CreateJwtClaim(User user)
+    // ReSharper disable once MemberCanBeMadeStatic.Global
+    public JwtClaim CreateJwtClaim(User user)
     {
         return new JwtClaim
         {
