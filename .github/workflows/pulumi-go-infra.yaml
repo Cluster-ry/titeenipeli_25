@@ -56,3 +56,5 @@ jobs:
           work-dir: ${{ env.working-dir }}
         env:
           ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
