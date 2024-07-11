@@ -48,7 +48,7 @@ jobs:
         run: go mod download
 
       - name: Applying infrastructure 🚀
-        uses: pulumi/actions@v4
+        uses: pulumi/actions@v5
         with:
           command: preview
           stack-name: dev
