@@ -54,4 +54,5 @@ jobs:
           stack-name: dev
           cloud-url: azblob://iacstate?storage_account=${{ secrets.AZURE_BLOB_ACCOUNT }}
           work-dir: ${{ env.working-dir }}
-          config-map: '{"azure-native:useOidc": true}'
+        env:
+          ARM_USE_OIDC: true
