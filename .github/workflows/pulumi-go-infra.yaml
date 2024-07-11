@@ -52,7 +52,5 @@ jobs:
         with:
           command: preview
           stack-name: test-dev
-          cloud-url: ${{ secrets.AZURE_BLOB_ACCOUNT }}
+          cloud-url: azblob://iacstate?storage_account=${{ secrets.AZURE_BLOB_ACCOUNT }}
           work-dir: ${{ env.working-dir }}
-        env:
-          PULUMI_ACCESS_TOKEN: ""
