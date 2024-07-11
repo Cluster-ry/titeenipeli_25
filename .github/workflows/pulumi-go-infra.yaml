@@ -51,6 +51,6 @@ jobs:
         uses: pulumi/actions@v4
         with:
           command: preview
-          stack-name: test-dev
+          stack-name: dev
           cloud-url: azblob://iacstate?storage_account=${{ secrets.AZURE_BLOB_ACCOUNT }}
           work-dir: ${{ env.working-dir }}
