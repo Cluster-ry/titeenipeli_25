@@ -8,7 +8,7 @@ import (
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
 		// Create an Azure Resource Group
-		_, err := resources.NewResourceGroup(ctx, "testRG", nil)
+		_, err := resources.NewResourceGroup(ctx, "testingRG", nil)
 		if err != nil {
 			return err
 		}
