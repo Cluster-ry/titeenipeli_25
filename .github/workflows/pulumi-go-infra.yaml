@@ -26,6 +26,48 @@ jobs:
     name: Preview
     runs-on: ubuntu-latest
     environment: plan
+    if: github.ref != 'refs/heads/main'
+    defaults:
+        run:
+          shell: bash
+          working-directory: ${{ env.working-dir }}
+    steps:
+      - name: Az CLI login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+
+      - name: Setup Go ✨
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Downloading dependencies 📦
+        run: go mod download
+
+      - name: Preview infrastructure 🚀
+        uses: pulumi/actions@v5
+        with:
+          command: preview
+          stack-name: ${{ env.stack-name }}
+          cloud-url: ${{ env.cloud-url }}
+          work-dir: ${{ env.working-dir }}
+          comment-on-pr: true
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+  update:
+    name: Update
+    runs-on: ubuntu-latest
+    environment: apply
+    if: github.ref == 'refs/heads/main'
     defaults:
         run:
           shell: bash
@@ -52,7 +94,7 @@ jobs:
       - name: Applying infrastructure 🚀
         uses: pulumi/actions@v5
         with:
-          command: preview
+          command: up
           stack-name: ${{ env.stack-name }}
           cloud-url: ${{ env.cloud-url }}
           work-dir: ${{ env.working-dir }}
