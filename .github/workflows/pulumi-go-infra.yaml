@@ -55,6 +55,7 @@ jobs:
           cloud-url: azblob://iacstate?storage_account=${{ secrets.AZURE_BLOB_ACCOUNT }}
           work-dir: ${{ env.working-dir }}
           comment-on-pr: true
+          color: always
         env:
           ARM_USE_OIDC: true
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
