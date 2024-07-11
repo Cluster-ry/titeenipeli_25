@@ -13,6 +13,9 @@ on:
 
 env:
   working-dir: ./infra/test
+  container-name: iacstate
+  stack-name: dev
+  cloud-url: azblob://${{ env.container-name }}?storage_account=${{ secrets.AZURE_BLOB_ACCOUNT }}
 
 permissions:
   id-token: write
@@ -51,11 +54,10 @@ jobs:
         uses: pulumi/actions@v5
         with:
           command: preview
-          stack-name: dev
-          cloud-url: azblob://iacstate?storage_account=${{ secrets.AZURE_BLOB_ACCOUNT }}
+          stack-name: ${{ env.stack-name }}
+          cloud-url: ${{ env.cloud-url }}
           work-dir: ${{ env.working-dir }}
           comment-on-pr: true
-          color: always
         env:
           ARM_USE_OIDC: true
           ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
