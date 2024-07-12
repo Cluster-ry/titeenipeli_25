@@ -26,10 +26,10 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult PostUser([FromBody] PostUserInput input)
+    public IActionResult PostUsers([FromBody] PostUsersInput usersInput)
     {
         User? user = _dbContext.Users.Include(entity => entity.Guild).FirstOrDefault(entity =>
-            entity.TelegramId == input.Id);
+            entity.TelegramId == usersInput.Id);
 
         if (user == null)
         {
@@ -43,13 +43,13 @@ public class UserController : ControllerBase
                 SpawnY = 0,
 
                 // TODO: Validate telegram credentials before creating a new user
-                TelegramId = input.Id,
-                FirstName = input.FirstName,
-                LastName = input.LastName,
-                Username = input.Username,
-                PhotoUrl = input.PhotoUrl,
-                AuthDate = input.AuthDate,
-                Hash = input.Hash
+                TelegramId = usersInput.Id,
+                FirstName = usersInput.FirstName,
+                LastName = usersInput.LastName,
+                Username = usersInput.Username,
+                PhotoUrl = usersInput.PhotoUrl,
+                AuthDate = usersInput.AuthDate,
+                Hash = usersInput.Hash
             };
 
             _dbContext.Users.Add(user);
@@ -69,7 +69,7 @@ public class UserController : ControllerBase
 
     [HttpPut]
     [Authorize]
-    public IActionResult PutUser([FromBody] PutUserInput input)
+    public IActionResult PutUsers([FromBody] PutUsersInput input)
     {
         ClaimsIdentity identity = (ClaimsIdentity)HttpContext.User.Identity!;
         JwtClaim? jwtClaim = JwtHandler.GetJwtClaimFromIdentity(identity);

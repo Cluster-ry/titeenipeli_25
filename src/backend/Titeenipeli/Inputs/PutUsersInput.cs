@@ -1,6 +1,6 @@
 namespace Titeenipeli.Inputs;
 
-public class PutUserInput
+public class PutUsersInput
 {
     public required string Guild { get; init; }
 }
