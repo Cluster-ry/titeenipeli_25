@@ -5,6 +5,7 @@ import { Pixel } from "../models/Pixel";
 /**
  * Map component
  *
+ *
  * Displaying the game map view
  *
  * @CurrentStatus
@@ -83,7 +84,7 @@ export default function Map() {
       <div>
         Coordinates
         <p>
-          x: {playerSpawn.x} y: {playerSpawn.y}
+          x: {playerSpawn.x} y: {pixels[0].length - playerSpawn.y - 1}
         </p>
       </div>
       <div style={{ display: "grid" }}>{mapElements}</div>
