@@ -5,26 +5,10 @@ import Map from "./pages/Map";
 function App() {
   return (
     <Router>
-      <div>
-        <Routes>
-          <Route
-            path="/authenticate"
-            element={
-              <>
-                <Authentication />
-              </>
-            }
-          />
-          <Route
-            path="/map"
-            element={
-              <>
-                <Map />
-              </>
-            }
-          />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/authenticate" element={<Authentication />} />
+        <Route path="/map" element={<Map />} />
+      </Routes>
     </Router>
   );
 }
