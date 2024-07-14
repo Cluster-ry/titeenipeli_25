@@ -112,7 +112,7 @@ public class MapUpdater
                         hasSpawn = isSpawnNode
                     };
                     nodes[leftNode].neighbours.Add(nextNode);
-                    nodes[aboveNode].neighbours.Add(aboveNode);
+                    nodes[aboveNode].neighbours.Add(nextNode);
                     nodeMap[y, x] = nextNode;
                     nextNode++;
                 }
@@ -134,7 +134,7 @@ public class MapUpdater
         nodeMap[coordinates.y, coordinates.x] = destinationNode;
     }
 
-    private (int, int) TryMerge(GuildEnum placingGuild, int[,] nodeMap, int y, int x, AreaNodes nodes)
+    private (int, int) TryMerge(GuildEnum mergingGuild, int[,] nodeMap, int y, int x, AreaNodes nodes)
     {
         var leftNode = nodeMap[y, x - 1];
         var aboveNode = nodeMap[y - 1, x];
@@ -146,7 +146,8 @@ public class MapUpdater
 
         var leftNodeGuild = nodes[leftNode].guild;
         var aboveNodeGuild = nodes[aboveNode].guild;
-        if (leftNodeGuild != aboveNodeGuild || leftNodeGuild != placingGuild)
+        var nodesHaveDifferingOwners = leftNodeGuild != aboveNodeGuild || leftNodeGuild != mergingGuild;
+        if (nodesHaveDifferingOwners)
         {
             return (leftNode, aboveNode);
         }
