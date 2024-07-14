@@ -39,8 +39,7 @@ public class MapUpdater
         var (nodes, justAddedNode) = _ConstructMapAdjacencyNodes(map, pixelCoordinates, placingGuild);
 
         // Construct a set of all nodes reachable from outside node (index 0)
-        var nonHangingNodeIndexes = new HashSet<int>();
-        _TraverseNodeTree(0, nodes, justAddedNode, nonHangingNodeIndexes);
+        var nonHangingNodeIndexes = _GetNonSurroundedNodes(nodes, justAddedNode);
 
         foreach (var nodeIndex in nodes.Keys.Where(nodeIndex => !nonHangingNodeIndexes.Contains(nodeIndex)))
         {
@@ -51,6 +50,13 @@ public class MapUpdater
         _CutNodesWithoutSpawn(map, nodes);
 
         _cachedNodes = nodes;
+    }
+
+    private HashSet<int> _GetNonSurroundedNodes(AreaNodes nodes, int justAddedNode)
+    {
+        var nonSurroundedNodeIndexes = new HashSet<int>();
+        _DfsWithBlockingNode(0, nodes, justAddedNode, nonSurroundedNodeIndexes);
+        return nonSurroundedNodeIndexes;
     }
 
     private (AreaNodes, int) _PlaceWithCache(Map map, Coordinates pixelCoordinates, GuildEnum placingGuild)
@@ -197,9 +203,13 @@ public class MapUpdater
     /// </summary>
     /// <param name="currentNode">The current node in the recursive search algorithm</param>
     /// <param name="nodes">All nodes</param>
-    /// <param name="justAddedNode">The node containing the last added pixel</param>
+    /// <param name="blockingNode">The node containing the last added pixel - will block search</param>
     /// <param name="visitedNodes">Nodes visited so far by the search. Mutated as a part of the algorithm.</param>
-    private void _TraverseNodeTree(int currentNode, AreaNodes nodes, int justAddedNode, HashSet<int> visitedNodes)
+    private void _DfsWithBlockingNode(
+        int currentNode,
+        AreaNodes nodes,
+        int blockingNode,
+        HashSet<int> visitedNodes)
     {
         // This is the recursion escape clause - for some reason ReSharper doesn't realize that
         // ReSharper disable once CanSimplifySetAddingWithSingleCall
@@ -209,14 +219,14 @@ public class MapUpdater
         }
 
         visitedNodes.Add(currentNode);
-        if (currentNode == justAddedNode)
+        if (currentNode == blockingNode)
         {
             return;
         }
 
         foreach (var neighbour in nodes[currentNode].neighbours)
         {
-            _TraverseNodeTree(neighbour, nodes, justAddedNode, visitedNodes);
+            _DfsWithBlockingNode(neighbour, nodes, blockingNode, visitedNodes);
         }
     }
 
