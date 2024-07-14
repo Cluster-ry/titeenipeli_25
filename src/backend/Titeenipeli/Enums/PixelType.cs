@@ -1,6 +1,6 @@
 namespace Titeenipeli.Enums;
 
-public enum PixelTypeEnum
+public enum PixelType
 {
     Normal,
     MapBorder,

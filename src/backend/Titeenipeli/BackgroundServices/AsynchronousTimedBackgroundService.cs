@@ -5,20 +5,17 @@ public interface IAsynchronousTimedBackgroundService
     Task DoWork();
 }
 
-public class AsynchronousTimedBackgroundService<Service, ServiceImplementation>(
-        IServiceProvider services,
-        ILogger<ServiceImplementation> logger,
-        TimeSpan period
-    ) : BackgroundService where Service : IAsynchronousTimedBackgroundService
+public class AsynchronousTimedBackgroundService<TService, TServiceImplementation>(
+    IServiceProvider services,
+    ILogger<TServiceImplementation> logger,
+    TimeSpan period
+) : BackgroundService where TService : IAsynchronousTimedBackgroundService
 {
-    private string _serviceName => this.GetType().Name;
-    private readonly IServiceProvider _services = services;
-    private readonly ILogger<ServiceImplementation> _logger = logger;
-    private readonly TimeSpan _period = period;
+    private string ServiceName => GetType().Name;
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Periodic {ServiceName} is running!", _serviceName);
+        logger.LogInformation("Periodic {ServiceName} is running!", ServiceName);
 
         try
         {
@@ -26,13 +23,13 @@ public class AsynchronousTimedBackgroundService<Service, ServiceImplementation>(
         }
         catch (OperationCanceledException)
         {
-            _logger.LogInformation("Periodic {ServiceName} is stopping!", _serviceName);
+            logger.LogInformation("Periodic {ServiceName} is stopping!", ServiceName);
         }
     }
 
     private async Task RunPeriodic(CancellationToken cancellationToken)
     {
-        using PeriodicTimer timer = new(_period);
+        using PeriodicTimer timer = new PeriodicTimer(period);
         do
         {
             await DoWorkWithErrorHandling();
@@ -43,8 +40,8 @@ public class AsynchronousTimedBackgroundService<Service, ServiceImplementation>(
     {
         try
         {
-            using var scope = _services.CreateScope();
-            var scopedBackgroundService = scope.ServiceProvider.GetRequiredService<Service>();
+            using IServiceScope scope = services.CreateScope();
+            TService scopedBackgroundService = scope.ServiceProvider.GetRequiredService<TService>();
 
             await scopedBackgroundService.DoWork();
         }
@@ -56,8 +53,8 @@ public class AsynchronousTimedBackgroundService<Service, ServiceImplementation>(
             }
 
             // Periodic services should not crash. Just log error, if service throws.
-            _logger.LogError("Periodic {ServiceName} threw exception: {Exception}",
-                _serviceName, exception);
+            logger.LogError("Periodic {ServiceName} threw exception: {Exception}",
+                ServiceName, exception);
         }
     }
 }

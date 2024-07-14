@@ -8,22 +8,18 @@ public interface IUpdateCumulativeScoresService : IAsynchronousTimedBackgroundSe
 
 public class UpdateCumulativeScoresService(ApiDbContext dbContext) : IUpdateCumulativeScoresService
 {
-    private readonly ApiDbContext _dbContext = dbContext;
-
     public async Task DoWork()
     {
-        Pixel[] pixels = await _dbContext.Map
-            .Include(pixel => pixel.User)
-            .ThenInclude(user => user!.Guild).ToArrayAsync();
+        Pixel[] pixels = await dbContext.Map
+                                        .Include(pixel => pixel.User)
+                                        .ThenInclude(user => user!.Guild).ToArrayAsync();
 
         foreach (Pixel pixel in pixels)
-        {
-            if (pixel.User != null)
+            if (pixel.User is { Guild: not null })
             {
                 pixel.User.Guild.CumulativeScore++;
             }
-        }
 
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
     }
 }

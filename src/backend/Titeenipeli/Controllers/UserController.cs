@@ -16,8 +16,8 @@ namespace Titeenipeli.Controllers;
 [Route("users")]
 public class UserController : ControllerBase
 {
-    private readonly JwtOptions _jwtOptions;
     private readonly ApiDbContext _dbContext;
+    private readonly JwtOptions _jwtOptions;
 
     public UserController(JwtOptions jwtOptions, ApiDbContext dbContext)
     {

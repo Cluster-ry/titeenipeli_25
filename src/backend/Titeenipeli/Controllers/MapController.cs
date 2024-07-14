@@ -30,24 +30,34 @@ public class MapController : ControllerBase
     public IActionResult GetPixels()
     {
         // TODO: Remove temporary testing user
-        User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
+        User? user = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
+
+        if (user == null)
+        {
+            return BadRequest();
+        }
+
         User[] users = _dbContext.Users.ToArray();
         Pixel[] pixels = _dbContext.Map
                                    .Include(pixel => pixel.User)
-                                   .ThenInclude(user => user!.Guild)
+                                   .ThenInclude(pixelOwner => pixelOwner!.Guild)
                                    .OrderBy(pixel => pixel.Y).ToArray();
 
         // +2 to account for the borders
         int width = _gameOptions.Width + 2 * BorderWidth;
         int height = _gameOptions.Height + 2 * BorderWidth;
 
-        Map map = ConstructMap(pixels, width, height, testUser);
+        Map map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
         map = CalculateFogOfWar(map);
 
         GetPixelsResult result = new GetPixelsResult
         {
-            PlayerSpawn = map.PlayerSpawn,
+            PlayerSpawn = new Coordinate
+            {
+                X = user.SpawnX,
+                Y = user.SpawnY
+            },
             Pixels = map.Pixels
         };
 
@@ -141,7 +151,7 @@ public class MapController : ControllerBase
                     map.Pixels[x, y] = new PixelModel
                     {
                         OwnPixel = false,
-                        Type = PixelTypeEnum.MapBorder
+                        Type = PixelType.MapBorder
                     };
                 }
             }
@@ -151,8 +161,8 @@ public class MapController : ControllerBase
         {
             PixelModel mapPixel = new PixelModel
             {
-                Type = PixelTypeEnum.Normal,
-                Owner = (GuildEnum?)pixel.User?.Guild?.Color,
+                Type = PixelType.Normal,
+                Owner = (GuildNames?)pixel.User?.Guild?.Color,
                 // TODO: Verify owning status of pixel, this can be done when we get user information from JWT
                 OwnPixel = pixel.User == user
             };
@@ -165,7 +175,7 @@ public class MapController : ControllerBase
 
     private static void MarkSpawns(Map map, IEnumerable<User> users)
     {
-        foreach (User user in users) map.Pixels[user.SpawnX, user.SpawnY].Type = PixelTypeEnum.Spawn;
+        foreach (User user in users) map.Pixels[user.SpawnX, user.SpawnY].Type = PixelType.Spawn;
     }
 
     private Map CalculateFogOfWar(Map map)

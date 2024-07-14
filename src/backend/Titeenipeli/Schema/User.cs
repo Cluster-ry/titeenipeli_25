@@ -15,7 +15,7 @@ public class User : Entity
     public required int SpawnY { get; init; }
 
 
-    #region Telegram
+#region Telegram
 
     [StringLength(64)]
     public required string TelegramId { get; init; }
@@ -38,5 +38,5 @@ public class User : Entity
     [StringLength(64)]
     public required string Hash { get; init; }
 
-    #endregion
+#endregion
 }
