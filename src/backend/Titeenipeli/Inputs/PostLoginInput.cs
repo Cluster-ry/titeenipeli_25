@@ -1,6 +1,6 @@
-namespace Titeenipeli.Models;
+namespace Titeenipeli.Inputs;
 
-public class Login
+public class PostLoginInput
 {
     public required string Username { get; set; }
     public required string Password { get; set; }

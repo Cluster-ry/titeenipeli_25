@@ -21,7 +21,7 @@ public class MapUpdater
     /// <param name="map">The game map - should include border pixels. Mutated according to the update event.</param>
     /// <param name="pixelCoordinates">The coordinates of the new pixel</param>
     /// <param name="placingGuild">The guild placing the new pixel</param>
-    public void PlacePixel(MapModel map, Coordinates pixelCoordinates, GuildEnum placingGuild)
+    public void PlacePixel(Map map, Coordinates pixelCoordinates, GuildEnum placingGuild)
     {
         map.Pixels[pixelCoordinates.Item2, pixelCoordinates.Item1]
             = new PixelModel { Owner = placingGuild, Type = PixelTypeEnum.Normal };
@@ -53,7 +53,7 @@ public class MapUpdater
         _cachedNodes = nodes;
     }
 
-    private (AreaNodes, int) _PlaceWithCache(MapModel map, Coordinates pixelCoordinates, GuildEnum placingGuild)
+    private (AreaNodes, int) _PlaceWithCache(Map map, Coordinates pixelCoordinates, GuildEnum placingGuild)
     {
         throw new NotImplementedException();
     }
@@ -70,7 +70,7 @@ public class MapUpdater
     /// <param name="pixelCoordinates">The coordinates of the last added pixel</param>
     /// <param name="placingGuild">The guild that placed the last added pixel</param>
     /// <returns></returns>
-    private (AreaNodes, int) _ConstructMapAdjacencyNodes(MapModel map, Coordinates pixelCoordinates,
+    private (AreaNodes, int) _ConstructMapAdjacencyNodes(Map map, Coordinates pixelCoordinates,
         GuildEnum placingGuild)
     {
         var ySize = map.Pixels.GetUpperBound(0) + 1;
@@ -220,7 +220,7 @@ public class MapUpdater
         }
     }
 
-    private void _FillNode(MapModel map, Node node, GuildEnum? newGuild)
+    private void _FillNode(Map map, Node node, GuildEnum? newGuild)
     {
         foreach (var (x, y) in node.pixels)
         {
@@ -234,7 +234,7 @@ public class MapUpdater
         }
     }
 
-    private void _CutNodesWithoutSpawn(MapModel map, AreaNodes nodes)
+    private void _CutNodesWithoutSpawn(Map map, AreaNodes nodes)
     {
         foreach (var node in nodes.Values.Where(node => node is { hasSpawn: false, guild: not null }))
         {

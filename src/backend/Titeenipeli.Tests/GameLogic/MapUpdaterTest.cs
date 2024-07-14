@@ -84,12 +84,12 @@ public class MapUpdaterTest
         }
     }
 
-    private static MapModel _BuildEmptyMap(int xSize = 100, int ySize = 100)
+    private static Map _BuildEmptyMap(int xSize = 100, int ySize = 100)
     {
-        return new MapModel { Pixels = _BuildEmptyMapPixels(xSize, ySize) };
+        return new Map { Pixels = _BuildEmptyMapPixels(xSize, ySize), Height = ySize, Width = xSize };
     }
 
-    private static MapModel _BuildMapFromOwnerArray(GuildEnum?[,] owners)
+    private static Map _BuildMapFromOwnerArray(GuildEnum?[,] owners)
     {
         var ySize = owners.GetUpperBound(0) + 1;
         var xSize = owners.GetUpperBound(1) + 1;
@@ -107,7 +107,7 @@ public class MapUpdaterTest
             map[y, xSize + 1] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.MapBorder };
         }
 
-        return new MapModel { Pixels = map };
+        return new Map { Pixels = map, Height = ySize, Width = xSize };
     }
 
     private static PixelModel[,] _BuildEmptyMapPixels(int xSize, int ySize)

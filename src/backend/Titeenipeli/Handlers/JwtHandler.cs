@@ -4,36 +4,82 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using Titeenipeli.Models;
+using Titeenipeli.Options;
+using Titeenipeli.Schema;
 
 namespace Titeenipeli.Handlers;
 
 public class JwtHandler
 {
-    private readonly IConfiguration _configuration;
+    private readonly JwtOptions _jwtOptions;
 
-    public JwtHandler(IConfiguration configuration)
+    public JwtHandler(JwtOptions jwtOptions)
     {
-        _configuration = configuration;
+        _jwtOptions = jwtOptions;
     }
 
-    public JwtToken GetJwtToken(JwtClaimModel jwtClaim)
+    // ReSharper disable once MemberCanBePrivate.Global
+    // ReSharper disable once MemberCanBeMadeStatic.Global
+    public JwtClaim CreateJwtClaim(User user)
+    {
+        return new JwtClaim
+        {
+            Id = user.Id,
+            CoordinateOffset = new Coordinate
+            {
+                X = user.SpawnX,
+                Y = user.SpawnY
+            },
+            GuildId = user.Guild?.Color
+        };
+    }
+
+    // ReSharper disable once MemberCanBePrivate.Global
+    public string GetJwtToken(JwtClaim jwtClaim, string claimName = "data")
     {
         SymmetricSecurityKey secretKey =
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]!));
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
 
-        SigningCredentials signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-        JwtSecurityToken tokeOptions = new JwtSecurityToken(_configuration["JWT:ValidIssuer"],
-            _configuration["JWT:ValidAudience"], new List<Claim>
-            {
-                new Claim("data", JsonSerializer.Serialize(jwtClaim))
-            },
-            expires: DateTime.Now.AddHours(6), signingCredentials: signinCredentials);
+        SymmetricSecurityKey encryptionKey =
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Encryption));
 
-        string tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+        SigningCredentials signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+        EncryptingCredentials encryptingCredentials = new EncryptingCredentials(encryptionKey,
+            SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256CbcHmacSha512);
 
-        return new JwtToken
+        List<Claim> claims = [new Claim(claimName, JsonSerializer.Serialize(jwtClaim))];
+
+        JwtSecurityToken tokeOptions = new JwtSecurityTokenHandler().CreateJwtSecurityToken(
+            _jwtOptions.ValidIssuer,
+            _jwtOptions.ValidAudience,
+            new ClaimsIdentity(claims),
+            DateTime.Now,
+            DateTime.Now.AddDays(_jwtOptions.ExpirationDays),
+            DateTime.Now,
+            signingCredentials,
+            encryptingCredentials);
+
+        return new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+    }
+
+    public string GetJwtToken(User user)
+    {
+        return GetJwtToken(CreateJwtClaim(user));
+    }
+
+    public CookieOptions GetAuthorizationCookieOptions()
+    {
+        return new CookieOptions
         {
-            Token = tokenString
+            HttpOnly = true,
+            SameSite = SameSiteMode.Strict,
+            MaxAge = TimeSpan.FromDays(_jwtOptions.ExpirationDays)
         };
+    }
+
+    public static JwtClaim? GetJwtClaimFromIdentity(ClaimsIdentity identity, string claimName = "data")
+    {
+        string? json = identity.FindFirst(claimName)?.Value;
+        return json != null ? JsonSerializer.Deserialize<JwtClaim>(json) : null;
     }
 }

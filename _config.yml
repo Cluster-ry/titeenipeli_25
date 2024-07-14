@@ -1,2 +1,2 @@
 exclude:
-  [infra/, src/backend/, src/frontend/, src/protobuf/, CODEOWNERS, src/Readme.md, Readme.md]
+  [infra/, src/backend/, src/frontend/, src/protobuf/, src/tg-bot/, CODEOWNERS, src/Readme.md, Readme.md]

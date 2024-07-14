@@ -5,7 +5,7 @@ namespace Titeenipeli.Schema;
 
 public class User : Entity
 {
-    public required Guild Guild { get; init; }
+    public required Guild? Guild { get; set; }
 
     [Column(TypeName = "VARCHAR")]
     [StringLength(64)]
@@ -13,4 +13,30 @@ public class User : Entity
 
     public required int SpawnX { get; init; }
     public required int SpawnY { get; init; }
+
+
+    #region Telegram
+
+    [StringLength(64)]
+    public required string TelegramId { get; init; }
+
+    [StringLength(64)]
+    public required string FirstName { get; init; }
+
+    [StringLength(64)]
+    public required string LastName { get; init; }
+
+    [StringLength(64)]
+    public required string Username { get; init; }
+
+    [StringLength(64)]
+    public required string PhotoUrl { get; init; }
+
+    [StringLength(64)]
+    public required string AuthDate { get; init; }
+
+    [StringLength(64)]
+    public required string Hash { get; init; }
+
+    #endregion
 }
