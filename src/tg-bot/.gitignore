@@ -482,3 +482,6 @@ $RECYCLE.BIN/
 
 # Hiding enviroment variables
 token
+
+.config
+dotnet-tools.json
