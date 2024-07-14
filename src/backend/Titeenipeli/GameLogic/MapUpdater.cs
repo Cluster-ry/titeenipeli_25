@@ -4,7 +4,7 @@ using Titeenipeli.Models;
 
 namespace Titeenipeli.GameLogic;
 
-using Coordinates = (int, int);
+using Coordinates = (int x, int y);
 using AreaNodes = Dictionary<int, Node>;
 
 public class MapUpdater
@@ -23,7 +23,7 @@ public class MapUpdater
     /// <param name="placingGuild">The guild placing the new pixel</param>
     public void PlacePixel(Map map, Coordinates pixelCoordinates, GuildEnum placingGuild)
     {
-        map.Pixels[pixelCoordinates.Item2, pixelCoordinates.Item1]
+        map.Pixels[pixelCoordinates.y, pixelCoordinates.x]
             = new PixelModel { Owner = placingGuild, Type = PixelTypeEnum.Normal };
 
         // TODO uncomment once _PlaceWithCache is implemented
@@ -96,11 +96,11 @@ public class MapUpdater
 
                 if (nodes[leftNode].guild == currentPixelGuild)
                 {
-                    AddPixelToNodeWithNeighbour(nodes, leftNode, x, y, isSpawnNode, aboveNode, nodeMap);
+                    AddPixelToNodeWithNeighbour(nodes, leftNode, (x, y), isSpawnNode, aboveNode, nodeMap);
                 }
                 else if (nodes[aboveNode].guild == currentPixelGuild)
                 {
-                    AddPixelToNodeWithNeighbour(nodes, aboveNode, x, y, isSpawnNode, leftNode, nodeMap);
+                    AddPixelToNodeWithNeighbour(nodes, aboveNode, (x, y), isSpawnNode, leftNode, nodeMap);
                 }
                 else
                 {
@@ -119,19 +119,19 @@ public class MapUpdater
             }
         }
 
-        var justAddedNode = nodeMap[pixelCoordinates.Item1, pixelCoordinates.Item2];
+        var justAddedNode = nodeMap[pixelCoordinates.x, pixelCoordinates.y];
         return (nodes, justAddedNode);
     }
 
-    private static void AddPixelToNodeWithNeighbour(AreaNodes nodes, int destinationNode, int x, int y,
+    private static void AddPixelToNodeWithNeighbour(AreaNodes nodes, int destinationNode, Coordinates coordinates,
         bool isSpawnNode,
         int neighbourNode, int[,] nodeMap)
     {
-        nodes[destinationNode].pixels.Add((x, y));
+        nodes[destinationNode].pixels.Add(coordinates);
         nodes[destinationNode].hasSpawn = nodes[destinationNode].hasSpawn || isSpawnNode;
         nodes[destinationNode].neighbours.Add(neighbourNode);
         nodes[neighbourNode].neighbours.Add(destinationNode);
-        nodeMap[y, x] = destinationNode;
+        nodeMap[coordinates.y, coordinates.x] = destinationNode;
     }
 
     private (int, int) TryMerge(GuildEnum placingGuild, int[,] nodeMap, int y, int x, AreaNodes nodes)
