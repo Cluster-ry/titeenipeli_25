@@ -5,8 +5,7 @@ namespace Titeenipeli.Models;
 [DataContract]
 public class Map
 {
-    public Coordinate? PlayerSpawn { get; set; }
-    public required PixelModel[,] Pixels { get; set; }
+    public required PixelModel[,] Pixels { get; init; }
 
     public required int Height { get; init; }
     public required int Width { get; init; }

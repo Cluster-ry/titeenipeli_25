@@ -2,5 +2,5 @@ namespace Titeenipeli.Inputs;
 
 public class PostCtfInput
 {
-    public required string Token { get; set; }
+    public required string Token { get; init; }
 }

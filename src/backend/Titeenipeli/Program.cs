@@ -36,14 +36,14 @@ public static class Program
         builder.Services.AddSingleton(gameOptions);
 
         // Adding OpenTelemetry tracing and metrics
-        IOpenTelemetryBuilder otel = builder.Services.AddOpenTelemetry();
+        IOpenTelemetryBuilder openTelemetry = builder.Services.AddOpenTelemetry();
 
-        string otelEnpoint = builder.Configuration["OpenTelemetryEndpoint"] ?? "localhost:4318";
+        string openTelemetryEndpoint = builder.Configuration["OpenTelemetryEndpoint"] ?? "localhost:4318";
 
-        otel.ConfigureResource(resource => resource
+        openTelemetry.ConfigureResource(resource => resource
             .AddService(builder.Environment.ApplicationName));
 
-        otel.WithMetrics(metrics =>
+        openTelemetry.WithMetrics(metrics =>
         {
             metrics
                 .AddAspNetCoreInstrumentation()
@@ -53,13 +53,13 @@ public static class Program
 
             metrics.AddOtlpExporter((exporterOptions, metricReaderOptions) =>
             {
-                exporterOptions.Endpoint = new Uri(otelEnpoint);
+                exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
                 exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
                 metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
             });
         });
 
-        otel.WithTracing(tracing =>
+        openTelemetry.WithTracing(tracing =>
         {
             tracing
                 .AddAspNetCoreInstrumentation()
@@ -68,15 +68,15 @@ public static class Program
 
             tracing.AddOtlpExporter(exporterOptions =>
             {
-                exporterOptions.Endpoint = new Uri(otelEnpoint);
+                exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
                 exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
             });
         });
 
         // Adding OpenTelemetry logging
-        builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter((exporterOptions) =>
+        builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter(exporterOptions =>
         {
-            exporterOptions.Endpoint = new Uri(otelEnpoint);
+            exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
             exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
         }));
 
@@ -176,18 +176,6 @@ public static class Program
 
         app.UseHttpsRedirection();
 
-        // <snippet_UseWebSockets>
-        WebSocketOptions webSocketOptions = new WebSocketOptions
-        {
-            KeepAliveInterval = TimeSpan.FromMinutes(2)
-        };
-
-        app.UseWebSockets(webSocketOptions);
-        // </snippet_UseWebSockets>
-
-        app.UseDefaultFiles();
-        app.UseStaticFiles();
-
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
@@ -209,10 +197,10 @@ public static class Program
                     updateCumulativeScoresServicePeriod));
     }
 
-    private static Service GetNonNullService<Service>(IServiceProvider serviceProvider)
+    private static TService GetNonNullService<TService>(IServiceProvider serviceProvider)
     {
-        return serviceProvider.GetService<Service>() ??
-            throw new Exception("Unable to discover critical service during startup. " +
-                $"Service name: {typeof(Service).Name}");
+        return serviceProvider.GetService<TService>() ??
+               throw new Exception("Unable to discover critical service during startup. " +
+                                   $"Service name: {typeof(TService).Name}");
     }
 }

@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
 using Titeenipeli.Handlers;
 using Titeenipeli.Inputs;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Schema;
 
@@ -12,8 +11,8 @@ namespace Titeenipeli.Controllers;
 [ApiController]
 public class AuthenticationController : ControllerBase
 {
-    private readonly JwtOptions _jwtOptions;
     private readonly ApiDbContext _dbContext;
+    private readonly JwtOptions _jwtOptions;
 
     public AuthenticationController(JwtOptions jwtOptions, ApiDbContext dbContext)
     {
@@ -30,7 +29,8 @@ public class AuthenticationController : ControllerBase
             return Unauthorized();
         }
 
-        User? user = _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Code == loginInput.Username);
+        User? user = _dbContext.Users.Include(user => user.Guild)
+                               .FirstOrDefault(user => user.Code == loginInput.Username);
 
         if (user == null)
         {

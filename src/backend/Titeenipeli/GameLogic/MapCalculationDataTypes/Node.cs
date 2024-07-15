@@ -4,8 +4,8 @@ namespace Titeenipeli.GameLogic.MapCalculationDataTypes;
 
 public record Node
 {
-    public required GuildEnum? guild { get; init; }
-    public HashSet<int> neighbours { get; } = [];
-    public HashSet<(int, int)> pixels { get; } = [];
-    public bool hasSpawn { get; set; }
+    public required GuildName? Guild { get; init; }
+    public HashSet<int> Neighbours { get; } = [];
+    public HashSet<(int, int)> Pixels { get; } = [];
+    public bool HasSpawn { get; set; }
 }

@@ -10,13 +10,13 @@ public class ApiDbContext : DbContext
     {
     }
 
-    public required DbSet<CtfFlag> CtfFlags { get; init; }
-    public required DbSet<Guild> Guilds { get; init; }
-    public required DbSet<User> Users { get; init; }
-    public required DbSet<Pixel> Map { get; init; }
-    public required DbSet<PowerUp> PowerUps { get; init; }
-    public required DbSet<GuildPowerUp> GuildPowerUps { get; init; }
-    public required DbSet<GameEvent> GameEvents { get; init; }
+    public DbSet<CtfFlag> CtfFlags { get; init; } = null!;
+    public DbSet<Guild> Guilds { get; init; } = null!;
+    public DbSet<User> Users { get; init; } = null!;
+    public DbSet<Pixel> Map { get; init; } = null!;
+    public DbSet<PowerUp> PowerUps { get; init; } = null!;
+    public DbSet<GuildPowerUp> GuildPowerUps { get; init; } = null!;
+    public DbSet<GameEvent> GameEvents { get; init; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,7 +31,11 @@ public class ApiDbContext : DbContext
     private void AddTimestamps()
     {
         IEnumerable<EntityEntry> entities = ChangeTracker.Entries()
-            .Where(x => x is { Entity: Entity, State: EntityState.Added or EntityState.Modified });
+                                                         .Where(x => x is
+                                                         {
+                                                             Entity: Entity,
+                                                             State: EntityState.Added or EntityState.Modified
+                                                         });
 
         foreach (EntityEntry entity in entities)
         {
