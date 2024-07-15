@@ -4,11 +4,11 @@ public enum GuildEnum
 {
     // TODO: Remove integers when ER model or OpenAPI spec is updated to match each other
     Tietokilta = 0,
-    Algo = 0,
-    Cluster = 0,
-    OulunTietoteekkarit = 0,
-    TietoTeekkarikilta = 0,
-    Digit = 0,
-    Datateknologerna = 0,
-    Sosa = 0
+    Algo = 1,
+    Cluster = 2,
+    OulunTietoteekkarit = 3,
+    TietoTeekkarikilta = 4,
+    Digit = 5,
+    Datateknologerna = 6,
+    Sosa = 7
 }
