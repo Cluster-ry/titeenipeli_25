@@ -12,9 +12,9 @@ public class MapUpdaterTest
 {
     // Saving some shortened versions of guild enum to make constructing test maps easier
     // null is 4 chars, so we want 4 char variables for symmetry
-    private const GuildEnum Clus = GuildEnum.Cluster;
-    private const GuildEnum Algo = GuildEnum.Algo;
-    private const GuildEnum TiKi = GuildEnum.Tietokilta;
+    private const GuildName Clus = GuildName.Cluster;
+    private const GuildName Algo = GuildName.Algo;
+    private const GuildName TiKi = GuildName.Tietokilta;
 
     [Fact]
     public void TestPlacePixel_ShouldReturnMapWithOnePlacedPixelIfPixelPlacedOnEmptyMap()
@@ -23,9 +23,9 @@ public class MapUpdaterTest
 
         var map = _BuildEmptyMap(10, 10);
 
-        mapUpdater.PlacePixel(map, (7, 8), GuildEnum.Cluster);
+        mapUpdater.PlacePixel(map, (7, 8), GuildName.Cluster);
 
-        Assert.Equal(GuildEnum.Cluster, map.Pixels[8, 7].Owner);
+        Assert.Equal(GuildName.Cluster, map.Pixels[8, 7].Owner);
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class MapUpdaterTest
     {
         var mapUpdater = new MapUpdater();
 
-        GuildEnum?[,] initialMap =
+        GuildName?[,] initialMap =
         {
             { Clus, Clus, Clus, Clus },
             { Clus, Algo, TiKi, Clus },
@@ -41,15 +41,15 @@ public class MapUpdaterTest
             { Clus, Clus, Clus, Clus },
         };
         var map = _BuildMapFromOwnerArray(initialMap);
-        map.Pixels[1, 1].Type = PixelTypeEnum.Spawn;
+        map.Pixels[1, 1].Type = PixelType.Spawn;
 
-        mapUpdater.PlacePixel(map, (4, 3), GuildEnum.Cluster);
+        mapUpdater.PlacePixel(map, (4, 3), GuildName.Cluster);
 
         foreach (var pixel in map.Pixels)
         {
             if (pixel.Owner is not null)
             {
-                Assert.Equal(GuildEnum.Cluster, pixel.Owner);
+                Assert.Equal(GuildName.Cluster, pixel.Owner);
             }
         }
     }
@@ -59,7 +59,7 @@ public class MapUpdaterTest
     {
         var mapUpdater = new MapUpdater();
 
-        GuildEnum?[,] initialMapPixelOwners =
+        GuildName?[,] initialMapPixelOwners =
         {
             { null, Clus, Clus, Clus, null, null, null, Clus, Clus, Clus, null },
             { Clus, Clus, TiKi, Clus, Clus, null, Clus, Clus, Algo, Clus, Clus },
@@ -71,15 +71,15 @@ public class MapUpdaterTest
             { Clus, Clus, null, Clus, Clus, Clus, null, Clus, null, null, Clus },
         };
         var map = _BuildMapFromOwnerArray(initialMapPixelOwners);
-        map.Pixels[1, 2].Type = PixelTypeEnum.Spawn;
+        map.Pixels[1, 2].Type = PixelType.Spawn;
 
-        mapUpdater.PlacePixel(map, (7, 8), GuildEnum.Cluster);
+        mapUpdater.PlacePixel(map, (7, 8), GuildName.Cluster);
 
         foreach (var pixel in map.Pixels)
         {
             if (pixel.Owner is not null)
             {
-                Assert.Equal(GuildEnum.Cluster, pixel.Owner);
+                Assert.Equal(GuildName.Cluster, pixel.Owner);
             }
         }
     }
@@ -89,7 +89,7 @@ public class MapUpdaterTest
         return new Map { Pixels = _BuildEmptyMapPixels(xSize, ySize), Height = ySize, Width = xSize };
     }
 
-    private static Map _BuildMapFromOwnerArray(GuildEnum?[,] owners)
+    private static Map _BuildMapFromOwnerArray(GuildName?[,] owners)
     {
         var ySize = owners.GetUpperBound(0) + 1;
         var xSize = owners.GetUpperBound(1) + 1;
@@ -97,14 +97,14 @@ public class MapUpdaterTest
 
         for (var y = 1; y < ySize + 1; y++)
         {
-            map[y, 0] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.MapBorder };
+            map[y, 0] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
             for (var x = 1; x < xSize + 1; x++)
             {
                 map[y, x] =
-                    new PixelModel { OwnPixel = false, Type = PixelTypeEnum.Normal, Owner = owners[y - 1, x - 1] };
+                    new PixelModel { OwnPixel = false, Type = PixelType.Normal, Owner = owners[y - 1, x - 1] };
             }
 
-            map[y, xSize + 1] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.MapBorder };
+            map[y, xSize + 1] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
         }
 
         return new Map { Pixels = map, Height = ySize, Width = xSize };
@@ -115,23 +115,23 @@ public class MapUpdaterTest
         var map = new PixelModel[ySize + 2, xSize + 2];
         for (var x = 0; x < xSize + 2; x++)
         {
-            map[0, x] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.MapBorder };
+            map[0, x] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
         }
 
         for (var y = 1; y < ySize + 1; y++)
         {
-            map[y, 0] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.MapBorder };
+            map[y, 0] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
             for (var x = 1; x < xSize + 1; x++)
             {
-                map[y, x] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.Normal };
+                map[y, x] = new PixelModel { OwnPixel = false, Type = PixelType.Normal };
             }
 
-            map[y, xSize + 1] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.MapBorder };
+            map[y, xSize + 1] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
         }
 
         for (var x = 0; x < xSize + 2; x++)
         {
-            map[ySize + 1, x] = new PixelModel { OwnPixel = false, Type = PixelTypeEnum.MapBorder };
+            map[ySize + 1, x] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
         }
 
         return map;

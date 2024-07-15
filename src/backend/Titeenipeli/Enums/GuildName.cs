@@ -1,6 +1,6 @@
 namespace Titeenipeli.Enums;
 
-public enum GuildNames
+public enum GuildName
 {
     // TODO: Remove integers when ER model or OpenAPI spec is updated to match each other
     Tietokilta = 0,

@@ -5,6 +5,6 @@ namespace Titeenipeli.Models;
 public class PixelModel
 {
     public PixelType Type { get; set; }
-    public GuildNames? Owner { get; init; }
+    public GuildName? Owner { get; set; }
     public bool OwnPixel { get; init; }
 }

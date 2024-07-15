@@ -162,7 +162,7 @@ public class MapController : ControllerBase
             PixelModel mapPixel = new PixelModel
             {
                 Type = PixelType.Normal,
-                Owner = (GuildNames?)pixel.User?.Guild?.Color,
+                Owner = (GuildName?)pixel.User?.Guild?.Color,
                 // TODO: Verify owning status of pixel, this can be done when we get user information from JWT
                 OwnPixel = pixel.User == user
             };
