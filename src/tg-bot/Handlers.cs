@@ -1,11 +1,4 @@
-using System.Collections.Generic;
-using System.Formats.Asn1;
-using System.Runtime.CompilerServices;
-using System.Xml;
-using DotNetEnv;
 using Telegram.Bot;
-using Telegram.Bot.Exceptions;
-using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
