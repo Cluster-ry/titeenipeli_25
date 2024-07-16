@@ -5,7 +5,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Titeenipeli_bot
 {
-    public class Handlers 
+    public class Handlers
     {
         // Variables
         static bool tosAccepted = false; // I know its more of a privacy notice than tos but tos is easier to write :D
@@ -263,7 +263,7 @@ namespace Titeenipeli_bot
 
             // Starts guild selection check
             choosingGuild = true;
-            
+
             guildKeyboard.OneTimeKeyboard = true;
             // select guild message (with guild keyboard)
             await bot.SendTextMessageAsync(

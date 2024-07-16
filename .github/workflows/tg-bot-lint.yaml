@@ -1,0 +1,40 @@
+name: Run dotnet lint on tg-bot
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "src/tg-bot/**"
+    branches:
+      - main
+
+permissions:
+  checks: write
+  contents: write
+  pull-requests: write
+
+env:
+  dotnet-version: "8.0.x"
+
+jobs:
+  run-linters:
+    name: Run linters
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.dotnet-version }}
+
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+          dotnet_format: true
+          dotnet_format_dir: src/tg-bot/
+          dotnet_format_args: Titeenipeli-bot.sln 
+          continue_on_error: false
