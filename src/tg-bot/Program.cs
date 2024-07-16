@@ -1,4 +1,6 @@
 ﻿using Telegram.Bot;
+using Microsoft.Extensions.Configuration;
+using System.Reflection;
 
 namespace Titeenipeli_bot
 {
@@ -13,9 +15,17 @@ namespace Titeenipeli_bot
         static void Main(string[] args)
         {
             // Initializing the bot with its token
-            DotNetEnv.Env.Load();
-            token = DotNetEnv.Env.GetString("tgtoken");
-            bot = new TelegramBotClient(TgBot.token);
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
+                .Build();
+
+            token = configuration["token"];
+            if (token is null) {
+                Console.WriteLine("Unable to find token, exiting...");
+                return;
+            }
+
+            bot = new TelegramBotClient(token);
             Handlers handlers = new(bot);
             // Runnin the bot
             using CancellationTokenSource cts = new CancellationTokenSource();
