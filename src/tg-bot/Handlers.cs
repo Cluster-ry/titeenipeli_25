@@ -26,7 +26,7 @@ namespace Titeenipeli_bot
             Sosa,
             TiTe
         };
-        static Dictionary<Handlers.guildEnum, string> guildDict =
+        static Dictionary<guildEnum, string> guildDict =
             new()
             {
                 { guildEnum.Cluster, "Cluster (lappeen Ranta)" },
@@ -49,15 +49,15 @@ namespace Titeenipeli_bot
         const string acceptButton = "I Accept";
 
         // pre-assigned Keyboard buttons
-        static KeyboardButton ClusterButton = new KeyboardButton("Cluster (lappeen Ranta)");
-        static KeyboardButton OtitButton = new KeyboardButton("Otit (Oulu)");
-        static KeyboardButton DigitButton = new KeyboardButton("Digit (Turku)");
-        static KeyboardButton DateButton = new KeyboardButton("Date (Turku)");
-        static KeyboardButton TikButton = new KeyboardButton("Tik (Otaniemi)");
-        static KeyboardButton AlgoButton = new KeyboardButton("Algo (Jyväskylä)");
-        static KeyboardButton TuttiButton = new KeyboardButton("Tutti (Vaasa)");
-        static KeyboardButton SosaButton = new KeyboardButton("Sosa (Lahti)");
-        static KeyboardButton TiTeButton = new KeyboardButton("TiTe (Tampere)");
+        static KeyboardButton ClusterButton = new KeyboardButton(guildDict[guildEnum.Cluster]);
+        static KeyboardButton OtitButton = new KeyboardButton(guildDict[guildEnum.Otit]);
+        static KeyboardButton DigitButton = new KeyboardButton(guildDict[guildEnum.Digit]);
+        static KeyboardButton DateButton = new KeyboardButton(guildDict[guildEnum.Date]);
+        static KeyboardButton TikButton = new KeyboardButton(guildDict[guildEnum.Tik]);
+        static KeyboardButton AlgoButton = new KeyboardButton(guildDict[guildEnum.Algo]);
+        static KeyboardButton TuttiButton = new KeyboardButton(guildDict[guildEnum.Tutti]);
+        static KeyboardButton SosaButton = new KeyboardButton(guildDict[guildEnum.Sosa]);
+        static KeyboardButton TiTeButton = new KeyboardButton(guildDict[guildEnum.TiTe]);
 
         // Build keyboards
         static InlineKeyboardMarkup tosMenuMarkup = new(InlineKeyboardButton.WithCallbackData(acceptButton));
