@@ -4,14 +4,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
+using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Titeenipeli.BackgroundServices;
 using Titeenipeli.Context;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
+using Titeenipeli.Options;
 
 namespace Titeenipeli;
 
@@ -24,50 +27,58 @@ public static class Program
         builder.Services.AddDbContext<ApiDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
 
+        JwtOptions jwtOptions = new JwtOptions();
+        builder.Configuration.GetSection("JWT").Bind(jwtOptions);
+        builder.Services.AddSingleton(jwtOptions);
+
+        GameOptions gameOptions = new GameOptions();
+        builder.Configuration.GetSection("Game").Bind(gameOptions);
+        builder.Services.AddSingleton(gameOptions);
+
         // Adding OpenTelemetry tracing and metrics
-        var otel = builder.Services.AddOpenTelemetry();
+        IOpenTelemetryBuilder openTelemetry = builder.Services.AddOpenTelemetry();
 
-        string otelEnpoint = builder.Configuration["OpenTelemetryEndpoint"] ?? "localhost:4318";
+        string openTelemetryEndpoint = builder.Configuration["OpenTelemetryEndpoint"] ?? "localhost:4318";
 
-        otel.ConfigureResource(resource => resource
-                .AddService(serviceName: builder.Environment.ApplicationName));
+        openTelemetry.ConfigureResource(resource => resource
+            .AddService(builder.Environment.ApplicationName));
 
-        otel.WithMetrics(metrics =>
+        openTelemetry.WithMetrics(metrics =>
+        {
+            metrics
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddMeter("Microsoft.AspNetCore.Hosting")
+                .AddMeter("Microsoft.AspNetCore.Server.Kestrel");
+
+            metrics.AddOtlpExporter((exporterOptions, metricReaderOptions) =>
             {
-                metrics
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddMeter("Microsoft.AspNetCore.Hosting")
-                    .AddMeter("Microsoft.AspNetCore.Server.Kestrel");
-
-                metrics.AddOtlpExporter((exporterOptions, metricReaderOptions) =>
-                {
-                    exporterOptions.Endpoint = new Uri(otelEnpoint);
-                    exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-                    metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
-                });
+                exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
+                exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
+                metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
             });
+        });
 
-        otel.WithTracing(tracing =>
+        openTelemetry.WithTracing(tracing =>
+        {
+            tracing
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddEntityFrameworkCoreInstrumentation();
+
+            tracing.AddOtlpExporter(exporterOptions =>
             {
-                tracing
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    .AddEntityFrameworkCoreInstrumentation();
-
-                tracing.AddOtlpExporter((exporterOptions) =>
-                {
-                    exporterOptions.Endpoint = new Uri(otelEnpoint);
-                    exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-                });
+                exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
+                exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
             });
+        });
 
         // Adding OpenTelemetry logging
-        builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter((exporterOptions) =>
-                {
-                    exporterOptions.Endpoint = new Uri(otelEnpoint);
-                    exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-                }));
+        builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter(exporterOptions =>
+        {
+            exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
+            exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
+        }));
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -78,8 +89,8 @@ public static class Program
             {
                 Scheme = "Bearer",
                 BearerFormat = "JWT",
-                In = ParameterLocation.Header,
-                Name = "Authorization",
+                In = ParameterLocation.Cookie,
+                Name = "X-Authorization",
                 Description = "Bearer Authentication with JWT Token",
                 Type = SecuritySchemeType.Http
             });
@@ -102,10 +113,10 @@ public static class Program
 
         builder.Services.AddControllers();
 
-        builder.Services.AddAuthentication(opt =>
+        builder.Services.AddAuthentication(options =>
         {
-            opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(options =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
@@ -114,21 +125,32 @@ public static class Program
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-                ValidAudience = builder.Configuration["JWT:ValidAudience"],
+                ValidIssuer = jwtOptions.ValidIssuer,
+                ValidAudience = jwtOptions.ValidAudience,
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]!)),
+                        Encoding.UTF8.GetBytes(jwtOptions.Secret)),
                 TokenDecryptionKey =
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Encryption"]!))
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Encryption))
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    context.Token = context.Request.Cookies[jwtOptions.CookieName];
+                    return Task.CompletedTask;
+                }
             };
         });
 
         builder.Services.AddControllers()
-            .AddNewtonsoftJson(options =>
-            {
-                options.SerializerSettings.ContractResolver = new DefaultContractResolver();
-            });
+               .AddNewtonsoftJson(options =>
+               {
+                   options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+               });
+
+        AddBackgroundServices(builder.Services);
 
         WebApplication app = builder.Build();
 
@@ -139,7 +161,7 @@ public static class Program
 
             DbFiller.Clear(dbContext);
             dbContext.Database.EnsureCreated();
-            DbFiller.Initialize(dbContext, builder.Configuration);
+            DbFiller.Initialize(dbContext, gameOptions);
         }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
@@ -154,22 +176,31 @@ public static class Program
 
         app.UseHttpsRedirection();
 
-        // <snippet_UseWebSockets>
-        WebSocketOptions webSocketOptions = new WebSocketOptions
-        {
-            KeepAliveInterval = TimeSpan.FromMinutes(2)
-        };
-
-        app.UseWebSockets(webSocketOptions);
-        // </snippet_UseWebSockets>
-
-        app.UseDefaultFiles();
-        app.UseStaticFiles();
-
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
 
         app.Run();
+    }
+
+    private static void AddBackgroundServices(IServiceCollection services)
+    {
+        TimeSpan updateCumulativeScoresServicePeriod = TimeSpan.FromMinutes(1);
+
+        services.AddScoped<IUpdateCumulativeScoresService, UpdateCumulativeScoresService>();
+        services.AddHostedService(
+            serviceProvider =>
+                new AsynchronousTimedBackgroundService<
+                    IUpdateCumulativeScoresService, UpdateCumulativeScoresService>(
+                    serviceProvider,
+                    GetNonNullService<ILogger<UpdateCumulativeScoresService>>(serviceProvider),
+                    updateCumulativeScoresServicePeriod));
+    }
+
+    private static TService GetNonNullService<TService>(IServiceProvider serviceProvider)
+    {
+        return serviceProvider.GetService<TService>() ??
+               throw new Exception("Unable to discover critical service during startup. " +
+                                   $"Service name: {typeof(TService).Name}");
     }
 }

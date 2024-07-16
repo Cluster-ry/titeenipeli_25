@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
 using Titeenipeli.Handlers;
-using Titeenipeli.Models;
+using Titeenipeli.Inputs;
+using Titeenipeli.Options;
 using Titeenipeli.Schema;
 
 namespace Titeenipeli.Controllers;
@@ -10,43 +11,37 @@ namespace Titeenipeli.Controllers;
 [ApiController]
 public class AuthenticationController : ControllerBase
 {
-    private readonly IConfiguration _configuration;
     private readonly ApiDbContext _dbContext;
+    private readonly JwtOptions _jwtOptions;
 
-    public AuthenticationController(IConfiguration configuration, ApiDbContext dbContext)
+    public AuthenticationController(JwtOptions jwtOptions, ApiDbContext dbContext)
     {
-        _configuration = configuration;
+        _jwtOptions = jwtOptions;
         _dbContext = dbContext;
     }
 
     [HttpPost("login")]
-    public IActionResult PostLogin([FromBody] Login login)
+    public IActionResult PostLogin([FromBody] PostLoginInput loginInput)
     {
         // TODO: Actual login validation 
-        if (login is not { Username: "test", Password: "test123" })
+        if (loginInput is not { Username: "test", Password: "test123" })
         {
             return Unauthorized();
         }
 
-        User? user = _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Code == login.Username);
+        User? user = _dbContext.Users.Include(user => user.Guild)
+                               .FirstOrDefault(user => user.Code == loginInput.Username);
 
         if (user == null)
         {
             return BadRequest();
         }
 
-        JwtClaimModel jwtClaim = new JwtClaimModel
-        {
-            Id = user.Id,
-            CoordinateOffset = new CoordinateModel
-            {
-                X = user.SpawnX,
-                Y = user.SpawnY
-            },
-            GuildId = user.Guild.Color
-        };
+        JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
 
-        Response.Headers.Authorization = $"Bearer {new JwtHandler(_configuration).GetJwtToken(jwtClaim).Token}";
+        Response.Cookies.Append(_jwtOptions.CookieName, jwtHandler.GetJwtToken(user),
+            jwtHandler.GetAuthorizationCookieOptions());
+
         return Ok();
     }
 }
