@@ -2,6 +2,9 @@ import "components/enums/pixelOwners.proto";
 import "components/enums/pixelTypes.proto";
 import "components/schemas/relativeCoordinate.proto";
 
+option csharp_namespace = "GrpcGeneratedServices";
+package Map;
+
 message IncrementalMapUpdateRequest {
   repeated IncrementalMapUpdate updates = 1;
 
@@ -18,6 +21,6 @@ message IncrementalMapUpdateResponse {
   
 }
 
-service IncrementalMapUpdateService {
-  rpc IncrementalMapUpdate(IncrementalMapUpdateRequest) returns (IncrementalMapUpdateResponse);
+service MapUpdate {
+  rpc GetIncremental(IncrementalMapUpdateRequest) returns (IncrementalMapUpdateResponse);
 }
