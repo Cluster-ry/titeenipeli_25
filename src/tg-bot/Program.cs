@@ -9,8 +9,6 @@ namespace Titeenipeli_bot
         // Variables
         private static string token;
         private static TelegramBotClient bot;
-        private Handlers handlers = new Handlers(bot);
-
 
         static void Main(string[] args)
         {
