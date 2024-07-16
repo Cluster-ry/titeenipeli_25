@@ -1,11 +1,11 @@
+#Stage 1: Build
 FROM node:latest
 
 WORKDIR /app
 
 # Installing the dependencies
 COPY pnpm-lock.yaml package.json ./
-
-RUN npm install -g pnpm
+RUN npm i -g pnpm
 
 RUN pnpm i
 
@@ -13,6 +13,19 @@ COPY . .
 
 # Building the application
 RUN pnpm run build
+
+#Stage 2: Production
+FROM node:alpine
+
+WORKDIR /app
+
+COPY pnpm-lock.yaml package.json ./
+
+# Installing dependencies only necessary for production
+RUN npm i -g pnpm
+RUN pnpm i --only=production
+
+COPY --from=0 /app .
 
 EXPOSE 5173     
 
