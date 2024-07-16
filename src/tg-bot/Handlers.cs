@@ -37,15 +37,15 @@ namespace Titeenipeli_bot
         const string acceptButton = "I Accept";
 
         // pre-assigned Keyboard buttons
-        static KeyboardButton ClusterButton = new("Cluster (lappeen Ranta)");
-        static KeyboardButton OtitButton = new("Otit (Oulu)");
-        static KeyboardButton DigitButton = new("Digit (Turku)");
-        static KeyboardButton DateButton = new("Date (Turku)");
-        static KeyboardButton TikButton = new("Tik (Otaniemi)");
-        static KeyboardButton AlgoButton = new("Algo (Jyväskylä)");
-        static KeyboardButton TuttiButton = new("Tutti (Vaasa)");
-        static KeyboardButton SosaButton = new("Sosa (Lahti)");
-        static KeyboardButton TiTeButton = new("TiTe (Tampere)");
+        static KeyboardButton ClusterButton = new KeyboardButton("Cluster (lappeen Ranta)");
+        static KeyboardButton OtitButton = new KeyboardButton("Otit (Oulu)");
+        static KeyboardButton DigitButton = new KeyboardButton("Digit (Turku)");
+        static KeyboardButton DateButton = new KeyboardButton("Date (Turku)");
+        static KeyboardButton TikButton = new KeyboardButton("Tik (Otaniemi)");
+        static KeyboardButton AlgoButton = new KeyboardButton("Algo (Jyväskylä)");
+        static KeyboardButton TuttiButton = new KeyboardButton("Tutti (Vaasa)");
+        static KeyboardButton SosaButton = new KeyboardButton("Sosa (Lahti)");
+        static KeyboardButton TiTeButton = new KeyboardButton("TiTe (Tampere)");
 
         // Build keyboards
         static InlineKeyboardMarkup tosMenuMarkup = new(InlineKeyboardButton.WithCallbackData(acceptButton));
