@@ -18,7 +18,8 @@ namespace Titeenipeli_bot
                 .Build();
 
             token = configuration["token"];
-            if (token is null) {
+            if (token is null)
+            {
                 Console.WriteLine("Unable to find token, exiting...");
                 return;
             }
@@ -28,19 +29,19 @@ namespace Titeenipeli_bot
             // Runnin the bot
             using CancellationTokenSource cts = new CancellationTokenSource();
 
-                // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool, so we use cancellation token
-                bot.StartReceiving(
-                    updateHandler: handlers.HandleUpdate,
-                    errorHandler: handlers.HandleError,
-                    cancellationToken: cts.Token
-                );
+            // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool, so we use cancellation token
+            bot.StartReceiving(
+                updateHandler: handlers.HandleUpdate,
+                errorHandler: handlers.HandleError,
+                cancellationToken: cts.Token
+            );
 
-                // Tell the user the bot is online
-                Console.WriteLine("TiteenipeliBot is running and is listening for updates. Press enter to stop");
-                Console.ReadLine();
+            // Tell the user the bot is online
+            Console.WriteLine("TiteenipeliBot is running and is listening for updates. Press enter to stop");
+            Console.ReadLine();
 
-                // Send cancellation request to stop the bot
-                cts.Cancel();
+            // Send cancellation request to stop the bot
+            cts.Cancel();
         }
     }
 }
