@@ -225,7 +225,7 @@ namespace Titeenipeli_bot
             );
 
             // After a small time window, jump straight to choosing your guild
-            Thread.Sleep(2000);
+            Thread.Sleep(1000);
             await SendGuildMenu(userid);
             return;
         }
@@ -266,6 +266,7 @@ namespace Titeenipeli_bot
         {
             // TODO: send guid data to application
             choosingGuild = false;
+            guildSelected = true;
             await bot.SendTextMessageAsync(
                 userid,
                 "Guild Selected! Now start the game with /game.",
