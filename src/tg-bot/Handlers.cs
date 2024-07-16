@@ -11,21 +11,33 @@ namespace Titeenipeli_bot
         static bool tosAccepted = false; // I know its more of a privacy notice than tos but tos is easier to write :D
         static private bool userCreated = false;
         static bool choosingGuild = false;
-        static string guildChosen = "";
+        guildEnum guildChosen;
         static bool guildSelected = false;
         private TelegramBotClient bot;
-        static Dictionary<string, string> guildDict =
+        enum guildEnum
+        {
+            Cluster,
+            Otit,
+            Digit,
+            Date,
+            Tik,
+            Algo,
+            Tutti,
+            Sosa,
+            TiTe
+        };
+        static Dictionary<Handlers.guildEnum, string> guildDict =
             new()
             {
-                { "Cluster", "Cluster (lappeen Ranta)" },
-                { "Otit", "Otit (Oulu)" },
-                { "Digit", "Digit (Turku)" },
-                { "Date", "Date (Turku)" },
-                { "Tik", "Tik (Otaniemi)" },
-                { "Algo", "Algo (Jyväskylä)" },
-                { "Tutti", "Tutti (Vaasa)" },
-                { "Sosa", "Sosa (Lahti)" },
-                { "TiTe", "TiTe (Tampere)" },
+                { guildEnum.Cluster, "Cluster (lappeen Ranta)" },
+                { guildEnum.Otit, "Otit (Oulu)" },
+                { guildEnum.Digit, "Digit (Turku)" },
+                { guildEnum.Date, "Date (Turku)" },
+                { guildEnum.Tik, "Tik (Otaniemi)" },
+                { guildEnum.Algo, "Algo (Jyväskylä)" },
+                { guildEnum.Tutti, "Tutti (Vaasa)" },
+                { guildEnum.Sosa, "Sosa (Lahti)" },
+                { guildEnum.TiTe, "TiTe (Tampere)" },
             };
 
         // Pre-assign menu text
@@ -111,7 +123,7 @@ namespace Titeenipeli_bot
             {
                 if (guildDict.ContainsValue(text))
                 {
-                    guildChosen = text;
+                    guildChosen = guildDict.FirstOrDefault(x => x.Value == text).Key;
                     await SendGuildData(user.Id, guildChosen);
                     return;
                 }
@@ -262,14 +274,14 @@ namespace Titeenipeli_bot
             );
         }
 
-        async Task SendGuildData(long userid, string guild)
+        async Task SendGuildData(long userid, guildEnum guild)
         {
             // TODO: send guid data to application
             choosingGuild = false;
             guildSelected = true;
             await bot.SendTextMessageAsync(
                 userid,
-                "Guild Selected! Now start the game with /game.",
+                String.Format("You selected the guild {0}! Now start the game with /game.", guildChosen.ToString()),
                 replyMarkup: new ReplyKeyboardRemove()
             );
             return;
