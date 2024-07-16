@@ -1,1 +1,6 @@
 # .gitignore
+# VS Code files for those working on multiple tools
+.vscode/*
+.vscode
+*.code-workspace
+src/tg-bot/todo
