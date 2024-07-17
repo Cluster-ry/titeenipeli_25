@@ -12,6 +12,7 @@ using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Titeenipeli.BackgroundServices;
 using Titeenipeli.Context;
+using Titeenipeli.gRPC;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
@@ -150,6 +151,9 @@ public static class Program
                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                });
 
+        builder.Services.AddGrpc();
+        builder.Services.AddGrpcReflection();
+
         AddBackgroundServices(builder.Services);
 
         WebApplication app = builder.Build();
@@ -179,6 +183,8 @@ public static class Program
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
+
+        GRPCServiceRegister.AddGRPCServices(app);
 
         app.Run();
     }

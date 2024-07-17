@@ -1,5 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# 
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli", "Titeenipeli\Titeenipeli.csproj", "{6D60AC2C-E10C-44EE-84B9-641E7C4514DC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Tests", "Titeenipeli.Tests\Titeenipeli.Tests.csproj", "{A6DC3A81-16D0-4F67-BD0A-F2624B30D740}"
@@ -10,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.env = .env
 		.env.example = .env.example
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.gRPC", "Titeenipeli.gRPC\Titeenipeli.gRPC.csproj", "{F10BBF82-94C4-4D2A-A042-5B96944BE339}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,5 +30,12 @@ Global
 		{A6DC3A81-16D0-4F67-BD0A-F2624B30D740}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6DC3A81-16D0-4F67-BD0A-F2624B30D740}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6DC3A81-16D0-4F67-BD0A-F2624B30D740}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F10BBF82-94C4-4D2A-A042-5B96944BE339}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F10BBF82-94C4-4D2A-A042-5B96944BE339}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F10BBF82-94C4-4D2A-A042-5B96944BE339}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F10BBF82-94C4-4D2A-A042-5B96944BE339}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
