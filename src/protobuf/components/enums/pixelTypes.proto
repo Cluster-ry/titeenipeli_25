@@ -1,3 +1,5 @@
+syntax = "proto3";
+
 enum PixelTypes {
     Normal = 0;
     MapBorder = 1;
