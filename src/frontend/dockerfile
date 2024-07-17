@@ -1,5 +1,5 @@
 #Stage 1: Build
-FROM node:latest
+FROM node:latest as build
 
 WORKDIR /app
 
@@ -9,24 +9,16 @@ RUN npm i -g pnpm
 
 RUN pnpm i
 
-COPY . .
+COPY . /app
 
 # Building the application
 RUN pnpm run build
 
 #Stage 2: Production
-FROM node:alpine
+FROM nginx:alpine as production
 
-WORKDIR /app
+COPY --from=build /app/dist /usr/share/nginx/html/
 
-COPY pnpm-lock.yaml package.json ./
+EXPOSE 80     
 
-# Installing dependencies only necessary for production
-RUN npm i -g pnpm
-RUN pnpm i --only=production
-
-COPY --from=0 /app .
-
-EXPOSE 5173     
-
-CMD ["pnpm", "run", "dev"]
+CMD ["nginx","-g","daemon off;"]
