@@ -16,6 +16,8 @@ using Titeenipeli.gRPC;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
+using Titeenipeli.Services;
+using Titeenipeli.Services.Interfaces;
 
 namespace Titeenipeli;
 
@@ -27,6 +29,9 @@ public static class Program
 
         builder.Services.AddDbContext<ApiDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
+
+        builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IGuildService, GuildService>();
 
         JwtOptions jwtOptions = new JwtOptions();
         builder.Configuration.GetSection("JWT").Bind(jwtOptions);
