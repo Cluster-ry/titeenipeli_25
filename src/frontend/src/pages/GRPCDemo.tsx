@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { MapUpdateClient } from "../generated/grpc/services/MapUpdateServiceClientPb";
-import * as Map from "../generated/grpc/services/MapUpdate_pb";
-import * as PixelOwners from "../generated/grpc/components/enums/pixelOwners_pb";
-import * as RelativeCoordinate from "../generated/grpc/components/schemas/relativeCoordinate_pb";
+import * as Map from "../generated/grpc/services/MapUpdate_pb.d";
+import * as PixelOwners from "../generated/grpc/components/enums/pixelOwners_pb.d";
+import * as RelativeCoordinate from "../generated/grpc/components/schemas/relativeCoordinate_pb.d";
+import {MapUpdateClient} from "../generated/grpc/services/MapUpdate.client";
+import {GrpcWebFetchTransport} from "@protobuf-ts/grpcweb-transport";
 
 export default function GRPCTest() {
   useEffect(() => {
@@ -10,7 +11,11 @@ export default function GRPCTest() {
   });
 
   const callGRPC = async () => {
-    const mapUpdateClient = new MapUpdateClient(window.location.origin);
+    const transport = new GrpcWebFetchTransport({
+      baseUrl: window.location.origin
+    });
+
+    const mapUpdateClient = new MapUpdateClient(transport);
     const relativeCoordinate = new RelativeCoordinate.RelativeCoordinate();
     relativeCoordinate.setX(1);
     relativeCoordinate.setY(1);
