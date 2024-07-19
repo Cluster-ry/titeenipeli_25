@@ -9,6 +9,7 @@ using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Results;
 using Titeenipeli.Schema;
+using Titeenipeli.Services.Interfaces;
 
 namespace Titeenipeli.Controllers;
 
@@ -16,20 +17,21 @@ namespace Titeenipeli.Controllers;
 [Route("users")]
 public class UserController : ControllerBase
 {
-    private readonly ApiDbContext _dbContext;
     private readonly JwtOptions _jwtOptions;
+    private readonly IUserService _userService;
+    private readonly IGuildService _guildService;
 
-    public UserController(JwtOptions jwtOptions, ApiDbContext dbContext)
+    public UserController(JwtOptions jwtOptions, IUserService userService, IGuildService guildService)
     {
         _jwtOptions = jwtOptions;
-        _dbContext = dbContext;
+        _userService = userService;
+        _guildService = guildService;
     }
 
     [HttpPost]
     public IActionResult PostUsers([FromBody] PostUsersInput usersInput)
     {
-        User? user = _dbContext.Users.Include(entity => entity.Guild).FirstOrDefault(entity =>
-            entity.TelegramId == usersInput.Id);
+        User? user = _userService.GetUserByTelegramId(usersInput.Id);
 
         if (user == null)
         {
@@ -52,8 +54,7 @@ public class UserController : ControllerBase
                 Hash = usersInput.Hash
             };
 
-            _dbContext.Users.Add(user);
-            _dbContext.SaveChanges();
+            _userService.AddUser(user);
         }
 
         JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
@@ -74,10 +75,15 @@ public class UserController : ControllerBase
         ClaimsIdentity identity = (ClaimsIdentity)HttpContext.User.Identity!;
         JwtClaim? jwtClaim = JwtHandler.GetJwtClaimFromIdentity(identity);
 
-        User? user = _dbContext.Users.Include(user => user.Guild)
-                               .FirstOrDefault(user => jwtClaim != null && user.Id == jwtClaim.Id);
+        bool validGuild = int.TryParse(input.Guild, out int guildColor);
 
-        Guild? guild = _dbContext.Guilds.FirstOrDefault(guild => guild.Color.ToString() == input.Guild);
+        if (jwtClaim == null || !validGuild)
+        {
+            return BadRequest();
+        }
+
+        User? user = _userService.GetUser(jwtClaim.Id);
+        Guild? guild = _guildService.GetGuildByColor(guildColor);
 
         if (user == null || guild == null || user.Guild != null)
         {
@@ -85,7 +91,7 @@ public class UserController : ControllerBase
         }
 
         user.Guild = guild;
-        _dbContext.SaveChanges();
+        _userService.UpdateUser(user);
 
 
         // Update the claim because users guild has changed
