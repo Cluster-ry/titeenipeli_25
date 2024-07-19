@@ -2,8 +2,7 @@ using Titeenipeli.Schema;
 
 namespace Titeenipeli.Services.Interfaces;
 
-public interface ICtfFlagService
+public interface ICtfFlagService : IEntityService<CtfFlag>
 {
-    public CtfFlag? GetCtfFlag(int id);
-    public CtfFlag? GetCtfFlagByToken(string token);
+    public CtfFlag? GetByToken(string token);
 }

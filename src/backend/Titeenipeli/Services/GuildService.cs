@@ -13,12 +13,23 @@ public class GuildService : IGuildService
         _dbContext = dbContext;
     }
 
-    public Guild? GetGuild(int id)
+    public Guild? GetById(int id)
     {
         return _dbContext.Guilds.FirstOrDefault(guild => guild.Id == id);
     }
 
-    public Guild? GetGuildByColor(int color)
+    public List<Guild> GetAll()
+    {
+        return _dbContext.Guilds.ToList();
+    }
+
+    public void Add(Guild guild)
+    {
+        _dbContext.Guilds.Add(guild);
+        _dbContext.SaveChanges();
+    }
+
+    public Guild? GetByColor(int color)
     {
         return _dbContext.Guilds.FirstOrDefault(guild => guild.Color == color);
     }

@@ -28,7 +28,7 @@ public class AuthenticationController : ControllerBase
             return Unauthorized();
         }
 
-        User? user = _userService.GetUserByCode(loginInput.Username);
+        User? user = _userService.GetByCode(loginInput.Username);
 
         if (user == null)
         {

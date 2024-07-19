@@ -20,7 +20,7 @@ public class CtfController : ControllerBase
     [HttpPost("ctf")]
     public IActionResult PostCtf([FromBody] PostCtfInput ctfInput)
     {
-        CtfFlag? ctfFlag = _ctfFlagService.GetCtfFlagByToken(ctfInput.Token);
+        CtfFlag? ctfFlag = _ctfFlagService.GetByToken(ctfInput.Token);
 
         if (ctfFlag == null)
         {

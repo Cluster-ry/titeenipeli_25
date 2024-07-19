@@ -14,12 +14,22 @@ public class CtfFlagMockService : ICtfFlagService
         _ctfFlags = ctfFlags;
     }
 
-    public CtfFlag GetCtfFlag(int id)
+    public CtfFlag GetById(int id)
     {
         return _ctfFlags.FirstOrDefault(flag => flag.Id == id);
     }
-    
-    public CtfFlag GetCtfFlagByToken(string token)
+
+    public List<CtfFlag> GetAll()
+    {
+        return _ctfFlags;
+    }
+
+    public void Add(CtfFlag ctfFlag)
+    {
+        _ctfFlags.Add(ctfFlag);
+    }
+
+    public CtfFlag GetByToken(string token)
     {
         return _ctfFlags.FirstOrDefault(flag => flag.Token == token);
     }

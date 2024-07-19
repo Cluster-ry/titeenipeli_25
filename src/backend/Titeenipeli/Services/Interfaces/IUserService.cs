@@ -2,12 +2,9 @@ using Titeenipeli.Schema;
 
 namespace Titeenipeli.Services.Interfaces;
 
-public interface IUserService
+public interface IUserService : IEntityService<User>
 {
-    public User? GetUser(int id);
-    public List<User> GetUsers();
-    public User? GetUserByCode(string code);
-    public User? GetUserByTelegramId(string telegramId);
-    public void AddUser(User user);
-    public void UpdateUser(User user);
+    public User? GetByCode(string code);
+    public User? GetByTelegramId(string telegramId);
+    public void Update(User user);
 }

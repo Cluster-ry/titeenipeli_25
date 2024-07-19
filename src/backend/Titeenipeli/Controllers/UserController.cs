@@ -29,7 +29,7 @@ public class UserController : ControllerBase
     [HttpPost]
     public IActionResult PostUsers([FromBody] PostUsersInput usersInput)
     {
-        User? user = _userService.GetUserByTelegramId(usersInput.Id);
+        User? user = _userService.GetByTelegramId(usersInput.Id);
 
         if (user == null)
         {
@@ -52,7 +52,7 @@ public class UserController : ControllerBase
                 Hash = usersInput.Hash
             };
 
-            _userService.AddUser(user);
+            _userService.Add(user);
         }
 
         JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
@@ -80,8 +80,8 @@ public class UserController : ControllerBase
             return BadRequest();
         }
 
-        User? user = _userService.GetUser(jwtClaim.Id);
-        Guild? guild = _guildService.GetGuildByColor(guildColor);
+        User? user = _userService.GetById(jwtClaim.Id);
+        Guild? guild = _guildService.GetByColor(guildColor);
 
         if (user == null || guild == null || user.Guild != null)
         {
@@ -89,7 +89,7 @@ public class UserController : ControllerBase
         }
 
         user.Guild = guild;
-        _userService.UpdateUser(user);
+        _userService.Update(user);
 
 
         // Update the claim because users guild has changed

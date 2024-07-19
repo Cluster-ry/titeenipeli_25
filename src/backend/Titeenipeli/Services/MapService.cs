@@ -15,12 +15,17 @@ public class MapService : IMapService
         _dbContext = dbContext;
     }
 
-    public Pixel? GetPixel(Coordinate pixelCoordinate)
+    public Pixel? GetByCoordinate(Coordinate pixelCoordinate)
     {
         return _dbContext.Map.FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
     }
 
-    public List<Pixel> GetPixels()
+    public Pixel? GetById(int id)
+    {
+        return _dbContext.Map.FirstOrDefault(pixel => pixel.Id == id);
+    }
+
+    public List<Pixel> GetAll()
     {
         return _dbContext.Map
             .Include(pixel => pixel.User)
@@ -28,15 +33,15 @@ public class MapService : IMapService
             .OrderBy(pixel => pixel.Y).ToList();
     }
 
-    public void AddPixel(Pixel pixel)
+    public void Add(Pixel pixel)
     {
         _dbContext.Map.Add(pixel);
         _dbContext.SaveChanges();
     }
 
-    public void UpdatePixel(Pixel pixel)
+    public void Update(Pixel pixel)
     {
-        Pixel? existingUser = GetPixel(new Coordinate
+        Pixel? existingUser = GetByCoordinate(new Coordinate
         {
             X = pixel.X,
             Y = pixel.Y

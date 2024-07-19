@@ -14,35 +14,35 @@ public class UserService : IUserService
         _dbContext = dbContext;
     }
 
-    public User? GetUser(int id)
+    public User? GetById(int id)
     {
         return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Id == id);
     }
 
-    public List<User> GetUsers()
+    public List<User> GetAll()
     {
         return _dbContext.Users.ToList();
     }
 
-    public User? GetUserByCode(string code)
+    public User? GetByCode(string code)
     {
         return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Code == code);
     }
 
-    public User? GetUserByTelegramId(string telegramId)
+    public User? GetByTelegramId(string telegramId)
     {
         return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.TelegramId == telegramId);
     }
 
-    public void AddUser(User user)
+    public void Add(User user)
     {
         _dbContext.Users.Add(user);
         _dbContext.SaveChanges();
     }
 
-    public void UpdateUser(User user)
+    public void Update(User user)
     {
-        User? existingUser = GetUser(user.Id);
+        User? existingUser = GetById(user.Id);
 
         if (existingUser == null)
         {

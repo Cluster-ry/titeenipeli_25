@@ -34,15 +34,15 @@ public class MapController : ControllerBase
     public IActionResult GetPixels()
     {
         // TODO: Remove temporary testing user
-        User? user = _userService.GetUserByCode("test");
+        User? user = _userService.GetByCode("test");
 
         if (user == null)
         {
             return BadRequest();
         }
 
-        User[] users = _userService.GetUsers().ToArray();
-        Pixel[] pixels = _mapService.GetPixels().ToArray();
+        User[] users = _userService.GetAll().ToArray();
+        Pixel[] pixels = _mapService.GetAll().ToArray();
 
         // +2 to account for the borders
         int width = _gameOptions.Width + 2 * BorderWidth;
@@ -69,7 +69,7 @@ public class MapController : ControllerBase
     public IActionResult PostPixels([FromBody] PostPixelsInput pixelsInput)
     {
         // TODO: Remove temporary testing user
-        User? user = _userService.GetUserByCode("test");
+        User? user = _userService.GetByCode("test");
 
         if (user == null)
         {
@@ -87,7 +87,7 @@ public class MapController : ControllerBase
             return BadRequest();
         }
 
-        Pixel? pixelToUpdate = _mapService.GetPixel(globalCoordinate);
+        Pixel? pixelToUpdate = _mapService.GetByCoordinate(globalCoordinate);
 
         if (pixelToUpdate == null)
         {
@@ -103,7 +103,7 @@ public class MapController : ControllerBase
 
 
         pixelToUpdate.User = user;
-        _mapService.UpdatePixel(pixelToUpdate);
+        _mapService.Update(pixelToUpdate);
 
         GameEvent gameEvent = new GameEvent
         {
