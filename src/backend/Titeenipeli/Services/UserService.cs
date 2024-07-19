@@ -19,6 +19,11 @@ public class UserService : IUserService
         return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Id == id);
     }
 
+    public List<User> GetUsers()
+    {
+        return _dbContext.Users.ToList();
+    }
+
     public User? GetUserByCode(string code)
     {
         return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Code == code);

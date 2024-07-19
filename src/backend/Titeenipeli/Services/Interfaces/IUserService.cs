@@ -5,6 +5,7 @@ namespace Titeenipeli.Services.Interfaces;
 public interface IUserService
 {
     public User? GetUser(int id);
+    public List<User> GetUsers();
     public User? GetUserByCode(string code);
     public User? GetUserByTelegramId(string telegramId);
     public void AddUser(User user);
