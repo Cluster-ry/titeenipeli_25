@@ -32,6 +32,7 @@ public static class Program
 
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IGuildService, GuildService>();
+        builder.Services.AddScoped<IMapService, MapService>();
 
         JwtOptions jwtOptions = new JwtOptions();
         builder.Configuration.GetSection("JWT").Bind(jwtOptions);
