@@ -21,13 +21,12 @@ public class UserService : IUserService
 
     public User? GetUserByCode(string code)
     {
-        throw new NotImplementedException();
+        return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Code == code);
     }
 
     public User? GetUserByTelegramId(string telegramId)
     {
-        return _dbContext.Users.Include(entity => entity.Guild)
-            .FirstOrDefault(entity => entity.TelegramId == telegramId);
+        return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.TelegramId == telegramId);
     }
 
     public void AddUser(User user)
