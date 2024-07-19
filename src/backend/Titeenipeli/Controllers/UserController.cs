@@ -1,8 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Titeenipeli.Context;
 using Titeenipeli.Handlers;
 using Titeenipeli.Inputs;
 using Titeenipeli.Models;
