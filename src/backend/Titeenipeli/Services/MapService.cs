@@ -15,12 +15,40 @@ public class MapService : IMapService
         _dbContext = dbContext;
     }
 
+    public Pixel? GetPixel(Coordinate pixelCoordinate)
+    {
+        return _dbContext.Map.FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
+    }
+
     public List<Pixel> GetPixels()
     {
         return _dbContext.Map
             .Include(pixel => pixel.User)
             .ThenInclude(pixelOwner => pixelOwner!.Guild)
             .OrderBy(pixel => pixel.Y).ToList();
+    }
+
+    public void AddPixel(Pixel pixel)
+    {
+        _dbContext.Map.Add(pixel);
+        _dbContext.SaveChanges();
+    }
+
+    public void UpdatePixel(Pixel pixel)
+    {
+        Pixel? existingUser = GetPixel(new Coordinate
+        {
+            X = pixel.X,
+            Y = pixel.Y
+        });
+
+        if (existingUser == null)
+        {
+            throw new Exception("Pixel doesn't exist.");
+        }
+
+        _dbContext.Entry(existingUser).CurrentValues.SetValues(pixel);
+        _dbContext.SaveChanges();
     }
 
     public bool IsValidPlacement(Coordinate pixelCoordinate, User user)
