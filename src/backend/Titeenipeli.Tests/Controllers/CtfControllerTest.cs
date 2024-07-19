@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Titeenipeli.Controllers;
 using Titeenipeli.Inputs;
@@ -14,10 +13,11 @@ namespace Titeenipeli.Tests.Controllers;
 public class CtfControllerTest
 {
     private readonly CtfFlagMockService _ctfFlagMockService;
-    
+
     public CtfControllerTest()
     {
-        List<CtfFlag> flags = [
+        List<CtfFlag> flags =
+        [
             new CtfFlag
             {
                 Token = "#TEST_FLAG"
@@ -41,6 +41,6 @@ public class CtfControllerTest
 
         IStatusCodeActionResult result = controller.PostCtf(input) as IStatusCodeActionResult;
 
-        Assert.Equal(statusCode,result?.StatusCode);
+        Assert.Equal(statusCode, result?.StatusCode);
     }
 }
