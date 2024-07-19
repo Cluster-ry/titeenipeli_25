@@ -34,6 +34,7 @@ public static class Program
         builder.Services.AddScoped<IGuildService, GuildService>();
         builder.Services.AddScoped<IMapService, MapService>();
         builder.Services.AddScoped<IGameEventService, GameEventService>();
+        builder.Services.AddScoped<ICtfFlagService, CtfFlagService>();
 
         JwtOptions jwtOptions = new JwtOptions();
         builder.Configuration.GetSection("JWT").Bind(jwtOptions);
