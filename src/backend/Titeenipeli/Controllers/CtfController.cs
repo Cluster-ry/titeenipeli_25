@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Titeenipeli.Context;
 using Titeenipeli.Inputs;
 using Titeenipeli.Schema;
+using Titeenipeli.Services.Interfaces;
 
 namespace Titeenipeli.Controllers;
 
@@ -10,17 +10,17 @@ namespace Titeenipeli.Controllers;
 [Authorize]
 public class CtfController : ControllerBase
 {
-    private readonly ApiDbContext _dbContext;
+    private readonly ICtfFlagService _ctfFlagService;
 
-    public CtfController(ApiDbContext dbContext)
+    public CtfController(ICtfFlagService ctfFlagService)
     {
-        _dbContext = dbContext;
+        _ctfFlagService = ctfFlagService;
     }
 
     [HttpPost("ctf")]
     public IActionResult PostCtf([FromBody] PostCtfInput ctfInput)
     {
-        CtfFlag? ctfFlag = _dbContext.CtfFlags.FirstOrDefault(ctfFlag => ctfFlag.Token == ctfInput.Token);
+        CtfFlag? ctfFlag = _ctfFlagService.GetCtfFlagByToken(ctfInput.Token);
 
         if (ctfFlag == null)
         {
