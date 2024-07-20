@@ -1,10 +1,10 @@
-using System.Collections.Generic;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Moq;
 using Titeenipeli.Controllers;
 using Titeenipeli.Inputs;
 using Titeenipeli.Schema;
-using Titeenipeli.Tests.Mocks.Services;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 using Xunit;
 
 namespace Titeenipeli.Tests.Controllers;
@@ -12,28 +12,18 @@ namespace Titeenipeli.Tests.Controllers;
 [TestSubject(typeof(CtfController))]
 public class CtfControllerTest
 {
-    private readonly CtfFlagRepositoryMockService _ctfFlagRepositoryMockService;
-
-    public CtfControllerTest()
-    {
-        List<CtfFlag> flags =
-        [
-            new CtfFlag
-            {
-                Token = "#TEST_FLAG"
-            }
-        ];
-
-        _ctfFlagRepositoryMockService = new CtfFlagRepositoryMockService(flags);
-    }
-
     [Theory]
     [InlineData("#TEST_FLAG", 200)]
     [InlineData("#INVALID_FLAG", 400)]
     [InlineData(null, 400)]
     public void PostCtfTest(string token, int statusCode)
     {
-        CtfController controller = new CtfController(_ctfFlagRepositoryMockService);
+        Mock<ICtfFlagRepositoryService> mockCtfFlagRepositoryService = new Mock<ICtfFlagRepositoryService>();
+        mockCtfFlagRepositoryService
+            .Setup(repositoryService => repositoryService.GetByToken("#TEST_FLAG"))
+            .Returns(new CtfFlag { Token = "#TEST_FLAG" });
+
+        CtfController controller = new CtfController(mockCtfFlagRepositoryService.Object);
         PostCtfInput input = new PostCtfInput
         {
             Token = token
