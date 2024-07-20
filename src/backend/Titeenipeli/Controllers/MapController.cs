@@ -1,13 +1,12 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Titeenipeli.Context;
 using Titeenipeli.Enums;
 using Titeenipeli.Inputs;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Results;
 using Titeenipeli.Schema;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
 
@@ -17,31 +16,33 @@ public class MapController : ControllerBase
 {
     private const int BorderWidth = 1;
 
-    private readonly ApiDbContext _dbContext;
     private readonly GameOptions _gameOptions;
+    private readonly IUserRepositoryService _userRepositoryService;
+    private readonly IMapRepositoryService _mapRepositoryService;
+    private readonly IGameEventRepositoryService _gameEventRepositoryService;
 
-    public MapController(GameOptions gameOptions, ApiDbContext dbContext)
+    public MapController(GameOptions gameOptions, IUserRepositoryService userRepositoryService, IMapRepositoryService mapRepositoryService,
+                         IGameEventRepositoryService gameEventRepositoryService)
     {
         _gameOptions = gameOptions;
-        _dbContext = dbContext;
+        _userRepositoryService = userRepositoryService;
+        _mapRepositoryService = mapRepositoryService;
+        _gameEventRepositoryService = gameEventRepositoryService;
     }
 
     [HttpGet]
     public IActionResult GetPixels()
     {
         // TODO: Remove temporary testing user
-        User? user = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
+        User? user = _userRepositoryService.GetByCode("test");
 
         if (user == null)
         {
             return BadRequest();
         }
 
-        User[] users = _dbContext.Users.ToArray();
-        Pixel[] pixels = _dbContext.Map
-                                   .Include(pixel => pixel.User)
-                                   .ThenInclude(pixelOwner => pixelOwner!.Guild)
-                                   .OrderBy(pixel => pixel.Y).ToArray();
+        User[] users = _userRepositoryService.GetAll().ToArray();
+        Pixel[] pixels = _mapRepositoryService.GetAll().ToArray();
 
         // +2 to account for the borders
         int width = _gameOptions.Width + 2 * BorderWidth;
@@ -68,38 +69,25 @@ public class MapController : ControllerBase
     public IActionResult PostPixels([FromBody] PostPixelsInput pixelsInput)
     {
         // TODO: Remove temporary testing user
-        User? testUser = _dbContext.Users.FirstOrDefault(user => user.Code == "test");
+        User? user = _userRepositoryService.GetByCode("test");
 
-        if (testUser == null)
+        if (user == null)
         {
             return BadRequest();
         }
 
         Coordinate globalCoordinate = new Coordinate
         {
-            X = testUser.SpawnX + pixelsInput.X,
-            Y = testUser.SpawnY + pixelsInput.Y
+            X = user.SpawnX + pixelsInput.X,
+            Y = user.SpawnY + pixelsInput.Y
         };
 
-        // Take neighboring pixels for the pixel the user is trying to set,
-        // but remove cornering pixels and only return pixels belonging to
-        // the user
-        bool validPlacement = (from pixel in _dbContext.Map
-                               where Math.Abs(pixel.X - globalCoordinate.X) <= 1 &&
-                                     Math.Abs(pixel.Y - globalCoordinate.Y) <= 1 &&
-                                     Math.Abs(pixel.X - globalCoordinate.X) + Math.Abs(pixel.Y - globalCoordinate.Y) <=
-                                     1 &&
-                                     pixel.User == testUser
-                               select pixel).Any();
-
-        if (!validPlacement)
+        if (IsValidPlacement(globalCoordinate, user))
         {
             return BadRequest();
         }
 
-        Pixel? pixelToUpdate = (from pixel in _dbContext.Map
-                                where pixel.X == globalCoordinate.X && pixel.Y == globalCoordinate.Y
-                                select pixel).FirstOrDefault();
+        Pixel? pixelToUpdate = _mapRepositoryService.GetByCoordinate(globalCoordinate);
 
         if (pixelToUpdate == null)
         {
@@ -114,10 +102,12 @@ public class MapController : ControllerBase
         }
 
 
-        pixelToUpdate.User = testUser;
-        _dbContext.GameEvents.Add(new GameEvent
+        pixelToUpdate.User = user;
+        _mapRepositoryService.Update(pixelToUpdate);
+
+        GameEvent gameEvent = new GameEvent
         {
-            User = testUser,
+            User = user,
             // TODO: This is only temporary, fix this when GameEvent structure is more clear
             Event = JsonSerializer.Serialize("{ " +
                                              "   'eventType': 'SetPixel'," +
@@ -126,9 +116,9 @@ public class MapController : ControllerBase
                                              "       'y': " + globalCoordinate.Y + "," +
                                              "   }" +
                                              "}")
-        });
+        };
 
-        _dbContext.SaveChanges();
+        _gameEventRepositoryService.Add(gameEvent);
 
         return Ok();
     }
@@ -263,5 +253,18 @@ public class MapController : ControllerBase
         }
 
         return trimmedMap;
+    }
+
+    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
+    {
+        // Take neighboring pixels for the pixel the user is trying to set,
+        // but remove cornering pixels and only return pixels belonging to
+        // the user
+        return (from pixel in _mapRepositoryService.GetAll()
+                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
+                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                      pixel.User == user
+                select pixel).Any();
     }
 }

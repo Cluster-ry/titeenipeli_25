@@ -10,12 +10,14 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Titeenipeli.BackgroundServices;
 using Titeenipeli.Context;
 using Titeenipeli.gRPC;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
+using Titeenipeli.Services.BackgroundServices;
+using Titeenipeli.Services.RepositoryServices;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli;
 
@@ -155,6 +157,7 @@ public static class Program
         builder.Services.AddGrpcReflection();
 
         AddBackgroundServices(builder.Services);
+        AddRepositoryServices(builder.Services);
 
         WebApplication app = builder.Build();
 
@@ -201,6 +204,15 @@ public static class Program
                     serviceProvider,
                     GetNonNullService<ILogger<UpdateCumulativeScoresService>>(serviceProvider),
                     updateCumulativeScoresServicePeriod));
+    }
+
+    private static void AddRepositoryServices(IServiceCollection services)
+    {
+        services.AddScoped<IUserRepositoryService, UserRepositoryRepositoryService>();
+        services.AddScoped<IGuildRepositoryService, GuildRepositoryRepositoryService>();
+        services.AddScoped<IMapRepositoryService, MapRepositoryRepositoryService>();
+        services.AddScoped<IGameEventRepositoryService, GameEventRepositoryRepositoryService>();
+        services.AddScoped<ICtfFlagRepositoryService, CtfFlagRepositoryRepositoryService>();
     }
 
     private static TService GetNonNullService<TService>(IServiceProvider serviceProvider)

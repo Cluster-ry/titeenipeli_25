@@ -1,14 +1,13 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Titeenipeli.Context;
 using Titeenipeli.Handlers;
 using Titeenipeli.Inputs;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Results;
 using Titeenipeli.Schema;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
 
@@ -16,20 +15,21 @@ namespace Titeenipeli.Controllers;
 [Route("users")]
 public class UserController : ControllerBase
 {
-    private readonly ApiDbContext _dbContext;
     private readonly JwtOptions _jwtOptions;
+    private readonly IUserRepositoryService _userRepositoryService;
+    private readonly IGuildRepositoryService _guildRepositoryService;
 
-    public UserController(JwtOptions jwtOptions, ApiDbContext dbContext)
+    public UserController(JwtOptions jwtOptions, IUserRepositoryService userRepositoryService, IGuildRepositoryService guildRepositoryService)
     {
         _jwtOptions = jwtOptions;
-        _dbContext = dbContext;
+        _userRepositoryService = userRepositoryService;
+        _guildRepositoryService = guildRepositoryService;
     }
 
     [HttpPost]
     public IActionResult PostUsers([FromBody] PostUsersInput usersInput)
     {
-        User? user = _dbContext.Users.Include(entity => entity.Guild).FirstOrDefault(entity =>
-            entity.TelegramId == usersInput.Id);
+        User? user = _userRepositoryService.GetByTelegramId(usersInput.Id);
 
         if (user == null)
         {
@@ -52,8 +52,7 @@ public class UserController : ControllerBase
                 Hash = usersInput.Hash
             };
 
-            _dbContext.Users.Add(user);
-            _dbContext.SaveChanges();
+            _userRepositoryService.Add(user);
         }
 
         JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
@@ -74,10 +73,15 @@ public class UserController : ControllerBase
         ClaimsIdentity identity = (ClaimsIdentity)HttpContext.User.Identity!;
         JwtClaim? jwtClaim = JwtHandler.GetJwtClaimFromIdentity(identity);
 
-        User? user = _dbContext.Users.Include(user => user.Guild)
-                               .FirstOrDefault(user => jwtClaim != null && user.Id == jwtClaim.Id);
+        bool validGuild = int.TryParse(input.Guild, out int guildColor);
 
-        Guild? guild = _dbContext.Guilds.FirstOrDefault(guild => guild.Color.ToString() == input.Guild);
+        if (jwtClaim == null || !validGuild)
+        {
+            return BadRequest();
+        }
+
+        User? user = _userRepositoryService.GetById(jwtClaim.Id);
+        Guild? guild = _guildRepositoryService.GetByColor(guildColor);
 
         if (user == null || guild == null || user.Guild != null)
         {
@@ -85,7 +89,7 @@ public class UserController : ControllerBase
         }
 
         user.Guild = guild;
-        _dbContext.SaveChanges();
+        _userRepositoryService.Update(user);
 
 
         // Update the claim because users guild has changed
