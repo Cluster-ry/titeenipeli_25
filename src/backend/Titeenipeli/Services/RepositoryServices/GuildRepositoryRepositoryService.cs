@@ -1,14 +1,14 @@
 using Titeenipeli.Context;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.Interfaces;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
-namespace Titeenipeli.Services;
+namespace Titeenipeli.Services.RepositoryServices;
 
-public class GuildService : IGuildService
+public class GuildRepositoryRepositoryService : IGuildRepositoryService
 {
     private readonly ApiDbContext _dbContext;
 
-    public GuildService(ApiDbContext dbContext)
+    public GuildRepositoryRepositoryService(ApiDbContext dbContext)
     {
         _dbContext = dbContext;
     }

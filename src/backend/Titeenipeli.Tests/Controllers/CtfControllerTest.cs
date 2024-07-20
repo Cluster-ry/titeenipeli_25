@@ -12,7 +12,7 @@ namespace Titeenipeli.Tests.Controllers;
 [TestSubject(typeof(CtfController))]
 public class CtfControllerTest
 {
-    private readonly CtfFlagMockService _ctfFlagMockService;
+    private readonly CtfFlagRepositoryMockService _ctfFlagRepositoryMockService;
 
     public CtfControllerTest()
     {
@@ -24,7 +24,7 @@ public class CtfControllerTest
             }
         ];
 
-        _ctfFlagMockService = new CtfFlagMockService(flags);
+        _ctfFlagRepositoryMockService = new CtfFlagRepositoryMockService(flags);
     }
 
     [Theory]
@@ -33,7 +33,7 @@ public class CtfControllerTest
     [InlineData(null, 400)]
     public void PostCtfTest(string token, int statusCode)
     {
-        CtfController controller = new CtfController(_ctfFlagMockService);
+        CtfController controller = new CtfController(_ctfFlagRepositoryMockService);
         PostCtfInput input = new PostCtfInput
         {
             Token = token

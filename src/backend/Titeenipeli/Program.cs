@@ -10,14 +10,14 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Titeenipeli.BackgroundServices;
 using Titeenipeli.Context;
 using Titeenipeli.gRPC;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
-using Titeenipeli.Services;
-using Titeenipeli.Services.Interfaces;
+using Titeenipeli.Services.BackgroundServices;
+using Titeenipeli.Services.RepositoryServices;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli;
 
@@ -30,11 +30,11 @@ public static class Program
         builder.Services.AddDbContext<ApiDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
 
-        builder.Services.AddScoped<IUserService, UserService>();
-        builder.Services.AddScoped<IGuildService, GuildService>();
-        builder.Services.AddScoped<IMapService, MapService>();
-        builder.Services.AddScoped<IGameEventService, GameEventService>();
-        builder.Services.AddScoped<ICtfFlagService, CtfFlagService>();
+        builder.Services.AddScoped<IUserRepositoryService, UserRepositoryRepositoryService>();
+        builder.Services.AddScoped<IGuildRepositoryService, GuildRepositoryRepositoryService>();
+        builder.Services.AddScoped<IMapRepositoryService, MapRepositoryRepositoryService>();
+        builder.Services.AddScoped<IGameEventRepositoryService, GameEventRepositoryRepositoryService>();
+        builder.Services.AddScoped<ICtfFlagRepositoryService, CtfFlagRepositoryRepositoryService>();
 
         JwtOptions jwtOptions = new JwtOptions();
         builder.Configuration.GetSection("JWT").Bind(jwtOptions);

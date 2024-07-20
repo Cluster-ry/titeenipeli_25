@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Inputs;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.Interfaces;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
 
@@ -10,17 +10,17 @@ namespace Titeenipeli.Controllers;
 [Authorize]
 public class CtfController : ControllerBase
 {
-    private readonly ICtfFlagService _ctfFlagService;
+    private readonly ICtfFlagRepositoryService _ctfFlagRepositoryService;
 
-    public CtfController(ICtfFlagService ctfFlagService)
+    public CtfController(ICtfFlagRepositoryService ctfFlagRepositoryService)
     {
-        _ctfFlagService = ctfFlagService;
+        _ctfFlagRepositoryService = ctfFlagRepositoryService;
     }
 
     [HttpPost("ctf")]
     public IActionResult PostCtf([FromBody] PostCtfInput ctfInput)
     {
-        CtfFlag? ctfFlag = _ctfFlagService.GetByToken(ctfInput.Token);
+        CtfFlag? ctfFlag = _ctfFlagRepositoryService.GetByToken(ctfInput.Token);
 
         if (ctfFlag == null)
         {

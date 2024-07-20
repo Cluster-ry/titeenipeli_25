@@ -1,4 +1,4 @@
-namespace Titeenipeli.BackgroundServices;
+namespace Titeenipeli.Services.BackgroundServices;
 
 public interface IAsynchronousTimedBackgroundService
 {

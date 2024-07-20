@@ -1,14 +1,14 @@
 using Titeenipeli.Context;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.Interfaces;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
-namespace Titeenipeli.Services;
+namespace Titeenipeli.Services.RepositoryServices;
 
-public class GameEventService : IGameEventService
+public class GameEventRepositoryRepositoryService : IGameEventRepositoryService
 {
     private readonly ApiDbContext _dbContext;
 
-    public GameEventService(ApiDbContext dbContext)
+    public GameEventRepositoryRepositoryService(ApiDbContext dbContext)
     {
         _dbContext = dbContext;
     }

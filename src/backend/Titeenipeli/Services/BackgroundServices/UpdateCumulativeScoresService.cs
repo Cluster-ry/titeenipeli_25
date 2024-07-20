@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
 using Titeenipeli.Schema;
 
-namespace Titeenipeli.BackgroundServices;
+namespace Titeenipeli.Services.BackgroundServices;
 
 public interface IUpdateCumulativeScoresService : IAsynchronousTimedBackgroundService;
 

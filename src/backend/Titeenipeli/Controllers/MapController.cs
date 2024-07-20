@@ -6,7 +6,7 @@ using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Results;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.Interfaces;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
 
@@ -17,32 +17,32 @@ public class MapController : ControllerBase
     private const int BorderWidth = 1;
 
     private readonly GameOptions _gameOptions;
-    private readonly IUserService _userService;
-    private readonly IMapService _mapService;
-    private readonly IGameEventService _gameEventService;
+    private readonly IUserRepositoryService _userRepositoryService;
+    private readonly IMapRepositoryService _mapRepositoryService;
+    private readonly IGameEventRepositoryService _gameEventRepositoryService;
 
-    public MapController(GameOptions gameOptions, IUserService userService, IMapService mapService,
-                         IGameEventService gameEventService)
+    public MapController(GameOptions gameOptions, IUserRepositoryService userRepositoryService, IMapRepositoryService mapRepositoryService,
+                         IGameEventRepositoryService gameEventRepositoryService)
     {
         _gameOptions = gameOptions;
-        _userService = userService;
-        _mapService = mapService;
-        _gameEventService = gameEventService;
+        _userRepositoryService = userRepositoryService;
+        _mapRepositoryService = mapRepositoryService;
+        _gameEventRepositoryService = gameEventRepositoryService;
     }
 
     [HttpGet]
     public IActionResult GetPixels()
     {
         // TODO: Remove temporary testing user
-        User? user = _userService.GetByCode("test");
+        User? user = _userRepositoryService.GetByCode("test");
 
         if (user == null)
         {
             return BadRequest();
         }
 
-        User[] users = _userService.GetAll().ToArray();
-        Pixel[] pixels = _mapService.GetAll().ToArray();
+        User[] users = _userRepositoryService.GetAll().ToArray();
+        Pixel[] pixels = _mapRepositoryService.GetAll().ToArray();
 
         // +2 to account for the borders
         int width = _gameOptions.Width + 2 * BorderWidth;
@@ -69,7 +69,7 @@ public class MapController : ControllerBase
     public IActionResult PostPixels([FromBody] PostPixelsInput pixelsInput)
     {
         // TODO: Remove temporary testing user
-        User? user = _userService.GetByCode("test");
+        User? user = _userRepositoryService.GetByCode("test");
 
         if (user == null)
         {
@@ -82,12 +82,12 @@ public class MapController : ControllerBase
             Y = user.SpawnY + pixelsInput.Y
         };
 
-        if (_mapService.IsValidPlacement(globalCoordinate, user))
+        if (IsValidPlacement(globalCoordinate, user))
         {
             return BadRequest();
         }
 
-        Pixel? pixelToUpdate = _mapService.GetByCoordinate(globalCoordinate);
+        Pixel? pixelToUpdate = _mapRepositoryService.GetByCoordinate(globalCoordinate);
 
         if (pixelToUpdate == null)
         {
@@ -103,7 +103,7 @@ public class MapController : ControllerBase
 
 
         pixelToUpdate.User = user;
-        _mapService.Update(pixelToUpdate);
+        _mapRepositoryService.Update(pixelToUpdate);
 
         GameEvent gameEvent = new GameEvent
         {
@@ -118,7 +118,7 @@ public class MapController : ControllerBase
                                              "}")
         };
 
-        _gameEventService.Add(gameEvent);
+        _gameEventRepositoryService.Add(gameEvent);
 
         return Ok();
     }
@@ -253,5 +253,18 @@ public class MapController : ControllerBase
         }
 
         return trimmedMap;
+    }
+
+    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
+    {
+        // Take neighboring pixels for the pixel the user is trying to set,
+        // but remove cornering pixels and only return pixels belonging to
+        // the user
+        return (from pixel in _mapRepositoryService.GetAll()
+                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
+                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                      pixel.User == user
+                select pixel).Any();
     }
 }

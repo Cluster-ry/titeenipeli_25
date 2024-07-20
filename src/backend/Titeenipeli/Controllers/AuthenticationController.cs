@@ -3,7 +3,7 @@ using Titeenipeli.Handlers;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.Interfaces;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
 
@@ -11,12 +11,12 @@ namespace Titeenipeli.Controllers;
 public class AuthenticationController : ControllerBase
 {
     private readonly JwtOptions _jwtOptions;
-    private readonly IUserService _userService;
+    private readonly IUserRepositoryService _userRepositoryService;
 
-    public AuthenticationController(JwtOptions jwtOptions, IUserService userService)
+    public AuthenticationController(JwtOptions jwtOptions, IUserRepositoryService userRepositoryService)
     {
         _jwtOptions = jwtOptions;
-        _userService = userService;
+        _userRepositoryService = userRepositoryService;
     }
 
     [HttpPost("login")]
@@ -28,7 +28,7 @@ public class AuthenticationController : ControllerBase
             return Unauthorized();
         }
 
-        User? user = _userService.GetByCode(loginInput.Username);
+        User? user = _userRepositoryService.GetByCode(loginInput.Username);
 
         if (user == null)
         {

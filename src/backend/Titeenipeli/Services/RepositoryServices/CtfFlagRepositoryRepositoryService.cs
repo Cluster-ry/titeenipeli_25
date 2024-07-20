@@ -1,14 +1,14 @@
 using Titeenipeli.Context;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.Interfaces;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
-namespace Titeenipeli.Services;
+namespace Titeenipeli.Services.RepositoryServices;
 
-public class CtfFlagService : ICtfFlagService
+public class CtfFlagRepositoryRepositoryService : ICtfFlagRepositoryService
 {
     private readonly ApiDbContext _dbContext;
 
-    public CtfFlagService(ApiDbContext dbContext)
+    public CtfFlagRepositoryRepositoryService(ApiDbContext dbContext)
     {
         _dbContext = dbContext;
     }

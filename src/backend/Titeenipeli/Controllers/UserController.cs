@@ -7,7 +7,7 @@ using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Results;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.Interfaces;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
 
@@ -16,20 +16,20 @@ namespace Titeenipeli.Controllers;
 public class UserController : ControllerBase
 {
     private readonly JwtOptions _jwtOptions;
-    private readonly IUserService _userService;
-    private readonly IGuildService _guildService;
+    private readonly IUserRepositoryService _userRepositoryService;
+    private readonly IGuildRepositoryService _guildRepositoryService;
 
-    public UserController(JwtOptions jwtOptions, IUserService userService, IGuildService guildService)
+    public UserController(JwtOptions jwtOptions, IUserRepositoryService userRepositoryService, IGuildRepositoryService guildRepositoryService)
     {
         _jwtOptions = jwtOptions;
-        _userService = userService;
-        _guildService = guildService;
+        _userRepositoryService = userRepositoryService;
+        _guildRepositoryService = guildRepositoryService;
     }
 
     [HttpPost]
     public IActionResult PostUsers([FromBody] PostUsersInput usersInput)
     {
-        User? user = _userService.GetByTelegramId(usersInput.Id);
+        User? user = _userRepositoryService.GetByTelegramId(usersInput.Id);
 
         if (user == null)
         {
@@ -52,7 +52,7 @@ public class UserController : ControllerBase
                 Hash = usersInput.Hash
             };
 
-            _userService.Add(user);
+            _userRepositoryService.Add(user);
         }
 
         JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
@@ -80,8 +80,8 @@ public class UserController : ControllerBase
             return BadRequest();
         }
 
-        User? user = _userService.GetById(jwtClaim.Id);
-        Guild? guild = _guildService.GetByColor(guildColor);
+        User? user = _userRepositoryService.GetById(jwtClaim.Id);
+        Guild? guild = _guildRepositoryService.GetByColor(guildColor);
 
         if (user == null || guild == null || user.Guild != null)
         {
@@ -89,7 +89,7 @@ public class UserController : ControllerBase
         }
 
         user.Guild = guild;
-        _userService.Update(user);
+        _userRepositoryService.Update(user);
 
 
         // Update the claim because users guild has changed

@@ -2,15 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
 using Titeenipeli.Models;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.Interfaces;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
-namespace Titeenipeli.Services;
+namespace Titeenipeli.Services.RepositoryServices;
 
-public class MapService : IMapService
+public class MapRepositoryRepositoryService : IMapRepositoryService
 {
     private readonly ApiDbContext _dbContext;
 
-    public MapService(ApiDbContext dbContext)
+    public MapRepositoryRepositoryService(ApiDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -54,18 +54,5 @@ public class MapService : IMapService
 
         _dbContext.Entry(existingUser).CurrentValues.SetValues(pixel);
         _dbContext.SaveChanges();
-    }
-
-    public bool IsValidPlacement(Coordinate pixelCoordinate, User user)
-    {
-        // Take neighboring pixels for the pixel the user is trying to set,
-        // but remove cornering pixels and only return pixels belonging to
-        // the user
-        return (from pixel in _dbContext.Map
-                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
-                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      pixel.User == user
-                select pixel).Any();
     }
 }

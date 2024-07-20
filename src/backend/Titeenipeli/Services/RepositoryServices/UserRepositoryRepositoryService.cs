@@ -1,15 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.Interfaces;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
-namespace Titeenipeli.Services;
+namespace Titeenipeli.Services.RepositoryServices;
 
-public class UserService : IUserService
+public class UserRepositoryRepositoryService : IUserRepositoryService
 {
     private readonly ApiDbContext _dbContext;
 
-    public UserService(ApiDbContext dbContext)
+    public UserRepositoryRepositoryService(ApiDbContext dbContext)
     {
         _dbContext = dbContext;
     }

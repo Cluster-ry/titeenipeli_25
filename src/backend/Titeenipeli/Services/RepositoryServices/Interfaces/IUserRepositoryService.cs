@@ -1,8 +1,8 @@
 using Titeenipeli.Schema;
 
-namespace Titeenipeli.Services.Interfaces;
+namespace Titeenipeli.Services.RepositoryServices.Interfaces;
 
-public interface IUserService : IEntityService<User>
+public interface IUserRepositoryService : IEntityRepositoryService<User>
 {
     public User? GetByCode(string code);
     public User? GetByTelegramId(string telegramId);

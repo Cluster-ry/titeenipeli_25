@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.Interfaces;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Tests.Mocks.Services;
 
-public class CtfFlagMockService : ICtfFlagService
+public class CtfFlagRepositoryMockService : ICtfFlagRepositoryService
 {
     private readonly List<CtfFlag> _ctfFlags;
 
-    public CtfFlagMockService(List<CtfFlag> ctfFlags)
+    public CtfFlagRepositoryMockService(List<CtfFlag> ctfFlags)
     {
         _ctfFlags = ctfFlags;
     }
