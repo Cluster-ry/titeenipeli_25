@@ -30,12 +30,6 @@ public static class Program
         builder.Services.AddDbContext<ApiDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
 
-        builder.Services.AddScoped<IUserRepositoryService, UserRepositoryRepositoryService>();
-        builder.Services.AddScoped<IGuildRepositoryService, GuildRepositoryRepositoryService>();
-        builder.Services.AddScoped<IMapRepositoryService, MapRepositoryRepositoryService>();
-        builder.Services.AddScoped<IGameEventRepositoryService, GameEventRepositoryRepositoryService>();
-        builder.Services.AddScoped<ICtfFlagRepositoryService, CtfFlagRepositoryRepositoryService>();
-
         JwtOptions jwtOptions = new JwtOptions();
         builder.Configuration.GetSection("JWT").Bind(jwtOptions);
         builder.Services.AddSingleton(jwtOptions);
@@ -163,6 +157,7 @@ public static class Program
         builder.Services.AddGrpcReflection();
 
         AddBackgroundServices(builder.Services);
+        AddRepositoryServices(builder.Services);
 
         WebApplication app = builder.Build();
 
@@ -209,6 +204,15 @@ public static class Program
                     serviceProvider,
                     GetNonNullService<ILogger<UpdateCumulativeScoresService>>(serviceProvider),
                     updateCumulativeScoresServicePeriod));
+    }
+
+    private static void AddRepositoryServices(IServiceCollection services)
+    {
+        services.AddScoped<IUserRepositoryService, UserRepositoryRepositoryService>();
+        services.AddScoped<IGuildRepositoryService, GuildRepositoryRepositoryService>();
+        services.AddScoped<IMapRepositoryService, MapRepositoryRepositoryService>();
+        services.AddScoped<IGameEventRepositoryService, GameEventRepositoryRepositoryService>();
+        services.AddScoped<ICtfFlagRepositoryService, CtfFlagRepositoryRepositoryService>();
     }
 
     private static TService GetNonNullService<TService>(IServiceProvider serviceProvider)
