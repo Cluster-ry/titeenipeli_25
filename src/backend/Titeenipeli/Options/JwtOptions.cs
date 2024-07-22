@@ -7,5 +7,6 @@ public class JwtOptions
     public string ValidIssuer { get; init; } = "";
     public string ValidAudience { get; init; } = "";
     public string CookieName { get; init; } = "";
+    public string ClaimName { get; init; } = "data";
     public int ExpirationDays { get; init; }
 }

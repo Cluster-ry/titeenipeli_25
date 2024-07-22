@@ -1,12 +1,11 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Titeenipeli.Handlers;
+using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
 using Titeenipeli.Models;
-using Titeenipeli.Options;
 using Titeenipeli.Results;
 using Titeenipeli.Schema;
+using Titeenipeli.Services;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
@@ -15,13 +14,15 @@ namespace Titeenipeli.Controllers;
 [Route("users")]
 public class UserController : ControllerBase
 {
-    private readonly JwtOptions _jwtOptions;
-    private readonly IUserRepositoryService _userRepositoryService;
     private readonly IGuildRepositoryService _guildRepositoryService;
+    private readonly JwtService _jwtService;
+    private readonly IUserRepositoryService _userRepositoryService;
 
-    public UserController(JwtOptions jwtOptions, IUserRepositoryService userRepositoryService, IGuildRepositoryService guildRepositoryService)
+    public UserController(JwtService jwtService,
+                          IUserRepositoryService userRepositoryService,
+                          IGuildRepositoryService guildRepositoryService)
     {
-        _jwtOptions = jwtOptions;
+        _jwtService = jwtService;
         _userRepositoryService = userRepositoryService;
         _guildRepositoryService = guildRepositoryService;
     }
@@ -55,10 +56,7 @@ public class UserController : ControllerBase
             _userRepositoryService.Add(user);
         }
 
-        JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
-
-        Response.Cookies.Append(_jwtOptions.CookieName, jwtHandler.GetJwtToken(user),
-            jwtHandler.GetAuthorizationCookieOptions());
+        Response.Cookies.AppendJwtCookie(_jwtService, user);
 
         return Ok(new PostUserResult
         {
@@ -70,8 +68,7 @@ public class UserController : ControllerBase
     [Authorize]
     public IActionResult PutUsers([FromBody] PutUsersInput input)
     {
-        ClaimsIdentity identity = (ClaimsIdentity)HttpContext.User.Identity!;
-        JwtClaim? jwtClaim = JwtHandler.GetJwtClaimFromIdentity(identity);
+        JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
 
         bool validGuild = int.TryParse(input.Guild, out int guildColor);
 
@@ -91,13 +88,8 @@ public class UserController : ControllerBase
         user.Guild = guild;
         _userRepositoryService.Update(user);
 
-
         // Update the claim because users guild has changed
-        JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
-
-        Response.Cookies.Append(_jwtOptions.CookieName, jwtHandler.GetJwtToken(user),
-            jwtHandler.GetAuthorizationCookieOptions());
-
+        Response.Cookies.AppendJwtCookie(_jwtService, user);
         return Ok();
     }
 }
