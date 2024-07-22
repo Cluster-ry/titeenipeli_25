@@ -6,6 +6,7 @@ using Titeenipeli.Inputs;
 using Titeenipeli.Schema;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
 using Xunit;
+using FluentAssertions;
 
 namespace Titeenipeli.Tests.Controllers;
 
@@ -31,6 +32,6 @@ public class CtfControllerTest
 
         IStatusCodeActionResult result = controller.PostCtf(input) as IStatusCodeActionResult;
 
-        Assert.Equal(statusCode, result?.StatusCode);
+        result?.StatusCode.Should().Be(statusCode);
     }
 }
