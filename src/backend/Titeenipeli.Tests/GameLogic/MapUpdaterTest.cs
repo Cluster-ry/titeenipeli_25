@@ -64,7 +64,7 @@ public class MapUpdaterTest
                 {
                     new [,]
                     {
-                        { Clus, Clus, Clus, Clus },
+                        { Clus, Clus, CLUS, Clus },
                         { Clus, Algo, TiKi, Clus },
                         { Clus, TiKi, Algo, None },
                         { Clus, Clus, Clus, Clus },
@@ -72,10 +72,44 @@ public class MapUpdaterTest
                     (GuildName.Cluster, (4, 3)),
                     new [,]
                     {
+                        { Clus, Clus, CLUS, Clus },
                         { Clus, Clus, Clus, Clus },
                         { Clus, Clus, Clus, Clus },
                         { Clus, Clus, Clus, Clus },
+                    }
+                },
+                {
+                    new [,]
+                    {
+                        { Clus, Clus, CLUS, Clus },
+                        { Clus, ALGO, TiKi, Clus },
+                        { Clus, Algo, Algo, None },
                         { Clus, Clus, Clus, Clus },
+                    },
+                    (GuildName.Cluster, (4, 3)),
+                    new [,]
+                    {
+                        { Clus, Clus, CLUS, Clus },
+                        { Clus, ALGO, Clus, Clus },
+                        { Clus, Clus, Clus, Clus },
+                        { Clus, Clus, Clus, Clus },
+                    }
+                },
+                {
+                    new [,]
+                    {
+                        {None, None, TiKi, None},
+                        {None, None, TiKi, TiKi},
+                        {None, CLUS, TiKi, None},
+                        {TIKI, TiKi, TiKi, TiKi}
+                    },
+                    (GuildName.Cluster, (2, 4)),
+                    new [,]
+                    {
+                        {None, None, None, None},
+                        {None, None, None, None},
+                        {None, CLUS, None, None},
+                        {TIKI, TiKi, None, None}
                     }
                 }
                 
@@ -86,14 +120,13 @@ public class MapUpdaterTest
 
     [Theory]
     [MemberData(nameof(MapTestData))]
-    public void TestPlacePixel_Parametrized_TODO_NameBetter(
-        GuildPixel[,] initialMapPixelOwners,
+    public void TestPlacePixel_Parametrized(
+        GuildPixel[,] initialMap,
         NewPixel placedPixel,
         GuildPixel[,] resultingMap)
     {
         var mapUpdater = new MapUpdater();
-        var map = _BuildMapFromOwnerArray(initialMapPixelOwners);
-        map.Pixels[1, 2].Type = PixelType.Spawn;
+        var map = MapUtils.BuildMapFromOwnerMatrix(initialMap);
 
         mapUpdater.PlacePixel(map, placedPixel.coordinates, placedPixel.guild);
 
@@ -108,39 +141,5 @@ public class MapUpdaterTest
         } 
     }
 
-    private static Map _BuildMapFromOwnerArray(GuildPixel[,] owners)
-    {
-        var ySize = owners.GetUpperBound(0) + 1;
-        var xSize = owners.GetUpperBound(1) + 1;
-        
-        var map = new PixelModel[ySize + 2, xSize + 2];
-        for (var x = 0; x < xSize + 2; x++)
-        {
-            map[0, x] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
-        }
-
-        for (var y = 1; y < ySize + 1; y++)
-        {
-            map[y, 0] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
-            for (var x = 1; x < xSize + 1; x++)
-            {
-                var pixelData = owners[y - 1, x - 1];
-                map[y, x] = new PixelModel
-                {
-                    OwnPixel = false,
-                    Type =  pixelData.isSpawn ? PixelType.Spawn : PixelType.Normal,
-                    Owner = pixelData.guild
-                };
-            }
-
-            map[y, xSize + 1] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
-        }
-        
-        for (var x = 0; x < xSize + 2; x++)
-        {
-            map[ySize + 1, x] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
-        }
-
-        return new Map { Pixels = map, Height = ySize, Width = xSize };
-    }
+    
 }
