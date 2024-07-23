@@ -26,6 +26,7 @@ public class CtfFlagRepositoryService : ICtfFlagRepositoryService
     public void Add(CtfFlag ctfFlag)
     {
         _dbContext.CtfFlags.Add(ctfFlag);
+        _dbContext.SaveChanges();
     }
 
     public CtfFlag? GetByToken(string token)
