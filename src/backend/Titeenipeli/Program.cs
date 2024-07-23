@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -15,6 +16,7 @@ using Titeenipeli.gRPC;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
+using Titeenipeli.Policies;
 using Titeenipeli.Services;
 using Titeenipeli.Services.BackgroundServices;
 using Titeenipeli.Services.RepositoryServices;
@@ -149,6 +151,11 @@ public static class Program
                 }
             };
         });
+
+        builder.Services.AddAuthorizationBuilder()
+               .AddPolicy("MustHaveGuild", policy => policy.Requirements.Add(new MustHaveGuildRequirement()));
+
+        builder.Services.AddSingleton<IAuthorizationHandler, MustHaveGuildHandler>();
 
         builder.Services.AddControllers()
                .AddNewtonsoftJson(options =>

@@ -7,7 +7,7 @@ using Titeenipeli.Services.RepositoryServices.Interfaces;
 namespace Titeenipeli.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(Policy = "MustHaveGuild")]
 public class CtfController : ControllerBase
 {
     private readonly ICtfFlagRepositoryService _ctfFlagRepositoryService;

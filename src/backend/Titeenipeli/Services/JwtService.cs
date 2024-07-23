@@ -49,6 +49,11 @@ public class JwtService
 
         List<Claim> claims = [new Claim(_jwtOptions.ClaimName, JsonSerializer.Serialize(jwtClaim))];
 
+        if (jwtClaim.GuildId != null)
+        {
+            claims.Add(new Claim(_jwtOptions.GuildClaimName, jwtClaim.GuildId.ToString()!));
+        }
+
         JwtSecurityToken tokeOptions = new JwtSecurityTokenHandler().CreateJwtSecurityToken(
             _jwtOptions.ValidIssuer,
             _jwtOptions.ValidAudience,
