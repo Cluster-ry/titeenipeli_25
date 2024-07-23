@@ -221,11 +221,11 @@ public static class Program
 
     private static void AddRepositoryServices(IServiceCollection services)
     {
-        services.AddScoped<IUserRepositoryService, UserRepositoryRepositoryService>();
-        services.AddScoped<IGuildRepositoryService, GuildRepositoryRepositoryService>();
-        services.AddScoped<IMapRepositoryService, MapRepositoryRepositoryService>();
-        services.AddScoped<IGameEventRepositoryService, GameEventRepositoryRepositoryService>();
-        services.AddScoped<ICtfFlagRepositoryService, CtfFlagRepositoryRepositoryService>();
+        services.AddScoped<IUserRepositoryService, UserRepositoryService>();
+        services.AddScoped<IGuildRepositoryService, GuildRepositoryService>();
+        services.AddScoped<IMapRepositoryService, MapRepositoryService>();
+        services.AddScoped<IGameEventRepositoryService, GameEventRepositoryService>();
+        services.AddScoped<ICtfFlagRepositoryService, CtfFlagRepositoryService>();
     }
 
     private static TService GetNonNullService<TService>(IServiceProvider serviceProvider)

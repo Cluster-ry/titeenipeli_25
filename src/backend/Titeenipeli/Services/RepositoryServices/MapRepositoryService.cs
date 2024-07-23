@@ -6,11 +6,11 @@ using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Services.RepositoryServices;
 
-public class MapRepositoryRepositoryService : IMapRepositoryService
+public class MapRepositoryService : IMapRepositoryService
 {
     private readonly ApiDbContext _dbContext;
 
-    public MapRepositoryRepositoryService(ApiDbContext dbContext)
+    public MapRepositoryService(ApiDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -28,9 +28,9 @@ public class MapRepositoryRepositoryService : IMapRepositoryService
     public List<Pixel> GetAll()
     {
         return _dbContext.Map
-            .Include(pixel => pixel.User)
-            .ThenInclude(pixelOwner => pixelOwner!.Guild)
-            .OrderBy(pixel => pixel.Y).ToList();
+                         .Include(pixel => pixel.User)
+                         .ThenInclude(pixelOwner => pixelOwner!.Guild)
+                         .OrderBy(pixel => pixel.Y).ToList();
     }
 
     public void Add(Pixel pixel)

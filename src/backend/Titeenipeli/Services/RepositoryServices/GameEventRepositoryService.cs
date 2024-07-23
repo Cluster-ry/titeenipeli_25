@@ -4,11 +4,11 @@ using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Services.RepositoryServices;
 
-public class GameEventRepositoryRepositoryService : IGameEventRepositoryService
+public class GameEventRepositoryService : IGameEventRepositoryService
 {
     private readonly ApiDbContext _dbContext;
 
-    public GameEventRepositoryRepositoryService(ApiDbContext dbContext)
+    public GameEventRepositoryService(ApiDbContext dbContext)
     {
         _dbContext = dbContext;
     }

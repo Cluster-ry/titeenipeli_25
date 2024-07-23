@@ -4,11 +4,11 @@ using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Services.RepositoryServices;
 
-public class CtfFlagRepositoryRepositoryService : ICtfFlagRepositoryService
+public class CtfFlagRepositoryService : ICtfFlagRepositoryService
 {
     private readonly ApiDbContext _dbContext;
 
-    public CtfFlagRepositoryRepositoryService(ApiDbContext dbContext)
+    public CtfFlagRepositoryService(ApiDbContext dbContext)
     {
         _dbContext = dbContext;
     }

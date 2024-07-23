@@ -4,11 +4,11 @@ using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Services.RepositoryServices;
 
-public class GuildRepositoryRepositoryService : IGuildRepositoryService
+public class GuildRepositoryService : IGuildRepositoryService
 {
     private readonly ApiDbContext _dbContext;
 
-    public GuildRepositoryRepositoryService(ApiDbContext dbContext)
+    public GuildRepositoryService(ApiDbContext dbContext)
     {
         _dbContext = dbContext;
     }
