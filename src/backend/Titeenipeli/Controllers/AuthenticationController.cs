@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Titeenipeli.Handlers;
+using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
-using Titeenipeli.Options;
 using Titeenipeli.Schema;
+using Titeenipeli.Services;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
@@ -10,12 +10,12 @@ namespace Titeenipeli.Controllers;
 [ApiController]
 public class AuthenticationController : ControllerBase
 {
-    private readonly JwtOptions _jwtOptions;
+    private readonly JwtService _jwtService;
     private readonly IUserRepositoryService _userRepositoryService;
 
-    public AuthenticationController(JwtOptions jwtOptions, IUserRepositoryService userRepositoryService)
+    public AuthenticationController(JwtService jwtService, IUserRepositoryService userRepositoryService)
     {
-        _jwtOptions = jwtOptions;
+        _jwtService = jwtService;
         _userRepositoryService = userRepositoryService;
     }
 
@@ -35,10 +35,7 @@ public class AuthenticationController : ControllerBase
             return BadRequest();
         }
 
-        JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
-
-        Response.Cookies.Append(_jwtOptions.CookieName, jwtHandler.GetJwtToken(user),
-            jwtHandler.GetAuthorizationCookieOptions());
+        Response.Cookies.AppendJwtCookie(_jwtService, user);
 
         return Ok();
     }

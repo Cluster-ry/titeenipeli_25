@@ -15,6 +15,7 @@ using Titeenipeli.gRPC;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
+using Titeenipeli.Services;
 using Titeenipeli.Services.BackgroundServices;
 using Titeenipeli.Services.RepositoryServices;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
@@ -37,6 +38,8 @@ public static class Program
         GameOptions gameOptions = new GameOptions();
         builder.Configuration.GetSection("Game").Bind(gameOptions);
         builder.Services.AddSingleton(gameOptions);
+
+        builder.Services.AddScoped<JwtService>();
 
         // Adding OpenTelemetry tracing and metrics
         IOpenTelemetryBuilder openTelemetry = builder.Services.AddOpenTelemetry();
@@ -185,6 +188,9 @@ public static class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseMiddleware<JwtDeserializerMiddleware>();
+
         app.MapControllers();
 
         GRPCServiceRegister.AddGRPCServices(app);
