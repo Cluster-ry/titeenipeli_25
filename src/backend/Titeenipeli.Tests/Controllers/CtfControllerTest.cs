@@ -13,9 +13,9 @@ namespace Titeenipeli.Tests.Controllers;
 [TestSubject(typeof(CtfController))]
 public class CtfControllerTest
 {
-    [TestCase("#TEST_FLAG", 200, TestName="Should return success code for valid flag")]
-    [TestCase("#INVALID_FLAG", 400, TestName="Should return failure code for invalid flag")]
-    [TestCase(null, 400, TestName="Should return failure code for null flag")]
+    [TestCase("#TEST_FLAG", 200, TestName = "Should return success code for valid flag")]
+    [TestCase("#INVALID_FLAG", 400, TestName = "Should return failure code for invalid flag")]
+    [TestCase(null, 400, TestName = "Should return failure code for null flag")]
     public void PostCtfTest(string token, int statusCode)
     {
         Mock<ICtfFlagRepositoryService> mockCtfFlagRepositoryService = new Mock<ICtfFlagRepositoryService>();

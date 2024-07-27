@@ -91,7 +91,7 @@ public class MapUpdater
             {
                 var currentPixelGuild = map.Pixels[y, x].Owner;
                 var (leftNode, aboveNode) = TryMerge(currentPixelGuild, nodeMap, y, x, nodes);
-                
+
                 var isSpawnNode = map.Pixels[y, x].Type == PixelType.Spawn;
 
                 if (nodes[leftNode].Guild == currentPixelGuild)
