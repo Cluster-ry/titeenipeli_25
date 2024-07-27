@@ -30,13 +30,14 @@ public class MapUpdaterTest
 
     private static readonly GuildPixel Digi = (GuildName.Digit, false);
     private static readonly GuildPixel DIGI = (GuildName.Digit, true);
+    // ReSharper restore InconsistentNaming
 
-    private MapUpdater _MapUpdater;
+    private MapUpdater _mapUpdater;
     
     [SetUp]
     public void BeforeEach()
     {
-        _MapUpdater = new MapUpdater();
+        _mapUpdater = new MapUpdater();
     }
 
     [TestCaseSource(nameof(MapTestCases))]
@@ -50,7 +51,7 @@ public class MapUpdaterTest
 
         foreach (var placedPixel in placedPixels)
         {
-            _MapUpdater.PlacePixel(map, placedPixel.coordinates, placedPixel.guild);
+            _mapUpdater.PlacePixel(map, placedPixel.coordinates, placedPixel.guild);
             Console.WriteLine("--------------");
             Console.WriteLine(MapUtils.MapAsNumbers(map));
         }
