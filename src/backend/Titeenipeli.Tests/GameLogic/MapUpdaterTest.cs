@@ -327,7 +327,7 @@ public class MapUpdaterTest
                         { None, Clus, Clus, None, None },
                         { None, None, None, None, None },
                         { None, None, None, Algo, ALGO }
-                    }).SetName("Should not cut J-shape");
+                    }).SetName("Should not cut J-shape when another guild places pixel");
         }
     }
 }
