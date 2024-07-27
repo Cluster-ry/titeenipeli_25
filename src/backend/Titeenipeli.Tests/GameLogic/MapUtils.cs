@@ -9,7 +9,7 @@ using GuildPixel = (GuildName? guild, bool isSpawn);
 
 public static class MapUtils
 {
-    private static Dictionary<GuildName, int> _ColourMappings = new()
+    private static readonly Dictionary<GuildName, int> _colourMappings = new()
     {
         { GuildName.Cluster, 31 },
         { GuildName.Tietokilta, 30 },
@@ -19,7 +19,7 @@ public static class MapUtils
         { GuildName.Digit, 36 },
         { GuildName.Datateknologerna, 37 }
     };
-    
+
     public static Map BuildMapFromOwnerMatrix(GuildPixel[,] owners)
     {
         var ySize = owners.GetUpperBound(0) + 1;
@@ -35,7 +35,7 @@ public static class MapUtils
                 map[y, x] = new PixelModel
                 {
                     OwnPixel = false,
-                    Type =  pixelData.isSpawn ? PixelType.Spawn : PixelType.Normal,
+                    Type = pixelData.isSpawn ? PixelType.Spawn : PixelType.Normal,
                     Owner = pixelData.guild
                 };
             }
@@ -47,7 +47,7 @@ public static class MapUtils
     public static Map BuildMapFromSpawnPointList(int size, (int x, int y, GuildName owner)[] spawnPoints)
     {
         var map = BuildMapBorders(size, size);
-        
+
         for (var y = 1; y < size + 1; y++)
         {
             for (var x = 1; x < size + 1; x++)
@@ -55,7 +55,7 @@ public static class MapUtils
                 map[y, x] = new PixelModel
                 {
                     OwnPixel = false,
-                    Type =  PixelType.Normal,
+                    Type = PixelType.Normal,
                     Owner = null
                 };
             }
@@ -76,20 +76,20 @@ public static class MapUtils
         {
             map[0, x] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
         }
-        
+
         for (var y = 1; y < ySize + 1; y++)
         {
             map[y, 0] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
             map[y, xSize + 1] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
         }
-        
+
         for (var x = 0; x < xSize + 2; x++)
         {
             map[ySize + 1, x] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
         }
 
         return map;
-     }
+    }
 
     public static string MapAsColours(Map map)
     {
@@ -108,12 +108,12 @@ public static class MapUtils
                 }
 
                 // For some reason static analysis doesn't recognize the null guard just above ... oh well
-                builder.Append($"\x1b[{_ColourMappings[(GuildName)pixelOwner]}m\u2588\x1b[0m");
+                builder.Append($"\x1b[{_colourMappings[(GuildName)pixelOwner]}m\u2588\x1b[0m");
             }
 
             builder.Append('\n');
         }
-        
+
         return builder.ToString();
     }
 
@@ -139,7 +139,7 @@ public static class MapUtils
 
             builder.Append('\n');
         }
-        
+
         return builder.ToString();
     }
 }
