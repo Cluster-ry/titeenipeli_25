@@ -1,7 +1,6 @@
 ﻿using JetBrains.Annotations;
 using Titeenipeli.Enums;
 using Titeenipeli.GameLogic;
-using Titeenipeli.Models;
 using Xunit;
 using FluentAssertions;
 

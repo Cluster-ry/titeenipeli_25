@@ -89,9 +89,9 @@ public class MapUpdater
         {
             for (var x = 1; x < xSize; x++)
             {
-                var (leftNode, aboveNode) = TryMerge(placingGuild, nodeMap, y, x, nodes);
-
                 var currentPixelGuild = map.Pixels[y, x].Owner;
+                var (leftNode, aboveNode) = TryMerge(currentPixelGuild, nodeMap, y, x, nodes);
+                
                 var isSpawnNode = map.Pixels[y, x].Type == PixelType.Spawn;
 
                 if (nodes[leftNode].Guild == currentPixelGuild)
@@ -119,7 +119,7 @@ public class MapUpdater
             }
         }
 
-        var justAddedNode = nodeMap[pixelCoordinates.x, pixelCoordinates.y];
+        var justAddedNode = nodeMap[pixelCoordinates.y, pixelCoordinates.x];
         return (nodes, justAddedNode);
     }
 
@@ -134,7 +134,7 @@ public class MapUpdater
         nodeMap[coordinates.y, coordinates.x] = destinationNode;
     }
 
-    private (int, int) TryMerge(GuildName mergingGuild, int[,] nodeMap, int y, int x, AreaNodes nodes)
+    private (int, int) TryMerge(GuildName? mergingGuild, int[,] nodeMap, int y, int x, AreaNodes nodes)
     {
         var leftNode = nodeMap[y, x - 1];
         var aboveNode = nodeMap[y - 1, x];

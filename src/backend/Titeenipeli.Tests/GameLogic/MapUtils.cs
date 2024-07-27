@@ -1,4 +1,6 @@
-﻿using Titeenipeli.Enums;
+﻿using System.Collections.Generic;
+using System.Text;
+using Titeenipeli.Enums;
 using Titeenipeli.Models;
 
 namespace Titeenipeli.Tests.GameLogic;
@@ -7,6 +9,17 @@ using GuildPixel = (GuildName? guild, bool isSpawn);
 
 public static class MapUtils
 {
+    private static Dictionary<GuildName, int> _ColourMappings = new()
+    {
+        { GuildName.Cluster, 31 },
+        { GuildName.Tietokilta, 30 },
+        { GuildName.Algo, 32 },
+        { GuildName.OulunTietoteekkarit, 33 },
+        { GuildName.TietoTeekkarikilta, 35 },
+        { GuildName.Digit, 36 },
+        { GuildName.Datateknologerna, 37 }
+    };
+    
     public static Map BuildMapFromOwnerMatrix(GuildPixel[,] owners)
     {
         var ySize = owners.GetUpperBound(0) + 1;
@@ -77,4 +90,56 @@ public static class MapUtils
 
         return map;
      }
+
+    public static string MapAsColours(Map map)
+    {
+        var ySize = map.Pixels.GetUpperBound(0) + 1;
+        var xSize = map.Pixels.GetUpperBound(1) + 1;
+        var builder = new StringBuilder();
+        for (var y = 0; y < ySize; y++)
+        {
+            for (var x = 0; x < xSize; x++)
+            {
+                var pixelOwner = map.Pixels[y, x].Owner;
+                if (pixelOwner is null)
+                {
+                    builder.Append(' ');
+                    continue;
+                }
+
+                // For some reason static analysis doesn't recognize the null guard just above ... oh well
+                builder.Append($"\x1b[{_ColourMappings[(GuildName)pixelOwner]}m\u2588\x1b[0m");
+            }
+
+            builder.Append('\n');
+        }
+        
+        return builder.ToString();
+    }
+
+    public static string MapAsNumbers(Map map)
+    {
+        var ySize = map.Pixels.GetUpperBound(0) + 1;
+        var xSize = map.Pixels.GetUpperBound(1) + 1;
+        var builder = new StringBuilder();
+        for (var y = 0; y < ySize; y++)
+        {
+            for (var x = 0; x < xSize; x++)
+            {
+                var pixelOwner = map.Pixels[y, x].Owner;
+                if (pixelOwner is null)
+                {
+                    builder.Append(' ');
+                    continue;
+                }
+
+                // For some reason static analysis doesn't recognize the null guard just above ... oh well
+                builder.Append((int)pixelOwner);
+            }
+
+            builder.Append('\n');
+        }
+        
+        return builder.ToString();
+    }
 }
