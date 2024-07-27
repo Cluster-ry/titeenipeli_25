@@ -81,7 +81,7 @@ public class MapUpdaterTest
                     { Clus, Clus, None, Algo, Algo, Algo, TiKi, TiKi, TiKi, None, Clus },
                     { None, Clus, TiKi, TiKi, Algo, None, None, TiKi, Clus, Clus, Clus },
                     { None, Clus, Clus, Clus, Algo, Algo, None, Clus, Clus, None, None },
-                    { Clus, Clus, None, Clus, Clus, Clus, None, Clus, None, None, Clus },
+                    { Clus, Clus, None, Clus, Clus, Clus, None, Clus, None, None, Clus }
                 },
                 new[] { (GuildName.Cluster, (7, 8)) },
                 new[,]
@@ -93,7 +93,7 @@ public class MapUpdaterTest
                     { Clus, Clus, Clus, Clus, Clus, Clus, Clus, Clus, Clus, Clus, Clus },
                     { None, Clus, Clus, Clus, Clus, Clus, Clus, Clus, Clus, Clus, Clus },
                     { None, Clus, Clus, Clus, Clus, Clus, Clus, Clus, Clus, None, None },
-                    { Clus, Clus, None, Clus, Clus, Clus, Clus, Clus, None, None, Clus },
+                    { Clus, Clus, None, Clus, Clus, Clus, Clus, Clus, None, None, Clus }
                 }).SetName("Should fill encircled area (large map)");
             yield return new TestCaseData(
                 new[,]
@@ -109,7 +109,7 @@ public class MapUpdaterTest
                     { Clus, Clus, CLUS, Clus },
                     { Clus, Clus, Clus, Clus },
                     { Clus, Clus, Clus, Clus },
-                    { Clus, Clus, Clus, Clus },
+                    { Clus, Clus, Clus, Clus }
                 }).SetName("Should fill encircled area (small map)");
             yield return new TestCaseData(
                 new[,]
@@ -117,7 +117,7 @@ public class MapUpdaterTest
                     { Clus, Clus, CLUS, Clus },
                     { Clus, ALGO, TiKi, Clus },
                     { Clus, Algo, Algo, None },
-                    { Clus, Clus, Clus, Clus },
+                    { Clus, Clus, Clus, Clus }
                 },
                 new[] { (GuildName.Cluster, (4, 3)) },
                 new[,]
@@ -125,7 +125,7 @@ public class MapUpdaterTest
                     { Clus, Clus, CLUS, Clus },
                     { Clus, ALGO, Clus, Clus },
                     { Clus, Clus, Clus, Clus },
-                    { Clus, Clus, Clus, Clus },
+                    { Clus, Clus, Clus, Clus }
                 }).SetName("Should not fill spawn cells");
             yield return new TestCaseData(
                 new[,]
@@ -277,7 +277,7 @@ public class MapUpdaterTest
                     (GuildName.Cluster, (6, 1)),
                     (GuildName.Tietokilta, (7, 6)),
                     (GuildName.Algo, (6, 7)),
-                    (GuildName.Digit, (7, 3)),
+                    (GuildName.Digit, (7, 3))
                 },
                 new[,]
                 {
