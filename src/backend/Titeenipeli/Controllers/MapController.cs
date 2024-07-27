@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Enums;
 using Titeenipeli.Inputs;
@@ -12,16 +13,18 @@ namespace Titeenipeli.Controllers;
 
 [ApiController]
 [Route("map/pixels")]
+[Authorize(Policy = "MustHaveGuild")]
 public class MapController : ControllerBase
 {
     private const int BorderWidth = 1;
-
-    private readonly GameOptions _gameOptions;
-    private readonly IUserRepositoryService _userRepositoryService;
-    private readonly IMapRepositoryService _mapRepositoryService;
     private readonly IGameEventRepositoryService _gameEventRepositoryService;
 
-    public MapController(GameOptions gameOptions, IUserRepositoryService userRepositoryService, IMapRepositoryService mapRepositoryService,
+    private readonly GameOptions _gameOptions;
+    private readonly IMapRepositoryService _mapRepositoryService;
+    private readonly IUserRepositoryService _userRepositoryService;
+
+    public MapController(GameOptions gameOptions, IUserRepositoryService userRepositoryService,
+                         IMapRepositoryService mapRepositoryService,
                          IGameEventRepositoryService gameEventRepositoryService)
     {
         _gameOptions = gameOptions;
