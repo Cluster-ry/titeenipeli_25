@@ -1,0 +1,45 @@
+name: Run dotnet tests on backend
+on:
+  pull_request:
+    paths:
+      - "src/backend/**"
+    branches:
+      - main
+
+permissions:
+  actions: read
+  contents: read
+  checks: write
+
+env:
+  dotnet-version: "8.0.x"
+
+jobs:
+  run-tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.dotnet-version }}
+
+      - name: Restore dependencies
+        working-directory: src/backend
+        run: dotnet restore
+
+      - name: Run tests
+        working-directory: src/backend
+        run: dotnet test --logger "trx;LogFileName=test-results.trx"
+
+      - name: Test report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()
+        with:
+          name: NUnit Tests
+          reporter: dotnet-nunit
+          path: "src/backend/Titeenipeli.Tests/TestResults/test-results.trx"
