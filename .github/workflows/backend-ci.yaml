@@ -41,5 +41,5 @@ jobs:
         if: success() || failure()
         with:
           name: NUnit Tests
-          reporter: dotnet-nunit
+          reporter: dotnet-trx
           path: "src/backend/Titeenipeli.Tests/TestResults/test-results.trx"
