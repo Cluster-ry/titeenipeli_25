@@ -5,11 +5,11 @@ using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Services.RepositoryServices;
 
-public class UserRepositoryRepositoryService : IUserRepositoryService
+public class UserRepositoryService : IUserRepositoryService
 {
     private readonly ApiDbContext _dbContext;
 
-    public UserRepositoryRepositoryService(ApiDbContext dbContext)
+    public UserRepositoryService(ApiDbContext dbContext)
     {
         _dbContext = dbContext;
     }
