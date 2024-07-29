@@ -4,19 +4,19 @@ using Titeenipeli.Inputs;
 using Titeenipeli.Schema;
 using Titeenipeli.Services.RepositoryServices;
 
-namespace Titeenipeli.IntegrationTest;
+namespace Titeenipeli.IntegrationTest.Controllers;
 
 [TestFixture]
 public class CtfControllerIntegrationTest : BaseFixture
 {
-    private readonly ApiDbContext _dbContext =
-        new ApiDbContext(new DbContextOptionsBuilder().UseNpgsql(Postgres.GetConnectionString()).Options);
-
     [SetUp]
     public async Task BeforeEach()
     {
         await _dbContext.Database.EnsureCreatedAsync();
     }
+
+    private readonly ApiDbContext _dbContext =
+        new ApiDbContext(new DbContextOptionsBuilder().UseNpgsql(Postgres.GetConnectionString()).Options);
 
     [TestCase("#TEST_FLAG", 200, TestName = "Should return success code for valid flag")]
     [TestCase("#INVALID_FLAG", 400, TestName = "Should return failure code for invalid flag")]
