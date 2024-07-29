@@ -7,44 +7,30 @@ using Titeenipeli.Services.RepositoryServices;
 namespace Titeenipeli.IntegrationTest;
 
 [TestFixture]
-[FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
-public class Tests
+public class CtfControllerIntegrationTest : BaseFixture
 {
-    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder()
-                                                     .WithImage("postgres:15-alpine")
-                                                     .Build();
+    private readonly ApiDbContext _dbContext =
+        new ApiDbContext(new DbContextOptionsBuilder().UseNpgsql(Postgres.GetConnectionString()).Options);
 
     [SetUp]
-    public async Task Setup()
+    public async Task BeforeEach()
     {
-        await _postgres.StartAsync();
+        await _dbContext.Database.EnsureCreatedAsync();
     }
 
-    [TearDown]
-    public async Task Cleanup()
+    [TestCase("#TEST_FLAG", 200, TestName = "Should return success code for valid flag")]
+    [TestCase("#INVALID_FLAG", 400, TestName = "Should return failure code for invalid flag")]
+    [TestCase(null, 400, TestName = "Should return failure code for null flag")]
+    public void Test1(string token, int statusCode)
     {
-        await _postgres.DisposeAsync();
-    }
+        CtfFlagRepositoryService ctfFlagRepositoryService = new CtfFlagRepositoryService(_dbContext);
+        ctfFlagRepositoryService.Add(new CtfFlag { Token = "#TEST_FLAG" });
 
-    [TestCase("#TEST_TOKEN", ExpectedResult = 200)]
-    [TestCase("#INVALID_TOKEN", ExpectedResult = 400)]
-    public int? Test1(string token)
-    {
-        ApiDbContext dbContext =
-            new ApiDbContext(new DbContextOptionsBuilder().UseNpgsql(_postgres.GetConnectionString()).Options);
-
-        dbContext.Database.EnsureCreated();
-
-        CtfFlagRepositoryService ctfFlagRepositoryRepositoryService =
-            new CtfFlagRepositoryService(dbContext);
-
-        ctfFlagRepositoryRepositoryService.Add(new CtfFlag { Token = "#TEST_TOKEN" });
-
-        CtfController ctfController = new CtfController(ctfFlagRepositoryRepositoryService);
+        CtfController ctfController = new CtfController(ctfFlagRepositoryService);
 
         PostCtfInput input = new PostCtfInput { Token = token };
 
         IStatusCodeActionResult? result = ctfController.PostCtf(input) as IStatusCodeActionResult;
-        return result?.StatusCode;
+        result?.StatusCode.Should().Be(statusCode);
     }
 }
