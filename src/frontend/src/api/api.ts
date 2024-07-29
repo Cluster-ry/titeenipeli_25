@@ -19,7 +19,7 @@ function postLogin(postLoginInput: PostLoginInput) {
         }
     )
     // Inspecting the response
-    // Currently only checks for success.
+    // Currently only checks for success
     .then(response => {
         console.log(response)
         if (response.status === 200) {
