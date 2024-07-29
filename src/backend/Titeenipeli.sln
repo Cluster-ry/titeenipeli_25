@@ -16,6 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.gRPC", "Titeenipeli.gRPC\Titeenipeli.gRPC.csproj", "{F10BBF82-94C4-4D2A-A042-5B96944BE339}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.IntegrationTest", "Titeenipeli.IntegrationTest\Titeenipeli.IntegrationTest.csproj", "{F52DC122-CE84-44C4-8C8B-353B9D00F909}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Benchmark", "Titeenipeli.Benchmark\Titeenipeli.Benchmark.csproj", "{C3068B0C-57CC-4AC9-8919-948B62C89DFF}"
 EndProject
 Global
@@ -36,6 +38,10 @@ Global
 		{F10BBF82-94C4-4D2A-A042-5B96944BE339}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F10BBF82-94C4-4D2A-A042-5B96944BE339}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F10BBF82-94C4-4D2A-A042-5B96944BE339}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F52DC122-CE84-44C4-8C8B-353B9D00F909}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F52DC122-CE84-44C4-8C8B-353B9D00F909}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F52DC122-CE84-44C4-8C8B-353B9D00F909}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F52DC122-CE84-44C4-8C8B-353B9D00F909}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C3068B0C-57CC-4AC9-8919-948B62C89DFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C3068B0C-57CC-4AC9-8919-948B62C89DFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3068B0C-57CC-4AC9-8919-948B62C89DFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
