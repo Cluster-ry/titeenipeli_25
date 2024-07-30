@@ -15,7 +15,8 @@ public class SpawnGenerator
 
     public Coordinate GetSpawnPoint(GuildName guild)
     {
-        Coordinate spawnAreaCenter = GetSpawnAreaCenter(guild, _gameOptions.SpawnAreaDistanceFromCenter,
+        Coordinate spawnAreaCenter = GetSpawnAreaCenter(guild,
+            _gameOptions.SpawnAreaDistanceFromCenter,
             _gameOptions.SpawnAreasPerGuild);
 
         Coordinate spawnPointInCircle = GetRandomPointInCircle(_gameOptions.SpawnAreaRadius);
@@ -30,6 +31,7 @@ public class SpawnGenerator
     {
         int guildCount = Enum.GetNames(typeof(GuildName)).Length;
         int selectedSpawnArea = new Random().Next(spawnAreasPerGuild);
+
         double angleOffset = 2 * Math.PI / (guildCount * spawnAreasPerGuild);
         double angle = angleOffset * guildCount * selectedSpawnArea + angleOffset * (int)guild;
 
@@ -45,9 +47,10 @@ public class SpawnGenerator
 
         double angle = 2 * Math.PI * random.NextDouble();
         double u = random.NextDouble() + random.NextDouble();
-        double r = u > 1 ? 2 - u : u;
-        double x = r * Math.Cos(angle);
-        double y = r * Math.Sin(angle);
+        double distance = u > 1 ? 2 - u : u;
+
+        double x = distance * Math.Cos(angle);
+        double y = distance * Math.Sin(angle);
 
         return new Coordinate
         {
