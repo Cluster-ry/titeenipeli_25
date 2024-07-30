@@ -1,23 +1,22 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Titeenipeli.Context;
-using Titeenipeli.Handlers;
+using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
-using Titeenipeli.Options;
 using Titeenipeli.Schema;
+using Titeenipeli.Services;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
 
 [ApiController]
 public class AuthenticationController : ControllerBase
 {
-    private readonly ApiDbContext _dbContext;
-    private readonly JwtOptions _jwtOptions;
+    private readonly JwtService _jwtService;
+    private readonly IUserRepositoryService _userRepositoryService;
 
-    public AuthenticationController(JwtOptions jwtOptions, ApiDbContext dbContext)
+    public AuthenticationController(JwtService jwtService, IUserRepositoryService userRepositoryService)
     {
-        _jwtOptions = jwtOptions;
-        _dbContext = dbContext;
+        _jwtService = jwtService;
+        _userRepositoryService = userRepositoryService;
     }
 
     [HttpPost("login")]
@@ -29,18 +28,14 @@ public class AuthenticationController : ControllerBase
             return Unauthorized();
         }
 
-        User? user = _dbContext.Users.Include(user => user.Guild)
-                               .FirstOrDefault(user => user.Code == loginInput.Username);
+        User? user = _userRepositoryService.GetByCode(loginInput.Username);
 
         if (user == null)
         {
             return BadRequest();
         }
 
-        JwtHandler jwtHandler = new JwtHandler(_jwtOptions);
-
-        Response.Cookies.Append(_jwtOptions.CookieName, jwtHandler.GetJwtToken(user),
-            jwtHandler.GetAuthorizationCookieOptions());
+        Response.Cookies.AppendJwtCookie(_jwtService, user);
 
         return Ok();
     }
