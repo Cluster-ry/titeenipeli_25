@@ -4,6 +4,15 @@ import { PostCtfInput } from "../models/PostCtfInput";
 import { PostPixelsInput } from "../models/PostPixelsInput";
 
 /**
+ * @NOTE 
+ * 
+ * The file currently has console.logs to help inspect
+ * behavior. These should be removed when the application
+ * is put to production.
+ */
+
+
+/**
  * @brief Sending a POST request for logging the user in. 
  * @param postLoginInput Username and Password 
  */
@@ -21,12 +30,12 @@ function postLogin(postLoginInput: PostLoginInput) {
     // Inspecting the response
     // Currently only checks for success
     .then(response => {
-        console.log(response)
+        console.log(response)       // REMOVE THIS
         if (response.status === 200) {
             console.log("Login successful.");
-        } else {
-            console.log("Login unsuccessful.");
+            return;
         }
+        console.log("Login unsuccessful.");
     })
 
     // Catching the errors.
@@ -52,8 +61,13 @@ function postCtf(postCtfInput: PostCtfInput) {
         }
     )
     .then( response => {
-    })
-    ;
+        console.log(response)       // REMOVE THIS
+        if (response.status === 200) {
+            console.log("Success.");
+            return;
+        }
+        console.log("Failure.");
+    });
 }
 
 function getPixels() {
@@ -64,7 +78,15 @@ function getPixels() {
                 "Content-Type": "application/json"
             }
         }
-    );
+    )
+    .then ( response => {
+        console.log(response);      // REMOVE THIS
+        if (response.status === 200) {
+            console.log("Success.");
+            return;
+        }
+        console.log("Failure.");
+    });
 }
 
 function postPixels(postPixelsInput: PostPixelsInput) {
@@ -76,7 +98,15 @@ function postPixels(postPixelsInput: PostPixelsInput) {
                 "Content-Type": "application/json"
             }
         }
-    );
+    )
+    .then( response => {
+        console.log(response);      // REMOVE THIS
+        if (response.status === 200) {
+            console.log("Success.");
+            return;
+        }
+        console.log("Failure.");
+    });
 }
 
 export { postLogin, postCtf, postPixels, getPixels };
