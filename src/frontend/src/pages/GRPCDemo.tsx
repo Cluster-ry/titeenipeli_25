@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import * as Map from "../generated/grpc/services/MapUpdate_pb.d";
-import * as PixelOwners from "../generated/grpc/components/enums/pixelOwners_pb.d";
-import * as RelativeCoordinate from "../generated/grpc/components/schemas/relativeCoordinate_pb.d";
-import {MapUpdateClient} from "../generated/grpc/services/MapUpdate.client";
 import {GrpcWebFetchTransport} from "@protobuf-ts/grpcweb-transport";
+import { MapUpdateClient } from "../generated/grpc/services/MapUpdate.client";
+import { IncrementalMapUpdateRequest, IncrementalMapUpdateRequest_IncrementalMapUpdate } from "../generated/grpc/services/MapUpdate";
+import { PixelTypes } from "../generated/grpc/components/enums/pixelTypes";
+import { PixelOwners } from "../generated/grpc/components/enums/pixelOwners";
+import { RelativeCoordinate } from "../generated/grpc/components/schemas/relativeCoordinate";
 
 export default function GRPCTest() {
   useEffect(() => {
@@ -14,21 +15,23 @@ export default function GRPCTest() {
     const transport = new GrpcWebFetchTransport({
       baseUrl: window.location.origin
     });
+    const mapUpdateClient = new MapUpdateClient(transport)
 
-    const mapUpdateClient = new MapUpdateClient(transport);
-    const relativeCoordinate = new RelativeCoordinate.RelativeCoordinate();
-    relativeCoordinate.setX(1);
-    relativeCoordinate.setY(1);
-    const incrementalMapUpdate =
-      new Map.IncrementalMapUpdateRequest.IncrementalMapUpdate();
-    incrementalMapUpdate.setOwner(PixelOwners.PixelOwners.CLUSTER);
-    incrementalMapUpdate.setOwnpixel(true);
-    incrementalMapUpdate.setSpawnrelativecoordinate();
-    incrementalMapUpdate.setType(1);
-    incrementalMapUpdate.setSpawnrelativecoordinate(relativeCoordinate);
-    const mapUpdateRequest = new Map.IncrementalMapUpdateRequest();
-    mapUpdateRequest.addUpdates(incrementalMapUpdate);
-    await mapUpdateClient.getIncremental(mapUpdateRequest);
+    const spawnRelativeCoordinate: RelativeCoordinate = {
+      x: 1,
+      y: 1
+    }
+    const incrementalMapUpdate: IncrementalMapUpdateRequest_IncrementalMapUpdate = {
+      type: PixelTypes.Normal,
+      owner: PixelOwners.Cluster,
+      ownPixel: true,
+      spawnRelativeCoordinate: spawnRelativeCoordinate
+    }
+    const incrementalMapUpdateRequest: IncrementalMapUpdateRequest = {
+      updates: [incrementalMapUpdate]
+    }
+    const response = await mapUpdateClient.getIncremental(incrementalMapUpdateRequest)
+    response.status
   };
 
   return <div id="grpcdemo"></div>;

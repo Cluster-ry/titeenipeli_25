@@ -9,8 +9,8 @@
     "build": "pnpm generate-grpc && pnpm build-tsc-vite",
     "build-tsc-vite": "tsc && vite build",
     "generate-grpc": "mkdirp -p src/generated/grpc && pnpm compile-grpc-components && pnpm compile-grpc-services",
-    "compile-grpc-components": "npx protoc --proto_path=../protobuf --ts_out=src/generated/grpc --grpc-web_out=import_style=commonjs+dts,mode=grpcweb:src/generated/grpc ../protobuf/components/*/*.proto",
-    "compile-grpc-services": "npx protoc --proto_path=../protobuf --ts_out=src/generated/grpc --grpc-web_out=import_style=commonjs+dts,mode=grpcweb:src/generated/grpc ../protobuf/*/*.proto",
+    "compile-grpc-components": "npx protoc --proto_path=../protobuf --ts_out=src/generated/grpc --ts_opt=ts_nocheck ../protobuf/components/*/*.proto",
+    "compile-grpc-services": "npx protoc --proto_path=../protobuf --ts_out=src/generated/grpc --ts_opt=ts_nocheck ../protobuf/*/*.proto",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
