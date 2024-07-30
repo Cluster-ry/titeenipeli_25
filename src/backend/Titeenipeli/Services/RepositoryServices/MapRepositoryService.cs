@@ -61,6 +61,7 @@ public class MapRepositoryService : IMapRepositoryService
     public bool IsSpawn(Coordinate pixelCoordinate)
     {
         Pixel? pixel = GetByCoordinate(pixelCoordinate);
-        return pixel?.User == null || (pixel.User.SpawnX != pixel.X && pixel.User.SpawnY != pixel.Y);
+        return pixel == null ||
+               !(pixel.User == null || (pixel.User.SpawnX != pixel.X && pixel.User.SpawnY != pixel.Y));
     }
 }
