@@ -17,7 +17,9 @@ public class MapRepositoryService : IMapRepositoryService
 
     public Pixel? GetByCoordinate(Coordinate pixelCoordinate)
     {
-        return _dbContext.Map.FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
+        return _dbContext.Map.Include(pixel => pixel.User)
+                         .ThenInclude(pixelOwner => pixelOwner!.Guild)
+                         .FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
     }
 
     public Pixel? GetById(int id)
@@ -54,5 +56,11 @@ public class MapRepositoryService : IMapRepositoryService
 
         _dbContext.Entry(existingUser).CurrentValues.SetValues(pixel);
         _dbContext.SaveChanges();
+    }
+
+    public bool IsSpawn(Coordinate pixelCoordinate)
+    {
+        Pixel? pixel = GetByCoordinate(pixelCoordinate);
+        return pixel?.User == null || (pixel.User.SpawnX != pixel.X && pixel.User.SpawnY != pixel.Y);
     }
 }
