@@ -42,6 +42,7 @@ public static class Program
         builder.Services.AddSingleton(gameOptions);
 
         builder.Services.AddScoped<JwtService>();
+        builder.Services.AddScoped<SpawnGeneratorService>();
 
         // Adding OpenTelemetry tracing and metrics
         IOpenTelemetryBuilder openTelemetry = builder.Services.AddOpenTelemetry();
