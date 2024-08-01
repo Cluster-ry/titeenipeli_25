@@ -1,9 +1,9 @@
 import * as ctf from "./ctf";
 import * as login from "./login";
-import * as pixels from "./pixels";
+import * as map from "./map";
 
 export const api = {
     ctf: ctf,
     login: login,
-    pixels: pixels,
+    map: map,
 }

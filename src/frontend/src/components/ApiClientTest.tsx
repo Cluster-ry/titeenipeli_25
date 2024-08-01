@@ -1,4 +1,5 @@
-import { postCtf, postLogin, postPixels, getPixels } from "../api/api"
+import { api } from "../api/index";
+
 import { PostLoginInput } from "../models/PostLoginInput";
 
 export default function ApiTestClient() {
@@ -11,13 +12,12 @@ export default function ApiTestClient() {
             Username: "test",
             Password: "test123"
         }
-
-        await postLogin(testUser);
+        api.login.postLogin(testUser);
     }
     return (
         <>
             <form onSubmit={logInTest}>
-
+                <input type="submit"></input>
             </form>
         </>
     )
