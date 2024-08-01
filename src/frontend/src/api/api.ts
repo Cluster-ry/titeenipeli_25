@@ -1,112 +1,124 @@
-import axios from "axios";
+import axios, { AxiosHeaders } from "axios";
 import { PostLoginInput } from "../models/PostLoginInput";
 import { PostCtfInput } from "../models/PostCtfInput";
 import { PostPixelsInput } from "../models/PostPixelsInput";
 
+
 /**
- * @NOTE 
+ * This file contains the front-end API client functionality. Every function
+ * is conveniently wrapped inside a namespace. 
  * 
- * The file currently has console.logs to help inspect
- * behavior. These should be removed when the application
- * is put to production.
+ * @Note
+ * This file is currently still not finished, thus it contains
+ * console.log commands that should not exist when the application
+ * is pushed into production.
  */
 
+const LOGIN_URL     = "/login";
+const CTF_URL       = "/ctf";
+const PIXELS_URL    = "/map/pixels";
 
-/**
- * @brief Sending a POST request for logging the user in. 
- * @param postLoginInput Username and Password 
- */
-function postLogin(postLoginInput: PostLoginInput) {
-    return axios.post<PostLoginInput>(
-        "/login",
-        postLoginInput,
-        {
-            headers: {
-                "Content-Type": "application/json"
-            },
-            withCredentials: true
-        }
-    )
-    // Inspecting the response
-    // Currently only checks for success
-    .then(response => {
-        console.log(response)       // REMOVE THIS
-        if (response.status === 200) {
-            console.log("Login successful.");
-            return;
-        }
-        console.log("Login unsuccessful.");
-    })
+namespace ApiClient {
 
-    // Catching the errors.
-    // Currently not an effective implementation.
-    .catch(error => {
-        console.error("Encountered an error", error);
-        throw error;
-    });
+    /**
+     * @brief POST request for logging in
+     * 
+     * @param postLoginInput Username and Password 
+     */
+    export async function postLogin(postLoginInput: PostLoginInput) {        
+        try {            
+            const headers = new AxiosHeaders();
+            return await axios.post<PostLoginInput>(
+                LOGIN_URL,
+                postLoginInput,
+                {
+                    headers,
+                    withCredentials: true
+                }
+            )
+            .then(response => {
+                console.log(response)       // REMOVE THIS
+                if (response.status === 200) {
+                    console.log("Login successful.");
+                    return;
+                }
+                console.log("Login unsuccessful.");
+            });
+        } catch(error) {
+            console.error(error);
+        }
+    }
+    
+    /**
+     * @param postCtfInput 
+     */
+    export async function postCtf(postCtfInput: PostCtfInput) {
+        try {
+            const headers = new AxiosHeaders();
+            return await axios.post<PostCtfInput>(
+                CTF_URL,
+                postCtfInput,
+                {
+                    headers
+                }
+            )
+            .then( response => {
+                console.log(response)       // REMOVE THIS
+                if (response.status === 200) {
+                    console.log("Success.");
+                    return;
+                }
+                console.log("Failure.");
+            });
+        } catch(error) {
+            console.error(error);
+        }
+    }
+    
+    export async function getPixels() {
+        try {
+            const headers = new AxiosHeaders();
+            return await axios.get<PostPixelsInput>(
+                PIXELS_URL,
+                {
+                    headers
+                }
+            )
+            .then ( response => {
+                console.log(response);      // REMOVE THIS
+                if (response.status === 200) {
+                    console.log("Success.");
+                    return;
+                }
+                console.log("Failure.");
+            });
+        } catch(error) {
+            console.error(error);
+        }
+    }
+    
+    export async function postPixels(postPixelsInput: PostPixelsInput) {
+        const headers = new AxiosHeaders();
+        try {
+            return axios.post<PostPixelsInput>(
+                PIXELS_URL,
+                postPixelsInput,
+                {
+                    headers
+                }
+            )
+            .then( response => {
+                console.log(response);      // REMOVE THIS
+                if (response.status === 200) {
+                    console.log("Success.");
+                    return;
+                }
+                console.log("Failure.");
+            });
+        } catch(error) {
+            console.error(error);
+        }
+    }
 }
 
-/**
- * @brief 
- * @param postCtfInput 
- */
-function postCtf(postCtfInput: PostCtfInput) {
-    return axios.post<PostCtfInput>(
-        "/ctf",
-        postCtfInput,
-        {
-            headers: {
-                "Content-Type": "application/json"
-            }
-        }
-    )
-    .then( response => {
-        console.log(response)       // REMOVE THIS
-        if (response.status === 200) {
-            console.log("Success.");
-            return;
-        }
-        console.log("Failure.");
-    });
-}
-
-function getPixels() {
-    return axios.get<PostPixelsInput>(
-        "/map/pixels",
-        {
-            headers: {
-                "Content-Type": "application/json"
-            }
-        }
-    )
-    .then ( response => {
-        console.log(response);      // REMOVE THIS
-        if (response.status === 200) {
-            console.log("Success.");
-            return;
-        }
-        console.log("Failure.");
-    });
-}
-
-function postPixels(postPixelsInput: PostPixelsInput) {
-    return axios.post<PostPixelsInput>(
-        "/map/pixels",
-        postPixelsInput,
-        {
-            headers: {
-                "Content-Type": "application/json"
-            }
-        }
-    )
-    .then( response => {
-        console.log(response);      // REMOVE THIS
-        if (response.status === 200) {
-            console.log("Success.");
-            return;
-        }
-        console.log("Failure.");
-    });
-}
-
-export { postLogin, postCtf, postPixels, getPixels };
+export { ApiClient }
