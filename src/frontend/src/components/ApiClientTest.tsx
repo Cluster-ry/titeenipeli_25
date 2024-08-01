@@ -5,7 +5,7 @@ import { PostLoginInput } from "../models/PostLoginInput";
 export default function ApiTestClient() {
 
 
-    const logInTest = async (event: any) => {
+    const logInTest = async (event: { preventDefault: () => void; }) => {
         event.preventDefault();
 
         const testUser: PostLoginInput = {
