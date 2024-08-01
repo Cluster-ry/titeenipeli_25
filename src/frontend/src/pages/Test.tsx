@@ -3,11 +3,11 @@
  * @NOTE Should not be included in production 
  */
 
-import { ApiClient } from "../api/api"
 
 function Test() {
-
     return <div>
 
     </div>
 }
+
+export default Test;
