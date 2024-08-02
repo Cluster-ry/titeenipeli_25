@@ -1,7 +1,7 @@
 import axios, { AxiosHeaders } from "axios";
 import { PostPixelsInput } from "../models/PostPixelsInput";
 
-const PIXELS_URL = "/map/pixels";
+const PIXELS_URL = "http://localhost:8080/map/pixels";
 
 export async function getPixels() {
     try {

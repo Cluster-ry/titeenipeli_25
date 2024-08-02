@@ -1,7 +1,7 @@
 import { PostLoginInput } from "../models/PostLoginInput";
 import axios, { AxiosHeaders } from "axios";
 
-const LOGIN_URL = "/login";
+const LOGIN_URL = "http://localhost:8080/login";
 
 
 /**

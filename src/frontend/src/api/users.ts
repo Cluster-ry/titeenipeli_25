@@ -1,19 +1,19 @@
 import axios, { AxiosHeaders } from "axios";
-import { PostCtfInput } from "../models/PostCtfInput";
+import { PostUsersInput } from "../models/PostUsersInput";
 
-const CTF_URL = "http://localhost:8080/ctf";
+const USERS_URL = "http://localhost:8080/users";
 
-export async function postCtf(postCtfInput: PostCtfInput) {
+export async function postUsers(postUsersInput: PostUsersInput) {
     try {
         const headers = new AxiosHeaders();
-        return await axios.post<PostCtfInput>(
-            CTF_URL,
-            postCtfInput,
+        return await axios.post<PostUsersInput>(
+            USERS_URL,
+            postUsersInput,
             {
-                headers
+                headers,
             }
         )
-        .then( response => {
+        .then(response => {
             console.log(response)       // REMOVE THIS
             if (response.status === 200) {
                 console.log("Success.");
