@@ -1,5 +1,5 @@
 import { PostLoginInput } from "../models/PostLoginInput";
-import axios, { AxiosHeaders } from "axios";
+import axios from "axios";
 
 const LOGIN_URL = "http://localhost:8080/login";
 
@@ -11,12 +11,10 @@ const LOGIN_URL = "http://localhost:8080/login";
  */
 export async function postLogin(postLoginInput: PostLoginInput) {        
     try {            
-        const headers = new AxiosHeaders();
         return await axios.post<PostLoginInput>(
             LOGIN_URL,
             postLoginInput,
             {
-                headers,
                 withCredentials: true
             }
         )

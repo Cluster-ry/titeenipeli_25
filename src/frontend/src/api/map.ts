@@ -1,16 +1,12 @@
-import axios, { AxiosHeaders } from "axios";
+import axios from "axios";
 import { PostPixelsInput } from "../models/PostPixelsInput";
 
 const PIXELS_URL = "http://localhost:8080/map/pixels";
 
 export async function getPixels() {
     try {
-        const headers = new AxiosHeaders();
         return await axios.get<PostPixelsInput>(
             PIXELS_URL,
-            {
-                headers
-            }
         )
         .then ( response => {
             console.log(response);      // REMOVE THIS
@@ -26,14 +22,10 @@ export async function getPixels() {
 }
 
 export async function postPixels(postPixelsInput: PostPixelsInput) {
-    const headers = new AxiosHeaders();
     try {
         return axios.post<PostPixelsInput>(
             PIXELS_URL,
             postPixelsInput,
-            {
-                headers
-            }
         )
         .then( response => {
             console.log(response);      // REMOVE THIS

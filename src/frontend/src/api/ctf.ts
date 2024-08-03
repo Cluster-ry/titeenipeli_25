@@ -1,17 +1,13 @@
-import axios, { AxiosHeaders } from "axios";
+import axios from "axios";
 import { PostCtfInput } from "../models/PostCtfInput";
 
 const CTF_URL = "http://localhost:8080/ctf";
 
 export async function postCtf(postCtfInput: PostCtfInput) {
     try {
-        const headers = new AxiosHeaders();
         return await axios.post<PostCtfInput>(
             CTF_URL,
             postCtfInput,
-            {
-                headers
-            }
         )
         .then( response => {
             console.log(response)       // REMOVE THIS

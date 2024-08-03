@@ -1,4 +1,4 @@
-import axios, { AxiosHeaders } from "axios";
+import axios from "axios";
 import { PostUsersInput } from "../models/PostUsersInput";
 import { PutUsersInput } from "../models/PutUsersInput";
 
@@ -6,13 +6,9 @@ const USERS_URL = "http://localhost:8080/users";
 
 export async function postUsers(postUsersInput: PostUsersInput) {
     try {
-        const headers = new AxiosHeaders();
         return await axios.post<PostUsersInput>(
             USERS_URL,
             postUsersInput,
-            {
-                headers,
-            }
         )
         .then(response => {
             console.log(response)       // REMOVE THIS
@@ -29,13 +25,9 @@ export async function postUsers(postUsersInput: PostUsersInput) {
 
 export async function putUsers(putUsersInput: PutUsersInput) {
     try {
-        const headers = new AxiosHeaders();
         return await axios.put<PutUsersInput>(
             USERS_URL,
-            putUsersInput,
-            {
-                headers,
-            }
+            putUsersInput
         )
         .then(response => {
             console.log(response)       // REMOVE THIS
