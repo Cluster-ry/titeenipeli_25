@@ -4,7 +4,7 @@ import { ClientApiError } from "../models/ClientApiError";
 
 const PIXELS_URL = "http://localhost:8080/map/pixels";
 
-export async function getPixels(): Promise<AxiosResponse<PostPixelsInput, any> | ClientApiError> {
+export async function getPixels(): Promise<AxiosResponse<PostPixelsInput> | ClientApiError> {
     try {
         const response = await axios.get<PostPixelsInput>(
             PIXELS_URL,
@@ -19,7 +19,7 @@ export async function getPixels(): Promise<AxiosResponse<PostPixelsInput, any> |
     }
 }
 
-export async function postPixels(postPixelsInput: PostPixelsInput): Promise<AxiosResponse<PostPixelsInput, any> | ClientApiError> {
+export async function postPixels(postPixelsInput: PostPixelsInput): Promise<AxiosResponse<PostPixelsInput> | ClientApiError> {
     try {
         const response = axios.post<PostPixelsInput>(
             PIXELS_URL,

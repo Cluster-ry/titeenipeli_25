@@ -5,7 +5,7 @@ import { ClientApiError } from "../models/ClientApiError";
 
 const USERS_URL = "http://localhost:8080/users";
 
-export async function postUsers(postUsersInput: PostUsersInput): Promise<AxiosResponse<PostUsersInput, any> | ClientApiError> {
+export async function postUsers(postUsersInput: PostUsersInput): Promise<AxiosResponse<PostUsersInput> | ClientApiError> {
     try {
         const response = await axios.post<PostUsersInput>(
             USERS_URL,
@@ -21,7 +21,7 @@ export async function postUsers(postUsersInput: PostUsersInput): Promise<AxiosRe
     }
 }
 
-export async function putUsers(putUsersInput: PutUsersInput): Promise<AxiosResponse<PutUsersInput, any> | ClientApiError> {
+export async function putUsers(putUsersInput: PutUsersInput): Promise<AxiosResponse<PutUsersInput> | ClientApiError> {
     try {
         const response = await axios.put<PutUsersInput>(
             USERS_URL,

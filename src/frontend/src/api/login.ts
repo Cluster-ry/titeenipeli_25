@@ -10,7 +10,7 @@ const LOGIN_URL = "http://localhost:8080/login";
  * 
  * @param postLoginInput Username and Password 
  */
-export async function postLogin(postLoginInput: PostLoginInput): Promise<AxiosResponse<PostLoginInput, any> | ClientApiError> {        
+export async function postLogin(postLoginInput: PostLoginInput): Promise<AxiosResponse<PostLoginInput> | ClientApiError> {        
     try {            
         const response = await axios.post<PostLoginInput>(
             LOGIN_URL,

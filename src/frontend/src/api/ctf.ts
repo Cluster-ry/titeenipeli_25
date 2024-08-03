@@ -4,7 +4,7 @@ import { ClientApiError } from "../models/ClientApiError";
 
 const CTF_URL = "http://localhost:8080/ctf";
 
-export async function postCtf(postCtfInput: PostCtfInput): Promise<AxiosResponse<PostCtfInput, any> | ClientApiError> {
+export async function postCtf(postCtfInput: PostCtfInput): Promise<AxiosResponse<PostCtfInput> | ClientApiError> {
     try {
         const response = await axios.post<PostCtfInput>(
             CTF_URL,
