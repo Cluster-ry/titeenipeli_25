@@ -1,43 +1,37 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { PostUsersInput } from "../models/PostUsersInput";
 import { PutUsersInput } from "../models/PutUsersInput";
+import { ClientApiError } from "../models/ClientApiError";
 
 const USERS_URL = "http://localhost:8080/users";
 
-export async function postUsers(postUsersInput: PostUsersInput) {
+export async function postUsers(postUsersInput: PostUsersInput): Promise<AxiosResponse<PostUsersInput, any> | ClientApiError> {
     try {
-        return await axios.post<PostUsersInput>(
+        const response = await axios.post<PostUsersInput>(
             USERS_URL,
             postUsersInput,
-        )
-        .then(response => {
-            console.log(response)       // REMOVE THIS
-            if (response.status === 200) {
-                console.log("Success.");
-                return;
-            }
-            console.log("Failure.");
-        });
+        );
+
+        console.log("Success.");
+        return response;
+
     } catch(error) {
         console.error(error);
+        return { msg: "Request unsuccessful." };
     }
 }
 
-export async function putUsers(putUsersInput: PutUsersInput) {
+export async function putUsers(putUsersInput: PutUsersInput): Promise<AxiosResponse<PutUsersInput, any> | ClientApiError> {
     try {
-        return await axios.put<PutUsersInput>(
+        const response = await axios.put<PutUsersInput>(
             USERS_URL,
             putUsersInput
-        )
-        .then(response => {
-            console.log(response)       // REMOVE THIS
-            if (response.status === 200) {
-                console.log("Success.");
-                return;
-            }
-            console.log("Failure.");
-        });
+        );
+
+        console.log("Success.");
+        return response;
     } catch(error) {
         console.error(error);
+        return { msg: "Request unsuccessful." };
     }
 }

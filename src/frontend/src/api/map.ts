@@ -1,41 +1,35 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { PostPixelsInput } from "../models/PostPixelsInput";
+import { ClientApiError } from "../models/ClientApiError";
 
 const PIXELS_URL = "http://localhost:8080/map/pixels";
 
-export async function getPixels() {
+export async function getPixels(): Promise<AxiosResponse<PostPixelsInput, any> | ClientApiError> {
     try {
-        return await axios.get<PostPixelsInput>(
+        const response = await axios.get<PostPixelsInput>(
             PIXELS_URL,
-        )
-        .then ( response => {
-            console.log(response);      // REMOVE THIS
-            if (response.status === 200) {
-                console.log("Success.");
-                return;
-            }
-            console.log("Failure.");
-        });
+        );
+
+        console.log("Success.");
+        return response;
+
     } catch(error) {
         console.error(error);
+        return { msg: "Request unsuccessful." };
     }
 }
 
-export async function postPixels(postPixelsInput: PostPixelsInput) {
+export async function postPixels(postPixelsInput: PostPixelsInput): Promise<AxiosResponse<PostPixelsInput, any> | ClientApiError> {
     try {
-        return axios.post<PostPixelsInput>(
+        const response = axios.post<PostPixelsInput>(
             PIXELS_URL,
             postPixelsInput,
         )
-        .then( response => {
-            console.log(response);      // REMOVE THIS
-            if (response.status === 200) {
-                console.log("Success.");
-                return;
-            }
-            console.log("Failure.");
-        });
+
+        console.log("Success.");
+        return response;
     } catch(error) {
         console.error(error);
+        return { msg: "Request unsuccessful." };
     }
 }

@@ -1,23 +1,21 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { PostCtfInput } from "../models/PostCtfInput";
+import { ClientApiError } from "../models/ClientApiError";
 
 const CTF_URL = "http://localhost:8080/ctf";
 
-export async function postCtf(postCtfInput: PostCtfInput) {
+export async function postCtf(postCtfInput: PostCtfInput): Promise<AxiosResponse<PostCtfInput, any> | ClientApiError> {
     try {
-        return await axios.post<PostCtfInput>(
+        const response = await axios.post<PostCtfInput>(
             CTF_URL,
             postCtfInput,
-        )
-        .then( response => {
-            console.log(response)       // REMOVE THIS
-            if (response.status === 200) {
-                console.log("Success.");
-                return;
-            }
-            console.log("Failure.");
-        });
+        );
+
+        console.log("Success");
+        return response;
+        
     } catch(error) {
         console.error(error);
+        return { msg: "Request unsuccessful." };
     }
 }

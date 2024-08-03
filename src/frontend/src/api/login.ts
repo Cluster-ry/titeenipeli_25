@@ -1,5 +1,6 @@
+import axios, { AxiosResponse } from "axios";
 import { PostLoginInput } from "../models/PostLoginInput";
-import axios from "axios";
+import { ClientApiError } from "../models/ClientApiError";
 
 const LOGIN_URL = "http://localhost:8080/login";
 
@@ -9,24 +10,20 @@ const LOGIN_URL = "http://localhost:8080/login";
  * 
  * @param postLoginInput Username and Password 
  */
-export async function postLogin(postLoginInput: PostLoginInput) {        
+export async function postLogin(postLoginInput: PostLoginInput): Promise<AxiosResponse<PostLoginInput, any> | ClientApiError> {        
     try {            
-        return await axios.post<PostLoginInput>(
+        const response = await axios.post<PostLoginInput>(
             LOGIN_URL,
             postLoginInput,
             {
                 withCredentials: true
             }
-        )
-        .then(response => {
-            console.log(response)       // REMOVE THIS
-            if (response.status === 200) {
-                console.log("Login successful.");
-                return;
-            }
-            console.log("Login unsuccessful.");
-        });
+        );
+        
+        console.log("Login successful.");
+        return response;
     } catch(error) {
         console.error(error);
+        return { msg: "Request unsuccessful." };
     }
 }
