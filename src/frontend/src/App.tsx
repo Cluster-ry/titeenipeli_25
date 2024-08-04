@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Authentication from "./pages/Authentication";
 import Map from "./pages/Map";
 import GRPCDemo from "./pages/GRPCDemo";
+import ApiTestClient from "./components/ApiClientTest";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Route path="/authenticate" element={<Authentication />} />
         <Route path="/grpcdemo" element={<GRPCDemo />} />
         <Route path="/map" element={<Map />} />
+        <Route path="/test" element={<ApiTestClient />}/>
       </Routes>
     </Router>
   );

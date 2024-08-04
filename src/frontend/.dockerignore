@@ -1,2 +1,19 @@
 node_modules
 package-lock.json
+
+# Ignore log files
+*.log
+
+# Ignore temporary files
+/tmp/
+/temp/
+
+# Ignore source control directories
+.git/
+
+# Ignore test files
+tests/
+
+# Ignore IDE related files
+.vscode/
+.DS_Store

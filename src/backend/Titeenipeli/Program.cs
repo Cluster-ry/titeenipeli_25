@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -10,12 +11,16 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Titeenipeli.BackgroundServices;
 using Titeenipeli.Context;
 using Titeenipeli.gRPC;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
+using Titeenipeli.Policies;
+using Titeenipeli.Services;
+using Titeenipeli.Services.BackgroundServices;
+using Titeenipeli.Services.RepositoryServices;
+using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli;
 
@@ -35,6 +40,9 @@ public static class Program
         GameOptions gameOptions = new GameOptions();
         builder.Configuration.GetSection("Game").Bind(gameOptions);
         builder.Services.AddSingleton(gameOptions);
+
+        builder.Services.AddScoped<JwtService>();
+        builder.Services.AddScoped<SpawnGeneratorService>();
 
         // Adding OpenTelemetry tracing and metrics
         IOpenTelemetryBuilder openTelemetry = builder.Services.AddOpenTelemetry();
@@ -145,6 +153,11 @@ public static class Program
             };
         });
 
+        builder.Services.AddAuthorizationBuilder()
+               .AddPolicy("MustHaveGuild", policy => policy.Requirements.Add(new MustHaveGuildRequirement()));
+
+        builder.Services.AddSingleton<IAuthorizationHandler, MustHaveGuildHandler>();
+
         builder.Services.AddControllers()
                .AddNewtonsoftJson(options =>
                {
@@ -155,6 +168,7 @@ public static class Program
         builder.Services.AddGrpcReflection();
 
         AddBackgroundServices(builder.Services);
+        AddRepositoryServices(builder.Services);
 
         WebApplication app = builder.Build();
 
@@ -182,6 +196,9 @@ public static class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+
+        app.UseMiddleware<JwtDeserializerMiddleware>();
+
         app.MapControllers();
 
         GRPCServiceRegister.AddGRPCServices(app);
@@ -201,6 +218,15 @@ public static class Program
                     serviceProvider,
                     GetNonNullService<ILogger<UpdateCumulativeScoresService>>(serviceProvider),
                     updateCumulativeScoresServicePeriod));
+    }
+
+    private static void AddRepositoryServices(IServiceCollection services)
+    {
+        services.AddScoped<IUserRepositoryService, UserRepositoryService>();
+        services.AddScoped<IGuildRepositoryService, GuildRepositoryService>();
+        services.AddScoped<IMapRepositoryService, MapRepositoryService>();
+        services.AddScoped<IGameEventRepositoryService, GameEventRepositoryService>();
+        services.AddScoped<ICtfFlagRepositoryService, CtfFlagRepositoryService>();
     }
 
     private static TService GetNonNullService<TService>(IServiceProvider serviceProvider)

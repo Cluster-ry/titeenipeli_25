@@ -20,6 +20,7 @@
     "@protobuf-ts/protoc": "^2.9.4",
     "@protobuf-ts/runtime": "^2.9.4",
     "@protobuf-ts/runtime-rpc": "^2.9.4",
+    "axios": "^1.7.2",
     "google-protobuf": "^3.21.4",
     "grpc-web": "^1.5.0",
     "react": "^18.3.1",
@@ -50,5 +51,5 @@
     "vite-plugin-http2-proxy": "^0.4.3",
     "vite-plugin-mkcert": "^1.17.5"
   },
-  "proxy": "http://localhost:5129"
+  "proxy": "http://localhost:8080"
 }

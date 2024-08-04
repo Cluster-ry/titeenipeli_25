@@ -7,13 +7,13 @@ using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Schema;
 
-namespace Titeenipeli.Handlers;
+namespace Titeenipeli.Services;
 
-public class JwtHandler
+public class JwtService
 {
     private readonly JwtOptions _jwtOptions;
 
-    public JwtHandler(JwtOptions jwtOptions)
+    public JwtService(JwtOptions jwtOptions)
     {
         _jwtOptions = jwtOptions;
     }
@@ -35,7 +35,7 @@ public class JwtHandler
     }
 
     // ReSharper disable once MemberCanBePrivate.Global
-    public string GetJwtToken(JwtClaim jwtClaim, string claimName = "data")
+    public string GetJwtToken(JwtClaim jwtClaim)
     {
         SymmetricSecurityKey secretKey =
             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
@@ -47,7 +47,12 @@ public class JwtHandler
         EncryptingCredentials encryptingCredentials = new EncryptingCredentials(encryptionKey,
             SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256CbcHmacSha512);
 
-        List<Claim> claims = [new Claim(claimName, JsonSerializer.Serialize(jwtClaim))];
+        List<Claim> claims = [new Claim(_jwtOptions.ClaimName, JsonSerializer.Serialize(jwtClaim))];
+
+        if (jwtClaim.GuildId != null)
+        {
+            claims.Add(new Claim(_jwtOptions.GuildClaimName, jwtClaim.GuildId.ToString()!));
+        }
 
         JwtSecurityToken tokeOptions = new JwtSecurityTokenHandler().CreateJwtSecurityToken(
             _jwtOptions.ValidIssuer,
@@ -77,9 +82,13 @@ public class JwtHandler
         };
     }
 
-    public static JwtClaim? GetJwtClaimFromIdentity(ClaimsIdentity identity, string claimName = "data")
+    public string GetAuthorizationCookieName()
     {
-        string? json = identity.FindFirst(claimName)?.Value;
-        return json != null ? JsonSerializer.Deserialize<JwtClaim>(json) : null;
+        return _jwtOptions.CookieName;
+    }
+
+    public string GetJwtClaimName()
+    {
+        return _jwtOptions.ClaimName;
     }
 }

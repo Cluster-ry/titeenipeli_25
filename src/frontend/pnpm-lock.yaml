@@ -23,6 +23,9 @@ importers:
       '@protobuf-ts/runtime-rpc':
         specifier: ^2.9.4
         version: 2.9.4
+      axios:
+        specifier: ^1.7.2
+        version: 1.7.2(debug@4.3.4)
       google-protobuf:
         specifier: ^3.21.4
         version: 3.21.4
@@ -2383,7 +2386,7 @@ snapshots:
   bl@1.2.3:
     dependencies:
       readable-stream: 2.3.8
-      safe-buffer: 5.1.2
+      safe-buffer: 5.2.1
 
   brace-expansion@1.1.11:
     dependencies:
@@ -2855,7 +2858,7 @@ snapshots:
       p-cancelable: 0.4.1
       p-timeout: 2.0.1
       pify: 3.0.0
-      safe-buffer: 5.1.2
+      safe-buffer: 5.2.1
       timed-out: 4.0.1
       url-parse-lax: 3.0.0
       url-to-options: 1.0.1
