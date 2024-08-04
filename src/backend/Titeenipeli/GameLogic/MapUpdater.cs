@@ -10,7 +10,7 @@ using AreaNodes = Dictionary<int, Node>;
 public class MapUpdater
 {
     // We can move this cache to Redis when Redis is up to eliminate state - although this is faster
-    private AreaNodes? _cachedNodes;
+    private CalculationCachedData? _cachedData;
 
     // Note - this class encapsulates the most complex part of game logic - thus I made a decision to overcomment here
     // including adding doc comments. This should enable others to modify the file should I be unavailable -Eddie
@@ -26,17 +26,9 @@ public class MapUpdater
         map.Pixels[pixelCoordinates.y, pixelCoordinates.x]
             = new PixelModel { Owner = placingGuild, Type = PixelType.Normal };
 
-        // TODO uncomment once _PlaceWithCache is implemented
-        // TODO  - this should drop time complexity to O(log n) from O(n) if done right (MIT approved)
-        // if (_cachedNodes is null)
-        // {
-        //     (nodes, justAddedNode) = _ConstructMapAdjacencyNodes(map, pixelCoordinates, placingGuild);
-        // }
-        // else
-        // {
-        //     (nodes, justAddedNode) = _PlaceWithCache(map, pixelCoordinates, placingGuild);
-        // }
-        var (nodes, justAddedNode) = _ConstructMapAdjacencyNodes(map, pixelCoordinates, placingGuild);
+        var (nodes, justAddedNode) = _cachedData is null
+            ? _ConstructMapAdjacencyNodes(map, pixelCoordinates, placingGuild)
+            : _PlaceWithCache(map, pixelCoordinates, placingGuild, _cachedData);
 
         // Construct a set of all nodes reachable from outside node (index 0)
         var nonHangingNodeIndexes = _GetNonSurroundedNodes(nodes, justAddedNode);
@@ -48,8 +40,6 @@ public class MapUpdater
         }
 
         _CutNodesWithoutSpawn(map, nodes);
-
-        _cachedNodes = nodes;
     }
 
     private HashSet<int> _GetNonSurroundedNodes(AreaNodes nodes, int justAddedNode)
@@ -58,13 +48,7 @@ public class MapUpdater
         _DfsWithBlockingNode(0, nodes, justAddedNode, nonSurroundedNodeIndexes);
         return nonSurroundedNodeIndexes;
     }
-
-    private (AreaNodes, int) _PlaceWithCache(Map map, Coordinates pixelCoordinates, GuildName placingGuild)
-    {
-        throw new NotImplementedException();
-    }
-
-
+    
     /// <summary>
     /// Builds a graph from all nodes (single-color areas) in the given map. Includes ownerless nodes (color = null).
     /// The outside of the map is considered an ownerless node and will always have an index of 0.
@@ -120,6 +104,7 @@ public class MapUpdater
         }
 
         var justAddedNode = nodeMap[pixelCoordinates.y, pixelCoordinates.x];
+        _cachedData = new CalculationCachedData { Nodes = nodes, NodeMap = nodeMap, NextNodeId = nextNode };
         return (nodes, justAddedNode);
     }
 
@@ -197,6 +182,21 @@ public class MapUpdater
         nodes.Remove(largerNodeIndex);
         return smallerNodeIndex;
     }
+    
+    private static (AreaNodes, int) _PlaceWithCache(
+        Map map,
+        Coordinates pixelCoordinates,
+        GuildName placingGuild,
+        CalculationCachedData cachedData)
+    {
+        Coordinates[] neighbourAndCornerCoordinates =
+            [(1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1)];
+
+        var neighboursWithDiagonals =
+            neighbourAndCornerCoordinates.Select(coordinate => cachedData.NodeMap[coordinate.y, coordinate.x]);
+        
+        return (null, 0);
+    }
 
     /// <summary>
     /// A recursive depth-first search for the node graph. Treats the given just added node as a dead end. This prevents
@@ -233,15 +233,58 @@ public class MapUpdater
 
     private void _FillNode(Map map, Node node, GuildName? newGuild)
     {
+        if (_cachedData is null)
+        {
+            throw new NullReferenceException("Fill node called without populating map data cache first");
+        }
+        
+        var sameGuildNeighbours = node.Neighbours.Where(neighbour => _cachedData.Nodes[neighbour].Guild == newGuild)
+            .ToList();
+        Node nodeAfterFill;
+        int nodeAfterFillId;
+        if (sameGuildNeighbours.Count == 0)
+        {
+            nodeAfterFill = new Node { Guild = newGuild, Neighbours = node.Neighbours };
+            nodeAfterFillId = _cachedData.NextNodeId;
+            _cachedData.Nodes[nodeAfterFillId] = nodeAfterFill;
+            _cachedData.NextNodeId += 1;
+        }
+        else
+        {
+            nodeAfterFill = _cachedData.Nodes[sameGuildNeighbours[0]];
+            nodeAfterFillId = sameGuildNeighbours[0];
+        }
+
+        List<PixelModel> filledSpawns = [];
         foreach (var (x, y) in node.Pixels)
         {
             if (map.Pixels[y, x].Type == PixelType.Spawn)
             {
-                continue;
+                filledSpawns.Add(map.Pixels[y, x]);
             }
 
             map.Pixels[y, x].Owner = newGuild;
             map.Pixels[y, x].Type = PixelType.Normal;
+            node.Pixels.Remove((x, y));
+
+            _cachedData.NodeMap[y, x] = nodeAfterFillId;
+            nodeAfterFill.Pixels.Add((x, y));
+        }
+
+        // Only filled spawn nodes
+        if (nodeAfterFill.Pixels.Count == 0)
+        {
+            _cachedData.NextNodeId -= 1;
+            _cachedData.Nodes.Remove(_cachedData.NextNodeId);
+            return;
+        }
+        
+        // No nodes left in filled node
+
+        if (sameGuildNeighbours.Count <= 1) return;
+        foreach (var nodeId in sameGuildNeighbours[1..])
+        {
+            nodeAfterFillId = _MergeNodes(nodeAfterFillId, nodeId, _cachedData.Nodes, _cachedData.NodeMap);
         }
     }
 
