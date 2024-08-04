@@ -1,38 +1,22 @@
-import { useEffect } from "react";
-import {GrpcWebFetchTransport} from "@protobuf-ts/grpcweb-transport";
-import { MapUpdateClient } from "../generated/grpc/services/MapUpdate.client";
-import { IncrementalMapUpdateRequest, IncrementalMapUpdateRequest_IncrementalMapUpdate } from "../generated/grpc/services/MapUpdate";
-import { PixelTypes } from "../generated/grpc/components/enums/pixelTypes";
-import { PixelOwners } from "../generated/grpc/components/enums/pixelOwners";
-import { RelativeCoordinate } from "../generated/grpc/components/schemas/relativeCoordinate";
+import { useState } from "react";
+import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
+import { getGrpcClient } from "../core/grpc/grpcClient";
 
 export default function GRPCTest() {
-  useEffect(() => {
-    callGRPC();
-  });
+  const [grpcConnectionStatus, setGrpcConnectionStatus] = useState(false);
+  const [latestGrpcResponse, setLatestGrpcResponse] =
+    useState<IncrementalMapUpdateResponse>();
 
-  const callGRPC = async () => {
-    const transport = new GrpcWebFetchTransport({
-      baseUrl: window.location.origin
-    });
-    const mapUpdateClient = new MapUpdateClient(transport)
+  const grpcClient = getGrpcClient();
+  grpcClient.registerOnConnectionStatusChangedListener(setGrpcConnectionStatus);
+  grpcClient.incrementalMapUpdateClient?.registerOnResponseListener(
+    setLatestGrpcResponse
+  );
 
-    const spawnRelativeCoordinate: RelativeCoordinate = {
-      x: 1,
-      y: 1
-    }
-    const incrementalMapUpdate: IncrementalMapUpdateRequest_IncrementalMapUpdate = {
-      type: PixelTypes.Normal,
-      owner: PixelOwners.Cluster,
-      ownPixel: true,
-      spawnRelativeCoordinate: spawnRelativeCoordinate
-    }
-    const incrementalMapUpdateRequest: IncrementalMapUpdateRequest = {
-      updates: [incrementalMapUpdate]
-    }
-    const response = await mapUpdateClient.getIncremental(incrementalMapUpdateRequest)
-    response.status
-  };
-
-  return <div id="grpcdemo"></div>;
+  return (
+    <div id="grpcdemo">
+      <p>Connection status: {grpcConnectionStatus.toString()}</p>
+      <p>Response: {JSON.stringify(latestGrpcResponse)}</p>
+    </div>
+  )
 }

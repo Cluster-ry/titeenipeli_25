@@ -8,6 +8,10 @@ option csharp_namespace = "GrpcGeneratedServices";
 package Map;
 
 message IncrementalMapUpdateRequest {
+
+}
+
+message IncrementalMapUpdateResponse {
   repeated IncrementalMapUpdate updates = 1;
 
   message IncrementalMapUpdate {
@@ -15,14 +19,9 @@ message IncrementalMapUpdateRequest {
     PixelTypes type = 2;
     PixelOwners owner = 3;
     bool ownPixel = 4;
-  }
-
-}
-
-message IncrementalMapUpdateResponse {
-  
+  }  
 }
 
 service MapUpdate {
-  rpc GetIncremental(IncrementalMapUpdateRequest) returns (IncrementalMapUpdateResponse);
+  rpc GetIncremental(IncrementalMapUpdateRequest) returns (stream IncrementalMapUpdateResponse);
 }
