@@ -12,6 +12,9 @@ export default defineConfig({
       "^/Map.MapUpdate/": {
         target: "https://localhost:7222",
       },
+      "^/api": {
+        target: "https://localhost:7222",
+      },
     }),
   ],
   optimizeDeps: {

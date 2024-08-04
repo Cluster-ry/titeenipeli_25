@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-using Titeenipeli.gRPC.Services;
+﻿using Titeenipeli.Grpc.Services;
 
-namespace Titeenipeli.gRPC;
+namespace Titeenipeli.Grpc;
 
-public static class GRPCServiceRegister
+public static class GrpcServiceRegister
 {
+    public static void AddSingletonGRPCServices(IServiceCollection services) {
+        services.AddSingleton<IIncrementalMapUpdateCoreService, IncrementalMapUpdateCoreService>();
+    }
+
     public static void AddGRPCServices(WebApplication app)
     {
         app.UseGrpcWeb();

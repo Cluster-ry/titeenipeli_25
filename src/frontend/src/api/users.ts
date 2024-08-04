@@ -5,7 +5,7 @@ import { ClientApiError } from "../models/ClientApiError";
 import { PostUserResult } from "../models/Post/PostUserResult";
 import { ClientApiOk } from "../models/ClientApiOk";
 
-const USERS_URL = "http://localhost:8080/users";
+const USERS_URL = "api/v1/users";
 
 export async function postUsers(postUsersInput: PostUsersInput): Promise<AxiosResponse<PostUserResult> | ClientApiError> {
     try {

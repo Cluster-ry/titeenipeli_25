@@ -23,7 +23,7 @@ export default function ApiTestClient() {
         event.preventDefault();
 
         const postUserInput: PostUsersInput = {
-            id: "string",
+            id: "test",
             firstName: "string",
             lastName: "string",
             username: "string",
