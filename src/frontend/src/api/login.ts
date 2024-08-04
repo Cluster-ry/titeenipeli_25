@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { PostLoginInput } from "../models/Post/PostLoginInput";
 import { ClientApiError } from "../models/ClientApiError";
+import { ClientApiOk } from "../models/ClientApiOk";
 
 const LOGIN_URL = "http://localhost:8080/login";
 
@@ -10,9 +11,9 @@ const LOGIN_URL = "http://localhost:8080/login";
  * 
  * @param postLoginInput Username and Password 
  */
-export async function postLogin(postLoginInput: PostLoginInput): Promise<AxiosResponse<PostLoginInput> | ClientApiError> {        
+export async function postLogin(postLoginInput: PostLoginInput): Promise<AxiosResponse<ClientApiOk> | ClientApiError> {        
     try {            
-        const response = await axios.post<PostLoginInput>(
+        const response = await axios.post<ClientApiOk>(
             LOGIN_URL,
             postLoginInput,
             {

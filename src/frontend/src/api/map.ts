@@ -1,12 +1,14 @@
 import axios, { AxiosResponse } from "axios";
 import { PostPixelsInput } from "../models/Post/PostPixelsInput";
+import { GetPixelsResult } from "../models/Get/GetPixelsResult";
 import { ClientApiError } from "../models/ClientApiError";
+import { ClientApiOk } from "../models/ClientApiOk";
 
 const PIXELS_URL = "http://localhost:8080/map/pixels";
 
-export async function getPixels(): Promise<AxiosResponse<PostPixelsInput> | ClientApiError> {
+export async function getPixels(): Promise<AxiosResponse<GetPixelsResult> | ClientApiError> {
     try {
-        const response = await axios.get<PostPixelsInput>(
+        const response = await axios.get<GetPixelsResult>(
             PIXELS_URL,
         );
 
@@ -19,9 +21,9 @@ export async function getPixels(): Promise<AxiosResponse<PostPixelsInput> | Clie
     }
 }
 
-export async function postPixels(postPixelsInput: PostPixelsInput): Promise<AxiosResponse<PostPixelsInput> | ClientApiError> {
+export async function postPixels(postPixelsInput: PostPixelsInput): Promise<AxiosResponse<ClientApiOk> | ClientApiError> {
     try {
-        const response = axios.post<PostPixelsInput>(
+        const response = axios.post<ClientApiOk>(
             PIXELS_URL,
             postPixelsInput,
         )
