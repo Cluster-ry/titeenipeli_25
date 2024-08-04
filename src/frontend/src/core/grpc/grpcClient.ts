@@ -30,7 +30,7 @@ export class GrpcClient {
   }
 
   async handleOnConnectionStatusChangedCallbacks() {
-    let newConnectionStatus =
+    const newConnectionStatus =
       this.incrementalMapUpdateClient?.connected ?? false;
 
     if (newConnectionStatus !== this.previousOverallConnectionStatus) {
@@ -51,7 +51,7 @@ export class GrpcClient {
   unRegisterOnConnectionStatusChangedListener(
     callback: (connected: boolean) => Promise<void> | void
   ) {
-    var index = this.onConnectionStatusChangedCallbacks.indexOf(callback);
+    const index = this.onConnectionStatusChangedCallbacks.indexOf(callback);
     this.onConnectionStatusChangedCallbacks.splice(index, 1);
   }
 
@@ -67,7 +67,7 @@ export class GrpcClient {
   }
 
   unRegisterOnErrorListener(callback: (error: unknown) => Promise<void>) {
-    var index = this.onErrorCallbacks.indexOf(callback);
+    const index = this.onErrorCallbacks.indexOf(callback);
     this.onErrorCallbacks.splice(index, 1);
   }
 }

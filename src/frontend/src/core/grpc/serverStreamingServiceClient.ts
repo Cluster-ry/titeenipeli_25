@@ -15,6 +15,7 @@ export default abstract class ServerStreamingServiceClient<ResponseType> {
   }
 
   async connect() {
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
         await this.connectService();
@@ -51,7 +52,7 @@ export default abstract class ServerStreamingServiceClient<ResponseType> {
   unRegisterOnResponseListener(
     callback: (response: ResponseType) => void | Promise<void>
   ) {
-    var index = this.onResponsecallbacks.indexOf(callback);
+    const index = this.onResponsecallbacks.indexOf(callback);
     this.onResponsecallbacks.splice(index, 1);
   }
 }
