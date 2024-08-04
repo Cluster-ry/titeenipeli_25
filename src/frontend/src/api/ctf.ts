@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { PostCtfInput } from "../models/PostCtfInput";
+import { PostCtfInput } from "../models/Post/PostCtfInput";
 import { ClientApiError } from "../models/ClientApiError";
 
 const CTF_URL = "http://localhost:8080/ctf";

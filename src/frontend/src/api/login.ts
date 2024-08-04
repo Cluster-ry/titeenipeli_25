@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { PostLoginInput } from "../models/PostLoginInput";
+import { PostLoginInput } from "../models/Post/PostLoginInput";
 import { ClientApiError } from "../models/ClientApiError";
 
 const LOGIN_URL = "http://localhost:8080/login";

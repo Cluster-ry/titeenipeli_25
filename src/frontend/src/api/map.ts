@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { PostPixelsInput } from "../models/PostPixelsInput";
+import { PostPixelsInput } from "../models/Post/PostPixelsInput";
 import { ClientApiError } from "../models/ClientApiError";
 
 const PIXELS_URL = "http://localhost:8080/map/pixels";

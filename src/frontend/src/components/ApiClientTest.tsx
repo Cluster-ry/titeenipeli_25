@@ -1,10 +1,10 @@
 import { api } from "../api/index";
 
-import { PostUsersInput } from "../models/PostUsersInput";
-import { PostLoginInput } from "../models/PostLoginInput";
-import { PostCtfInput } from "../models/PostCtfInput";
-import { PostPixelsInput } from "../models/PostPixelsInput";
-import { PutUsersInput } from "../models/PutUsersInput";
+import { PostUsersInput } from "../models/Post/PostUsersInput";
+import { PostLoginInput } from "../models/Post/PostLoginInput";
+import { PostCtfInput } from "../models/Post/PostCtfInput";
+import { PostPixelsInput } from "../models/Post/PostPixelsInput";
+import { PutUsersInput } from "../models/Put/PutUsersInput";
 
 export default function ApiTestClient() {
 
@@ -12,8 +12,8 @@ export default function ApiTestClient() {
         event.preventDefault();
 
         const postUserInput: PostLoginInput = {
-            Username: "test",
-            Password: "test123"
+            username: "test",
+            password: "test123"
         }
 
         api.login.postLogin(postUserInput);
@@ -23,13 +23,13 @@ export default function ApiTestClient() {
         event.preventDefault();
 
         const postUserInput: PostUsersInput = {
-            Id: "string",
-            FirstName: "string",
-            LastName: "string",
-            Username: "string",
-            PhotoUrl: "string",
-            AuthDate: "string",
-            Hash: "string"
+            id: "string",
+            firstName: "string",
+            lastName: "string",
+            username: "string",
+            photoUrl: "string",
+            authDate: "string",
+            hash: "string"
         }
         api.users.postUsers(postUserInput);
     }
@@ -38,7 +38,7 @@ export default function ApiTestClient() {
         event.preventDefault();
 
         const putUsersInput: PutUsersInput = {
-            Guild: "Tietokilta"
+            guild: "Tietokilta"
         }
         api.users.putUsers(putUsersInput);
     }
@@ -51,8 +51,8 @@ export default function ApiTestClient() {
     const postMapTest = async(event: { preventDefault: () => void; }) => {
         event.preventDefault();
         const postPixelsInput: PostPixelsInput = {
-            X: -1,
-            Y: 1
+            x: -1,
+            y: 1
         }
         api.map.postPixels(postPixelsInput);
     }
@@ -60,7 +60,7 @@ export default function ApiTestClient() {
     const postCtfTest = async(event: { preventDefault: () => void; }) => {
         event.preventDefault();
         const postCtfInput: PostCtfInput = {
-            Token: "FGSTLBGXM3YB7USWS28KE2JV9Z267L48"
+            token: "FGSTLBGXM3YB7USWS28KE2JV9Z267L48"
         }
         api.ctf.postCtf(postCtfInput);
     }

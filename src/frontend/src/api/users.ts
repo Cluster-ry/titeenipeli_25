@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
-import { PostUsersInput } from "../models/PostUsersInput";
-import { PutUsersInput } from "../models/PutUsersInput";
+import { PostUsersInput } from "../models/Post/PostUsersInput";
+import { PutUsersInput } from "../models/Put/PutUsersInput";
 import { ClientApiError } from "../models/ClientApiError";
 
 const USERS_URL = "http://localhost:8080/users";

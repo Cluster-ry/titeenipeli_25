@@ -1,3 +1,3 @@
 export interface PutUsersInput {
-    Guild: string;
+    guild: string;
 }
