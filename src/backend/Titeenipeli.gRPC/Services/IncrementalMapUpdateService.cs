@@ -13,7 +13,7 @@ public class IncrementalMapUpdateService(ILogger<IncrementalMapUpdateService> lo
     {
         var random = new Random();
 
-        while (true)
+        while (!context.CancellationToken.IsCancellationRequested)
         {
             var incrementalMapUpdate = new IncrementalMapUpdate()
             {
@@ -22,8 +22,8 @@ public class IncrementalMapUpdateService(ILogger<IncrementalMapUpdateService> lo
                 OwnPixel = true,
                 SpawnRelativeCoordinate = new()
                 {
-                    X = Convert.ToInt32(random.NextInt64(256)),
-                    Y = Convert.ToInt32(random.NextInt64(256))
+                    X = random.Next(256),
+                    Y = random.Next(256)
                 }
             };
 
@@ -32,7 +32,7 @@ public class IncrementalMapUpdateService(ILogger<IncrementalMapUpdateService> lo
 
             await responseStream.WriteAsync(incrementalResponse);
             _logger.LogDebug("Send incremental response: {incrementalResponse}", incrementalResponse);
-            Thread.Sleep(10 * 1000);
+            await Task.Delay(10 * 1000);
         }
     }
 }
