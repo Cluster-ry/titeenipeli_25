@@ -19,13 +19,13 @@ namespace Titeenipeli.Controllers;
 public class MapController : ControllerBase
 {
     private const int BorderWidth = 1;
-    private readonly IGameEventRepositoryService _gameEventRepositoryService;
     private readonly GameOptions _gameOptions;
 
+    private readonly IGameEventRepositoryService _gameEventRepositoryService;
     private readonly IMapRepositoryService _mapRepositoryService;
+    private readonly IUserRepositoryService _userRepositoryService;
 
     private readonly RateLimitService _rateLimitService;
-    private readonly IUserRepositoryService _userRepositoryService;
 
     public MapController(GameOptions gameOptions,
                          RateLimitService rateLimitService,
