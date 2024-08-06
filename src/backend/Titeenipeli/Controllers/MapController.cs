@@ -88,7 +88,7 @@ public class MapController : ControllerBase
 
         if (!_rateLimitService.CanPlacePixel(user))
         {
-            return new TooManyRequestsResult("Try again later", TimeSpan.FromSeconds(2147483646));
+            return new TooManyRequestsResult("Try again later", _rateLimitService.TimeBeforeNextPixel(user));
         }
 
 
