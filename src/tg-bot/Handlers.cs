@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -8,6 +9,7 @@ namespace Titeenipeli_bot
     public class Handlers
     {
         // Variables
+        string ip = "http://localhost:5129/api/v1"; // how to get this for production?
         static bool tosAccepted = false; // I know its more of a privacy notice than tos but tos is easier to write :D
         static private bool userCreated = false;
         static bool choosingGuild = false;
@@ -96,7 +98,8 @@ namespace Titeenipeli_bot
 
         public async Task HandleError(ITelegramBotClient _, Exception exception, CancellationToken cancellationToken)
         {
-            await Console.Error.WriteLineAsync(exception.Message);
+            await Console.Error.WriteLineAsync($"Exeption at the bot: '{exception.Message}'");
+            return;
         }
 
         async Task HandleMessage(Message msg)
@@ -117,14 +120,14 @@ namespace Titeenipeli_bot
             // When we get a command, we react accordingly
             if (text.StartsWith('/'))
             {
-                await HandleCommand(user.Id, text);
+                await HandleCommand(user, text);
             }
             else if (choosingGuild)
             {
                 if (guildDict.ContainsValue(text))
                 {
                     guildChosen = guildDict.FirstOrDefault(x => x.Value == text).Key;
-                    await SendGuildData(user.Id, guildChosen);
+                    await SendGuildData(user, guildChosen);
                     return;
                 }
                 else
@@ -142,19 +145,19 @@ namespace Titeenipeli_bot
             }
         }
 
-        async Task HandleCommand(long userId, string command)
+        async Task HandleCommand(User user, string command)
         {
             // Here you can find every command and the accosiated method for running it
             switch (command)
             {
                 case "/start":
-                    await SendTosMenu(userId);
+                    await SendTosMenu(user);
                     break;
                 case "/guild":
-                    await SendGuildMenu(userId);
+                    await SendGuildMenu(user);
                     break;
                 case "/game":
-                    await SendGame(userId);
+                    await SendGame(user);
                     break;
             }
 
@@ -187,7 +190,7 @@ namespace Titeenipeli_bot
                 tosAccepted = true;
                 Thread.Sleep(1 * 1000);
 
-                await HandleUserSignup(query.Message.Chat.Id);
+                await HandleUserSignup(query.From);
             }
             else
             {
@@ -196,59 +199,74 @@ namespace Titeenipeli_bot
             }
         }
 
-        async Task SendTosMenu(long userId)
+        async Task SendTosMenu(User user)
         {
             // check if tos is already done, if so then skip
             if (tosAccepted)
             {
-                await HandleUserSignup(userId);
+                await HandleUserSignup(user);
                 return;
             }
 
             await bot.SendTextMessageAsync(
-                userId,
+                user.Id,
                 tosMenu,
                 parseMode: ParseMode.Html,
                 replyMarkup: tosMenuMarkup
             );
         }
 
-        async Task HandleUserSignup(long userid)
+        async Task HandleUserSignup(User user)
         {
             // this prevents sequence breaks
             if (userCreated)
             {
                 await bot.SendTextMessageAsync(
-                    userid.ToString(),
+                    user.Id,
                     "User already created!",
                     replyMarkup: null // doesen't remove the keyboard
                 );
                 return;
             }
 
-            // TODO: User sign-in to db
+            // TODO: User sign-in to db 
+            UserProfilePhotos userPhotos = await bot.GetUserProfilePhotosAsync(user.Id,0,1);
+            PhotoSize photo = userPhotos.Photos[0][0];
+            
+            Dictionary<string, string> json = new Dictionary<string, string>(){
+                {"id", user.Id.ToString()},
+                {"firstName", user.FirstName},
+                {"lastName", user.LastName?? ""},
+                {"username", user.Username?? ""},
+                {"photoUrl", photo.FileId}, // for a URL pickup telegram requires the toke, which would be sent on plaintext
+                {"authDate", DateTime.Now.ToString()},
+                {"hash", ""} // TODO: create hash
+            };
+
+            await Requests.CreateUserRequestAsync(ip, JsonConvert.SerializeObject(json));
+            
             userCreated = true;
 
             // success message
             await bot.SendTextMessageAsync(
-                userid.ToString(),
+                user.Id,
                 "User created! Now choose your guild.",
                 replyMarkup: null
             );
 
             // After a small time window, jump straight to choosing your guild
             Thread.Sleep(1000);
-            await SendGuildMenu(userid);
+            await SendGuildMenu(user);
             return;
         }
 
-        async Task SendGuildMenu(long userId)
+        async Task SendGuildMenu(User user)
         {
             // this prevents sequence breaks
             if (!userCreated)
             {
                 await bot.SendTextMessageAsync(
-                    userId,
+                    user.Id,
                     "User not signed in. Please proceed with user creation with /start."
                 );
                 return;
@@ -257,7 +275,7 @@ namespace Titeenipeli_bot
             if (guildSelected)
             {
                 // NOTE: could print the chosen guild?
-                await bot.SendTextMessageAsync(userId, "Guild already chosen. Start the game with /game.");
+                await bot.SendTextMessageAsync(user.Id, "Guild already chosen. Start the game with /game.");
                 return;
             }
 
@@ -267,33 +285,33 @@ namespace Titeenipeli_bot
             guildKeyboard.OneTimeKeyboard = true;
             // select guild message (with guild keyboard)
             await bot.SendTextMessageAsync(
-                userId,
+                user.Id,
                 guildMenuText,
                 replyMarkup: guildKeyboard,
                 parseMode: ParseMode.Html
             );
         }
 
-        async Task SendGuildData(long userid, guildEnum guild)
+        async Task SendGuildData(User user, guildEnum guild)
         {
             // TODO: send guid data to application
             choosingGuild = false;
             guildSelected = true;
             await bot.SendTextMessageAsync(
-                userid,
+                user.Id,
                 String.Format("You selected the guild {0}! Now start the game with /game.", guildChosen.ToString()),
                 replyMarkup: new ReplyKeyboardRemove()
             );
             return;
         }
 
-        async Task SendGame(long userId)
+        async Task SendGame(User user)
         {
             // this prevents sequence breaks
             if (!userCreated)
             {
                 await bot.SendTextMessageAsync(
-                    userId,
+                    user.Id,
                     "User not signed in. Please proceed with user creation with /start."
                 );
                 return;
@@ -301,11 +319,11 @@ namespace Titeenipeli_bot
 
             if (!guildSelected)
             {
-                await bot.SendTextMessageAsync(userId, "You haven't selected your guild yet. Use /guild.");
+                await bot.SendTextMessageAsync(user.Id, "You haven't selected your guild yet. Use /guild.");
                 return;
             }
 
-            await bot.SendTextMessageAsync(userId, "Opening game...");
+            await bot.SendTextMessageAsync(user.Id, "Opening game...");
 
             // TODO: send to game with userid as param
         }

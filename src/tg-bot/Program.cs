@@ -7,8 +7,8 @@ namespace Titeenipeli_bot
     class TgBot
     {
         // Variables
-        private static string token;
-        private static TelegramBotClient bot;
+        private static string? token;
+        private static TelegramBotClient ?bot;
 
         static void Main(string[] args)
         {
