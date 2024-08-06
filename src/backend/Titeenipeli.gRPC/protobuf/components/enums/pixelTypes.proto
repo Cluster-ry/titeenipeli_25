@@ -1,5 +1,0 @@
-enum PixelTypes {
-  Normal = 0;
-  MapBorder = 1;
-  Spawn = 2;
-}

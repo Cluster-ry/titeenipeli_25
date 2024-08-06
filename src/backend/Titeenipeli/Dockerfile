@@ -6,11 +6,12 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Titeenipeli/Titeenipeli.csproj", "Titeenipeli/"]
-COPY ["Titeenipeli.gRPC/Titeenipeli.gRPC.csproj", "Titeenipeli.gRPC/"]
-RUN dotnet restore "Titeenipeli/Titeenipeli.csproj"
+COPY ["backend/Titeenipeli/Titeenipeli.csproj", "backend/Titeenipeli/"]
+COPY ["backend/Titeenipeli.gRPC/Titeenipeli.gRPC.csproj", "backend/Titeenipeli.gRPC/"]
+COPY ["protobuf/", "protobuf/"]
+RUN dotnet restore "backend/Titeenipeli/Titeenipeli.csproj"
 COPY . .
-WORKDIR "/src/Titeenipeli"
+WORKDIR "/src/backend/Titeenipeli"
 RUN dotnet build "Titeenipeli.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
