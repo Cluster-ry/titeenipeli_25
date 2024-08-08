@@ -1,14 +1,34 @@
 using System.Collections.Concurrent;
+using System.Threading.Channels;
 using GrpcGeneratedServices;
+using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
+using Titeenipeli.Options;
 
 namespace Titeenipeli.Grpc.Services;
 
-public class IncrementalMapUpdateCoreService(ILogger<IncrementalMapUpdateService> logger) : IIncrementalMapUpdateCoreService
+public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
 {
+    private const int _maxChannelSize = 100;
     private readonly ConcurrentDictionary<int, ConcurrentDictionary<int, GrpcConnection<IncrementalMapUpdateResponse>>> Connections = new();
 
-    private readonly ILogger<IncrementalMapUpdateService> _logger = logger;
+    private readonly ILogger<IncrementalMapUpdateService> _logger;
+    private readonly GameOptions _gameOptions;
+
+    private readonly Channel<GrpcMapChangesInput> _mapChangeQueue = Channel.CreateBounded<GrpcMapChangesInput>(_maxChannelSize);
+
+    public IncrementalMapUpdateCoreService(ILogger<IncrementalMapUpdateService> logger, GameOptions gameOptions)
+    {
+        _logger = logger;
+        _gameOptions = gameOptions;
+        new Thread(ProcessMapChangeRequests).Start();
+    }
+
+    public async void UpdateUsersMapState(GrpcMapChangesInput mapChangesInput)
+    {
+        await _mapChangeQueue.Writer.WaitToWriteAsync();
+        await _mapChangeQueue.Writer.WriteAsync(mapChangesInput);
+    }
 
     public void AddGrpcConnection(GrpcConnection<IncrementalMapUpdateResponse> connection)
     {
@@ -24,5 +44,26 @@ public class IncrementalMapUpdateCoreService(ILogger<IncrementalMapUpdateService
         {
             dictionaryOutput?.TryRemove(connection.Id, out _);
         }
+    }
+
+    private async void ProcessMapChangeRequests()
+    {
+        await foreach (GrpcMapChangesInput mapChangesInput in _mapChangeQueue.Reader.ReadAllAsync())
+        {
+            await GenerateAndRunMapUpdateTasks(mapChangesInput);
+        }
+    }
+
+    private async Task GenerateAndRunMapUpdateTasks(GrpcMapChangesInput mapChangesInput)
+    {
+        List<Task> updateTasks = new(Connections.Count);
+        foreach (var connectionKeyValuePair in Connections)
+        {
+            var mapUpdateProcessor = new MapUpdateProcessor(mapChangesInput, connectionKeyValuePair.Value, _gameOptions.FogOfWarDistance);
+            var updateTask = Task.Run(mapUpdateProcessor.Process);
+            updateTasks.Add(updateTask);
+        }
+
+        await Task.WhenAll(updateTasks);
     }
 }
