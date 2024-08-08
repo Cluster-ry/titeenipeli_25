@@ -26,7 +26,7 @@ resource storageAccountBlob 'Microsoft.Storage/storageAccounts/blobServices@2023
   parent: storageAccount
 }
 
-resource iacContaier 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
+resource iacContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-05-01' = {
   name: 'iacstate'
   parent: storageAccountBlob
   properties: {
