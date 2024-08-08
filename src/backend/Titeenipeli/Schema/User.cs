@@ -14,6 +14,9 @@ public class User : Entity
     public required int SpawnX { get; init; }
     public required int SpawnY { get; init; }
 
+    public DateTime LastPlacement { get; set; } = DateTime.MinValue;
+    public int PixelBucket { get; set; } = 0;
+
 
     #region Telegram
     [StringLength(64)]
