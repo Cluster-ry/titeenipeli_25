@@ -99,7 +99,7 @@ namespace Titeenipeli_bot
         public async Task HandleError(ITelegramBotClient _, Exception exception, CancellationToken cancellationToken)
         {
             await Console.Error.WriteLineAsync($"Exeption at the bot: '{exception.Message}'");
-            return;
+            throw new Exception();
         }
 
         async Task HandleMessage(Message msg)
@@ -127,7 +127,7 @@ namespace Titeenipeli_bot
                 if (guildDict.ContainsValue(text))
                 {
                     guildChosen = guildDict.FirstOrDefault(x => x.Value == text).Key;
-                    await SendGuildData(user, guildChosen);
+                    await SendGuildData(user, (int) guildChosen); // changed for now since api takes the guild as int
                     return;
                 }
                 else
@@ -229,20 +229,20 @@ namespace Titeenipeli_bot
                 return;
             }
 
-            // TODO: User sign-in to db 
             UserProfilePhotos userPhotos = await bot.GetUserProfilePhotosAsync(user.Id,0,1);
-            PhotoSize photo = userPhotos.Photos[0][0];
-            
+            PhotoSize photo = userPhotos.Photos[0][0]; // with this you can only get the fileID
+
             Dictionary<string, string> json = new Dictionary<string, string>(){
                 {"id", user.Id.ToString()},
                 {"firstName", user.FirstName},
                 {"lastName", user.LastName?? ""},
                 {"username", user.Username?? ""},
-                {"photoUrl", photo.FileId}, // for a URL pickup telegram requires the toke, which would be sent on plaintext
+                {"photoUrl", ""}, // the download URL includes the token, which shouldn't be sent (atleast without encryption)
                 {"authDate", DateTime.Now.ToString()},
                 {"hash", ""} // TODO: create hash
             };
 
+            
             await Requests.CreateUserRequestAsync(ip, JsonConvert.SerializeObject(json));
             
             userCreated = true;
@@ -292,9 +292,13 @@ namespace Titeenipeli_bot
             );
         }
 
-        async Task SendGuildData(User user, guildEnum guild)
+        async Task SendGuildData(User user, int guild)
         {
-            // TODO: send guid data to application
+            Dictionary<string, string> guildJson = new() {
+                {"guild", guild.ToString()}
+            };
+            await Requests.SetGuildRequestAsync(ip, JsonConvert.SerializeObject(guildJson));
+
             choosingGuild = false;
             guildSelected = true;
             await bot.SendTextMessageAsync(
