@@ -9,13 +9,15 @@ public class GrpcMapChangesInput
     public List<GrpcMapChangeInput> Changes;
     public Dictionary<Coordinate, GrpcChangePixel> NewPixels;
 
-    public GrpcMapChangesInput(Dictionary<Coordinate, GrpcChangePixel> oldPixels, List<GrpcMapChangeInput> changes) {
+    public GrpcMapChangesInput(Dictionary<Coordinate, GrpcChangePixel> oldPixels, List<GrpcMapChangeInput> changes)
+    {
         OldPixels = oldPixels;
         Changes = changes;
         NewPixels = ComputeNewPixels();
     }
 
-    private Dictionary<Coordinate, GrpcChangePixel> ComputeNewPixels() {
+    private Dictionary<Coordinate, GrpcChangePixel> ComputeNewPixels()
+    {
         Dictionary<Coordinate, GrpcChangePixel> newPixels = CloneOldPixels();
         foreach (var change in Changes)
         {
@@ -24,7 +26,8 @@ public class GrpcMapChangesInput
         return newPixels;
     }
 
-    private Dictionary<Coordinate, GrpcChangePixel> CloneOldPixels() {
+    private Dictionary<Coordinate, GrpcChangePixel> CloneOldPixels()
+    {
         Dictionary<Coordinate, GrpcChangePixel> newPixels = new();
         foreach (var oldPixel in OldPixels)
         {

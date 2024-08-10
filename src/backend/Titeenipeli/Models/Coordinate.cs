@@ -14,8 +14,10 @@ public struct Coordinate
             Y = a.Y + b.Y,
         };
 
-    public Coordinate ToSpawnRelativeCoordinate(User user) {
-        return new Coordinate() {
+    public Coordinate ToSpawnRelativeCoordinate(User user)
+    {
+        return new Coordinate()
+        {
             X = X - user.SpawnX,
             Y = Y - user.SpawnY
         };

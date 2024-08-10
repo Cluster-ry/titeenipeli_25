@@ -5,7 +5,7 @@ namespace Titeenipeli.Grpc.Services;
 
 public interface IIncrementalMapUpdateCoreService
 {
-    public void AddGrpcConnection(GrpcConnection<IncrementalMapUpdateResponse> connection);
+    public void AddGrpcConnection(IGrpcConnection<IncrementalMapUpdateResponse> connection);
 
-    public void RemoveGrpcConnection(GrpcConnection<IncrementalMapUpdateResponse> connection);
+    public void RemoveGrpcConnection(IGrpcConnection<IncrementalMapUpdateResponse> connection);
 }

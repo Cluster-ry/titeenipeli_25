@@ -4,7 +4,8 @@ namespace Titeenipeli.Grpc;
 
 public static class GrpcServiceRegister
 {
-    public static void AddSingletonGRPCServices(IServiceCollection services) {
+    public static void AddSingletonGRPCServices(IServiceCollection services)
+    {
         services.AddSingleton<IIncrementalMapUpdateCoreService, IncrementalMapUpdateCoreService>();
     }
 

@@ -3,6 +3,7 @@ using System.Threading.Channels;
 using GrpcGeneratedServices;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
+using Titeenipeli.Grpc.Controllers;
 using Titeenipeli.Options;
 
 namespace Titeenipeli.Grpc.Services;
@@ -10,7 +11,7 @@ namespace Titeenipeli.Grpc.Services;
 public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
 {
     private const int _maxChannelSize = 100;
-    private readonly ConcurrentDictionary<int, ConcurrentDictionary<int, GrpcConnection<IncrementalMapUpdateResponse>>> Connections = new();
+    private readonly ConcurrentDictionary<int, ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>> Connections = new();
 
     private readonly ILogger<IncrementalMapUpdateService> _logger;
     private readonly GameOptions _gameOptions;
@@ -30,15 +31,15 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
         await _mapChangeQueue.Writer.WriteAsync(mapChangesInput);
     }
 
-    public void AddGrpcConnection(GrpcConnection<IncrementalMapUpdateResponse> connection)
+    public void AddGrpcConnection(IGrpcConnection<IncrementalMapUpdateResponse> connection)
     {
-        ConcurrentDictionary<int, GrpcConnection<IncrementalMapUpdateResponse>> userConnections = Connections.GetOrAdd(connection.User.Id, new ConcurrentDictionary<int, GrpcConnection<IncrementalMapUpdateResponse>>());
+        ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> userConnections = Connections.GetOrAdd(connection.User.Id, new ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>());
         userConnections.TryAdd(connection.Id, connection);
     }
 
-    public void RemoveGrpcConnection(GrpcConnection<IncrementalMapUpdateResponse> connection)
+    public void RemoveGrpcConnection(IGrpcConnection<IncrementalMapUpdateResponse> connection)
     {
-        ConcurrentDictionary<int, GrpcConnection<IncrementalMapUpdateResponse>>? dictionaryOutput;
+        ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>? dictionaryOutput;
         var retrievalSucceeded = Connections.TryGetValue(connection.User.Id, out dictionaryOutput);
         if (retrievalSucceeded)
         {
@@ -59,11 +60,19 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
         List<Task> updateTasks = new(Connections.Count);
         foreach (var connectionKeyValuePair in Connections)
         {
-            var mapUpdateProcessor = new MapUpdateProcessor(mapChangesInput, connectionKeyValuePair.Value, _gameOptions.FogOfWarDistance);
+            var mapUpdateProcessor = new MapUpdateProcessor(mapChangesInput, connectionKeyValuePair.Value, _gameOptions);
             var updateTask = Task.Run(mapUpdateProcessor.Process);
             updateTasks.Add(updateTask);
         }
 
-        await Task.WhenAll(updateTasks);
+        try
+        {
+            await Task.WhenAll(updateTasks);
+        }
+        catch (Exception exception)
+        {
+
+            _logger.LogError("Error while processing gRPC updates: {error}", exception);
+        }
     }
 }

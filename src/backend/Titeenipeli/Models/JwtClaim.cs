@@ -1,3 +1,5 @@
+using Titeenipeli.Enums;
+
 namespace Titeenipeli.Models;
 
 public class JwtClaim
@@ -7,5 +9,5 @@ public class JwtClaim
     public required Coordinate CoordinateOffset { get; init; }
 
     // TODO: Switch guild id to string
-    public required int? GuildId { get; init; }
+    public required GuildName? GuildId { get; init; }
 }

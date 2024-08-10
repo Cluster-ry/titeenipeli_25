@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Titeenipeli.Context;
+using Titeenipeli.Enums;
 using Titeenipeli.Options;
 using Titeenipeli.Schema;
 
@@ -30,35 +31,35 @@ public static class DbFiller
             [
                 new Guild
                 {
-                    Color = 0
+                    Name = GuildName.Tietokilta
                 },
                 new Guild
                 {
-                    Color = 1
+                    Name = GuildName.Algo
                 },
                 new Guild
                 {
-                    Color = 2
+                    Name = GuildName.Cluster
                 },
                 new Guild
                 {
-                    Color = 3
+                    Name = GuildName.OulunTietoteekkarit
                 },
                 new Guild
                 {
-                    Color = 4
+                    Name = GuildName.TietoTeekkarikilta
                 },
                 new Guild
                 {
-                    Color = 5
+                    Name = GuildName.Digit
                 },
                 new Guild
                 {
-                    Color = 6
+                    Name = GuildName.Datateknologerna
                 },
                 new Guild
                 {
-                    Color = 7
+                    Name = GuildName.Sosa
                 }
             ];
 
@@ -85,7 +86,7 @@ public static class DbFiller
         User testOpponent = new User
         {
             Code = "opponent",
-            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Color == 4) ?? throw new InvalidOperationException(),
+            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ?? throw new InvalidOperationException(),
             SpawnX = 3,
             SpawnY = 2,
             TelegramId = "opponent",

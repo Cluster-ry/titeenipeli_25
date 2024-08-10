@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Titeenipeli.Enums;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
 using Titeenipeli.Models;
@@ -60,7 +61,7 @@ public class UserController : ControllerBase
 
         return Ok(new PostUserResult
         {
-            Guild = user.Guild?.Color.ToString()
+            Guild = user.Guild?.Name.ToString()
         });
     }
 
@@ -70,7 +71,7 @@ public class UserController : ControllerBase
     {
         JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
 
-        bool validGuild = int.TryParse(input.Guild, out int guildColor);
+        bool validGuild = GuildName.TryParse(input.Guild, out GuildName guildName);
 
         if (jwtClaim == null || !validGuild)
         {
@@ -78,7 +79,7 @@ public class UserController : ControllerBase
         }
 
         User? user = _userRepositoryService.GetById(jwtClaim.Id);
-        Guild? guild = _guildRepositoryService.GetByColor(guildColor);
+        Guild? guild = _guildRepositoryService.GetByColor(guildName);
 
         if (user == null || guild == null || user.Guild != null)
         {
