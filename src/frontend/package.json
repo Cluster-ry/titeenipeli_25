@@ -3,13 +3,21 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@9.5.0",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "export NODE_OPTIONS=--use-openssl-ca && vite",
+    "build": "pnpm generate-grpc && pnpm build-tsc-vite",
+    "build-tsc-vite": "tsc && vite build",
+    "generate-grpc": "rimraf src/generated/grpc && mkdirp -p src/generated/grpc && pnpm compile-grpc-components && pnpm compile-grpc-services",
+    "compile-grpc-components": "npx protoc --proto_path=../protobuf --ts_out=src/generated/grpc --ts_opt=ts_nocheck ../protobuf/components/*/*.proto",
+    "compile-grpc-services": "npx protoc --proto_path=../protobuf --ts_out=src/generated/grpc --ts_opt=ts_nocheck ../protobuf/*/*.proto",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@protobuf-ts/grpcweb-transport": "^2.9.4",
+    "@protobuf-ts/runtime": "^2.9.4",
+    "@protobuf-ts/runtime-rpc": "^2.9.4",
     "axios": "^1.7.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -18,6 +26,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.3.0",
+    "@protobuf-ts/plugin": "^2.9.4",
+    "@types/node": "^20.14.11",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/react-router-dom": "^5.3.3",
@@ -27,9 +37,14 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.7",
+    "grpc-tools": "^1.12.4",
+    "mkdirp": "^3.0.1",
+    "rimraf": "^6.0.1",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.10.0",
-    "vite": "^5.2.11"
+    "vite": "^5.2.11",
+    "vite-plugin-http2-proxy": "^0.4.3",
+    "vite-plugin-mkcert": "^1.17.5"
   },
   "proxy": "http://localhost:8080"
 }

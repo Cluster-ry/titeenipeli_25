@@ -1,3 +1,5 @@
+syntax = "proto3";
+
 import "components/enums/pixelOwners.proto";
 import "components/enums/pixelTypes.proto";
 import "components/schemas/relativeCoordinate.proto";
@@ -6,21 +8,20 @@ option csharp_namespace = "GrpcGeneratedServices";
 package Map;
 
 message IncrementalMapUpdateRequest {
-  repeated IncrementalMapUpdate updates = 1;
-
-  message IncrementalMapUpdate {
-    required RelativeCoordinate spawnRelativeCoordinate = 1;
-    required PixelTypes type = 2;
-    required PixelOwners owner = 3;
-    required bool ownPixel = 4;
-  }
 
 }
 
 message IncrementalMapUpdateResponse {
-  
+  repeated IncrementalMapUpdate updates = 1;
+
+  message IncrementalMapUpdate {
+    RelativeCoordinate spawnRelativeCoordinate = 1;
+    PixelTypes type = 2;
+    PixelOwners owner = 3;
+    bool ownPixel = 4;
+  }  
 }
 
 service MapUpdate {
-  rpc GetIncremental(IncrementalMapUpdateRequest) returns (IncrementalMapUpdateResponse);
+  rpc GetIncremental(IncrementalMapUpdateRequest) returns (stream IncrementalMapUpdateResponse);
 }
