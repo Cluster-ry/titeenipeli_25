@@ -1,3 +1,5 @@
+syntax = "proto3";
+
 enum PixelOwners {
   Nobody = 0;
   Tietokilta = 1;

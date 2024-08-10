@@ -6,7 +6,9 @@ using Titeenipeli.Inputs;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Results;
+using Titeenipeli.Results.CustomStatusCodes;
 using Titeenipeli.Schema;
+using Titeenipeli.Services;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
@@ -17,17 +19,22 @@ namespace Titeenipeli.Controllers;
 public class MapController : ControllerBase
 {
     private const int BorderWidth = 1;
-    private readonly IGameEventRepositoryService _gameEventRepositoryService;
-
     private readonly GameOptions _gameOptions;
+
+    private readonly IGameEventRepositoryService _gameEventRepositoryService;
     private readonly IMapRepositoryService _mapRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
 
-    public MapController(GameOptions gameOptions, IUserRepositoryService userRepositoryService,
+    private readonly RateLimitService _rateLimitService;
+
+    public MapController(GameOptions gameOptions,
+                         RateLimitService rateLimitService,
+                         IUserRepositoryService userRepositoryService,
                          IMapRepositoryService mapRepositoryService,
                          IGameEventRepositoryService gameEventRepositoryService)
     {
         _gameOptions = gameOptions;
+        _rateLimitService = rateLimitService;
         _userRepositoryService = userRepositoryService;
         _mapRepositoryService = mapRepositoryService;
         _gameEventRepositoryService = gameEventRepositoryService;
@@ -79,6 +86,12 @@ public class MapController : ControllerBase
             return BadRequest();
         }
 
+        if (!_rateLimitService.CanPlacePixel(user))
+        {
+            return new TooManyRequestsResult("Try again later", _rateLimitService.TimeBeforeNextPixel(user));
+        }
+
+
         Coordinate globalCoordinate = new Coordinate
         {
             X = user.SpawnX + pixelsInput.X,
@@ -107,6 +120,9 @@ public class MapController : ControllerBase
 
         pixelToUpdate.User = user;
         _mapRepositoryService.Update(pixelToUpdate);
+
+        user.LastPlacement = DateTime.UtcNow;
+        _userRepositoryService.Update(user);
 
         GameEvent gameEvent = new GameEvent
         {
