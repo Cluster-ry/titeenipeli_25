@@ -30,12 +30,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="..\..\protobuf\**\*.proto" ProtoRoot="..\..\protobuf" />
+        <Protobuf Include="../../protobuf/**/*.proto" ProtoRoot="../../protobuf"/>
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="..\.dockerignore">
+        <Content Include="../.dockerignore">
             <Link>.dockerignore</Link>
+            <DependentUpon>Dockerfile</DependentUpon>
         </Content>
     </ItemGroup>
 

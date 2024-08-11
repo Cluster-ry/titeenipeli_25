@@ -43,6 +43,7 @@ public static class Program
 
         builder.Services.AddScoped<JwtService>();
         builder.Services.AddScoped<SpawnGeneratorService>();
+        builder.Services.AddScoped<RateLimitService>();
 
         // Adding OpenTelemetry tracing and metrics
         IOpenTelemetryBuilder openTelemetry = builder.Services.AddOpenTelemetry();
