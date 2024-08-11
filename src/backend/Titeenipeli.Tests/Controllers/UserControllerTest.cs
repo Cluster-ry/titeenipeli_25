@@ -20,22 +20,16 @@ namespace Titeenipeli.Tests.Controllers;
 [TestOf(typeof(UserController))]
 public class UserControllerTest
 {
-    [SetUp]
-    public void BeforeEach()
-    {
-        _jwtService = new JwtService(new JwtOptions
-            {
-                ClaimName = ClaimName,
-                CookieName = "Auth",
-                Encryption = string.Join("", Enumerable.Repeat(0, 32).Select(n => (char)new Random().Next(97, 122))),
-                Secret = string.Join("", Enumerable.Repeat(0, 256).Select(n => (char)new Random().Next(97, 122)))
-            }
-        );
-    }
-
     private const string ClaimName = "jwt-claim";
 
-    private JwtService _jwtService;
+    private readonly JwtService _jwtService = new JwtService(new JwtOptions
+        {
+            ClaimName = ClaimName,
+            CookieName = "Auth",
+            Encryption = string.Join("", Enumerable.Repeat(0, 32).Select(n => (char)new Random().Next(97, 122))),
+            Secret = string.Join("", Enumerable.Repeat(0, 256).Select(n => (char)new Random().Next(97, 122)))
+        }
+    );
 
     [TestCase("1", 200, TestName = "Should return success for new user")]
     [TestCase("2", 200, TestName = "Should return success for existing user")]
