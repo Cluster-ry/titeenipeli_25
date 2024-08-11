@@ -16,13 +16,13 @@ internal static class MapUtils
         var mapHeight = map.GetUpperBound(1);
 
         Dictionary<Coordinate, GrpcChangePixel> pixels = [];
-        Coordinate coordinate;
+        Coordinate coordinate = new();
         for (coordinate.Y = 0; coordinate.Y < mapHeight; coordinate.Y++)
         {
             for (coordinate.X = 0; coordinate.X < mapWidth; coordinate.X++)
             {
                 GrpcChangePixel pixel;
-                int mapUser = map[coordinate.X, coordinate.Y];
+                int mapUser = map[coordinate.Y, coordinate.X];
                 if (mapUser == 0)
                 {
                     pixel = new GrpcChangePixel(coordinate, null);
@@ -39,23 +39,38 @@ internal static class MapUtils
 
     internal static int[,] GrpcUpdatesToUserMap(RepeatedField<IncrementalMapUpdateResponse.Types.IncrementalMapUpdate> updates, GameOptions gameOptions)
     {
-        int[,] map = new int[gameOptions.Width, gameOptions.Height];
+        var fogOfWarDistance = gameOptions.FogOfWarDistance;
+        var padding = fogOfWarDistance * 2;
+
+        int[,] map = new int[gameOptions.Width + padding, gameOptions.Height + padding];
+        for (int y = 0; y < gameOptions.Height + padding; y++)
+        {
+            for (int x = 0; x < gameOptions.Width + padding; x++)
+            {
+                map[x, y] = MapUpdateProcessorTest.Nop;
+            }
+        }
+
         foreach (var update in updates)
         {
             int userId;
             if (update.Owner == PixelOwners.Cluster)
             {
-                userId = 1;
+                userId = MapUpdateProcessorTest.Own;
             }
             else if (update.Owner == PixelOwners.Tietokilta)
             {
-                userId = 2;
+                userId = MapUpdateProcessorTest.Oth;
+            }
+            else if (update.Type == PixelTypes.MapBorder)
+            {
+                userId = MapUpdateProcessorTest.Bor;
             }
             else
             {
-                userId = 0;
+                userId = MapUpdateProcessorTest.Emp;
             }
-            map[update.SpawnRelativeCoordinate.X, update.SpawnRelativeCoordinate.Y] = userId;
+            map[update.SpawnRelativeCoordinate.Y + fogOfWarDistance, update.SpawnRelativeCoordinate.X + fogOfWarDistance] = userId;
         }
         return map;
     }

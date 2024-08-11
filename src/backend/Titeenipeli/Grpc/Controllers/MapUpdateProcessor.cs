@@ -3,6 +3,7 @@ using GrpcGeneratedServices;
 using Titeenipeli.Enums;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
+using Titeenipeli.Grpc.Services;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Schema;
@@ -11,22 +12,29 @@ namespace Titeenipeli.Grpc.Controllers;
 
 public class MapUpdateProcessor
 {
+    private readonly IIncrementalMapUpdateCoreService _incrementalMapUpdateCoreService;
+
     private readonly GrpcMapChangesInput _mapChangesInput;
     private readonly User _user;
     private readonly ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _grpcConnections;
     private readonly GameOptions _gameOptions;
-    private int FogOfWarDistance => _gameOptions.FogOfWarDistance;
+
+    private readonly Dictionary<Coordinate, IncrementalMapUpdateResponse.Types.IncrementalMapUpdate> _pixelWireChanges = [];
 
     private VisibilityMap _visibilityMap;
 
-    private Dictionary<Coordinate, IncrementalMapUpdateResponse.Types.IncrementalMapUpdate> _pixelWireChanges = [];
-
-    public MapUpdateProcessor(GrpcMapChangesInput mapChangesInput, ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> connections, GameOptions gameOptions)
+    public MapUpdateProcessor(
+            IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
+            GrpcMapChangesInput mapChangesInput,
+            ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> connections,
+            GameOptions gameOptions
+        )
     {
+        _incrementalMapUpdateCoreService = incrementalMapUpdateCoreService;
         _mapChangesInput = mapChangesInput;
         _gameOptions = gameOptions;
         _grpcConnections = connections;
-        _visibilityMap = new VisibilityMap(gameOptions.Width, gameOptions.Height);
+        _visibilityMap = new VisibilityMap(gameOptions.Width, gameOptions.Height, gameOptions.FogOfWarDistance);
 
         var connection = connections.FirstOrDefault();
         _user = connection.Value.User;
@@ -39,11 +47,22 @@ public class MapUpdateProcessor
             return;
         }
 
-        ComputeVisibilityMap();
-        ComputeUserLosses();
-        ComputeNormalPixelChanges();
-        ComputeUserWins();
-        await SendResults();
+        try
+        {
+            ComputeVisibilityMap();
+            ComputeUserLosses();
+            ComputeNormalPixelChanges();
+            ComputeUserWins();
+            await SendResults();
+        }
+        catch (Exception)
+        {
+            foreach (var connectionKeyValue in _grpcConnections)
+            {
+                _incrementalMapUpdateCoreService.RemoveGrpcConnection(connectionKeyValue.Value);
+            }
+            throw;
+        }
     }
 
     private void ComputeVisibilityMap()
@@ -51,7 +70,7 @@ public class MapUpdateProcessor
         var pixelsOwnedByPlayer = _mapChangesInput.NewPixels.Where((pixel) => pixel.Value.User?.Id == _user.Id);
         foreach (var pixelOwnedByPlayer in pixelsOwnedByPlayer)
         {
-            LoopNearbyPixelsInsideFieldOfView(
+            LoopNearbyPixelsInsideFogOfWar(
                 _visibilityMap.SetVisible,
                 pixelOwnedByPlayer.Value.Coordinate
             );
@@ -60,20 +79,29 @@ public class MapUpdateProcessor
 
     private void ComputeUserLosses()
     {
-        var changesCausingLosses = _mapChangesInput.Changes.Where((change) => change.OldOwner?.Id == _user?.Id);
+        var changesCausingLosses = _mapChangesInput.Changes.Where((change) =>
+            change.OldOwner?.Id == _user?.Id);
         foreach (var change in changesCausingLosses)
         {
             ComputeSurroundingPixelVisibility(change);
+
+            // Special case, if lost pixel remains within field of view, update its value.
+            bool insideFogOfWar = _visibilityMap.GetVisibility(change.Coordinate);
+            if (insideFogOfWar)
+            {
+                AddStandardChange(change.Coordinate);
+            }
         }
     }
 
     private void ComputeNormalPixelChanges()
     {
-        IEnumerable<GrpcMapChangeInput> normalChanges = _mapChangesInput.Changes.Where((change) => change.OldOwner?.Id != _user?.Id && change.NewOwner?.Id != _user?.Id);
+        IEnumerable<GrpcMapChangeInput> normalChanges = _mapChangesInput.Changes.Where((change) =>
+            change.OldOwner?.Id != _user?.Id && change.NewOwner?.Id != _user?.Id);
         foreach (var change in normalChanges)
         {
-            bool insideFieldOfView = _visibilityMap.GetVisibility(change.Coordinate);
-            if (insideFieldOfView)
+            bool insideFogOfWar = _visibilityMap.GetVisibility(change.Coordinate);
+            if (insideFogOfWar)
             {
                 AddStandardChange(change.Coordinate);
             }
@@ -82,10 +110,11 @@ public class MapUpdateProcessor
 
     private void ComputeUserWins()
     {
-        IEnumerable<GrpcMapChangeInput> winChanges = _mapChangesInput.Changes.Where((change) => change.NewOwner?.Id == _user?.Id);
+        IEnumerable<GrpcMapChangeInput> winChanges = _mapChangesInput.Changes.Where((change) =>
+            change.NewOwner?.Id == _user?.Id);
         foreach (var change in winChanges)
         {
-            LoopNearbyPixelsInsideFieldOfView(
+            LoopNearbyPixelsInsideFogOfWar(
                 AddStandardChange,
                 change.Coordinate
             );
@@ -99,26 +128,28 @@ public class MapUpdateProcessor
     /// </summary>
     private void ComputeSurroundingPixelVisibility(GrpcMapChangeInput change)
     {
-        LoopNearbyPixelsInsideFieldOfView(
+        LoopNearbyPixelsInsideFogOfWar(
             (coordinate) =>
             {
-                bool insideFieldOfView = _visibilityMap.GetVisibility(coordinate);
-                if (!insideFieldOfView)
+                bool insideFogOfWar = _visibilityMap.GetVisibility(coordinate);
+                if (!insideFogOfWar)
                 {
-                    AddEmptyingChange(coordinate);
+                    AddNotOwnedChange(coordinate, PixelTypes.Normal);
                 }
             },
             change.Coordinate
         );
     }
 
-    private void LoopNearbyPixelsInsideFieldOfView(Action<Coordinate> action, Coordinate aroundCoordinate)
+    private void LoopNearbyPixelsInsideFogOfWar(Action<Coordinate> action, Coordinate aroundCoordinate)
     {
-        Coordinate coordinate;
+        int FogOfWarDistance = _gameOptions.FogOfWarDistance;
         int minY = aroundCoordinate.Y - FogOfWarDistance;
         int maxY = aroundCoordinate.Y + FogOfWarDistance;
         int minX = aroundCoordinate.X - FogOfWarDistance;
         int maxX = aroundCoordinate.X + FogOfWarDistance;
+
+        Coordinate coordinate = new();
         for (coordinate.Y = minY; coordinate.Y <= maxY; coordinate.Y++)
         {
             for (coordinate.X = minX; coordinate.X <= maxX; coordinate.X++)
@@ -128,27 +159,14 @@ public class MapUpdateProcessor
         }
     }
 
-    private void AddEmptyingChange(Coordinate coordinate)
-    {
-        Coordinate spawnRelativeCoordinate = coordinate.ToSpawnRelativeCoordinate(_user);
-        PixelTypes type = IsInsideMap(coordinate) ? PixelTypes.Normal : PixelTypes.MapBorder;
-
-        IncrementalMapUpdateResponse.Types.IncrementalMapUpdate mapUpdate = new()
-        {
-            SpawnRelativeCoordinate = new()
-            {
-                X = spawnRelativeCoordinate.X,
-                Y = spawnRelativeCoordinate.Y
-            },
-            Type = type,
-            Owner = PixelOwners.Nobody,
-            OwnPixel = false
-        };
-        _pixelWireChanges[coordinate] = mapUpdate;
-    }
-
     private void AddStandardChange(Coordinate coordinate)
     {
+        if (!IsInsideMap(coordinate))
+        {
+            AddNotOwnedChange(coordinate, PixelTypes.MapBorder);
+            return;
+        }
+
         Coordinate spawnRelativeCoordinate = coordinate.ToSpawnRelativeCoordinate(_user);
 
         GrpcChangePixel newPixel;
@@ -177,29 +195,35 @@ public class MapUpdateProcessor
         _pixelWireChanges[coordinate] = mapUpdate;
     }
 
+    private void AddNotOwnedChange(Coordinate coordinate, PixelTypes pixelType)
+    {
+        Coordinate spawnRelativeCoordinate = coordinate.ToSpawnRelativeCoordinate(_user);
+
+        IncrementalMapUpdateResponse.Types.IncrementalMapUpdate mapUpdate = new()
+        {
+            SpawnRelativeCoordinate = new()
+            {
+                X = spawnRelativeCoordinate.X,
+                Y = spawnRelativeCoordinate.Y
+            },
+            Type = pixelType,
+            Owner = PixelOwners.Nobody,
+            OwnPixel = false
+        };
+        _pixelWireChanges[coordinate] = mapUpdate;
+    }
+
     private static PixelOwners ConvertGuildToPixelOwners(GuildName? guildName)
     {
-        switch (guildName)
+        bool success = Enum.TryParse(guildName.ToString(), false, out PixelOwners result);
+        if (success)
         {
-            case GuildName.Tietokilta:
-                return PixelOwners.Tietokilta;
-            case GuildName.Algo:
-                return PixelOwners.Algo;
-            case GuildName.Cluster:
-                return PixelOwners.Cluster;
-            case GuildName.OulunTietoteekkarit:
-                return PixelOwners.OulunTietoteekkarit;
-            case GuildName.TietoTeekkarikilta:
-                return PixelOwners.TietoTeekkarikilta;
-            case GuildName.Digit:
-                return PixelOwners.Digit;
-            case GuildName.Datateknologerna:
-                return PixelOwners.Datateknologerna;
-            case GuildName.Sosa:
-                return PixelOwners.Sosa;
-            default:
-                return PixelOwners.Nobody;
-        };
+            return result;
+        }
+        else
+        {
+            return PixelOwners.Nobody;
+        }
     }
 
     private bool IsInsideMap(Coordinate coordinate)
@@ -209,6 +233,11 @@ public class MapUpdateProcessor
 
     private async Task SendResults()
     {
+        if (_pixelWireChanges.Count == 0)
+        {
+            return;
+        }
+
         var incrementalResponse = new IncrementalMapUpdateResponse();
         foreach (var pixelChanges in _pixelWireChanges)
         {
@@ -218,7 +247,14 @@ public class MapUpdateProcessor
         foreach (var connectionKeyValuePair in _grpcConnections)
         {
             var connection = connectionKeyValuePair.Value;
-            await connection.ResponseStreamQueue.Writer.WriteAsync(incrementalResponse);
+            try
+            {
+                await connection.ResponseStreamQueue.Writer.WriteAsync(incrementalResponse);
+            }
+            catch (Exception)
+            {
+                _incrementalMapUpdateCoreService.RemoveGrpcConnection(connection);
+            }
         }
     }
 }

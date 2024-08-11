@@ -22,7 +22,7 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
     {
         _logger = logger;
         _gameOptions = gameOptions;
-        new Thread(ProcessMapChangeRequests).Start();
+        Task.Run(ProcessMapChangeRequests);
     }
 
     public async void UpdateUsersMapState(GrpcMapChangesInput mapChangesInput)
@@ -33,7 +33,8 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
 
     public void AddGrpcConnection(IGrpcConnection<IncrementalMapUpdateResponse> connection)
     {
-        ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> userConnections = Connections.GetOrAdd(connection.User.Id, new ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>());
+        ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> userConnections =
+            Connections.GetOrAdd(connection.User.Id, new ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>());
         userConnections.TryAdd(connection.Id, connection);
     }
 
@@ -43,6 +44,7 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
         var retrievalSucceeded = Connections.TryGetValue(connection.User.Id, out dictionaryOutput);
         if (retrievalSucceeded)
         {
+            connection.Dispose();
             dictionaryOutput?.TryRemove(connection.Id, out _);
         }
     }
@@ -60,7 +62,7 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
         List<Task> updateTasks = new(Connections.Count);
         foreach (var connectionKeyValuePair in Connections)
         {
-            var mapUpdateProcessor = new MapUpdateProcessor(mapChangesInput, connectionKeyValuePair.Value, _gameOptions);
+            var mapUpdateProcessor = new MapUpdateProcessor(this, mapChangesInput, connectionKeyValuePair.Value, _gameOptions);
             var updateTask = Task.Run(mapUpdateProcessor.Process);
             updateTasks.Add(updateTask);
         }
@@ -71,7 +73,6 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
         }
         catch (Exception exception)
         {
-
             _logger.LogError("Error while processing gRPC updates: {error}", exception);
         }
     }

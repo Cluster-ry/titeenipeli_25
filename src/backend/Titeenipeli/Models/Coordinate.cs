@@ -4,8 +4,8 @@ namespace Titeenipeli.Models;
 
 public struct Coordinate
 {
-    public int X;
-    public int Y;
+    public int X { get; set; }
+    public int Y { get; set; }
 
     public static Coordinate operator +(Coordinate a, Coordinate b)
         => new()

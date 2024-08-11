@@ -8,9 +8,8 @@ using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Grpc.Services;
 
-public class IncrementalMapUpdateService(ILogger<IncrementalMapUpdateService> logger, JwtService jwtService, IUserRepositoryService userRepositoryService, IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService) : MapUpdate.MapUpdateBase
+public class IncrementalMapUpdateService(JwtService jwtService, IUserRepositoryService userRepositoryService, IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService) : MapUpdate.MapUpdateBase
 {
-    private readonly ILogger<IncrementalMapUpdateService> _logger = logger;
     private readonly JwtService _jwtService = jwtService;
     private readonly IUserRepositoryService _userRepositoryService = userRepositoryService;
     private readonly IIncrementalMapUpdateCoreService _incrementalMapUpdateCoreService = incrementalMapUpdateCoreService;
@@ -37,32 +36,7 @@ public class IncrementalMapUpdateService(ILogger<IncrementalMapUpdateService> lo
         var incrementalResponse = new IncrementalMapUpdateResponse();
         await responseStream.WriteAsync(incrementalResponse);
 
-        await Task.Delay(Timeout.Infinite, context.CancellationToken);
-
-        /*
-        var random = new Random();
-
-        while (true)
-        {
-            var incrementalMapUpdate = new IncrementalMapUpdate()
-            {
-                Type = PixelTypes.Normal,
-                Owner = PixelOwners.Cluster,
-                OwnPixel = true,
-                SpawnRelativeCoordinate = new()
-                {
-                    X = Convert.ToInt32(random.NextInt64(256)),
-                    Y = Convert.ToInt32(random.NextInt64(256))
-                }
-            };
-
-            var incrementalResponse = new IncrementalMapUpdateResponse();
-            incrementalResponse.Updates.Add(incrementalMapUpdate);
-
-            await responseStream.WriteAsync(incrementalResponse);
-            _logger.LogDebug("Send incremental response: {incrementalResponse}", incrementalResponse);
-            Thread.Sleep(10 * 1000);
-        }
-        */
+        Task clientCancellationTask = Task.Delay(Timeout.Infinite, context.CancellationToken);
+        await Task.WhenAny(clientCancellationTask, grpcConnection.ProcessResponseWritesTask);
     }
 }

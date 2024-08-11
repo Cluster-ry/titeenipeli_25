@@ -2,34 +2,18 @@ using Titeenipeli.Models;
 
 namespace Titeenipeli.Grpc.Controllers;
 
-public class VisibilityMap(int mapWidth, int mapHeight)
+public class VisibilityMap(int mapWidth, int mapHeight, int fogOfWarDistance)
 {
-    private int _mapWidth = mapWidth;
-    private int _mapHeight = mapHeight;
-    private bool[,] _visibilityMap = new bool[mapWidth, mapHeight];
+    private int _fogOfWarDistance = fogOfWarDistance;
+    private bool[,] _visibilityMap = new bool[mapWidth + 2 * fogOfWarDistance, mapHeight + 2 * fogOfWarDistance];
 
     public void SetVisible(Coordinate coordinate)
     {
-        if (IsInsideMap(coordinate))
-        {
-            _visibilityMap[coordinate.X, coordinate.Y] = true;
-        }
+        _visibilityMap[coordinate.X + _fogOfWarDistance, coordinate.Y + _fogOfWarDistance] = true;
     }
 
     public bool GetVisibility(Coordinate coordinate)
     {
-        if (IsInsideMap(coordinate))
-        {
-            return _visibilityMap[coordinate.X, coordinate.Y];
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    private bool IsInsideMap(Coordinate coordinate)
-    {
-        return coordinate.X >= 0 && coordinate.X < _mapWidth && coordinate.Y >= 0 && coordinate.Y < _mapHeight;
+        return _visibilityMap[coordinate.X + _fogOfWarDistance, coordinate.Y + _fogOfWarDistance];
     }
 }
