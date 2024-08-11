@@ -12,7 +12,7 @@ on:
       - main
 
 env:
-  working-dir: ./infra/test
+  working-dir: ./infra/pulumi
   stack-name: dev
   cloud-url: azblob://iacstate?storage_account=${{ secrets.AZURE_BLOB_ACCOUNT }}
 
