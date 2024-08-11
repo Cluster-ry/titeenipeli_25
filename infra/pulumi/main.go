@@ -1,47 +1,54 @@
 package main
 
 import (
-	"github.com/pulumi/pulumi-azure-native-sdk/resources/v2"
-	"github.com/pulumi/pulumi-azure-native-sdk/storage/v2"
+	v1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
+	"github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/helm/v3"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		// Create an Azure Resource Group
-		resourceGroup, err := resources.NewResourceGroup(ctx, "resourceGroup", nil)
+		cfg, err := configure(ctx)
 		if err != nil {
 			return err
 		}
 
-		// Create an Azure resource (Storage Account)
-		account, err := storage.NewStorageAccount(ctx, "sa", &storage.StorageAccountArgs{
-			ResourceGroupName: resourceGroup.Name,
-			Sku: &storage.SkuArgs{
-				Name: pulumi.String("Standard_LRS"),
-			},
-			Kind: pulumi.String("StorageV2"),
-		})
+		k8sCluster, err := buildCluster(ctx, cfg)
 		if err != nil {
 			return err
 		}
 
-		// Export the primary key of the Storage Account
-		ctx.Export("primaryStorageKey", pulumi.All(resourceGroup.Name, account.Name).ApplyT(
-			func(args []interface{}) (string, error) {
-				resourceGroupName := args[0].(string)
-				accountName := args[1].(string)
-				accountKeys, err := storage.ListStorageAccountKeys(ctx, &storage.ListStorageAccountKeysArgs{
-					ResourceGroupName: resourceGroupName,
-					AccountName:       accountName,
-				})
-				if err != nil {
-					return "", err
-				}
+		kubeconfig := getKubeconfig(ctx, k8sCluster)
 
-				return accountKeys.Keys[0].Value, nil
+		k8sProvider, err := buildProvider(ctx, k8sCluster, kubeconfig)
+		if err != nil {
+			return err
+		}
+
+		chartArgs := helm.ChartArgs{
+			Chart:   pulumi.String("apache"),
+			Version: pulumi.String("8.12.1"),
+			FetchArgs: helm.FetchArgs{
+				Repo: pulumi.String("https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami"),
 			},
-		))
+		}
+
+		chart, err := helm.NewChart(ctx, "apache-chart", chartArgs,
+			pulumi.Providers(k8sProvider))
+		if err != nil {
+			return err
+		}
+
+		ip := chart.GetResource("v1/Service", "apache-chart", "").
+			ApplyT(func(input interface{}) pulumi.StringPtrOutput {
+				service := input.(*v1.Service)
+				return service.Status.LoadBalancer().
+					Ingress().Index(pulumi.Int(0)).Ip()
+			})
+
+		ctx.Export("apacheServiceIP", ip)
+		ctx.Export("kubeconfig", kubeconfig)
+		ctx.Export("clusterName", k8sCluster.ManagedCluster.Name)
 
 		return nil
 	})
