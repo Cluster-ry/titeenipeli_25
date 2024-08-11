@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="..\..\protobuf\**\*.proto" ProtoRoot="..\..\protobuf" />
+    <Protobuf Include="../../protobuf/**/*.proto" ProtoRoot="../../protobuf"/>
   </ItemGroup>
 
 </Project>
