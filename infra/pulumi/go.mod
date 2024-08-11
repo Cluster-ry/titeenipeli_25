@@ -1,6 +1,6 @@
 module titeenipeli-k8s
 
-go 1.20
+go 1.22
 
 require (
 	github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2 v2.55.0
