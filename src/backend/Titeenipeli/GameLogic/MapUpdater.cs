@@ -1,6 +1,7 @@
 ﻿using Titeenipeli.Enums;
 using Titeenipeli.GameLogic.MapCalculationDataTypes;
 using Titeenipeli.Models;
+using Titeenipeli.Schema;
 
 namespace Titeenipeli.GameLogic;
 
@@ -33,7 +34,11 @@ public class MapUpdater
         // Construct a set of all nodes reachable from outside node (index 0)
         var nonHangingNodeIndexes = _GetNonSurroundedNodes(nodes, justAddedNode);
 
-        foreach (var nodeIndex in nodes.Keys.Where(nodeIndex => !nonHangingNodeIndexes.Contains(nodeIndex)))
+        var hangingNodeIndexes = nodes.Keys.Where(nodeIndex => 
+            !nonHangingNodeIndexes.Contains(nodeIndex)
+            && nodes[nodeIndex].Guild != placingGuild).ToList();
+
+        foreach (var nodeIndex in hangingNodeIndexes)
         {
             _FillNode(map, nodes[nodeIndex], placingGuild);
             nodes.Remove(nodeIndex);
@@ -51,7 +56,8 @@ public class MapUpdater
     
     /// <summary>
     /// Builds a graph from all nodes (single-color areas) in the given map. Includes ownerless nodes (color = null).
-    /// The outside of the map is considered an ownerless node and will always have an index of 0.
+    /// The outside of the map is considered an ownerless node and will always have an index of 0. All ownerless nodes
+    /// that are connected to the outside are also added to node 0.
     /// <remarks>
     /// Also returns the index of the node that contains the last added pixel
     /// </remarks>
@@ -59,7 +65,8 @@ public class MapUpdater
     /// <param name="map">The map state to construct a graph of</param>
     /// <param name="pixelCoordinates">The coordinates of the last added pixel</param>
     /// <param name="placingGuild">The guild that placed the last added pixel</param>
-    /// <returns></returns>
+    /// <returns>A tuple containing the constructed node graph and the index of the node of the last added pixel.
+    /// </returns>
     private (AreaNodes, int) _ConstructMapAdjacencyNodes(Map map, Coordinates pixelCoordinates,
         GuildName placingGuild)
     {
@@ -238,8 +245,8 @@ public class MapUpdater
             throw new NullReferenceException("Fill node called without populating map data cache first");
         }
         
-        var sameGuildNeighbours = node.Neighbours.Where(neighbour => _cachedData.Nodes[neighbour].Guild == newGuild)
-            .ToList();
+        var sameGuildNeighbours = node.Neighbours.Where(neighbour =>
+            _cachedData.Nodes.ContainsKey(neighbour) && _cachedData.Nodes[neighbour].Guild == newGuild).ToList();
         Node nodeAfterFill;
         int nodeAfterFillId;
         if (sameGuildNeighbours.Count == 0)
@@ -255,12 +262,13 @@ public class MapUpdater
             nodeAfterFillId = sameGuildNeighbours[0];
         }
 
-        List<PixelModel> filledSpawns = [];
+        List<(PixelModel pixel, int x, int y)> filledSpawns = [];
         foreach (var (x, y) in node.Pixels)
         {
             if (map.Pixels[y, x].Type == PixelType.Spawn)
             {
-                filledSpawns.Add(map.Pixels[y, x]);
+                filledSpawns.Add((map.Pixels[y, x], x, y));
+                continue;
             }
 
             map.Pixels[y, x].Owner = newGuild;
@@ -269,6 +277,19 @@ public class MapUpdater
 
             _cachedData.NodeMap[y, x] = nodeAfterFillId;
             nodeAfterFill.Pixels.Add((x, y));
+        }
+
+        foreach (var spawn in filledSpawns)
+        {
+            _cachedData.Nodes.Add(_cachedData.NextNodeId, new Node
+            {
+                Guild = spawn.pixel.Owner,
+                HasSpawn = true,
+                Neighbours = [nodeAfterFillId],
+                Pixels = { (spawn.x, spawn.y) }
+            });
+            nodeAfterFill.Neighbours.Add(_cachedData.NextNodeId);
+            _cachedData.NextNodeId += 1;
         }
 
         // Only filled spawn nodes
@@ -280,7 +301,6 @@ public class MapUpdater
         }
         
         // No nodes left in filled node
-
         if (sameGuildNeighbours.Count <= 1) return;
         foreach (var nodeId in sameGuildNeighbours[1..])
         {
