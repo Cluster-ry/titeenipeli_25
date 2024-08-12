@@ -30,13 +30,12 @@ public class UserControllerIntegrationTest : BaseFixture
     private const string ClaimName = "jwt-claim";
 
     private readonly JwtService _jwtService = new JwtService(new JwtOptions
-        {
-            ClaimName = ClaimName,
-            CookieName = "Auth",
-            Encryption = string.Join("", Enumerable.Repeat(0, 32).Select(_ => (char)new Random().Next(97, 122))),
-            Secret = string.Join("", Enumerable.Repeat(0, 256).Select(_ => (char)new Random().Next(97, 122)))
-        }
-    );
+    {
+        ClaimName = ClaimName,
+        CookieName = "Auth",
+        Encryption = string.Join("", Enumerable.Repeat(0, 32).Select(_ => (char)new Random().Next(97, 122))),
+        Secret = string.Join("", Enumerable.Repeat(0, 256).Select(_ => (char)new Random().Next(97, 122)))
+    });
 
     private ApiDbContext _dbContext;
 
