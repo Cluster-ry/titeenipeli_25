@@ -23,13 +23,12 @@ public class UserControllerTest
     private const string ClaimName = "jwt-claim";
 
     private readonly JwtService _jwtService = new JwtService(new JwtOptions
-        {
-            ClaimName = ClaimName,
-            CookieName = "Auth",
-            Encryption = string.Join("", Enumerable.Repeat(0, 32).Select(n => (char)new Random().Next(97, 122))),
-            Secret = string.Join("", Enumerable.Repeat(0, 256).Select(n => (char)new Random().Next(97, 122)))
-        }
-    );
+    {
+        ClaimName = ClaimName,
+        CookieName = "Auth",
+        Encryption = string.Join("", Enumerable.Repeat(0, 32).Select(n => (char)new Random().Next(97, 122))),
+        Secret = string.Join("", Enumerable.Repeat(0, 256).Select(n => (char)new Random().Next(97, 122)))
+    });
 
     [TestCase("1", 200, TestName = "Should return success for new user")]
     [TestCase("2", 200, TestName = "Should return success for existing user")]
@@ -43,22 +42,21 @@ public class UserControllerTest
         mockUserRepositoryService
             .Setup(repositoryService => repositoryService.GetByTelegramId("2"))
             .Returns(new User
-                {
-                    Guild = null,
-                    Code = "",
+            {
+                Guild = null,
+                Code = "",
 
-                    SpawnX = 0,
-                    SpawnY = 0,
+                SpawnX = 0,
+                SpawnY = 0,
 
-                    TelegramId = "",
-                    FirstName = "",
-                    LastName = "",
-                    Username = "",
-                    PhotoUrl = "",
-                    AuthDate = "",
-                    Hash = ""
-                }
-            );
+                TelegramId = "",
+                FirstName = "",
+                LastName = "",
+                Username = "",
+                PhotoUrl = "",
+                AuthDate = "",
+                Hash = ""
+            });
 
         Mock<IGuildRepositoryService> mockGuildRepositoryService = new Mock<IGuildRepositoryService>();
 
@@ -97,42 +95,40 @@ public class UserControllerTest
         mockUserRepositoryService
             .Setup(repositoryService => repositoryService.GetById(1))
             .Returns(new User
-                {
-                    Guild = null,
-                    Code = "",
+            {
+                Guild = null,
+                Code = "",
 
-                    SpawnX = 0,
-                    SpawnY = 0,
+                SpawnX = 0,
+                SpawnY = 0,
 
-                    TelegramId = "",
-                    FirstName = "",
-                    LastName = "",
-                    Username = "",
-                    PhotoUrl = "",
-                    AuthDate = "",
-                    Hash = ""
-                }
-            );
+                TelegramId = "",
+                FirstName = "",
+                LastName = "",
+                Username = "",
+                PhotoUrl = "",
+                AuthDate = "",
+                Hash = ""
+            });
 
         mockUserRepositoryService
             .Setup(repositoryService => repositoryService.GetById(2))
             .Returns(new User
-                {
-                    Guild = new Guild { Color = 1 },
-                    Code = "",
+            {
+                Guild = new Guild { Color = 1 },
+                Code = "",
 
-                    SpawnX = 0,
-                    SpawnY = 0,
+                SpawnX = 0,
+                SpawnY = 0,
 
-                    TelegramId = "",
-                    FirstName = "",
-                    LastName = "",
-                    Username = "",
-                    PhotoUrl = "",
-                    AuthDate = "",
-                    Hash = ""
-                }
-            );
+                TelegramId = "",
+                FirstName = "",
+                LastName = "",
+                Username = "",
+                PhotoUrl = "",
+                AuthDate = "",
+                Hash = ""
+            });
 
         Mock<IGuildRepositoryService> mockGuildRepositoryService = new Mock<IGuildRepositoryService>();
         mockGuildRepositoryService
