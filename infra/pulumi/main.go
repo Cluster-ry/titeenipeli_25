@@ -47,7 +47,7 @@ func main() {
 			})
 
 		ctx.Export("apacheServiceIP", ip)
-		ctx.Export("kubeconfig", kubeconfig)
+		ctx.Export("kubeconfig", pulumi.ToSecret(kubeconfig))
 		ctx.Export("clusterName", k8sCluster.ManagedCluster.Name)
 
 		return nil

@@ -24,7 +24,7 @@ func configure(ctx *pulumi.Context) (Config, error) {
 
 	out.K8sVersion = cfg.Get("k8sVersion")
 	if out.K8sVersion == "" {
-		out.K8sVersion = "1.26.3"
+		out.K8sVersion = "1.30.3"
 	}
 
 	generatedKeyPair, err := tls.NewPrivateKey(ctx, "ssh-key",
