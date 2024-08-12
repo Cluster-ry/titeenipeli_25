@@ -38,6 +38,10 @@ public class UserControllerTest
         Mock<IUserRepositoryService> mockUserRepositoryService = new Mock<IUserRepositoryService>();
         mockUserRepositoryService
             .Setup(repositoryService => repositoryService.GetByTelegramId("1"))
+            .Returns(null as User);
+
+        mockUserRepositoryService
+            .Setup(repositoryService => repositoryService.GetByTelegramId("2"))
             .Returns(new User
                 {
                     Guild = null,
@@ -55,10 +59,6 @@ public class UserControllerTest
                     Hash = ""
                 }
             );
-
-        mockUserRepositoryService
-            .Setup(repositoryService => repositoryService.GetByTelegramId("2"))
-            .Returns(null as User);
 
         Mock<IGuildRepositoryService> mockGuildRepositoryService = new Mock<IGuildRepositoryService>();
 
