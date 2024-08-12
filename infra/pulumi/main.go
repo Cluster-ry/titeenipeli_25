@@ -20,7 +20,7 @@ func main() {
 
 		kubeconfig := getKubeconfig(ctx, k8sCluster)
 
-		k8sProvider, err := buildProvider(ctx, k8sCluster, kubeconfig)
+		k8sProvider, err := buildProvider(ctx, kubeconfig)
 		if err != nil {
 			return err
 		}

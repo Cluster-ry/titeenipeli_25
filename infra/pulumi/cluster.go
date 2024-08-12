@@ -47,7 +47,7 @@ func buildCluster(ctx *pulumi.Context, cfg Config) (*ClusterInfo, error) {
 		return nil, err
 	}
 
-	k8sCluster, err := cs.NewManagedCluster(ctx, "cluster",
+	k8sCluster, _ := cs.NewManagedCluster(ctx, "cluster",
 		&cs.ManagedClusterArgs{
 			ResourceGroupName: resourceGroup.Name,
 			AgentPoolProfiles: cs.ManagedClusterAgentPoolProfileArray{
@@ -108,7 +108,6 @@ func getKubeconfig(ctx *pulumi.Context, cluster *ClusterInfo) pulumi.StringOutpu
 
 func buildProvider(
 	ctx *pulumi.Context,
-	cluster *ClusterInfo,
 	kubeConfig pulumi.StringOutput) (*kubernetes.Provider, error) {
 
 	return kubernetes.NewProvider(ctx, "k8s-provider", &kubernetes.ProviderArgs{
