@@ -30,18 +30,18 @@ namespace Titeenipeli_bot
             }
             catch (Exception e)
             {
-                Console.WriteLine($"exception: '{e}'");
-                return;
+                Console.WriteLine($"exception on CreateUser: '{e}'");
+                throw;
             }
         }
 
         private static void SetCookies(string cookies)
         {
             Client.DefaultRequestHeaders.Clear();
-            string[] cookieList = cookies.Split("; "); // this is ugly I know
+            string[] cookieList = cookies.Split("; "); // this is ugly I know, couldn't find a better way to parse
             foreach (string cookie in cookieList)
             {
-                string[] cookieSplit = cookie.Split('=');
+                string[] cookieSplit = cookie.Split('='); // again, I know
                 if (!cookieSplit[0].Equals("X-Authorization")) continue;
                 Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookieSplit[1]);
                 return;
@@ -62,7 +62,7 @@ namespace Titeenipeli_bot
                 Console.WriteLine($"\nResponse:\n'{response}'"); // DEBUG
 
                 response.EnsureSuccessStatusCode();
-                // api givces a new jwt token once the guild has been set 
+                // api gives a new jwt token once the guild has been set 
                 string? cookies = response.Headers.TryGetValues("Set-Cookie", out var values) ? values.FirstOrDefault() : null;
                 if (cookies == null) {
                     throw new Exception("Unable to get cookies.");
@@ -72,8 +72,8 @@ namespace Titeenipeli_bot
             }
             catch (Exception e)
             {
-                Console.WriteLine($"exception: '{e}'");
-                return;
+                Console.WriteLine($"exception on SetGuild: '{e}'");
+                throw;
             }
         }
     }

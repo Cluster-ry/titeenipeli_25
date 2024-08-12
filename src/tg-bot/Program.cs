@@ -26,7 +26,6 @@ namespace Titeenipeli_bot
 
             bot = new TelegramBotClient(token);
             Handlers handlers = new(bot);
-            // Runnin the bot
             using CancellationTokenSource cts = new CancellationTokenSource();
 
             // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool, so we use cancellation token

@@ -6,7 +6,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Titeenipeli_bot
 {
-    public class Handlers
+    public class Handlers(TelegramBotClient bot)
     {
         // Variables
         string ip = "http://localhost:5129/api/v1"; // how to get this for production?
@@ -15,7 +15,7 @@ namespace Titeenipeli_bot
         static bool choosingGuild = false;
         guildEnum guildChosen;
         static bool guildSelected = false;
-        private TelegramBotClient bot;
+
         enum guildEnum
         {
             Cluster,
@@ -74,11 +74,6 @@ namespace Titeenipeli_bot
                 ]
             );
 
-        public Handlers(TelegramBotClient bot)
-        {
-            this.bot = bot;
-        }
-
         // Each time a user interacts with the bot, this method is called
         public async Task HandleUpdate(ITelegramBotClient _, Update update, CancellationToken cancellationToken)
         {
@@ -98,7 +93,7 @@ namespace Titeenipeli_bot
 
         public async Task HandleError(ITelegramBotClient _, Exception exception, CancellationToken cancellationToken)
         {
-            await Console.Error.WriteLineAsync($"Exeption at the bot: '{exception.Message}'");
+            await Console.Error.WriteLineAsync($"Exception at the bot: '{exception.Message}'");
             throw new Exception();
         }
 
@@ -107,7 +102,7 @@ namespace Titeenipeli_bot
             User? user = msg.From ?? null;
             string text = msg.Text ?? string.Empty;
 
-            if (user is null)
+            if (user is null || text.Length <= 0)
                 return;
 
             // Print to console
@@ -116,6 +111,7 @@ namespace Titeenipeli_bot
             );
 
             // TODO: here should come persistent data check
+            // TODO: Test if booleans are user-specific
 
             // When we get a command, we react accordingly
             if (text.StartsWith('/'))
@@ -147,7 +143,7 @@ namespace Titeenipeli_bot
 
         async Task HandleCommand(User user, string command)
         {
-            // Here you can find every command and the accosiated method for running it
+            // Here you can find every command and the associated method for running it
             switch (command)
             {
                 case "/start":
@@ -224,40 +220,52 @@ namespace Titeenipeli_bot
                 await bot.SendTextMessageAsync(
                     user.Id,
                     "User already created!",
-                    replyMarkup: null // doesen't remove the keyboard
+                    replyMarkup: new ReplyKeyboardRemove()
                 );
                 return;
             }
 
-            UserProfilePhotos userPhotos = await bot.GetUserProfilePhotosAsync(user.Id,0,1);
-            PhotoSize photo = userPhotos.Photos[0][0]; // with this you can only get the fileID
+            try
+            {
+                UserProfilePhotos userPhotos = await bot.GetUserProfilePhotosAsync(user.Id,0,1);
+                PhotoSize photo = userPhotos.Photos[0][0]; // with this you can only get the fileID
 
-            Dictionary<string, string> json = new Dictionary<string, string>(){
-                {"id", user.Id.ToString()},
-                {"firstName", user.FirstName},
-                {"lastName", user.LastName?? ""},
-                {"username", user.Username?? ""},
-                {"photoUrl", ""}, // the download URL includes the token, which shouldn't be sent (atleast without encryption)
-                {"authDate", DateTime.Now.ToString()},
-                {"hash", ""} // TODO: create hash
-            };
+                Dictionary<string, string> json = new Dictionary<string, string>(){
+                    {"id", user.Id.ToString()},
+                    {"firstName", user.FirstName},
+                    {"lastName", user.LastName?? ""},
+                    {"username", user.Username?? ""},
+                    {"photoUrl", ""}, // the download URL includes the token, which shouldn't be sent (at-least without encryption)
+                    {"authDate", DateTime.Now.ToString()},
+                    {"hash", ""} // TODO: create hash
+                };
 
             
-            await Requests.CreateUserRequestAsync(ip, JsonConvert.SerializeObject(json));
+                await Requests.CreateUserRequestAsync(ip, JsonConvert.SerializeObject(json));
             
-            userCreated = true;
+                userCreated = true;
 
-            // success message
-            await bot.SendTextMessageAsync(
-                user.Id,
-                "User created! Now choose your guild.",
-                replyMarkup: null
-            );
+                // success message
+                await bot.SendTextMessageAsync(
+                    user.Id,
+                    "User created! Now choose your guild.",
+                    replyMarkup: null
+                );
 
-            // After a small time window, jump straight to choosing your guild
-            Thread.Sleep(1000);
-            await SendGuildMenu(user);
-            return;
+                // After a small-time window, jump straight to choosing your guild
+                Thread.Sleep(1000);
+                await SendGuildMenu(user);
+                return;
+            }
+            catch (Exception e)
+            {
+                await bot.SendTextMessageAsync(
+                    user.Id,
+                    "There was an error with User signup. Please try again.",
+                    replyMarkup: new ReplyKeyboardRemove()
+                );
+                return;
+            }
         }
 
         async Task SendGuildMenu(User user)
@@ -297,16 +305,26 @@ namespace Titeenipeli_bot
             Dictionary<string, string> guildJson = new() {
                 {"guild", guild.ToString()}
             };
-            await Requests.SetGuildRequestAsync(ip, JsonConvert.SerializeObject(guildJson));
-
-            choosingGuild = false;
-            guildSelected = true;
-            await bot.SendTextMessageAsync(
-                user.Id,
-                String.Format("You selected the guild {0}! Now start the game with /game.", guildChosen.ToString()),
-                replyMarkup: new ReplyKeyboardRemove()
-            );
-            return;
+            try
+            {
+                await Requests.SetGuildRequestAsync(ip, JsonConvert.SerializeObject(guildJson));
+                choosingGuild = false;
+                guildSelected = true;
+                await bot.SendTextMessageAsync(
+                    user.Id,
+                    $"You selected the guild {guildChosen.ToString()}! Now start the game with /game.",
+                    replyMarkup: new ReplyKeyboardRemove()
+                );
+                return;
+            }
+            catch (Exception e)
+            {
+                await bot.SendTextMessageAsync(
+                    user.Id,
+                    $"There was an error with setting the guild. Please try again.",
+                    replyMarkup: new ReplyKeyboardRemove()
+                );
+            }
         }
 
         async Task SendGame(User user)
