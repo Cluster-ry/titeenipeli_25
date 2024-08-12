@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections;
+using FluentAssertions;
 using NUnit.Framework;
 using Titeenipeli.Enums;
 using Titeenipeli.GameLogic;
-using FluentAssertions;
+using Titeenipeli.Models;
 
 namespace Titeenipeli.Tests.GameLogic;
 
@@ -13,32 +14,13 @@ using NewPixel = (GuildName guild, (int x, int y) coordinates);
 [TestFixture]
 public class MapUpdaterTest
 {
-    // Saving some shortened versions of guild enum to make constructing test maps easier
-    //
-    // We're naming spawn pixels with all caps. This is considered inconsistent naming by the static analyzer
-    // ReSharper disable InconsistentNaming
-    private static readonly GuildPixel None = (null, false);
-
-    private static readonly GuildPixel Clus = (GuildName.Cluster, false);
-    private static readonly GuildPixel CLUS = (GuildName.Cluster, true);
-
-    private static readonly GuildPixel Algo = (GuildName.Algo, false);
-    private static readonly GuildPixel ALGO = (GuildName.Algo, true);
-
-    private static readonly GuildPixel TiKi = (GuildName.Tietokilta, false);
-    private static readonly GuildPixel TIKI = (GuildName.Tietokilta, true);
-
-    private static readonly GuildPixel Digi = (GuildName.Digit, false);
-    private static readonly GuildPixel DIGI = (GuildName.Digit, true);
-    // ReSharper restore InconsistentNaming
-
-    private MapUpdater _mapUpdater;
-
     [SetUp]
     public void BeforeEach()
     {
         _mapUpdater = new MapUpdater();
     }
+
+    private MapUpdater _mapUpdater;
 
     [TestCaseSource(nameof(MapTestCases))]
     public void TestPlacePixel_Parametrized(
@@ -46,18 +28,18 @@ public class MapUpdaterTest
         NewPixel[] placedPixels,
         GuildPixel[,] resultingMap)
     {
-        var map = MapUtils.BuildMapFromOwnerMatrix(initialMap);
+        Map map = MapUtils.BuildMapFromOwnerMatrix(initialMap);
 
-        foreach (var placedPixel in placedPixels)
+        foreach (NewPixel placedPixel in placedPixels)
         {
             _mapUpdater.PlacePixel(map, placedPixel.coordinates, placedPixel.guild);
             Console.WriteLine("--------------");
             Console.WriteLine(MapUtils.MapAsNumbers(map));
         }
 
-        for (var x = 0; x < resultingMap.GetUpperBound(1); x++)
+        for (int x = 0; x < resultingMap.GetUpperBound(1); x++)
         {
-            for (var y = 0; y < resultingMap.GetUpperBound(0); y++)
+            for (int y = 0; y < resultingMap.GetUpperBound(0); y++)
             {
                 map.Pixels[y + 1, x + 1].Owner.Should().Be(resultingMap[y, x].guild,
                     $"Expected pixel in [{x}, {y}] to be owned by {resultingMap[y, x].guild}, " +
@@ -95,13 +77,14 @@ public class MapUpdaterTest
                     { None, Clus, Clus, Clus, Clus, Clus, Clus, Clus, Clus, None, None },
                     { Clus, Clus, None, Clus, Clus, Clus, Clus, Clus, None, None, Clus }
                 }).SetName("Should fill encircled area (large map)");
+
             yield return new TestCaseData(
                 new[,]
                 {
                     { Clus, Clus, CLUS, Clus },
                     { Clus, Algo, TiKi, Clus },
                     { Clus, TiKi, Algo, None },
-                    { Clus, Clus, Clus, Clus },
+                    { Clus, Clus, Clus, Clus }
                 },
                 new[] { (GuildName.Cluster, (4, 3)) },
                 new[,]
@@ -111,6 +94,7 @@ public class MapUpdaterTest
                     { Clus, Clus, Clus, Clus },
                     { Clus, Clus, Clus, Clus }
                 }).SetName("Should fill encircled area (small map)");
+
             yield return new TestCaseData(
                 new[,]
                 {
@@ -127,6 +111,7 @@ public class MapUpdaterTest
                     { Clus, Clus, Clus, Clus },
                     { Clus, Clus, Clus, Clus }
                 }).SetName("Should not fill spawn cells");
+
             yield return new TestCaseData(
                 new[,]
                 {
@@ -143,6 +128,7 @@ public class MapUpdaterTest
                     { None, CLUS, None, None },
                     { TIKI, TiKi, None, None }
                 }).SetName("Should cut cells not connected to spawn cells");
+
             yield return new TestCaseData(
                 new[,]
                 {
@@ -292,6 +278,7 @@ public class MapUpdaterTest
                     { Algo, Algo, Algo, Algo, Algo, Algo, TiKi, TiKi, TiKi, TiKi },
                     { ALGO, Algo, Algo, Algo, None, None, None, TiKi, TiKi, TIKI }
                 }).SetName("Should have valid benchmark case");
+
             yield return new TestCaseData(
                 new[,]
                 {
@@ -310,6 +297,7 @@ public class MapUpdaterTest
                     { None, None, None, None, None },
                     { ALGO, None, None, TiKi, TIKI }
                 }).SetName("Should not fill non-encircled space on a sparse map");
+
             yield return new TestCaseData(
                 new[,]
                 {
@@ -330,4 +318,24 @@ public class MapUpdaterTest
                 }).SetName("Should not cut J-shape when another guild places pixel");
         }
     }
+
+    // Saving some shortened versions of guild enum to make constructing test maps easier
+    //
+    // We're naming spawn pixels with all caps. This is considered inconsistent naming by the static analyzer
+    // ReSharper disable InconsistentNaming
+    private static readonly GuildPixel None = (null, false);
+
+    private static readonly GuildPixel Clus = (GuildName.Cluster, false);
+    private static readonly GuildPixel CLUS = (GuildName.Cluster, true);
+
+    private static readonly GuildPixel Algo = (GuildName.Algo, false);
+    private static readonly GuildPixel ALGO = (GuildName.Algo, true);
+
+    private static readonly GuildPixel TiKi = (GuildName.Tietokilta, false);
+    private static readonly GuildPixel TIKI = (GuildName.Tietokilta, true);
+
+    private static readonly GuildPixel Digi = (GuildName.Digit, false);
+
+    private static readonly GuildPixel DIGI = (GuildName.Digit, true);
+    // ReSharper restore InconsistentNaming
 }
