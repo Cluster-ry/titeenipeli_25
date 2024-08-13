@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Inputs;
+using Titeenipeli.Results;
 using Titeenipeli.Schema;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
 
@@ -22,11 +23,18 @@ public class CtfController : ControllerBase
     {
         CtfFlag? ctfFlag = _ctfFlagRepositoryService.GetByToken(ctfInput.Token);
 
-        if (ctfFlag == null)
+        if (ctfFlag != null)
         {
-            return BadRequest();
+            return Ok();
         }
 
-        return Ok();
+        ErrorResult error = new ErrorResult
+        {
+            Title = "Invalid flag",
+            Code = 400,
+            Description = "Better luck next time"
+        };
+
+        return BadRequest(error);
     }
 }
