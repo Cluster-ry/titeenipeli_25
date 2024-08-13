@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Titeenipeli.Context;
+using Titeenipeli.Enums;
 using Titeenipeli.Options;
 using Titeenipeli.Schema;
 
@@ -26,41 +27,9 @@ public static class DbFiller
 
         if (!dbContext.Guilds.Any())
         {
-            Guild[] guilds =
-            [
-                new Guild
-                {
-                    Color = 0
-                },
-                new Guild
-                {
-                    Color = 1
-                },
-                new Guild
-                {
-                    Color = 2
-                },
-                new Guild
-                {
-                    Color = 3
-                },
-                new Guild
-                {
-                    Color = 4
-                },
-                new Guild
-                {
-                    Color = 5
-                },
-                new Guild
-                {
-                    Color = 6
-                },
-                new Guild
-                {
-                    Color = 7
-                }
-            ];
+            List<Guild> guilds = [];
+            guilds.AddRange(from GuildName name in Enum.GetValues(typeof(GuildName))
+                            select new Guild { Name = name.ToString(), Color = (int)name, NameId = name });
 
             dbContext.Guilds.AddRange(guilds);
 
