@@ -7,10 +7,12 @@ namespace Titeenipeli.GameLogic;
 public class SpawnGenerator
 {
     private readonly GameOptions _gameOptions;
+    private readonly Random _random;
 
     public SpawnGenerator(GameOptions gameOptions)
     {
         _gameOptions = gameOptions;
+        _random = new Random();
     }
 
     public Coordinate GetSpawnPoint(GuildName guild)
@@ -27,10 +29,10 @@ public class SpawnGenerator
         return new Coordinate { X = spawnX, Y = spawnY };
     }
 
-    private static Coordinate GetSpawnAreaCenter(GuildName guild, int radius, int spawnAreasPerGuild)
+    private Coordinate GetSpawnAreaCenter(GuildName guild, int radius, int spawnAreasPerGuild)
     {
         int guildCount = Enum.GetNames(typeof(GuildName)).Length;
-        int selectedSpawnArea = new Random().Next(spawnAreasPerGuild);
+        int selectedSpawnArea = _random.Next(spawnAreasPerGuild);
 
         double angleOffset = 2 * Math.PI / (guildCount * spawnAreasPerGuild);
         double angle = angleOffset * guildCount * selectedSpawnArea + angleOffset * (int)guild;
@@ -41,12 +43,10 @@ public class SpawnGenerator
         return new Coordinate { X = x, Y = y };
     }
 
-    private static Coordinate GetRandomPointInCircle(int radius)
+    private Coordinate GetRandomPointInCircle(int radius)
     {
-        Random random = new Random();
-
-        double angle = 2 * Math.PI * random.NextDouble();
-        double u = random.NextDouble() + random.NextDouble();
+        double angle = 2 * Math.PI * _random.NextDouble();
+        double u = _random.NextDouble() + _random.NextDouble();
         double distance = u > 1 ? 2 - u : u;
 
         double x = distance * Math.Cos(angle);
