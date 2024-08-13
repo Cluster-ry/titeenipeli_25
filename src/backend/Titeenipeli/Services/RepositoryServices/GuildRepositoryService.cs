@@ -30,18 +30,8 @@ public class GuildRepositoryService : IGuildRepositoryService
         _dbContext.SaveChanges();
     }
 
-    public Guild? GetByColor(int color)
-    {
-        return _dbContext.Guilds.FirstOrDefault(guild => guild.Color == color);
-    }
-
-    public Guild? GetByName(string name)
+    public Guild? GetByName(GuildName name)
     {
         return _dbContext.Guilds.FirstOrDefault(guild => guild.Name == name);
-    }
-
-    public Guild? GetByNameId(GuildName nameId)
-    {
-        return _dbContext.Guilds.FirstOrDefault(guild => guild.NameId == nameId);
     }
 }

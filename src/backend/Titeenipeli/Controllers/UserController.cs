@@ -60,7 +60,7 @@ public class UserController : ControllerBase
 
         return Ok(new PostUserResult
         {
-            Guild = user.Guild?.NameId.ToString()
+            Guild = user.Guild?.Name.ToString()
         });
     }
 
@@ -70,7 +70,7 @@ public class UserController : ControllerBase
     {
         JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
 
-        bool validGuild = Enum.TryParse(input.Guild, out GuildName guildNameId);
+        bool validGuild = Enum.TryParse(input.Guild, out GuildName guildName);
 
         if (jwtClaim == null)
         {
@@ -90,7 +90,7 @@ public class UserController : ControllerBase
         }
 
         User? user = _userRepositoryService.GetById(jwtClaim.Id);
-        Guild? guild = _guildRepositoryService.GetByNameId(guildNameId);
+        Guild? guild = _guildRepositoryService.GetByName(guildName);
 
         if (user == null || guild == null || user.Guild != null)
         {
