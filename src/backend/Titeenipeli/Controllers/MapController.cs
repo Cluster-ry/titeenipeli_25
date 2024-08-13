@@ -202,7 +202,6 @@ public class MapController : ControllerBase
             {
                 Type = PixelType.Normal,
                 Owner = pixel.User?.Guild?.Name,
-                // TODO: Verify owning status of pixel, this can be done when we get user information from JWT
                 OwnPixel = pixel.User == user
             };
 
