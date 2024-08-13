@@ -11,8 +11,8 @@ public class User : Entity
     [StringLength(64)]
     public required string Code { get; init; }
 
-    public required int SpawnX { get; init; }
-    public required int SpawnY { get; init; }
+    public required int SpawnX { get; set; }
+    public required int SpawnY { get; set; }
 
     public DateTime LastPlacement { get; set; } = DateTime.MinValue;
     public int PixelBucket { get; set; } = 0;
