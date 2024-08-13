@@ -72,9 +72,21 @@ public class UserController : ControllerBase
 
         bool validGuild = Enum.TryParse(input.Guild, out GuildName guildNameId);
 
-        if (jwtClaim == null || !validGuild)
+        if (jwtClaim == null)
         {
             return BadRequest();
+        }
+
+        if (!validGuild)
+        {
+            ErrorResult error = new ErrorResult
+            {
+                Title = "Invalid guild",
+                Code = 400,
+                Description = "Provide valid guild"
+            };
+
+            return BadRequest(error);
         }
 
         User? user = _userRepositoryService.GetById(jwtClaim.Id);
@@ -82,7 +94,14 @@ public class UserController : ControllerBase
 
         if (user == null || guild == null || user.Guild != null)
         {
-            return BadRequest();
+            ErrorResult error = new ErrorResult
+            {
+                Title = "Invalid guild",
+                Code = 400,
+                Description = "Provide valid guild"
+            };
+
+            return BadRequest(error);
         }
 
         user.Guild = guild;
