@@ -1,4 +1,5 @@
 using Titeenipeli.Context;
+using Titeenipeli.Enums;
 using Titeenipeli.Schema;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
 
@@ -29,8 +30,8 @@ public class GuildRepositoryService : IGuildRepositoryService
         _dbContext.SaveChanges();
     }
 
-    public Guild? GetByColor(int color)
+    public Guild? GetByName(GuildName name)
     {
-        return _dbContext.Guilds.FirstOrDefault(guild => guild.Color == color);
+        return _dbContext.Guilds.FirstOrDefault(guild => guild.Name == name);
     }
 }

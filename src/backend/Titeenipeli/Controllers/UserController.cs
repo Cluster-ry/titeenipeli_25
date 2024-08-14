@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Titeenipeli.Enums;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
 using Titeenipeli.Models;
@@ -15,8 +16,8 @@ namespace Titeenipeli.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IGuildRepositoryService _guildRepositoryService;
-    private readonly JwtService _jwtService;
     private readonly IUserRepositoryService _userRepositoryService;
+    private readonly JwtService _jwtService;
 
     public UserController(JwtService jwtService,
                           IUserRepositoryService userRepositoryService,
@@ -39,9 +40,8 @@ public class UserController : ControllerBase
                 Guild = null,
                 Code = "",
 
-                // TODO: Generate users spawn point
-                SpawnX = 0,
-                SpawnY = 0,
+                SpawnX = -1,
+                SpawnY = -1,
 
                 // TODO: Validate telegram credentials before creating a new user
                 TelegramId = usersInput.Id,
@@ -60,7 +60,7 @@ public class UserController : ControllerBase
 
         return Ok(new PostUserResult
         {
-            Guild = user.Guild?.Color.ToString()
+            Guild = user.Guild?.Name.ToString()
         });
     }
 
@@ -70,19 +70,38 @@ public class UserController : ControllerBase
     {
         JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
 
-        bool validGuild = int.TryParse(input.Guild, out int guildColor);
+        bool validGuild = Enum.TryParse(input.Guild, out GuildName guildName);
 
-        if (jwtClaim == null || !validGuild)
+        if (jwtClaim == null)
         {
             return BadRequest();
         }
 
+        if (!validGuild)
+        {
+            ErrorResult error = new ErrorResult
+            {
+                Title = "Invalid guild",
+                Code = 400,
+                Description = "Provide valid guild"
+            };
+
+            return BadRequest(error);
+        }
+
         User? user = _userRepositoryService.GetById(jwtClaim.Id);
-        Guild? guild = _guildRepositoryService.GetByColor(guildColor);
+        Guild? guild = _guildRepositoryService.GetByName(guildName);
 
         if (user == null || guild == null || user.Guild != null)
         {
-            return BadRequest();
+            ErrorResult error = new ErrorResult
+            {
+                Title = "Invalid guild",
+                Code = 400,
+                Description = "Provide valid guild"
+            };
+
+            return BadRequest(error);
         }
 
         user.Guild = guild;
