@@ -63,7 +63,7 @@ public class UserController : ControllerBase
 
         return Ok(new PostUserResult
         {
-            Guild = user.Guild?.NameId.ToString()
+            Guild = user.Guild?.Name.ToString()
         });
     }
 
@@ -93,7 +93,8 @@ public class UserController : ControllerBase
         }
 
         User? user = _userRepositoryService.GetById(jwtClaim.Id);
-        Guild? guild = _guildRepositoryService.GetByNameId(guildName);
+        Guild? guild = _guildRepositoryService.GetByName(guildName);
+
 
         if (user == null || guild == null || user.Guild != null)
         {

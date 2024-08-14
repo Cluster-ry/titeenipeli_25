@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Titeenipeli.Context;
 using Titeenipeli.Enums;
 using Titeenipeli.Options;
@@ -11,9 +9,6 @@ public static class DbFiller
 {
     public static void Initialize(ApiDbContext dbContext, GameOptions gameOptions)
     {
-        RelationalDatabaseCreator databaseCreator =
-            (RelationalDatabaseCreator)dbContext.Database.GetService<IDatabaseCreator>();
-
         if (!dbContext.CtfFlags.Any())
         {
             dbContext.CtfFlags.Add(new CtfFlag
@@ -28,8 +23,7 @@ public static class DbFiller
         if (!dbContext.Guilds.Any())
         {
             List<Guild> guilds = [];
-            guilds.AddRange(from GuildName name in Enum.GetValues(typeof(GuildName))
-                            select new Guild { Name = name.ToString(), Color = (int)name, NameId = name });
+            guilds.AddRange(from GuildName name in Enum.GetValues(typeof(GuildName)) select new Guild { Name = name });
 
             dbContext.Guilds.AddRange(guilds);
 
@@ -54,7 +48,8 @@ public static class DbFiller
         User testOpponent = new User
         {
             Code = "opponent",
-            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Color == 4) ?? throw new InvalidOperationException(),
+            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ??
+                    throw new InvalidOperationException(),
             SpawnX = 3,
             SpawnY = 2,
             TelegramId = "opponent",
