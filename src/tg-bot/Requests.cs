@@ -14,10 +14,10 @@ namespace Titeenipeli_bot
             try
             {
                 StringContent content = new(json, Encoding.UTF8, "application/json");
-                Console.WriteLine($"Making a POST Request to '{url}' with the following body:\n{await content.ReadAsStringAsync()}"); // DEBUG
+                // Console.WriteLine($"Making a POST Request to '{url}' with the following body:\n{await content.ReadAsStringAsync()}"); // DEBUG
 
                 HttpResponseMessage response = await Client.PostAsync(url, content);
-                Console.WriteLine($"\nResponse:\n'{response}'"); // DEBUG
+                // Console.WriteLine($"\nResponse:\n'{response}'"); // DEBUG
 
                 response.EnsureSuccessStatusCode();
 

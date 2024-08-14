@@ -1,3 +1,4 @@
+using System.Globalization;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -9,26 +10,10 @@ namespace Titeenipeli_bot
     public class Handlers(TelegramBotClient bot)
     {
         // Variables
-        string ip = "http://localhost:5129/api/v1"; // how to get this for production?
-        static bool tosAccepted = false; // I know its more of a privacy notice than tos but tos is easier to write :D
-        static private bool userCreated = false;
-        static bool choosingGuild = false;
-        guildEnum guildChosen;
-        static bool guildSelected = false;
-
-        enum guildEnum
-        {
-            Cluster,
-            Otit,
-            Digit,
-            Date,
-            Tik,
-            Algo,
-            Tutti,
-            Sosa,
-            TiTe
-        };
-        static Dictionary<guildEnum, string> guildDict =
+        private readonly string _ip = "http://localhost:5129/api/v1"; // how to get this for production?
+        private readonly List<UserData> _userList = new List<UserData>(); // TODO: Make this guy persistent?
+        private UserData? _currentUser; 
+        static readonly Dictionary<guildEnum, string> GuildDict =
             new()
             {
                 { guildEnum.Cluster, "Cluster (lappeen Ranta)" },
@@ -43,27 +28,29 @@ namespace Titeenipeli_bot
             };
 
         // Pre-assign menu text
-        const string tosMenu =
+        private const string TosMenu =
            "<b>Welcome to Titeenipeli-bot!</b>\n\nIn order to play this years Titeenipeli, you have to consent to us using your Telegram nickname. This can be seen by other players in the pixels you've placed";
-        const string guildMenuText = "<b>Please choose your guild from the menu below.</b>";
+
+        private const string GuildMenuText = "<b>Please choose your guild from the menu below.</b>";
 
         // Pre-assign button text
-        const string acceptButton = "I Accept";
+        private const string AcceptButton = "I Accept";
 
         // pre-assigned Keyboard buttons
-        static KeyboardButton ClusterButton = new KeyboardButton(guildDict[guildEnum.Cluster]);
-        static KeyboardButton OtitButton = new KeyboardButton(guildDict[guildEnum.Otit]);
-        static KeyboardButton DigitButton = new KeyboardButton(guildDict[guildEnum.Digit]);
-        static KeyboardButton DateButton = new KeyboardButton(guildDict[guildEnum.Date]);
-        static KeyboardButton TikButton = new KeyboardButton(guildDict[guildEnum.Tik]);
-        static KeyboardButton AlgoButton = new KeyboardButton(guildDict[guildEnum.Algo]);
-        static KeyboardButton TuttiButton = new KeyboardButton(guildDict[guildEnum.Tutti]);
-        static KeyboardButton SosaButton = new KeyboardButton(guildDict[guildEnum.Sosa]);
-        static KeyboardButton TiTeButton = new KeyboardButton(guildDict[guildEnum.TiTe]);
+        private static readonly KeyboardButton ClusterButton = new KeyboardButton(GuildDict[guildEnum.Cluster]);
+        private static readonly KeyboardButton OtitButton = new KeyboardButton(GuildDict[guildEnum.Otit]);
+        private static readonly KeyboardButton DigitButton = new KeyboardButton(GuildDict[guildEnum.Digit]);
+        private static readonly KeyboardButton DateButton = new KeyboardButton(GuildDict[guildEnum.Date]);
+        private static readonly KeyboardButton TikButton = new KeyboardButton(GuildDict[guildEnum.Tik]);
+        private static readonly KeyboardButton AlgoButton = new KeyboardButton(GuildDict[guildEnum.Algo]);
+        private static readonly KeyboardButton TuttiButton = new KeyboardButton(GuildDict[guildEnum.Tutti]);
+        private static readonly KeyboardButton SosaButton = new KeyboardButton(GuildDict[guildEnum.Sosa]);
+        private static readonly KeyboardButton TiTeButton = new KeyboardButton(GuildDict[guildEnum.TiTe]);
 
         // Build keyboards
-        static InlineKeyboardMarkup tosMenuMarkup = new(InlineKeyboardButton.WithCallbackData(acceptButton));
-        protected static ReplyKeyboardMarkup guildKeyboard =
+        private static readonly InlineKeyboardMarkup TosMenuMarkup = new(InlineKeyboardButton.WithCallbackData(AcceptButton));
+
+        private static readonly ReplyKeyboardMarkup GuildKeyboard =
             new(
                 [ // This layout matches with how the keyboard is shown to the user
                     [ClusterButton],
@@ -110,29 +97,31 @@ namespace Titeenipeli_bot
                 $"[{DateTime.Now:dd-MM-yyyy HH:mm:ss}] User '{user.FirstName}' wrote '{text}'"
             );
 
-            // TODO: here should come persistent data check
-            // TODO: Test if booleans are user-specific
+            _currentUser = _userList.Find(x => x.Id == user.Id);
+            if (_currentUser == null)
+            {
+                _currentUser = new UserData(user.Id);
+                _userList.Add(_currentUser);
+            }
 
             // When we get a command, we react accordingly
             if (text.StartsWith('/'))
             {
                 await HandleCommand(user, text);
             }
-            else if (choosingGuild)
+            else if (_currentUser.ChoosingGuild)
             {
-                if (guildDict.ContainsValue(text))
+                if (GuildDict.ContainsValue(text))
                 {
-                    guildChosen = guildDict.FirstOrDefault(x => x.Value == text).Key;
-                    await SendGuildData(user, (int) guildChosen); // changed for now since api takes the guild as int
+                    _currentUser.GuildChosen = GuildDict.FirstOrDefault(x => x.Value == text).Key;
+                    await SendGuildData(user, (int) _currentUser.GuildChosen); // changed for now since api takes the guild as int
                     return;
                 }
-                else
-                {
-                    await bot.SendTextMessageAsync(
-                        user.Id,
-                        "Unrecognized guild. Please select your guild by using the keyboard given."
-                    );
-                }
+
+                await bot.SendTextMessageAsync(
+                    user.Id,
+                    "Unrecognized guild. Please select your guild by using the keyboard given."
+                );
             }
             else
             {
@@ -162,10 +151,10 @@ namespace Titeenipeli_bot
 
         async Task HandleButton(CallbackQuery query)
         {
-            string text = string.Empty;
-            InlineKeyboardMarkup markup = new(Array.Empty<InlineKeyboardButton>());
+            
+            // InlineKeyboardMarkup markup = new(Array.Empty<InlineKeyboardButton>());
 
-            if (query.Data == acceptButton)
+            if (query.Data == AcceptButton)
             {
                 // Close the query to end the client-side loading animation
                 await bot.AnswerCallbackQueryAsync(query.Id);
@@ -176,14 +165,14 @@ namespace Titeenipeli_bot
                     query.Message.MessageId,
                     "Thank you!\n\nYou are now being signed in!", // EXTRA:  better markup
                     parseMode: ParseMode.Html,
-                    replyMarkup: markup
+                    replyMarkup: InlineKeyboardMarkup.Empty()
                 );
                 // no need to accept it twice
-                if (tosAccepted)
+                if (_currentUser!.TosAccepted)
                 {
                     return;
                 }
-                tosAccepted = true;
+                _currentUser.TosAccepted = true;
                 Thread.Sleep(1 * 1000);
 
                 await HandleUserSignup(query.From);
@@ -198,7 +187,7 @@ namespace Titeenipeli_bot
         async Task SendTosMenu(User user)
         {
             // check if tos is already done, if so then skip
-            if (tosAccepted)
+            if (_currentUser!.TosAccepted)
             {
                 await HandleUserSignup(user);
                 return;
@@ -206,16 +195,16 @@ namespace Titeenipeli_bot
 
             await bot.SendTextMessageAsync(
                 user.Id,
-                tosMenu,
+                TosMenu,
                 parseMode: ParseMode.Html,
-                replyMarkup: tosMenuMarkup
+                replyMarkup: TosMenuMarkup
             );
         }
 
         async Task HandleUserSignup(User user)
         {
             // this prevents sequence breaks
-            if (userCreated)
+            if (_currentUser!.UserCreated)
             {
                 await bot.SendTextMessageAsync(
                     user.Id,
@@ -228,22 +217,25 @@ namespace Titeenipeli_bot
             try
             {
                 UserProfilePhotos userPhotos = await bot.GetUserProfilePhotosAsync(user.Id,0,1);
-                PhotoSize photo = userPhotos.Photos[0][0]; // with this you can only get the fileID
+                PhotoSize dummy = userPhotos.Photos[0][0]; // with this you can only get the fileID
+                // the download URL includes the token, which shouldn't be sent (at-least without encryption)
+                // TODO: find a way to send photo without token 
 
-                Dictionary<string, string> json = new Dictionary<string, string>(){
+                Dictionary<string, string> json = new Dictionary<string, string>
+                {
                     {"id", user.Id.ToString()},
                     {"firstName", user.FirstName},
                     {"lastName", user.LastName?? ""},
                     {"username", user.Username?? ""},
-                    {"photoUrl", ""}, // the download URL includes the token, which shouldn't be sent (at-least without encryption)
-                    {"authDate", DateTime.Now.ToString()},
+                    {"photoUrl", ""}, 
+                    {"authDate", DateTime.Now.ToString(CultureInfo.CurrentCulture)},
                     {"hash", ""} // TODO: create hash
                 };
 
             
-                await Requests.CreateUserRequestAsync(ip, JsonConvert.SerializeObject(json));
+                await Requests.CreateUserRequestAsync(_ip, JsonConvert.SerializeObject(json));
             
-                userCreated = true;
+                _currentUser.UserCreated = true;
 
                 // success message
                 await bot.SendTextMessageAsync(
@@ -255,23 +247,21 @@ namespace Titeenipeli_bot
                 // After a small-time window, jump straight to choosing your guild
                 Thread.Sleep(1000);
                 await SendGuildMenu(user);
-                return;
             }
-            catch (Exception e)
+            catch
             {
                 await bot.SendTextMessageAsync(
                     user.Id,
                     "There was an error with User signup. Please try again.",
                     replyMarkup: new ReplyKeyboardRemove()
                 );
-                return;
             }
         }
 
         async Task SendGuildMenu(User user)
         {
             // this prevents sequence breaks
-            if (!userCreated)
+            if (!_currentUser!.UserCreated)
             {
                 await bot.SendTextMessageAsync(
                     user.Id,
@@ -280,7 +270,7 @@ namespace Titeenipeli_bot
                 return;
             }
 
-            if (guildSelected)
+            if (_currentUser.GuildSelected)
             {
                 // NOTE: could print the chosen guild?
                 await bot.SendTextMessageAsync(user.Id, "Guild already chosen. Start the game with /game.");
@@ -288,14 +278,14 @@ namespace Titeenipeli_bot
             }
 
             // Starts guild selection check
-            choosingGuild = true;
+            _currentUser.ChoosingGuild = true;
 
-            guildKeyboard.OneTimeKeyboard = true;
+            GuildKeyboard.OneTimeKeyboard = true;
             // select guild message (with guild keyboard)
             await bot.SendTextMessageAsync(
                 user.Id,
-                guildMenuText,
-                replyMarkup: guildKeyboard,
+                GuildMenuText,
+                replyMarkup: GuildKeyboard,
                 parseMode: ParseMode.Html
             );
         }
@@ -307,21 +297,20 @@ namespace Titeenipeli_bot
             };
             try
             {
-                await Requests.SetGuildRequestAsync(ip, JsonConvert.SerializeObject(guildJson));
-                choosingGuild = false;
-                guildSelected = true;
+                await Requests.SetGuildRequestAsync(_ip, JsonConvert.SerializeObject(guildJson));
+                _currentUser!.ChoosingGuild = false;
+                _currentUser.GuildSelected = true;
                 await bot.SendTextMessageAsync(
                     user.Id,
-                    $"You selected the guild {guildChosen.ToString()}! Now start the game with /game.",
+                    $"You selected the guild {_currentUser.GuildChosen.ToString()}! Now start the game with /game.",
                     replyMarkup: new ReplyKeyboardRemove()
                 );
-                return;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 await bot.SendTextMessageAsync(
                     user.Id,
-                    $"There was an error with setting the guild. Please try again.",
+                    "There was an error with setting the guild. Please try again.",
                     replyMarkup: new ReplyKeyboardRemove()
                 );
             }
@@ -330,7 +319,7 @@ namespace Titeenipeli_bot
         async Task SendGame(User user)
         {
             // this prevents sequence breaks
-            if (!userCreated)
+            if (!_currentUser!.UserCreated)
             {
                 await bot.SendTextMessageAsync(
                     user.Id,
@@ -339,7 +328,7 @@ namespace Titeenipeli_bot
                 return;
             }
 
-            if (!guildSelected)
+            if (!_currentUser.GuildSelected)
             {
                 await bot.SendTextMessageAsync(user.Id, "You haven't selected your guild yet. Use /guild.");
                 return;
