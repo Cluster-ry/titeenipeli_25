@@ -18,12 +18,15 @@ public class UserController : ControllerBase
     private readonly IGuildRepositoryService _guildRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
     private readonly JwtService _jwtService;
+    private readonly SpawnGeneratorService _spawnGeneratorService;
 
     public UserController(JwtService jwtService,
+                          SpawnGeneratorService spawnGeneratorService,
                           IUserRepositoryService userRepositoryService,
                           IGuildRepositoryService guildRepositoryService)
     {
         _jwtService = jwtService;
+        _spawnGeneratorService = spawnGeneratorService;
         _userRepositoryService = userRepositoryService;
         _guildRepositoryService = guildRepositoryService;
     }
@@ -92,6 +95,7 @@ public class UserController : ControllerBase
         User? user = _userRepositoryService.GetById(jwtClaim.Id);
         Guild? guild = _guildRepositoryService.GetByName(guildName);
 
+
         if (user == null || guild == null || user.Guild != null)
         {
             ErrorResult error = new ErrorResult
@@ -104,7 +108,12 @@ public class UserController : ControllerBase
             return BadRequest(error);
         }
 
+        Coordinate spawnPoint = _spawnGeneratorService.GetSpawnPoint(guildName);
+
+        user.SpawnX = spawnPoint.X;
+        user.SpawnY = spawnPoint.Y;
         user.Guild = guild;
+
         _userRepositoryService.Update(user);
 
         // Update the claim because users guild has changed
