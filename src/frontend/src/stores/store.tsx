@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { Pixel } from "../models/Pixel";
 import { PlayerCoordinates } from "../models/PlayerCoordinates";
+import { Guild } from "../components/gameMap/guild/Guild";
 
 // The amount of rows and columns in the map. These can be
 // changed to alter the map size.
-const ROW_COUNT = 3;
-const COLUMN_COUNT = 3;
+const ROW_COUNT = 256;
+const COLUMN_COUNT = 256;
 
 interface Map {
   playerSpawn: PlayerCoordinates;
@@ -14,7 +15,7 @@ interface Map {
 
   setPixels: () => void;
   updatePlayerPosition: (x: number, y: number) => void;
-  conquerPixel: (newOwner: string, newOwnPixel: boolean) => void;
+  conquerPixel: (newOwner: number, newOwnPixel: boolean) => void;
 }
 
 const usePixelStore = create<Map>((set) => ({
@@ -50,7 +51,7 @@ const usePixelStore = create<Map>((set) => ({
         for (let x = 0; x < COLUMN_COUNT; x++) {
           pixelRow.push({
             type: "empty",
-            owner: "",
+            owner: Math.round(Math.random() * 8) as Guild,
             ownPixel: false,
           });
         }
@@ -79,7 +80,7 @@ const usePixelStore = create<Map>((set) => ({
    *
    * @param {boolean} newOwnPixel The new ownership status
    */
-  conquerPixel: (newOwner: string, newOwnPixel: boolean) =>
+  conquerPixel: (newOwner: number, newOwnPixel: boolean) =>
     set((state) => {
       const pixels = [...state.pixels];
       const { x, y } = state.playerSpawn;

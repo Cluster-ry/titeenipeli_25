@@ -22,33 +22,29 @@ const PixiComponentViewport = PixiComponent("Viewport", {
       screenHeight: props.height,
       worldWidth: props.maxWidth,
       worldHeight: props.maxHeight,
-      events: props.app.renderer.events
+      events: props.app.renderer.events,
     });
     viewport
-      .drag(
-        {
-          underflow: "center"
-        }
-      )
+      .drag({
+        underflow: "center",
+      })
       .pinch()
       .wheel()
       .decelerate({
         friction: 0.955,
-        minSpeed: 0.05
+        minSpeed: 0.05,
       })
-      .bounce(
-        {
-          friction: 0.5,
-          time: 500
-        }
-      )
+      .bounce({
+        friction: 0.5,
+        time: 500,
+      })
       .clampZoom({
         minScale: 0.5,
-        maxScale: 2
+        maxScale: 2,
       });
 
     return viewport;
-  }
+  },
 });
 
 const Viewport = (props: ViewportProps) => {

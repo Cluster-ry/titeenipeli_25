@@ -76,7 +76,7 @@ export default function Map() {
    */
   const movePlayerAndConquer = (x: number, y: number) => {
     updatePlayerPosition(x, y);
-    conquerPixel("client", !pixels[y][x].ownPixel);
+    conquerPixel(2, !pixels[y][x].ownPixel);
   };
 
   return (
