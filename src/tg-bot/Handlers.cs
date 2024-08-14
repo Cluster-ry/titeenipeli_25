@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net.Http.Headers;
 using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -10,7 +11,7 @@ namespace Titeenipeli_bot
     public class Handlers(TelegramBotClient bot)
     {
         // Variables
-        private readonly string _ip = "http://localhost:5129/api/v1"; // how to get this for production?
+        private readonly string _url = "http://localhost:5129"; // how to get this for production?
         private readonly List<UserData> _userList = new List<UserData>(); // TODO: Make this guy persistent?
         private UserData? _currentUser; 
         static readonly Dictionary<guildEnum, string> GuildDict =
@@ -114,7 +115,7 @@ namespace Titeenipeli_bot
                 if (GuildDict.ContainsValue(text))
                 {
                     _currentUser.GuildChosen = GuildDict.FirstOrDefault(x => x.Value == text).Key;
-                    await SendGuildData(user, (int) _currentUser.GuildChosen); // changed for now since api takes the guild as int
+                    await SendGuildData(user, (int) _currentUser.GuildChosen); // changed since api takes the guild as int
                     return;
                 }
 
@@ -233,7 +234,7 @@ namespace Titeenipeli_bot
                 };
 
             
-                await Requests.CreateUserRequestAsync(_ip, JsonConvert.SerializeObject(json));
+                await Requests.CreateUserRequestAsync(_url, JsonConvert.SerializeObject(json));
             
                 _currentUser.UserCreated = true;
 
@@ -297,7 +298,7 @@ namespace Titeenipeli_bot
             };
             try
             {
-                await Requests.SetGuildRequestAsync(_ip, JsonConvert.SerializeObject(guildJson));
+                await Requests.SetGuildRequestAsync(_url, JsonConvert.SerializeObject(guildJson));
                 _currentUser!.ChoosingGuild = false;
                 _currentUser.GuildSelected = true;
                 await bot.SendTextMessageAsync(
@@ -334,9 +335,13 @@ namespace Titeenipeli_bot
                 return;
             }
 
-            await bot.SendTextMessageAsync(user.Id, "Opening game...");
-
-            // TODO: send to game with userid as param
+            AuthenticationHeaderValue? cookies = Requests.GetCookies();
+            Console.WriteLine($"token: {cookies}");
+            await bot.SendTextMessageAsync(
+                user.Id,
+                $"Open the following link to enter the game:\n\n" +
+                $"{_url}?Authorization={cookies}" //TODO: Proper url
+                );
         }
     }
 }

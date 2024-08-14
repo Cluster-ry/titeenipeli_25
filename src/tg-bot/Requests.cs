@@ -5,20 +5,23 @@ namespace Titeenipeli_bot
 {
     public static class Requests
     {   
-        private static readonly HttpClient Client = new HttpClient();
+        private readonly static HttpClient Client = new HttpClient();
         
-        public static async Task CreateUserRequestAsync(string ip, string json) 
+        public async static Task CreateUserRequestAsync(string uri, string json) 
         {
-            string url = $"{ip}/users";
+            string url = $"{uri}/api/v1/users";
 
             try
             {
                 StringContent content = new(json, Encoding.UTF8, "application/json");
-                // Console.WriteLine($"Making a POST Request to '{url}' with the following body:\n{await content.ReadAsStringAsync()}"); // DEBUG
-
                 HttpResponseMessage response = await Client.PostAsync(url, content);
-                // Console.WriteLine($"\nResponse:\n'{response}'"); // DEBUG
-
+                
+                //DEBUG
+                /*
+                Console.WriteLine($"Making a POST Request to '{url}' with the following body:\n{await content.ReadAsStringAsync()}");
+                Console.WriteLine($"\nResponse:\n'{response}'"); 
+                */ 
+                
                 response.EnsureSuccessStatusCode();
 
                 string? cookies = response.Headers.TryGetValues("Set-Cookie", out var values) ? values.FirstOrDefault() : null;
@@ -48,19 +51,27 @@ namespace Titeenipeli_bot
             }
         }
 
-        public static async Task SetGuildRequestAsync(string ip, string json)
+        public static AuthenticationHeaderValue? GetCookies()
         {
-            string url = $"{ip}/users";
+            return Client.DefaultRequestHeaders.Authorization;
+        }
+
+        public async static Task SetGuildRequestAsync(string ip, string json)
+        {
+            string url = $"{ip}/api/v1/users";
 
             try
             {
                 StringContent content = new(json, Encoding.UTF8, "application/json");
                 HttpResponseMessage response = await Client.PutAsync(url, content);
                 
-                Console.WriteLine($"Made the following PUT Request:\n'{response.RequestMessage}'"); // DEBUG
+                //DEBUG
+                /*
+                Console.WriteLine($"Made the following PUT Request:\n'{response.RequestMessage}'");
                 Console.WriteLine($"\nContent:\n{await content.ReadAsStringAsync()}");
-                Console.WriteLine($"\nResponse:\n'{response}'"); // DEBUG
-
+                Console.WriteLine($"\nResponse:\n'{response}'");
+                 */
+                
                 response.EnsureSuccessStatusCode();
                 // api gives a new jwt token once the guild has been set 
                 string? cookies = response.Headers.TryGetValues("Set-Cookie", out var values) ? values.FirstOrDefault() : null;
