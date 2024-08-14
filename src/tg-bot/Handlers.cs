@@ -54,7 +54,10 @@ public class Handlers(TelegramBotClient bot)
 
     private readonly static ReplyKeyboardMarkup GuildKeyboard = new ReplyKeyboardMarkup(
     [ // This layout matches with how the keyboard is shown to the user
-        [ClusterButton], [OtitButton, DigitButton], [DateButton, TikButton], [AlgoButton, TuttiButton],
+        [ClusterButton],
+        [OtitButton, DigitButton],
+        [DateButton, TikButton],
+        [AlgoButton, TuttiButton],
         [SosaButton, TiTeButton]
     ]);
 
