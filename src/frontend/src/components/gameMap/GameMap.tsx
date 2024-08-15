@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
@@ -7,20 +7,19 @@ import usePixelStore from "../../stores/store";
 import { Pixel } from "../../models/Pixel";
 import { Guild, guildColor } from "./guild/Guild";
 
-const MapWidth = 256;
-const MapHeight = 256;
+import { mapConfig } from "./MapConfig";
 
-const PixelSize = 32;
+const MaxWidth = mapConfig.MapWidth * mapConfig.PixelSize;
+const MaxHeight = mapConfig.MapHeight * mapConfig.PixelSize;
 
-const MaxWidth = MapWidth * PixelSize;
-const MaxHeight = MapHeight * PixelSize;
+const defaultGuild = 0;   // For testing
 
 export default function GameMap() {
   // Local state for the elements
   const [mapElements, setMapElements] = useState<JSX.Element[][]>();
 
   // Global state for the data
-  const { playerSpawn, pixels, setPixels, updatePlayerPosition, conquerPixel } =
+  const { playerSpawn, pixels, playerGuild, setPixels, setPlayerGuild, updatePlayerPosition, conquerPixel } =
     usePixelStore();
 
   /**
@@ -32,9 +31,12 @@ export default function GameMap() {
 
   /**
    * Using the previously filled 2D Pixel array to create a map
+   * 
+   * @note Currently sets the player's guild as well.
    */
   useEffect(() => {
     generateMap();
+    setPlayerGuild(defaultGuild);
   }, [pixels, playerSpawn]);
 
   const generateMap = () => {
@@ -42,10 +44,10 @@ export default function GameMap() {
       row.map((pixel: Pixel, x: number) => (
         <Rectangle
           key={x * 1000 + y}
-          x={x * PixelSize}
-          y={y * PixelSize}
-          width={PixelSize}
-          height={PixelSize}
+          x={x * mapConfig.PixelSize}
+          y={y * mapConfig.PixelSize}
+          width={mapConfig.PixelSize}
+          height={mapConfig.PixelSize}
           color={guildColor(pixel.owner as Guild)}
           onClick={movePlayerAndConquer}
         />
@@ -60,11 +62,11 @@ export default function GameMap() {
     y: number;
     color: number;
   }) {
-    updatePlayerPosition(event.x / PixelSize, event.y / PixelSize);
-    if (!pixels[event.x / PixelSize][event.y / PixelSize].ownPixel) {
+    updatePlayerPosition(event.x / mapConfig.PixelSize, event.y / mapConfig.PixelSize);
+    if (!pixels[event.x / mapConfig.PixelSize][event.y / mapConfig.PixelSize].ownPixel) {
       conquerPixel(
-        0,
-        !pixels[event.x / PixelSize][event.y / PixelSize].ownPixel
+        playerGuild,
+        !pixels[event.x / mapConfig.PixelSize][event.y / mapConfig.PixelSize].ownPixel
       );
     }
   }

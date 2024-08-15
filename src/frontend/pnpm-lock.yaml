@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@pixi/react':
-        specifier: '7'
+        specifier: ^7.1.2
         version: 7.1.2(x7hpdnb7sbkba2bybj7sudwevi)
       '@protobuf-ts/grpcweb-transport':
         specifier: ^2.9.4

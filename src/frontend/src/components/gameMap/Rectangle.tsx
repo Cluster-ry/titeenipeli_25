@@ -1,5 +1,7 @@
-import { PixiComponent, Sprite } from "@pixi/react";
-import { FederatedPointerEvent, Graphics, Texture } from "pixi.js";
+import { Sprite } from "@pixi/react";
+import { Texture } from "pixi.js";
+//import { PixiComponent } from "@pixi/react";
+//import { FederatedPointerEvent, Graphics, Texture } from "pixi.js";
 
 interface RectangleProps {
   x: number;
