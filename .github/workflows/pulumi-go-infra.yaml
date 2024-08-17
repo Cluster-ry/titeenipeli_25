@@ -28,16 +28,16 @@ jobs:
     environment: plan
     if: github.ref != 'refs/heads/main'
     defaults:
-        run:
-          shell: bash
-          working-directory: ${{ env.working-dir }}
+      run:
+        shell: bash
+        working-directory: ${{ env.working-dir }}
     steps:
-      - name: Az CLI login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #- name: Az CLI login
+      #  uses: azure/login@v2
+      #  with:
+      #    client-id: ${{ secrets.AZURE_CLIENT_ID }}
+      #    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      #    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Checkout 🛎️
         uses: actions/checkout@v4
@@ -45,7 +45,7 @@ jobs:
       - name: Setup Go ✨
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: "1.22"
 
       - name: Downloading dependencies 📦
         run: go mod download
@@ -70,9 +70,9 @@ jobs:
     environment: apply
     if: github.ref == 'refs/heads/main'
     defaults:
-        run:
-          shell: bash
-          working-directory: ${{ env.working-dir }}
+      run:
+        shell: bash
+        working-directory: ${{ env.working-dir }}
     steps:
       - name: Az CLI login
         uses: azure/login@v2
@@ -87,7 +87,7 @@ jobs:
       - name: Setup Go ✨
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: "1.22"
 
       - name: Downloading dependencies 📦
         run: go mod download
