@@ -60,6 +60,8 @@ jobs:
           cloud-url: ${{ env.cloud-url }}
           work-dir: ${{ env.working-dir }}
           comment-on-pr: true
+          comment-on-summary: true
+          diff: true
         env:
           ARM_USE_MSI: true
 
@@ -100,5 +102,7 @@ jobs:
           cloud-url: ${{ env.cloud-url }}
           work-dir: ${{ env.working-dir }}
           comment-on-pr: true
+          comment-on-summary: true
+          diff: true
         env:
           ARM_USE_MSI: true
