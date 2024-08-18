@@ -2,6 +2,7 @@
 using GrpcGeneratedServices;
 using Titeenipeli.Extensions;
 using Titeenipeli.Grpc.Common;
+using Titeenipeli.Models;
 using Titeenipeli.Schema;
 using Titeenipeli.Services;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
@@ -16,9 +17,9 @@ public class IncrementalMapUpdateService(JwtService jwtService, IUserRepositoryS
 
     public override async Task GetIncremental(IncrementalMapUpdateRequest request, IServerStreamWriter<IncrementalMapUpdateResponse> responseStream, ServerCallContext context)
     {
-        var httpContext = context.GetHttpContext();
+        HttpContext httpContext = context.GetHttpContext();
 
-        var jwtClaim = httpContext.GetUser(_jwtService);
+        JwtClaim? jwtClaim = httpContext.GetUser(_jwtService);
         if (jwtClaim == null)
         {
             throw new RpcException(new Status(StatusCode.PermissionDenied, "Missing or invalid authentication cookie."));
@@ -30,10 +31,10 @@ public class IncrementalMapUpdateService(JwtService jwtService, IUserRepositoryS
             throw new RpcException(new Status(StatusCode.PermissionDenied, "User couldn't be found."));
         }
 
-        var grpcConnection = new GrpcConnection<IncrementalMapUpdateResponse>(user, responseStream);
+        GrpcConnection<IncrementalMapUpdateResponse> grpcConnection = new(user, responseStream);
         _incrementalMapUpdateCoreService.AddGrpcConnection(grpcConnection);
 
-        var incrementalResponse = new IncrementalMapUpdateResponse();
+        IncrementalMapUpdateResponse incrementalResponse = new();
         await responseStream.WriteAsync(incrementalResponse);
 
         Task clientCancellationTask = Task.Delay(Timeout.Infinite, context.CancellationToken);

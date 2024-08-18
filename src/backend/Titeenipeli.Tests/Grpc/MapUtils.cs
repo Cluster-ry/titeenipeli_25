@@ -5,6 +5,7 @@ using Titeenipeli.Models;
 using Google.Protobuf.Collections;
 using Titeenipeli.Schema;
 using Titeenipeli.Options;
+using static GrpcGeneratedServices.IncrementalMapUpdateResponse.Types;
 
 namespace Titeenipeli.Tests.Grpc;
 
@@ -12,8 +13,8 @@ internal static class MapUtils
 {
     internal static Dictionary<Coordinate, GrpcChangePixel> MatrixOfUsersToPixels(int[,] map, List<User> users)
     {
-        var mapWidth = map.GetUpperBound(0);
-        var mapHeight = map.GetUpperBound(1);
+        int mapWidth = map.GetUpperBound(0);
+        int mapHeight = map.GetUpperBound(1);
 
         Dictionary<Coordinate, GrpcChangePixel> pixels = [];
         Coordinate coordinate = new();
@@ -39,8 +40,8 @@ internal static class MapUtils
 
     internal static int[,] GrpcUpdatesToUserMap(RepeatedField<IncrementalMapUpdateResponse.Types.IncrementalMapUpdate> updates, GameOptions gameOptions)
     {
-        var fogOfWarDistance = gameOptions.FogOfWarDistance;
-        var padding = fogOfWarDistance * 2;
+        int fogOfWarDistance = gameOptions.FogOfWarDistance;
+        int padding = fogOfWarDistance * 2;
 
         int[,] map = new int[gameOptions.Width + padding, gameOptions.Height + padding];
         for (int y = 0; y < gameOptions.Height + padding; y++)
@@ -51,7 +52,7 @@ internal static class MapUtils
             }
         }
 
-        foreach (var update in updates)
+        foreach (IncrementalMapUpdate update in updates)
         {
             int userId;
             if (update.Owner == PixelOwners.Cluster)

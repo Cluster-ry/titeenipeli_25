@@ -36,7 +36,7 @@ public class MapUpdateProcessor
         _grpcConnections = connections;
         _visibilityMap = new VisibilityMap(gameOptions.Width, gameOptions.Height, gameOptions.FogOfWarDistance);
 
-        var connection = connections.FirstOrDefault();
+        KeyValuePair<int, IGrpcConnection<IncrementalMapUpdateResponse>> connection = connections.FirstOrDefault();
         _user = connection.Value.User;
     }
 
@@ -57,7 +57,7 @@ public class MapUpdateProcessor
         }
         catch (Exception)
         {
-            foreach (var connectionKeyValue in _grpcConnections)
+            foreach (KeyValuePair<int, IGrpcConnection<IncrementalMapUpdateResponse>> connectionKeyValue in _grpcConnections)
             {
                 _incrementalMapUpdateCoreService.RemoveGrpcConnection(connectionKeyValue.Value);
             }
@@ -67,8 +67,9 @@ public class MapUpdateProcessor
 
     private void ComputeVisibilityMap()
     {
-        var pixelsOwnedByPlayer = _mapChangesInput.NewPixels.Where((pixel) => pixel.Value.User?.Id == _user.Id);
-        foreach (var pixelOwnedByPlayer in pixelsOwnedByPlayer)
+        IEnumerable<KeyValuePair<Coordinate, GrpcChangePixel>> pixelsOwnedByPlayer =
+            _mapChangesInput.NewPixels.Where((pixel) => pixel.Value.User?.Id == _user.Id);
+        foreach (KeyValuePair<Coordinate, GrpcChangePixel> pixelOwnedByPlayer in pixelsOwnedByPlayer)
         {
             LoopNearbyPixelsInsideFogOfWar(
                 _visibilityMap.SetVisible,
@@ -79,9 +80,9 @@ public class MapUpdateProcessor
 
     private void ComputeUserLosses()
     {
-        var changesCausingLosses = _mapChangesInput.Changes.Where((change) =>
+        IEnumerable<GrpcMapChangeInput> changesCausingLosses = _mapChangesInput.Changes.Where((change) =>
             change.OldOwner?.Id == _user?.Id);
-        foreach (var change in changesCausingLosses)
+        foreach (GrpcMapChangeInput change in changesCausingLosses)
         {
             ComputeSurroundingPixelVisibility(change);
 
@@ -98,7 +99,7 @@ public class MapUpdateProcessor
     {
         IEnumerable<GrpcMapChangeInput> normalChanges = _mapChangesInput.Changes.Where((change) =>
             change.OldOwner?.Id != _user?.Id && change.NewOwner?.Id != _user?.Id);
-        foreach (var change in normalChanges)
+        foreach (GrpcMapChangeInput change in normalChanges)
         {
             bool insideFogOfWar = _visibilityMap.GetVisibility(change.Coordinate);
             if (insideFogOfWar)
@@ -112,7 +113,7 @@ public class MapUpdateProcessor
     {
         IEnumerable<GrpcMapChangeInput> winChanges = _mapChangesInput.Changes.Where((change) =>
             change.NewOwner?.Id == _user?.Id);
-        foreach (var change in winChanges)
+        foreach (GrpcMapChangeInput change in winChanges)
         {
             LoopNearbyPixelsInsideFogOfWar(
                 AddStandardChange,
@@ -170,7 +171,7 @@ public class MapUpdateProcessor
         Coordinate spawnRelativeCoordinate = coordinate.ToSpawnRelativeCoordinate(_user);
 
         GrpcChangePixel newPixel;
-        var foundValue = _mapChangesInput.NewPixels.TryGetValue(coordinate, out newPixel);
+        bool foundValue = _mapChangesInput.NewPixels.TryGetValue(coordinate, out newPixel);
         if (!foundValue)
         {
             throw new Exception("Unable to add new standard change, missing pixel data.");
@@ -238,15 +239,15 @@ public class MapUpdateProcessor
             return;
         }
 
-        var incrementalResponse = new IncrementalMapUpdateResponse();
-        foreach (var pixelChanges in _pixelWireChanges)
+        IncrementalMapUpdateResponse incrementalResponse = new();
+        foreach (KeyValuePair<Coordinate, IncrementalMapUpdateResponse.Types.IncrementalMapUpdate> pixelChanges in _pixelWireChanges)
         {
             incrementalResponse.Updates.Add(pixelChanges.Value);
         }
 
-        foreach (var connectionKeyValuePair in _grpcConnections)
+        foreach (KeyValuePair<int, IGrpcConnection<IncrementalMapUpdateResponse>> connectionKeyValuePair in _grpcConnections)
         {
-            var connection = connectionKeyValuePair.Value;
+            IGrpcConnection<IncrementalMapUpdateResponse> connection = connectionKeyValuePair.Value;
             try
             {
                 await connection.ResponseStreamQueue.Writer.WriteAsync(incrementalResponse);

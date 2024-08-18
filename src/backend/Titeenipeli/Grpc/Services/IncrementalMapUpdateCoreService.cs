@@ -41,7 +41,7 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
     public void RemoveGrpcConnection(IGrpcConnection<IncrementalMapUpdateResponse> connection)
     {
         ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>? dictionaryOutput;
-        var retrievalSucceeded = Connections.TryGetValue(connection.User.Id, out dictionaryOutput);
+        bool retrievalSucceeded = Connections.TryGetValue(connection.User.Id, out dictionaryOutput);
         if (retrievalSucceeded)
         {
             connection.Dispose();
@@ -60,10 +60,10 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
     private async Task GenerateAndRunMapUpdateTasks(GrpcMapChangesInput mapChangesInput)
     {
         List<Task> updateTasks = new(Connections.Count);
-        foreach (var connectionKeyValuePair in Connections)
+        foreach (KeyValuePair<int, ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>> connectionKeyValuePair in Connections)
         {
-            var mapUpdateProcessor = new MapUpdateProcessor(this, mapChangesInput, connectionKeyValuePair.Value, _gameOptions);
-            var updateTask = Task.Run(mapUpdateProcessor.Process);
+            MapUpdateProcessor mapUpdateProcessor = new(this, mapChangesInput, connectionKeyValuePair.Value, _gameOptions);
+            Task updateTask = Task.Run(mapUpdateProcessor.Process);
             updateTasks.Add(updateTask);
         }
 

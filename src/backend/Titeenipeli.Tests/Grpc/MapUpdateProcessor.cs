@@ -27,24 +27,24 @@ public class MapUpdateProcessorTest
     public const int Nop = 3;
     public const int Bor = 4;
 
-    const int Width = 10;
-    const int Height = 10;
-    const int FogOfWarDistance = 2;
+    private const int Width = 10;
+    private const int Height = 10;
+    private const int FogOfWarDistance = 2;
 
     private IGrpcConnection<IncrementalMapUpdateResponse> _connection;
     private ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _connections;
     private IIncrementalMapUpdateCoreService _incrementalMapUpdateCoreService;
     private GameOptions _gameOptions;
 
-    private static Guild _ownGuild = new()
+    private static readonly Guild _ownGuild = new()
     {
         Name = Enums.GuildName.Cluster
     };
-    private static Guild _otherGuild = new()
+    private static readonly Guild _otherGuild = new()
     {
         Name = Enums.GuildName.Tietokilta
     };
-    private static User _currentUser = new()
+    private static readonly User _currentUser = new()
     {
         Id = 1,
         Guild = _ownGuild,
@@ -59,7 +59,7 @@ public class MapUpdateProcessorTest
         AuthDate = "",
         Hash = ""
     };
-    private static User _otherUser = new()
+    private static readonly User _otherUser = new()
     {
         Id = 2,
         Guild = _otherGuild,
@@ -74,7 +74,7 @@ public class MapUpdateProcessorTest
         AuthDate = "",
         Hash = ""
     };
-    private static List<User> _users = new() {
+    private static readonly List<User> _users = new() {
         _currentUser,
         _otherUser
     };
