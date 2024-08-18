@@ -21,22 +21,13 @@ public class SpawnGeneratorService
 
     public Coordinate GetSpawnPoint(GuildName guildName)
     {
-        Coordinate spawnCoordinate = AddOffset(_spawnGenerator.GetSpawnPoint(guildName));
+        Coordinate spawnCoordinate;
 
-        while (_mapRepositoryService.IsSpawn(spawnCoordinate))
+        do
         {
-            spawnCoordinate = AddOffset(_spawnGenerator.GetSpawnPoint(guildName));
-        }
+            spawnCoordinate = _mapCenter + _spawnGenerator.GetSpawnPoint(guildName);
+        } while (!_mapRepositoryService.IsValid(spawnCoordinate) && _mapRepositoryService.IsSpawn(spawnCoordinate));
 
         return spawnCoordinate;
-    }
-
-    private Coordinate AddOffset(Coordinate coordinate)
-    {
-        return new Coordinate
-        {
-            X = _mapCenter.X + coordinate.X,
-            Y = _mapCenter.Y + coordinate.Y
-        };
     }
 }

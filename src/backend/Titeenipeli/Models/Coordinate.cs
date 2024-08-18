@@ -8,11 +8,9 @@ public struct Coordinate
     public int Y { get; set; }
 
     public static Coordinate operator +(Coordinate a, Coordinate b)
-        => new()
-        {
-            X = a.X + b.X,
-            Y = a.Y + b.Y,
-        };
+    {
+        return new Coordinate { X = a.X + b.X, Y = a.Y + b.Y };
+    }
 
     public Coordinate ToSpawnRelativeCoordinate(User user)
     {
