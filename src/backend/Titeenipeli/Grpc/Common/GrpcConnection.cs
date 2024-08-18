@@ -4,13 +4,13 @@ using Titeenipeli.Schema;
 
 namespace Titeenipeli.Grpc.Common;
 
-public class GrpcConnection<TResponseStream> : IGrpcConnection<TResponseStream>, IDisposable
+public class GrpcConnection<TResponseStream> : IGrpcConnection<TResponseStream>
 {
-    private const int _maxChannelSize = 100;
+    private const int MaxChannelSize = 100;
     private static int _idCounter = 0;
     public int Id { get; init; } = Interlocked.Increment(ref _idCounter);
     public User User { get; set; }
-    public Channel<TResponseStream> ResponseStreamQueue { get; init; } = Channel.CreateBounded<TResponseStream>(_maxChannelSize);
+    public Channel<TResponseStream> ResponseStreamQueue { get; init; } = Channel.CreateBounded<TResponseStream>(MaxChannelSize);
     public Task ProcessResponseWritesTask { get; init; }
     private readonly IServerStreamWriter<TResponseStream> _responseStream;
 

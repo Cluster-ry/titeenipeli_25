@@ -11,7 +11,7 @@ namespace Titeenipeli.Grpc.Services;
 public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
 {
     private const int _maxChannelSize = 100;
-    private readonly ConcurrentDictionary<int, ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>> Connections = new();
+    private readonly ConcurrentDictionary<int, ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>> _connections = new();
 
     private readonly ILogger<IncrementalMapUpdateService> _logger;
     private readonly GameOptions _gameOptions;
@@ -34,14 +34,14 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
     public void AddGrpcConnection(IGrpcConnection<IncrementalMapUpdateResponse> connection)
     {
         ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> userConnections =
-            Connections.GetOrAdd(connection.User.Id, new ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>());
+            _connections.GetOrAdd(connection.User.Id, new ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>());
         userConnections.TryAdd(connection.Id, connection);
     }
 
     public void RemoveGrpcConnection(IGrpcConnection<IncrementalMapUpdateResponse> connection)
     {
         ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>? dictionaryOutput;
-        bool retrievalSucceeded = Connections.TryGetValue(connection.User.Id, out dictionaryOutput);
+        bool retrievalSucceeded = _connections.TryGetValue(connection.User.Id, out dictionaryOutput);
         if (retrievalSucceeded)
         {
             connection.Dispose();
@@ -59,8 +59,8 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
 
     private async Task GenerateAndRunMapUpdateTasks(GrpcMapChangesInput mapChangesInput)
     {
-        List<Task> updateTasks = new(Connections.Count);
-        foreach (KeyValuePair<int, ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>> connectionKeyValuePair in Connections)
+        List<Task> updateTasks = new(_connections.Count);
+        foreach (KeyValuePair<int, ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>> connectionKeyValuePair in _connections)
         {
             MapUpdateProcessor mapUpdateProcessor = new(this, mapChangesInput, connectionKeyValuePair.Value, _gameOptions);
             Task updateTask = Task.Run(mapUpdateProcessor.Process);

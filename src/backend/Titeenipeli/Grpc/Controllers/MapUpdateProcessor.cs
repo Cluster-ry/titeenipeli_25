@@ -7,6 +7,7 @@ using Titeenipeli.Grpc.Services;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Schema;
+using static GrpcGeneratedServices.IncrementalMapUpdateResponse.Types;
 
 namespace Titeenipeli.Grpc.Controllers;
 
@@ -19,7 +20,7 @@ public class MapUpdateProcessor
     private readonly ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _grpcConnections;
     private readonly GameOptions _gameOptions;
 
-    private readonly Dictionary<Coordinate, IncrementalMapUpdateResponse.Types.IncrementalMapUpdate> _pixelWireChanges = [];
+    private readonly Dictionary<Coordinate, IncrementalMapUpdate> _pixelWireChanges = [];
 
     private VisibilityMap _visibilityMap;
 
@@ -130,25 +131,27 @@ public class MapUpdateProcessor
     private void ComputeSurroundingPixelVisibility(GrpcMapChangeInput change)
     {
         LoopNearbyPixelsInsideFogOfWar(
-            (coordinate) =>
-            {
-                bool insideFogOfWar = _visibilityMap.GetVisibility(coordinate);
-                if (!insideFogOfWar)
-                {
-                    AddNotOwnedChange(coordinate, PixelTypes.Normal);
-                }
-            },
+            AddNotOwnedChangeIfNotInsideFogOfWar,
             change.Coordinate
         );
     }
 
+    private void AddNotOwnedChangeIfNotInsideFogOfWar(Coordinate coordinate)
+    {
+        bool insideFogOfWar = _visibilityMap.GetVisibility(coordinate);
+        if (!insideFogOfWar)
+        {
+            AddNotOwnedChange(coordinate, PixelTypes.Normal);
+        }
+    }
+
     private void LoopNearbyPixelsInsideFogOfWar(Action<Coordinate> action, Coordinate aroundCoordinate)
     {
-        int FogOfWarDistance = _gameOptions.FogOfWarDistance;
-        int minY = aroundCoordinate.Y - FogOfWarDistance;
-        int maxY = aroundCoordinate.Y + FogOfWarDistance;
-        int minX = aroundCoordinate.X - FogOfWarDistance;
-        int maxX = aroundCoordinate.X + FogOfWarDistance;
+        int fogOfWarDistance = _gameOptions.FogOfWarDistance;
+        int minY = aroundCoordinate.Y - fogOfWarDistance;
+        int maxY = aroundCoordinate.Y + fogOfWarDistance;
+        int minX = aroundCoordinate.X - fogOfWarDistance;
+        int maxX = aroundCoordinate.X + fogOfWarDistance;
 
         Coordinate coordinate = new();
         for (coordinate.Y = minY; coordinate.Y <= maxY; coordinate.Y++)
@@ -182,9 +185,9 @@ public class MapUpdateProcessor
         PixelOwners owner = ConvertGuildToPixelOwners(newPixel.User?.Guild?.Name);
         bool ownPixel = newPixel.User?.Id == _user?.Id;
 
-        IncrementalMapUpdateResponse.Types.IncrementalMapUpdate mapUpdate = new()
+        IncrementalMapUpdate mapUpdate = new()
         {
-            SpawnRelativeCoordinate = new()
+            SpawnRelativeCoordinate = new RelativeCoordinate()
             {
                 X = spawnRelativeCoordinate.X,
                 Y = spawnRelativeCoordinate.Y
@@ -200,7 +203,7 @@ public class MapUpdateProcessor
     {
         Coordinate spawnRelativeCoordinate = coordinate.ToSpawnRelativeCoordinate(_user);
 
-        IncrementalMapUpdateResponse.Types.IncrementalMapUpdate mapUpdate = new()
+        IncrementalMapUpdate mapUpdate = new()
         {
             SpawnRelativeCoordinate = new()
             {
@@ -217,14 +220,7 @@ public class MapUpdateProcessor
     private static PixelOwners ConvertGuildToPixelOwners(GuildName? guildName)
     {
         bool success = Enum.TryParse(guildName.ToString(), false, out PixelOwners result);
-        if (success)
-        {
-            return result;
-        }
-        else
-        {
-            return PixelOwners.Nobody;
-        }
+        return success ? result : PixelOwners.Nobody;
     }
 
     private bool IsInsideMap(Coordinate coordinate)
@@ -240,7 +236,7 @@ public class MapUpdateProcessor
         }
 
         IncrementalMapUpdateResponse incrementalResponse = new();
-        foreach (KeyValuePair<Coordinate, IncrementalMapUpdateResponse.Types.IncrementalMapUpdate> pixelChanges in _pixelWireChanges)
+        foreach (KeyValuePair<Coordinate, IncrementalMapUpdate> pixelChanges in _pixelWireChanges)
         {
             incrementalResponse.Updates.Add(pixelChanges.Value);
         }

@@ -9,7 +9,11 @@ using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Grpc.Services;
 
-public class IncrementalMapUpdateService(JwtService jwtService, IUserRepositoryService userRepositoryService, IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService) : MapUpdate.MapUpdateBase
+public class IncrementalMapUpdateService(
+        JwtService jwtService,
+        IUserRepositoryService userRepositoryService,
+        IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService
+    ) : MapUpdate.MapUpdateBase
 {
     private readonly JwtService _jwtService = jwtService;
     private readonly IUserRepositoryService _userRepositoryService = userRepositoryService;
