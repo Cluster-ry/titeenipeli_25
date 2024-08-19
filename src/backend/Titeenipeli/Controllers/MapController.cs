@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Enums;
+using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
@@ -19,15 +20,18 @@ namespace Titeenipeli.Controllers;
 public class MapController : ControllerBase
 {
     private const int BorderWidth = 1;
+
     private readonly GameOptions _gameOptions;
 
     private readonly IGameEventRepositoryService _gameEventRepositoryService;
     private readonly IMapRepositoryService _mapRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
 
+    private readonly JwtService _jwtService;
     private readonly RateLimitService _rateLimitService;
 
     public MapController(GameOptions gameOptions,
+                         JwtService jwtService,
                          RateLimitService rateLimitService,
                          IUserRepositoryService userRepositoryService,
                          IMapRepositoryService mapRepositoryService,
@@ -38,13 +42,20 @@ public class MapController : ControllerBase
         _userRepositoryService = userRepositoryService;
         _mapRepositoryService = mapRepositoryService;
         _gameEventRepositoryService = gameEventRepositoryService;
+        _jwtService = jwtService;
     }
 
     [HttpGet]
     public IActionResult GetPixels()
     {
-        // TODO: Remove temporary testing user
-        User? user = _userRepositoryService.GetByCode("test");
+        JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
+
+        if (jwtClaim == null)
+        {
+            return BadRequest();
+        }
+
+        User? user = _userRepositoryService.GetById(jwtClaim.Id);
 
         if (user == null)
         {
@@ -78,8 +89,14 @@ public class MapController : ControllerBase
     [HttpPost]
     public IActionResult PostPixels([FromBody] PostPixelsInput pixelsInput)
     {
-        // TODO: Remove temporary testing user
-        User? user = _userRepositoryService.GetByCode("test");
+        JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
+
+        if (jwtClaim == null)
+        {
+            return BadRequest();
+        }
+
+        User? user = _userRepositoryService.GetById(jwtClaim.Id);
 
         if (user == null)
         {
@@ -91,7 +108,6 @@ public class MapController : ControllerBase
             return new TooManyRequestsResult("Try again later", _rateLimitService.TimeBeforeNextPixel(user));
         }
 
-
         Coordinate globalCoordinate = new Coordinate
         {
             X = user.SpawnX + pixelsInput.X,
@@ -100,7 +116,14 @@ public class MapController : ControllerBase
 
         if (IsValidPlacement(globalCoordinate, user))
         {
-            return BadRequest();
+            ErrorResult error = new ErrorResult
+            {
+                Title = "Invalid pixel placement",
+                Code = 400,
+                Description = "Try another pixel"
+            };
+
+            return BadRequest(error);
         }
 
         Pixel? pixelToUpdate = _mapRepositoryService.GetByCoordinate(globalCoordinate);
@@ -114,7 +137,14 @@ public class MapController : ControllerBase
             pixelToUpdate.User.SpawnX == globalCoordinate.X &&
             pixelToUpdate.User.SpawnY == globalCoordinate.Y)
         {
-            return BadRequest();
+            ErrorResult error = new ErrorResult
+            {
+                Title = "Pixel is a spawn point",
+                Code = 400,
+                Description = "Spawn pixels cannot be captured"
+            };
+
+            return BadRequest(error);
         }
 
 
@@ -171,8 +201,7 @@ public class MapController : ControllerBase
             PixelModel mapPixel = new PixelModel
             {
                 Type = PixelType.Normal,
-                Owner = (GuildName?)pixel.User?.Guild?.Color,
-                // TODO: Verify owning status of pixel, this can be done when we get user information from JWT
+                Owner = pixel.User?.Guild?.Name,
                 OwnPixel = pixel.User == user
             };
 

@@ -10,3 +10,13 @@ body {
   text-align: center;
   box-sizing: border-box;
 }
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  /* dvh to account for mobile browser navigation bar */
+  /* https://stackoverflow.com/a/72245072 */
+  height: 100dvh;
+  width: 100vw;
+  box-sizing: border-box;
+}

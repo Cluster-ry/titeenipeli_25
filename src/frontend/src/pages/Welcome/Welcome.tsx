@@ -4,14 +4,7 @@ import { GreetingContainer } from "./GreetingContainer";
 
 export const Welcome = () => {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100vh",
-        width: "100vw",
-      }}
-    >
+    <>
       <VerticalHalfContainer>
         <LogoContainer />
       </VerticalHalfContainer>
@@ -28,7 +21,7 @@ export const Welcome = () => {
         </div>
       </VerticalHalfContainer>
       AppVersion
-    </div>
+    </>
   );
 };
 
