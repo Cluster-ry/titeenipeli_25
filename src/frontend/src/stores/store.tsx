@@ -1,24 +1,28 @@
 import { create } from "zustand";
 import { Pixel } from "../models/Pixel";
 import { PlayerCoordinates } from "../models/PlayerCoordinates";
+import { Guild } from "../components/gameMap/guild/Guild";
+import { mapConfig } from "../components/gameMap/MapConfig";
+
 
 // The amount of rows and columns in the map. These can be
 // changed to alter the map size.
-const ROW_COUNT = 3;
-const COLUMN_COUNT = 3;
 
 interface Map {
   playerSpawn: PlayerCoordinates;
+  playerGuild: Guild;
   pixels: Pixel[][];
   mapSet: boolean;
 
   setPixels: () => void;
+  setPlayerGuild: (guild: number) => void; 
   updatePlayerPosition: (x: number, y: number) => void;
-  conquerPixel: (newOwner: string, newOwnPixel: boolean) => void;
+  conquerPixel: (newOwner: number, newOwnPixel: boolean) => void;
 }
 
 const usePixelStore = create<Map>((set) => ({
   playerSpawn: { x: 0, y: 0 }, // Subject to change
+  playerGuild: 2,   // Cluster as default for TESTING
   pixels: [[]],
   mapSet: false,
 
@@ -40,17 +44,17 @@ const usePixelStore = create<Map>((set) => ({
 
       // Creating the rows for the 2D array
       // -1 is in the middle due to the 2D array being initialized with 1 row.
-      for (let y = 0; y < ROW_COUNT - 1; y++) {
+      for (let y = 0; y < mapConfig.MapHeight - 1; y++) {
         pixels.push([]);
       }
 
       // Creating a the specified amount of pixels for each row, with each
       // containing the default values.
       pixels.forEach((pixelRow) => {
-        for (let x = 0; x < COLUMN_COUNT; x++) {
+        for (let x = 0; x < mapConfig.MapWidth; x++) {
           pixelRow.push({
             type: "empty",
-            owner: "",
+            owner: Math.round(Math.random() * 8) as Guild,
             ownPixel: false,
           });
         }
@@ -58,6 +62,12 @@ const usePixelStore = create<Map>((set) => ({
 
       return { ...state, pixels: pixels, mapSet: true };
     }),
+
+    setPlayerGuild: (guild: number) =>
+      set((state) => {
+
+        return {...state, playerGuild: guild}
+      }),
 
   /**
    * Updating the coordinates of the client/player
@@ -79,7 +89,7 @@ const usePixelStore = create<Map>((set) => ({
    *
    * @param {boolean} newOwnPixel The new ownership status
    */
-  conquerPixel: (newOwner: string, newOwnPixel: boolean) =>
+  conquerPixel: (newOwner: number, newOwnPixel: boolean) =>
     set((state) => {
       const pixels = [...state.pixels];
       const { x, y } = state.playerSpawn;
