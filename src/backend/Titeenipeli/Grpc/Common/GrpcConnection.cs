@@ -39,6 +39,6 @@ public class GrpcConnection<TResponseStream> : IGrpcConnection<TResponseStream>
 
     public void Dispose()
     {
-        ResponseStreamQueue.Writer.TryComplete(null);
+        ResponseStreamQueue.Writer.TryComplete();
     }
 }

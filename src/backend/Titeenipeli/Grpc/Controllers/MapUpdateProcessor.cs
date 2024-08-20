@@ -125,11 +125,6 @@ public class MapUpdateProcessor
         }
     }
 
-    /// <summary>
-    /// Computes player visibility losses when loosing pixel.
-    /// Visibility for nearby pixels is lost, if visibility
-    /// is not supported by other nearby pixels.
-    /// </summary>
     private void ComputeSurroundingPixelVisibility(GrpcMapChangeInput change)
     {
         LoopNearbyPixelsInsideFogOfWar(

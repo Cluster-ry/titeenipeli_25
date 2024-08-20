@@ -9,9 +9,9 @@ using static GrpcGeneratedServices.IncrementalMapUpdateResponse.Types;
 
 namespace Titeenipeli.Tests.Grpc;
 
-internal static class MapUtils
+public static class MapUtils
 {
-    internal static Dictionary<Coordinate, GrpcChangePixel> MatrixOfUsersToPixels(int[,] map, List<User> users)
+    public static Dictionary<Coordinate, GrpcChangePixel> MatrixOfUsersToPixels(int[,] map, List<User> users)
     {
         int mapWidth = map.GetUpperBound(0);
         int mapHeight = map.GetUpperBound(1);
@@ -38,7 +38,7 @@ internal static class MapUtils
         return pixels;
     }
 
-    internal static int[,] GrpcUpdatesToUserMap(RepeatedField<IncrementalMapUpdateResponse.Types.IncrementalMapUpdate> updates, GameOptions gameOptions)
+    public static int[,] GrpcUpdatesToUserMap(RepeatedField<IncrementalMapUpdateResponse.Types.IncrementalMapUpdate> updates, GameOptions gameOptions)
     {
         int fogOfWarDistance = gameOptions.FogOfWarDistance;
         int padding = fogOfWarDistance * 2;

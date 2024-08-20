@@ -10,13 +10,13 @@ namespace Titeenipeli.Grpc.Services;
 
 public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
 {
-    private const int _maxChannelSize = 100;
+    private const int MaxChannelSize = 100;
     private readonly ConcurrentDictionary<int, ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>> _connections = new();
 
     private readonly ILogger<IncrementalMapUpdateService> _logger;
     private readonly GameOptions _gameOptions;
 
-    private readonly Channel<GrpcMapChangesInput> _mapChangeQueue = Channel.CreateBounded<GrpcMapChangesInput>(_maxChannelSize);
+    private readonly Channel<GrpcMapChangesInput> _mapChangeQueue = Channel.CreateBounded<GrpcMapChangesInput>(MaxChannelSize);
 
     public IncrementalMapUpdateCoreService(ILogger<IncrementalMapUpdateService> logger, GameOptions gameOptions)
     {

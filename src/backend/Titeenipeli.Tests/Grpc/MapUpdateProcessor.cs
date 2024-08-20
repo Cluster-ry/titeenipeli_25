@@ -21,10 +21,15 @@ namespace Titeenipeli.Tests.Grpc;
 [TestSubject(typeof(MapUpdateProcessor))]
 public class MapUpdateProcessorTest
 {
+    // Empty pixel.
     public const int Emp = 0;
+    // Pixel owned by current user.
     public const int Own = 1;
+    // Pixel owned by other user.
     public const int Oth = 2;
+    // No pixel data send. Available only on output.
     public const int Nop = 3;
+    // Pixel reprsenting border. Available only on output.
     public const int Bor = 4;
 
     private const int Width = 10;
@@ -36,18 +41,18 @@ public class MapUpdateProcessorTest
     private IIncrementalMapUpdateCoreService _incrementalMapUpdateCoreService;
     private GameOptions _gameOptions;
 
-    private static readonly Guild _ownGuild = new()
+    private static readonly Guild OwnGuild = new()
     {
         Name = Enums.GuildName.Cluster
     };
-    private static readonly Guild _otherGuild = new()
+    private static readonly Guild OtherGuild = new()
     {
         Name = Enums.GuildName.Tietokilta
     };
-    private static readonly User _currentUser = new()
+    private static readonly User CurrentUser = new()
     {
         Id = 1,
-        Guild = _ownGuild,
+        Guild = OwnGuild,
         Code = "",
         SpawnX = 0,
         SpawnY = 0,
@@ -62,7 +67,7 @@ public class MapUpdateProcessorTest
     private static readonly User _otherUser = new()
     {
         Id = 2,
-        Guild = _otherGuild,
+        Guild = OtherGuild,
         Code = "",
         SpawnX = 0,
         SpawnY = 0,
@@ -75,7 +80,7 @@ public class MapUpdateProcessorTest
         Hash = ""
     };
     private static readonly List<User> _users = new() {
-        _currentUser,
+        CurrentUser,
         _otherUser
     };
 
@@ -85,7 +90,7 @@ public class MapUpdateProcessorTest
         _connections = [];
         _connection = new GrpcConnectionMock<IncrementalMapUpdateResponse>
         {
-            User = _currentUser
+            User = CurrentUser
         };
         _connections.TryAdd(1, _connection);
         _gameOptions = new GameOptions()
@@ -171,7 +176,7 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
                 new List<GrpcMapChangeInput>() {
-                    new GrpcMapChangeInput(new Coordinate() {X = 5, Y = 5}, null, _currentUser)
+                    new GrpcMapChangeInput(new Coordinate() {X = 5, Y = 5}, null, CurrentUser)
                 },
                 new[,]
                 {
@@ -205,7 +210,7 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
                 new List<GrpcMapChangeInput>() {
-                    new GrpcMapChangeInput(new Coordinate() {X = 5, Y = 5}, _currentUser, _otherUser)
+                    new GrpcMapChangeInput(new Coordinate() {X = 5, Y = 5}, CurrentUser, _otherUser)
                 },
                 new[,]
                 {
@@ -297,7 +302,7 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
                 new List<GrpcMapChangeInput>() {
-                    new GrpcMapChangeInput(new Coordinate() {X = 5, Y = 5}, _currentUser, _otherUser)
+                    new GrpcMapChangeInput(new Coordinate() {X = 5, Y = 5}, CurrentUser, _otherUser)
                 },
                 new[,]
                 {
@@ -331,7 +336,7 @@ public class MapUpdateProcessorTest
                     { Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth },
                 },
                 new List<GrpcMapChangeInput>() {
-                    new GrpcMapChangeInput(new Coordinate() {X = 0, Y = 0}, null, _currentUser)
+                    new GrpcMapChangeInput(new Coordinate() {X = 0, Y = 0}, null, CurrentUser)
                 },
                 new[,]
                 {
@@ -365,7 +370,7 @@ public class MapUpdateProcessorTest
                     { Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth },
                 },
                 new List<GrpcMapChangeInput>() {
-                    new GrpcMapChangeInput(new Coordinate() {X = 0, Y = 0}, _currentUser, _otherUser)
+                    new GrpcMapChangeInput(new Coordinate() {X = 0, Y = 0}, CurrentUser, _otherUser)
                 },
                 new[,]
                 {
@@ -399,8 +404,8 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
                 new List<GrpcMapChangeInput>() {
-                    new GrpcMapChangeInput(new Coordinate() {X = 1, Y = 1}, _currentUser, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate() {X = 2, Y = 1}, _otherUser, _currentUser),
+                    new GrpcMapChangeInput(new Coordinate() {X = 1, Y = 1}, CurrentUser, _otherUser),
+                    new GrpcMapChangeInput(new Coordinate() {X = 2, Y = 1}, _otherUser, CurrentUser),
                     new GrpcMapChangeInput(new Coordinate() {X = 1, Y = 2}, null, _otherUser),
                 },
                 new[,]
