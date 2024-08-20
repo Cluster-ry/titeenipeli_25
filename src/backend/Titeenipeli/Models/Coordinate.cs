@@ -12,12 +12,19 @@ public struct Coordinate
         return new Coordinate { X = a.X + b.X, Y = a.Y + b.Y };
     }
 
-    public Coordinate ToSpawnRelativeCoordinate(User user)
+    public Coordinate ToSpawnRelativeCoordinate(User? user)
     {
-        return new Coordinate()
+        if (user == null)
         {
-            X = X - user.SpawnX,
-            Y = Y - user.SpawnY
-        };
+            return this;
+        }
+        else
+        {
+            return new Coordinate()
+            {
+                X = X - user.SpawnX,
+                Y = Y - user.SpawnY
+            };
+        }
     }
 }

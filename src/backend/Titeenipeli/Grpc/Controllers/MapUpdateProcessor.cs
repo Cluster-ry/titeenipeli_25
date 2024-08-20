@@ -16,7 +16,7 @@ public class MapUpdateProcessor
     private readonly IIncrementalMapUpdateCoreService _incrementalMapUpdateCoreService;
 
     private readonly GrpcMapChangesInput _mapChangesInput;
-    private readonly User _user;
+    private readonly User? _user;
     private readonly ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _grpcConnections;
     private readonly GameOptions _gameOptions;
 
@@ -43,6 +43,8 @@ public class MapUpdateProcessor
 
     public async Task Process()
     {
+        // User can be null if user does not have any active connections.
+        // Must be checked here to prevent potential unnecessary calculations.
         if (_user == null)
         {
             return;
@@ -69,7 +71,7 @@ public class MapUpdateProcessor
     private void ComputeVisibilityMap()
     {
         IEnumerable<KeyValuePair<Coordinate, GrpcChangePixel>> pixelsOwnedByPlayer =
-            _mapChangesInput.NewPixels.Where((pixel) => pixel.Value.User?.Id == _user.Id);
+            _mapChangesInput.NewPixels.Where((pixel) => pixel.Value.User?.Id == _user?.Id);
         foreach (KeyValuePair<Coordinate, GrpcChangePixel> pixelOwnedByPlayer in pixelsOwnedByPlayer)
         {
             LoopNearbyPixelsInsideFogOfWar(
