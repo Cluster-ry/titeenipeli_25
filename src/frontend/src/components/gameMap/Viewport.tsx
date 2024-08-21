@@ -50,11 +50,6 @@ const PixiComponentViewport = PixiComponent("Viewport", {
 
 const Viewport = (props: ViewportProps) => {
   const app = useApp();
-  /** 
-  (globalThis as any).__PIXI_APP__ = app;
-  (globalThis as any).__PIXI_STAGE__ = app.stage;
-  (globalThis as any).__PIXI_RENDERER__ = app.renderer;
-  */
   return <PixiComponentViewport app={app} {...props} />;
 };
 
