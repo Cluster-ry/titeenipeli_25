@@ -41,6 +41,7 @@ function AppRouter() {
           }
         />
         <Route path="/map" element={<GameMap />} />
+
         <Route path="/test" element={<ApiTestClient />} />
       </Routes>
     </Router>

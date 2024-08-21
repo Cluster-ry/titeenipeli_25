@@ -1,73 +1,75 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
-import usePixelStore from "../../stores/store";
-import { Pixel } from "../../models/Pixel";
 import { Guild, guildColor } from "./guild/Guild";
 
 import { mapConfig } from "./MapConfig";
 
-const MaxWidth = mapConfig.MapWidth * mapConfig.PixelSize;
-const MaxHeight = mapConfig.MapHeight * mapConfig.PixelSize;
+import { PixelMap } from "../../models/PixelMap";
 
 const defaultGuild = 0;   // For testing
 
-export default function GameMap() {
-  // Local state for the elements
-  const [mapElements, setMapElements] = useState<JSX.Element[][]>();
 
-  // Global state for the data
-  const { playerSpawn, pixels, playerGuild, setPixels, setPlayerGuild, updatePlayerPosition, conquerPixel } =
-    usePixelStore();
+/**
+ * @component GameMap
+ * 
+ * Wraps up all the processes for fetching data from API for map creation.
+ * Processes the data in a quadtree data structure in order to present 
+ * a scalable and optimized map to guarantee a good experience for the 
+ * client. 
+ */
+const GameMap = () => {
 
-  /**
-   * Filling the 2D array with default status pixels
-   */
-  useEffect(() => {
-    setPixels();
-  }, [setPixels]);
-
-  /**
-   * Using the previously filled 2D Pixel array to create a map
-   * 
-   * @note Currently sets the player's guild as well.
-   */
-  useEffect(() => {
-    generateMap();
-    setPlayerGuild(defaultGuild);
-  }, [pixels, playerSpawn]);
-
-  const generateMap = () => {
-    const mapElems: JSX.Element[][] = pixels.map((row: Pixel[], y: number) =>
-      row.map((pixel: Pixel, x: number) => (
-        <Rectangle
-          key={x * 1000 + y}
-          x={x * mapConfig.PixelSize}
-          y={y * mapConfig.PixelSize}
+  
+  const generatePixels = () => {
+    const pixels: PixelMap = new Map();
+    for (let y = 0; y < mapConfig.MapHeight; y++) {
+      for (let x = 0; x < mapConfig.MapWidth; x++) {
+        const randomGuild: Guild = Math.round(Math.random() * 8);
+        pixels.set({ x, y }, randomGuild);
+      }
+    }
+    return pixels;
+  }
+  
+  const [pixelMap, setPixelMap] = useState(generatePixels());
+  
+  const pixelElements = useMemo(() => {
+    const pixelElements = [];  
+    for (const [coordinate, guild] of pixelMap) {
+      const rectangleX = coordinate.x * mapConfig.PixelSize;
+      const rectangleY = coordinate.y * mapConfig.PixelSize;
+      const color = guildColor(guild);
+  
+      pixelElements.push(
+        <Rectangle 
+          key={coordinate.x * 1000 + coordinate.y}
+          x={rectangleX}
+          y={rectangleY}
           width={mapConfig.PixelSize}
           height={mapConfig.PixelSize}
-          color={guildColor(pixel.owner as Guild)}
-          onClick={movePlayerAndConquer}
+          color={color}
+          onClick={conquer}
         />
-      ))
-    );
+      )
+    }
+    return pixelElements;
+  }, [pixelMap])
 
-    setMapElements(mapElems);
-  };
 
-  function movePlayerAndConquer(event: {
+  function conquer(event: {
     x: number;
     y: number;
-    color: number;
   }) {
-    updatePlayerPosition(event.x / mapConfig.PixelSize, event.y / mapConfig.PixelSize);
-    if (!pixels[event.x / mapConfig.PixelSize][event.y / mapConfig.PixelSize].ownPixel) {
-      conquerPixel(
-        playerGuild,
-        !pixels[event.x / mapConfig.PixelSize][event.y / mapConfig.PixelSize].ownPixel
-      );
+    const { x, y } = event;
+    const coordinate = { x, y };
+    const currentGuild = pixelMap.get(coordinate);  
+    console.log(pixelElements.length)
+    if (currentGuild !== defaultGuild) {
+      pixelMap.set(coordinate, defaultGuild);
+      setPixelMap(pixelMap)
     }
   }
 
@@ -81,12 +83,14 @@ export default function GameMap() {
         <Viewport
           width={window.innerWidth}
           height={window.innerHeight}
-          maxWidth={MaxWidth}
-          maxHeight={MaxHeight}
+          maxWidth={mapConfig.MapWidth * mapConfig.PixelSize}
+          maxHeight={mapConfig.MapHeight * mapConfig.PixelSize}
         >
-          <Container>{mapElements}</Container>
+          <Container>{pixelElements}</Container>
         </Viewport>
       </Stage>
     </>
   );
 }
+
+export default GameMap;
