@@ -8,8 +8,9 @@ import { Guild, guildColor } from "./guild/Guild";
 import { mapConfig } from "./MapConfig";
 
 import { PixelMap } from "../../models/PixelMap";
+import { Coordinate } from "../../models/Coordinate";
 
-const defaultGuild = 0;   // For testing
+const defaultGuild = 6;   // For testing
 
 
 /**
@@ -22,7 +23,7 @@ const defaultGuild = 0;   // For testing
  */
 const GameMap = () => {
 
-  
+  // Generates an array of pixel elements
   const generatePixels = () => {
     const pixels: PixelMap = new Map();
     for (let y = 0; y < mapConfig.MapHeight; y++) {
@@ -63,14 +64,18 @@ const GameMap = () => {
     x: number;
     y: number;
   }) {
-    const { x, y } = event;
-    const coordinate = { x, y };
-    const currentGuild = pixelMap.get(coordinate);  
-    console.log(pixelElements.length)
-    if (currentGuild !== defaultGuild) {
-      pixelMap.set(coordinate, defaultGuild);
-      setPixelMap(pixelMap)
+    const x = event.x/32;
+    const y = event.y/32;
+  
+    for (const [key] of pixelMap) {
+      if (key.x === x && key.y === y) {
+        console.log(pixelMap.get(key))
+        pixelMap.set(key, defaultGuild);
+        console.log(pixelMap.get(key))
+        break;
+      }
     }
+    setPixelMap(pixelMap)
   }
 
   return (
