@@ -64,18 +64,19 @@ const GameMap = () => {
     x: number;
     y: number;
   }) {
-    const x = event.x/32;
-    const y = event.y/32;
+    const x = event.x / 32;
+    const y = event.y / 32;
   
+    const newPixelMap = new Map(pixelMap);
     for (const [key] of pixelMap) {
       if (key.x === x && key.y === y) {
-        console.log(pixelMap.get(key))
-        pixelMap.set(key, defaultGuild);
-        console.log(pixelMap.get(key))
+        console.log(pixelMap.get(key));
+        newPixelMap.set(key, defaultGuild);
+        console.log(newPixelMap.get(key));
         break;
       }
     }
-    setPixelMap(pixelMap)
+    setPixelMap(newPixelMap);
   }
 
   return (
