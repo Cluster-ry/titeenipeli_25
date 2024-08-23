@@ -60,6 +60,13 @@ const GameMap = () => {
   }, [pixelMap])
 
 
+  /**
+   * Executes when the client conquers a pixel for their guild.
+   * Changes the integer value representing a guild to the one
+   * associated with the client's own guild.
+   * 
+   * @note Upon change, the map is automatically refreshed. 
+   */
   function conquer(event: {
     x: number;
     y: number;
@@ -68,11 +75,16 @@ const GameMap = () => {
     const y = event.y / 32;
   
     const newPixelMap = new Map(pixelMap);
-    for (const [key] of pixelMap) {
+    for (const [key, value] of pixelMap) {
       if (key.x === x && key.y === y) {
-        console.log(pixelMap.get(key));
+
+        // Returning if the pixel is owned already by client guild
+        if (value === defaultGuild) {
+          return;
+        }
+
+        // Conquering the pixel
         newPixelMap.set(key, defaultGuild);
-        console.log(newPixelMap.get(key));
         break;
       }
     }
