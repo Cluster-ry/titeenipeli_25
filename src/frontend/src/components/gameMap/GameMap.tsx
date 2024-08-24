@@ -9,7 +9,7 @@ import { mapConfig } from "./MapConfig";
 
 import { PixelMap } from "../../models/PixelMap";
 import { Coordinate } from "../../models/Coordinate";
-
+import Fov from "./Fov";
 const defaultGuild = 6;   // For testing
 
 
@@ -107,6 +107,8 @@ const GameMap = () => {
           <Container>{pixelElements}</Container>
         </Viewport>
       </Stage>
+
+      <Fov />
     </>
   );
 }
