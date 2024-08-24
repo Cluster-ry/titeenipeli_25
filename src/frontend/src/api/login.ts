@@ -3,7 +3,7 @@ import { PostLoginInput } from "../models/Post/PostLoginInput";
 import { ClientApiError } from "../models/ClientApiError";
 import { ClientApiOk } from "../models/ClientApiOk";
 
-const LOGIN_URL = "http://localhost:8080/login";
+const LOGIN_URL = "api/v1/users";
 
 
 /**

@@ -7,7 +7,6 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["backend/Titeenipeli/Titeenipeli.csproj", "backend/Titeenipeli/"]
-COPY ["backend/Titeenipeli.gRPC/Titeenipeli.gRPC.csproj", "backend/Titeenipeli.gRPC/"]
 COPY ["protobuf/", "protobuf/"]
 RUN dotnet restore "backend/Titeenipeli/Titeenipeli.csproj"
 COPY . .
