@@ -32,7 +32,6 @@ public static class Requests
                 throw new Exception("Unable to get cookies.");
             }
 
-            SetCookies(cookies);
         }
         catch (Exception e)
         {
@@ -41,22 +40,9 @@ public static class Requests
         }
     }
 
-    private static void SetCookies(string cookies)
+    public static HttpRequestHeaders GetHeaders()
     {
-        Client.DefaultRequestHeaders.Clear();
-        string[] cookieList = cookies.Split("; "); // this is ugly I know, couldn't find a better way to parse
-        foreach (string cookie in cookieList)
-        {
-            string[] cookieSplit = cookie.Split('='); // again, I know
-            if (!cookieSplit[0].Equals("X-Authorization")) continue;
-            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cookieSplit[1]);
-            return;
-        }
-    }
-
-    public static AuthenticationHeaderValue? GetCookies()
-    {
-        return Client.DefaultRequestHeaders.Authorization;
+        return Client.DefaultRequestHeaders;
     }
 
     public async static Task SetGuildRequestAsync(string ip, string json)
@@ -85,7 +71,6 @@ public static class Requests
                 throw new Exception("Unable to get cookies.");
             }
 
-            SetCookies(cookies);
         }
         catch (Exception e)
         {

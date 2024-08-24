@@ -18,14 +18,15 @@ public class Handlers(TelegramBotClient bot)
     private readonly static Dictionary<guildEnum, string> GuildDict = new Dictionary<guildEnum, string>
     {
         { guildEnum.Cluster, "Cluster (lappeen Ranta)" },
-        { guildEnum.Otit, "Otit (Oulu)" },
+        { guildEnum.OulunTietoteekkarit, "Otit (Oulu)" },
         { guildEnum.Digit, "Digit (Turku)" },
         { guildEnum.Date, "Date (Turku)" },
-        { guildEnum.Tik, "Tik (Otaniemi)" },
+        { guildEnum.Tietokilta, "Tik (Otaniemi)" },
         { guildEnum.Algo, "Algo (Jyväskylä)" },
         { guildEnum.Tutti, "Tutti (Vaasa)" },
         { guildEnum.Sosa, "Sosa (Lahti)" },
-        { guildEnum.TiTe, "TiTe (Tampere)" }
+        { guildEnum.TietoTeekkarikilta, "TiTe (Tampere)" },
+        { guildEnum.Datateknologerna, "Datateknologerna (Åbo)"}
     };
 
     // Pre-assign menu text
@@ -39,14 +40,15 @@ public class Handlers(TelegramBotClient bot)
 
     // pre-assigned Keyboard buttons
     private readonly static KeyboardButton ClusterButton = new KeyboardButton(GuildDict[guildEnum.Cluster]);
-    private readonly static KeyboardButton OtitButton = new KeyboardButton(GuildDict[guildEnum.Otit]);
+    private readonly static KeyboardButton OtitButton = new KeyboardButton(GuildDict[guildEnum.OulunTietoteekkarit]);
     private readonly static KeyboardButton DigitButton = new KeyboardButton(GuildDict[guildEnum.Digit]);
     private readonly static KeyboardButton DateButton = new KeyboardButton(GuildDict[guildEnum.Date]);
-    private readonly static KeyboardButton TikButton = new KeyboardButton(GuildDict[guildEnum.Tik]);
+    private readonly static KeyboardButton TikButton = new KeyboardButton(GuildDict[guildEnum.Tietokilta]);
     private readonly static KeyboardButton AlgoButton = new KeyboardButton(GuildDict[guildEnum.Algo]);
     private readonly static KeyboardButton TuttiButton = new KeyboardButton(GuildDict[guildEnum.Tutti]);
     private readonly static KeyboardButton SosaButton = new KeyboardButton(GuildDict[guildEnum.Sosa]);
-    private readonly static KeyboardButton TiTeButton = new KeyboardButton(GuildDict[guildEnum.TiTe]);
+    private readonly static KeyboardButton TiTeButton = new KeyboardButton(GuildDict[guildEnum.TietoTeekkarikilta]);
+    private readonly static KeyboardButton ÅboButton = new KeyboardButton(GuildDict[guildEnum.Datateknologerna]);
 
     // Build keyboards
     private readonly static InlineKeyboardMarkup TosMenuMarkup =
@@ -54,7 +56,7 @@ public class Handlers(TelegramBotClient bot)
 
     private readonly static ReplyKeyboardMarkup GuildKeyboard = new ReplyKeyboardMarkup(
     [ // This layout matches with how the keyboard is shown to the user
-        [ClusterButton],
+        [ClusterButton, ÅboButton],
         [OtitButton, DigitButton],
         [DateButton, TikButton],
         [AlgoButton, TuttiButton],
@@ -68,12 +70,12 @@ public class Handlers(TelegramBotClient bot)
         {
             // A message was received
             case UpdateType.Message:
-                await HandleMessage(update.Message!);
+                await HandleMessage(update.Message);
                 break;
 
             // A button was pressed
             case UpdateType.CallbackQuery:
-                await HandleButton(update.CallbackQuery!);
+                await HandleButton(update.CallbackQuery);
                 break;
         }
     }
@@ -335,12 +337,12 @@ public class Handlers(TelegramBotClient bot)
             return;
         }
 
-        AuthenticationHeaderValue? cookies = Requests.GetCookies();
-        Console.WriteLine($"token: {cookies}");
+        HttpRequestHeaders headers = Requests.GetHeaders();
+        Console.WriteLine($"headers: {headers}");
         await bot.SendTextMessageAsync(
             user.Id,
             $"Open the following link to enter the game:\n\n" +
-            $"{_url}?Authorization={cookies}" //TODO: Proper url
+            $"{_url}?Authorization={headers}" //TODO: Proper url
         );
     }
 }
