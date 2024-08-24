@@ -12,6 +12,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Titeenipeli.Context;
+using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
@@ -158,6 +159,7 @@ public static class Program
                .AddPolicy("MustHaveGuild", policy => policy.Requirements.Add(new MustHaveGuildRequirement()));
 
         builder.Services.AddSingleton<IAuthorizationHandler, MustHaveGuildHandler>();
+        builder.Services.AddSingleton<IMapUpdaterWrapper, MapUpdaterWrapper>();
 
         builder.Services.AddControllers()
                .AddNewtonsoftJson(options =>

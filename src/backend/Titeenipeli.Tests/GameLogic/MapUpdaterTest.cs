@@ -4,11 +4,12 @@ using NUnit.Framework;
 using Titeenipeli.Enums;
 using Titeenipeli.GameLogic;
 using FluentAssertions;
+using Titeenipeli.Models;
 
 namespace Titeenipeli.Tests.GameLogic;
 
 using GuildPixel = (GuildName? guild, bool isSpawn);
-using NewPixel = (GuildName guild, (int x, int y) coordinates);
+using NewPixel = (GuildName guild, Coordinate coordinates);
 
 [TestFixture]
 public class MapUpdaterTest
@@ -59,9 +60,9 @@ public class MapUpdaterTest
         {
             for (var y = 0; y < resultingMap.GetUpperBound(0); y++)
             {
-                map.Pixels[y + 1, x + 1].Owner.Should().Be(resultingMap[y, x].guild,
+                map.Pixels[x + 1, y + 1].Owner.Should().Be(resultingMap[y, x].guild,
                     $"Expected pixel in [{x}, {y}] to be owned by {resultingMap[y, x].guild}, " +
-                    $"but was owned by {map.Pixels[y + 1, x + 1].Owner}\n\n" +
+                    $"but was owned by {map.Pixels[x + 1, y + 1].Owner}\n\n" +
                     $"{MapUtils.MapAsColours(map)}");
             }
         }
@@ -83,7 +84,7 @@ public class MapUpdaterTest
                     { None, Clus, Clus, Clus, Algo, Algo, None, Clus, Clus, None, None },
                     { Clus, Clus, None, Clus, Clus, Clus, None, Clus, None, None, Clus }
                 },
-                new[] { (GuildName.Cluster, (7, 8)) },
+                new[] { (GuildName.Cluster, new Coordinate(7, 8)) },
                 new[,]
                 {
                     { None, CLUS, Clus, Clus, None, None, None, Clus, Clus, Clus, None },
@@ -103,7 +104,7 @@ public class MapUpdaterTest
                     { Clus, TiKi, Algo, None },
                     { Clus, Clus, Clus, Clus },
                 },
-                new[] { (GuildName.Cluster, (4, 3)) },
+                new[] { (GuildName.Cluster, new Coordinate(4, 3)) },
                 new[,]
                 {
                     { Clus, Clus, CLUS, Clus },
@@ -119,7 +120,7 @@ public class MapUpdaterTest
                     { Clus, Algo, Algo, None },
                     { Clus, Clus, Clus, Clus }
                 },
-                new[] { (GuildName.Cluster, (4, 3)) },
+                new[] { (GuildName.Cluster, new Coordinate(4, 3)) },
                 new[,]
                 {
                     { Clus, Clus, CLUS, Clus },
@@ -135,7 +136,7 @@ public class MapUpdaterTest
                     { None, CLUS, TiKi, None },
                     { TIKI, TiKi, TiKi, TiKi }
                 },
-                new[] { (GuildName.Cluster, (2, 4)) },
+                new[] { (GuildName.Cluster, new Coordinate(2, 4)) },
                 new[,]
                 {
                     { None, None, None, None },
@@ -159,125 +160,125 @@ public class MapUpdaterTest
                 },
                 new[]
                 {
-                    (GuildName.Cluster, (2, 1)),
-                    (GuildName.Tietokilta, (9, 10)),
-                    (GuildName.Algo, (1, 9)),
-                    (GuildName.Digit, (10, 2)),
+                    (GuildName.Cluster, new Coordinate(2, 1)),
+                    (GuildName.Tietokilta, new Coordinate(9, 10)),
+                    (GuildName.Algo, new Coordinate(1, 9)),
+                    (GuildName.Digit, new Coordinate(10, 2)),
 
-                    (GuildName.Cluster, (3, 1)),
-                    (GuildName.Tietokilta, (8, 10)),
-                    (GuildName.Algo, (1, 8)),
-                    (GuildName.Digit, (10, 3)),
+                    (GuildName.Cluster, new Coordinate(3, 1)),
+                    (GuildName.Tietokilta, new Coordinate(8, 10)),
+                    (GuildName.Algo, new Coordinate(1, 8)),
+                    (GuildName.Digit, new Coordinate(10, 3)),
 
-                    (GuildName.Cluster, (4, 1)),
-                    (GuildName.Tietokilta, (7, 10)),
-                    (GuildName.Algo, (2, 10)),
-                    (GuildName.Digit, (9, 3)),
+                    (GuildName.Cluster, new Coordinate(4, 1)),
+                    (GuildName.Tietokilta, new Coordinate(7, 10)),
+                    (GuildName.Algo, new Coordinate(2, 10)),
+                    (GuildName.Digit, new Coordinate(9, 3)),
 
-                    (GuildName.Cluster, (4, 2)),
-                    (GuildName.Tietokilta, (6, 10)),
-                    (GuildName.Algo, (2, 8)),
-                    (GuildName.Digit, (9, 1)),
+                    (GuildName.Cluster, new Coordinate(4, 2)),
+                    (GuildName.Tietokilta, new Coordinate(6, 10)),
+                    (GuildName.Algo, new Coordinate(2, 8)),
+                    (GuildName.Digit, new Coordinate(9, 1)),
 
-                    (GuildName.Cluster, (4, 3)),
-                    (GuildName.Tietokilta, (5, 10)),
-                    (GuildName.Algo, (3, 8)),
-                    (GuildName.Digit, (8, 1)),
+                    (GuildName.Cluster, new Coordinate(4, 3)),
+                    (GuildName.Tietokilta, new Coordinate(5, 10)),
+                    (GuildName.Algo, new Coordinate(3, 8)),
+                    (GuildName.Digit, new Coordinate(8, 1)),
 
-                    (GuildName.Cluster, (4, 4)),
-                    (GuildName.Tietokilta, (4, 10)),
-                    (GuildName.Algo, (3, 9)),
-                    (GuildName.Digit, (7, 1)),
+                    (GuildName.Cluster, new Coordinate(4, 4)),
+                    (GuildName.Tietokilta, new Coordinate(4, 10)),
+                    (GuildName.Algo, new Coordinate(3, 9)),
+                    (GuildName.Digit, new Coordinate(7, 1)),
 
-                    (GuildName.Cluster, (1, 2)),
-                    (GuildName.Tietokilta, (3, 10)),
-                    (GuildName.Algo, (4, 9)),
-                    (GuildName.Digit, (7, 2)),
+                    (GuildName.Cluster, new Coordinate(1, 2)),
+                    (GuildName.Tietokilta, new Coordinate(3, 10)),
+                    (GuildName.Algo, new Coordinate(4, 9)),
+                    (GuildName.Digit, new Coordinate(7, 2)),
 
-                    (GuildName.Cluster, (1, 3)),
-                    (GuildName.Tietokilta, (2, 10)),
-                    (GuildName.Algo, (4, 10)),
-                    (GuildName.Digit, (8, 3)),
+                    (GuildName.Cluster, new Coordinate(1, 3)),
+                    (GuildName.Tietokilta, new Coordinate(2, 10)),
+                    (GuildName.Algo, new Coordinate(4, 10)),
+                    (GuildName.Digit, new Coordinate(8, 3)),
 
-                    (GuildName.Cluster, (3, 4)),
-                    (GuildName.Tietokilta, (10, 9)),
-                    (GuildName.Algo, (5, 9)),
-                    (GuildName.Digit, (6, 1)),
+                    (GuildName.Cluster, new Coordinate(3, 4)),
+                    (GuildName.Tietokilta, new Coordinate(10, 9)),
+                    (GuildName.Algo, new Coordinate(5, 9)),
+                    (GuildName.Digit, new Coordinate(6, 1)),
 
-                    (GuildName.Cluster, (2, 4)),
-                    (GuildName.Tietokilta, (10, 8)),
-                    (GuildName.Algo, (6, 9)),
-                    (GuildName.Digit, (5, 1)),
+                    (GuildName.Cluster, new Coordinate(2, 4)),
+                    (GuildName.Tietokilta, new Coordinate(10, 8)),
+                    (GuildName.Algo, new Coordinate(6, 9)),
+                    (GuildName.Digit, new Coordinate(5, 1)),
 
-                    (GuildName.Cluster, (5, 2)),
-                    (GuildName.Tietokilta, (10, 7)),
-                    (GuildName.Algo, (7, 9)),
-                    (GuildName.Digit, (4, 1)),
+                    (GuildName.Cluster, new Coordinate(5, 2)),
+                    (GuildName.Tietokilta, new Coordinate(10, 7)),
+                    (GuildName.Algo, new Coordinate(7, 9)),
+                    (GuildName.Digit, new Coordinate(4, 1)),
 
-                    (GuildName.Cluster, (5, 1)),
-                    (GuildName.Tietokilta, (9, 7)),
-                    (GuildName.Algo, (7, 10)),
-                    (GuildName.Digit, (8, 4)),
+                    (GuildName.Cluster, new Coordinate(5, 1)),
+                    (GuildName.Tietokilta, new Coordinate(9, 7)),
+                    (GuildName.Algo, new Coordinate(7, 10)),
+                    (GuildName.Digit, new Coordinate(8, 4)),
 
-                    (GuildName.Cluster, (4, 5)),
-                    (GuildName.Tietokilta, (8, 7)),
-                    (GuildName.Algo, (1, 7)),
-                    (GuildName.Digit, (8, 5)),
+                    (GuildName.Cluster, new Coordinate(4, 5)),
+                    (GuildName.Tietokilta, new Coordinate(8, 7)),
+                    (GuildName.Algo, new Coordinate(1, 7)),
+                    (GuildName.Digit, new Coordinate(8, 5)),
 
-                    (GuildName.Cluster, (4, 6)),
-                    (GuildName.Tietokilta, (7, 7)),
-                    (GuildName.Algo, (1, 6)),
-                    (GuildName.Digit, (7, 5)),
+                    (GuildName.Cluster, new Coordinate(4, 6)),
+                    (GuildName.Tietokilta, new Coordinate(7, 7)),
+                    (GuildName.Algo, new Coordinate(1, 6)),
+                    (GuildName.Digit, new Coordinate(7, 5)),
 
-                    (GuildName.Cluster, (3, 6)),
-                    (GuildName.Tietokilta, (7, 8)),
-                    (GuildName.Algo, (2, 6)),
-                    (GuildName.Digit, (6, 5)),
+                    (GuildName.Cluster, new Coordinate(3, 6)),
+                    (GuildName.Tietokilta, new Coordinate(7, 8)),
+                    (GuildName.Algo, new Coordinate(2, 6)),
+                    (GuildName.Digit, new Coordinate(6, 5)),
 
-                    (GuildName.Cluster, (2, 5)),
-                    (GuildName.Tietokilta, (7, 9)),
-                    (GuildName.Algo, (3, 7)),
-                    (GuildName.Digit, (6, 4)),
+                    (GuildName.Cluster, new Coordinate(2, 5)),
+                    (GuildName.Tietokilta, new Coordinate(7, 9)),
+                    (GuildName.Algo, new Coordinate(3, 7)),
+                    (GuildName.Digit, new Coordinate(6, 4)),
 
-                    (GuildName.Cluster, (5, 6)),
-                    (GuildName.Tietokilta, (6, 7)),
-                    (GuildName.Algo, (2, 10)),
-                    (GuildName.Digit, (6, 3)),
+                    (GuildName.Cluster, new Coordinate(5, 6)),
+                    (GuildName.Tietokilta, new Coordinate(6, 7)),
+                    (GuildName.Algo, new Coordinate(2, 10)),
+                    (GuildName.Digit, new Coordinate(6, 3)),
 
-                    (GuildName.Cluster, (6, 6)),
-                    (GuildName.Tietokilta, (5, 7)),
-                    (GuildName.Algo, (5, 8)),
-                    (GuildName.Digit, (6, 2)),
+                    (GuildName.Cluster, new Coordinate(6, 6)),
+                    (GuildName.Tietokilta, new Coordinate(5, 7)),
+                    (GuildName.Algo, new Coordinate(5, 8)),
+                    (GuildName.Digit, new Coordinate(6, 2)),
 
-                    (GuildName.Cluster, (7, 6)),
-                    (GuildName.Tietokilta, (10, 6)),
-                    (GuildName.Algo, (4, 7)),
-                    (GuildName.Digit, (9, 5)),
+                    (GuildName.Cluster, new Coordinate(7, 6)),
+                    (GuildName.Tietokilta, new Coordinate(10, 6)),
+                    (GuildName.Algo, new Coordinate(4, 7)),
+                    (GuildName.Digit, new Coordinate(9, 5)),
 
-                    (GuildName.Cluster, (7, 5)),
-                    (GuildName.Tietokilta, (10, 5)),
-                    (GuildName.Algo, (3, 10)),
-                    (GuildName.Digit, (10, 4)),
+                    (GuildName.Cluster, new Coordinate(7, 5)),
+                    (GuildName.Tietokilta, new Coordinate(10, 5)),
+                    (GuildName.Algo, new Coordinate(3, 10)),
+                    (GuildName.Digit, new Coordinate(10, 4)),
 
-                    (GuildName.Cluster, (7, 4)),
-                    (GuildName.Tietokilta, (8, 6)),
-                    (GuildName.Algo, (1, 5)),
-                    (GuildName.Digit, (9, 6)),
+                    (GuildName.Cluster, new Coordinate(7, 4)),
+                    (GuildName.Tietokilta, new Coordinate(8, 6)),
+                    (GuildName.Algo, new Coordinate(1, 5)),
+                    (GuildName.Digit, new Coordinate(9, 6)),
 
-                    (GuildName.Cluster, (7, 3)),
-                    (GuildName.Tietokilta, (9, 5)),
-                    (GuildName.Algo, (1, 4)),
-                    (GuildName.Digit, (8, 6)),
+                    (GuildName.Cluster, new Coordinate(7, 3)),
+                    (GuildName.Tietokilta, new Coordinate(9, 5)),
+                    (GuildName.Algo, new Coordinate(1, 4)),
+                    (GuildName.Digit, new Coordinate(8, 6)),
 
-                    (GuildName.Cluster, (6, 2)),
-                    (GuildName.Tietokilta, (8, 5)),
-                    (GuildName.Algo, (6, 8)),
-                    (GuildName.Digit, (5, 1)),
+                    (GuildName.Cluster, new Coordinate(6, 2)),
+                    (GuildName.Tietokilta, new Coordinate(8, 5)),
+                    (GuildName.Algo, new Coordinate(6, 8)),
+                    (GuildName.Digit, new Coordinate(5, 1)),
 
-                    (GuildName.Cluster, (6, 1)),
-                    (GuildName.Tietokilta, (7, 6)),
-                    (GuildName.Algo, (6, 7)),
-                    (GuildName.Digit, (7, 3))
+                    (GuildName.Cluster, new Coordinate(6, 1)),
+                    (GuildName.Tietokilta, new Coordinate(7, 6)),
+                    (GuildName.Algo, new Coordinate(6, 7)),
+                    (GuildName.Digit, new Coordinate(7, 3))
                 },
                 new[,]
                 {
@@ -301,7 +302,7 @@ public class MapUpdaterTest
                     { None, None, None, None, None },
                     { ALGO, None, None, None, TIKI }
                 },
-                new[] { (GuildName.Tietokilta, (4, 5)) },
+                new[] { (GuildName.Tietokilta, new Coordinate(4, 5)) },
                 new[,]
                 {
                     { CLUS, Clus, None, None, DIGI },
@@ -319,7 +320,7 @@ public class MapUpdaterTest
                     { None, None, None, None, None },
                     { None, None, None, None, ALGO }
                 },
-                new[] { (GuildName.Algo, (4, 5)) },
+                new[] { (GuildName.Algo, new Coordinate(4, 5)) },
                 new[,]
                 {
                     { None, None, CLUS, None, None },

@@ -4,7 +4,7 @@ import { GetPixelsResult } from "../models/Get/GetPixelsResult";
 import { ClientApiError } from "../models/ClientApiError";
 import { ClientApiOk } from "../models/ClientApiOk";
 
-const PIXELS_URL = "http://localhost:8080/map/pixels";
+const PIXELS_URL = "api/v1/map/pixels";
 
 export async function getPixels(): Promise<AxiosResponse<GetPixelsResult> | ClientApiError> {
     try {
