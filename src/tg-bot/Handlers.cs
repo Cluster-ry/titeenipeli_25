@@ -11,9 +11,7 @@ namespace Titeenipeli_bot;
 public class Handlers(TelegramBotClient bot)
 {
     // Variables
-    private readonly string _url = "http://localhost:5129"; // how to get this for production?
-    private readonly List<UserData> _userList = new List<UserData>(); // TODO: Make this guy persistent?
-    private UserData? _currentUser;
+    private readonly string _url = "http://localhost:5129"; // TODO: get from IConfiguration
 
     private readonly static Dictionary<guildEnum, string> GuildDict = new Dictionary<guildEnum, string>
     {
@@ -30,9 +28,6 @@ public class Handlers(TelegramBotClient bot)
     };
 
     // Pre-assign menu text
-    private const string TosMenu =
-        "<b>Welcome to Titeenipeli-bot!</b>\n\nIn order to play this years Titeenipeli, you have to consent to us using your Telegram nickname. This can be seen by other players in the pixels you've placed";
-
     private const string GuildMenuText = "<b>Please choose your guild from the menu below.</b>";
 
     // Pre-assign button text
@@ -51,9 +46,6 @@ public class Handlers(TelegramBotClient bot)
     private readonly static KeyboardButton ÅboButton = new KeyboardButton(GuildDict[guildEnum.Datateknologerna]);
 
     // Build keyboards
-    private readonly static InlineKeyboardMarkup TosMenuMarkup =
-        new InlineKeyboardMarkup(InlineKeyboardButton.WithCallbackData(AcceptButton));
-
     private readonly static ReplyKeyboardMarkup GuildKeyboard = new ReplyKeyboardMarkup(
     [ // This layout matches with how the keyboard is shown to the user
         [ClusterButton, ÅboButton],
@@ -98,38 +90,22 @@ public class Handlers(TelegramBotClient bot)
         Console.WriteLine(
             $"[{DateTime.Now:dd-MM-yyyy HH:mm:ss}] User '{user.FirstName}' wrote '{text}'"
         );
-
-        _currentUser = _userList.Find(x => x.Id == user.Id);
-        if (_currentUser == null)
-        {
-            _currentUser = new UserData(user.Id);
-            _userList.Add(_currentUser);
-        }
-
+        
         // When we get a command, we react accordingly
         if (text.StartsWith('/'))
         {
             await HandleCommand(user, text);
+            return;
         }
-        else if (_currentUser.ChoosingGuild)
+        
+        if (GuildDict.ContainsValue(text))
         {
-            if (GuildDict.ContainsValue(text))
-            {
-                _currentUser.GuildChosen = GuildDict.FirstOrDefault(x => x.Value == text).Key;
-                await SendGuildData(user, (int)_currentUser.GuildChosen); // changed since api takes the guild as int
-                return;
-            }
-
-            await bot.SendTextMessageAsync(
-                user.Id,
-                "Unrecognized guild. Please select your guild by using the keyboard given."
-            );
+            guildEnum chosenGuild = GuildDict.FirstOrDefault(x => x.Value == text).Key;
+            await SendGuildData(user, (int) chosenGuild); // changed since api takes the guild as int
+            return;
         }
-        else
-        {
-            // Lastly, if the text has no meaning we tell user that we ain't chatGPT
-            await bot.SendTextMessageAsync(user.Id, "Sorry, but I'm no chatbot. Use /start.");
-        }
+        // Lastly, if the text has no meaning we tell user that we ain't chatGPT
+        await bot.SendTextMessageAsync(user.Id, "Sorry, but I'm no chatbot. Use /start.");
     }
 
     private async Task HandleCommand(User user, string command)
@@ -137,14 +113,11 @@ public class Handlers(TelegramBotClient bot)
         // Here you can find every command and the associated method for running it
         switch (command)
         {
-            case "/start":
-                await SendTosMenu(user);
-                break;
             case "/guild":
                 await SendGuildMenu(user);
                 break;
-            case "/game":
-                await SendGame(user);
+            case "/start" or "/game":
+                await HandleUser(user);
                 break;
         }
 
@@ -164,20 +137,14 @@ public class Handlers(TelegramBotClient bot)
             await bot.EditMessageTextAsync(
                 query.Message!.Chat.Id,
                 query.Message.MessageId,
-                "Thank you!\n\nYou are now being signed in!", // EXTRA:  better markup
+                "Thank you! Your guild has been set!",
                 ParseMode.Html,
                 replyMarkup: InlineKeyboardMarkup.Empty()
             );
-            // no need to accept it twice
-            if (_currentUser!.TosAccepted)
-            {
-                return;
-            }
 
-            _currentUser.TosAccepted = true;
             Thread.Sleep(1 * 1000);
 
-            await HandleUserSignup(query.From);
+            await HandleUser(query.From);
         }
         else
         {
@@ -186,38 +153,17 @@ public class Handlers(TelegramBotClient bot)
         }
     }
 
-    private async Task SendTosMenu(User user)
+    private async Task HandleUser(User user)
     {
-        // check if tos is already done, if so then skip
-        if (_currentUser!.TosAccepted)
-        {
-            await HandleUserSignup(user);
-            return;
-        }
-
-        await bot.SendTextMessageAsync(
-            user.Id,
-            TosMenu,
-            parseMode: ParseMode.Html,
-            replyMarkup: TosMenuMarkup
-        );
-    }
-
-    private async Task HandleUserSignup(User user)
-    {
-        // this prevents sequence breaks
-        if (_currentUser!.UserCreated)
-        {
-            await bot.SendTextMessageAsync(
-                user.Id,
-                "User already created!",
-                replyMarkup: new ReplyKeyboardRemove()
-            );
-            return;
-        }
-
         try
         {
+            // this message prob should be updated and not just spam more messages.
+            await bot.SendTextMessageAsync(
+                user.Id,
+                "Sending data to the game...",
+                replyMarkup: null
+            );
+            
             UserProfilePhotos userPhotos = await bot.GetUserProfilePhotosAsync(user.Id, 0, 1);
             PhotoSize dummy = userPhotos.Photos[0][0]; // with this you can only get the fileID
             // the download URL includes the token, which shouldn't be sent (at-least without encryption)
@@ -235,20 +181,26 @@ public class Handlers(TelegramBotClient bot)
             };
 
 
-            await Requests.CreateUserRequestAsync(_url, JsonConvert.SerializeObject(json));
+            int result = await Requests.CreateUserRequestAsync(_url, JsonConvert.SerializeObject(json));
+            
+            // if results is not a 0, a guild must be set
+            if (result == 0)
+            {
+                await SendGame(user);
+            }
+            else
+            {
+                // success message
+                await bot.SendTextMessageAsync(
+                    user.Id,
+                    "User created! Now choose your guild.",
+                    replyMarkup: null
+                );
 
-            _currentUser.UserCreated = true;
-
-            // success message
-            await bot.SendTextMessageAsync(
-                user.Id,
-                "User created! Now choose your guild.",
-                replyMarkup: null
-            );
-
-            // After a small-time window, jump straight to choosing your guild
-            Thread.Sleep(1000);
-            await SendGuildMenu(user);
+                // After a small-time window, jump straight to choosing your guild
+                Thread.Sleep(1000);
+                await SendGuildMenu(user);
+            }
         }
         catch
         {
@@ -262,26 +214,6 @@ public class Handlers(TelegramBotClient bot)
 
     private async Task SendGuildMenu(User user)
     {
-        // this prevents sequence breaks
-        if (!_currentUser!.UserCreated)
-        {
-            await bot.SendTextMessageAsync(
-                user.Id,
-                "User not signed in. Please proceed with user creation with /start."
-            );
-            return;
-        }
-
-        if (_currentUser.GuildSelected)
-        {
-            // NOTE: could print the chosen guild?
-            await bot.SendTextMessageAsync(user.Id, "Guild already chosen. Start the game with /game.");
-            return;
-        }
-
-        // Starts guild selection check
-        _currentUser.ChoosingGuild = true;
-
         GuildKeyboard.OneTimeKeyboard = true;
         // select guild message (with guild keyboard)
         await bot.SendTextMessageAsync(
@@ -301,11 +233,10 @@ public class Handlers(TelegramBotClient bot)
         try
         {
             await Requests.SetGuildRequestAsync(_url, JsonConvert.SerializeObject(guildJson));
-            _currentUser!.ChoosingGuild = false;
-            _currentUser.GuildSelected = true;
+            
             await bot.SendTextMessageAsync(
                 user.Id,
-                $"You selected the guild {_currentUser.GuildChosen.ToString()}! Now start the game with /game.",
+                $"You selected your guild! Now start the game with /game.",
                 replyMarkup: new ReplyKeyboardRemove()
             );
         }
@@ -321,28 +252,11 @@ public class Handlers(TelegramBotClient bot)
 
     private async Task SendGame(User user)
     {
-        // this prevents sequence breaks
-        if (!_currentUser!.UserCreated)
-        {
-            await bot.SendTextMessageAsync(
-                user.Id,
-                "User not signed in. Please proceed with user creation with /start."
-            );
-            return;
-        }
-
-        if (!_currentUser.GuildSelected)
-        {
-            await bot.SendTextMessageAsync(user.Id, "You haven't selected your guild yet. Use /guild.");
-            return;
-        }
-
-        HttpRequestHeaders headers = Requests.GetHeaders();
-        Console.WriteLine($"headers: {headers}");
+        AuthenticationHeaderValue? header = Requests.GetAuthHeader(); // replace this with proper user token
         await bot.SendTextMessageAsync(
             user.Id,
             $"Open the following link to enter the game:\n\n" +
-            $"{_url}?Authorization={headers}" //TODO: Proper url
+            $"{_url}?token={header}" //TODO: Proper url
         );
     }
 }

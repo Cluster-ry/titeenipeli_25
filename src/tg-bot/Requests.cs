@@ -1,5 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json.Nodes;
+using Newtonsoft.Json;
 
 namespace Titeenipeli_bot;
 
@@ -7,7 +9,7 @@ public static class Requests
 {
     private readonly static HttpClient Client = new HttpClient();
 
-    public async static Task CreateUserRequestAsync(string uri, string json)
+    public async static Task<int> CreateUserRequestAsync(string uri, string json)
     {
         string url = $"{uri}/api/v1/users";
 
@@ -23,15 +25,11 @@ public static class Requests
             */
 
             response.EnsureSuccessStatusCode();
-
-            string? cookies = response.Headers.TryGetValues("Set-Cookie", out IEnumerable<string>? values)
-                ? values.FirstOrDefault()
-                : null;
-            if (cookies == null)
-            {
-                throw new Exception("Unable to get cookies.");
-            }
-
+            string responseBody = await response.Content.ReadAsStringAsync();
+            Dictionary<string, string>? bodyJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseBody);
+            
+            Console.WriteLine($"body: '{bodyJson}'\nguild: '{bodyJson["guild"]}'");
+            return bodyJson["guild"] != null ? 0 : 1;
         }
         catch (Exception e)
         {
@@ -40,9 +38,9 @@ public static class Requests
         }
     }
 
-    public static HttpRequestHeaders GetHeaders()
+    public static AuthenticationHeaderValue? GetAuthHeader()
     {
-        return Client.DefaultRequestHeaders;
+        return Client.DefaultRequestHeaders.Authorization;
     }
 
     public async static Task SetGuildRequestAsync(string ip, string json)
@@ -63,13 +61,8 @@ public static class Requests
 
             response.EnsureSuccessStatusCode();
             // api gives a new jwt token once the guild has been set 
-            string? cookies = response.Headers.TryGetValues("Set-Cookie", out IEnumerable<string>? values)
-                ? values.FirstOrDefault()
-                : null;
-            if (cookies == null)
-            {
-                throw new Exception("Unable to get cookies.");
-            }
+            string responseBody = await response.Content.ReadAsStringAsync();
+            
 
         }
         catch (Exception e)
