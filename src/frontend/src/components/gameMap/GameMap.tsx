@@ -4,12 +4,9 @@ import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
 import { Guild, guildColor } from "./guild/Guild";
-
 import { mapConfig } from "./MapConfig";
-
 import { PixelMap } from "../../models/PixelMap";
 import { Coordinate } from "../../models/Coordinate";
-import Fov from "./Fov";
 const defaultGuild = 6;   // For testing
 
 
@@ -22,11 +19,11 @@ const defaultGuild = 6;   // For testing
  * client. 
  */
 const GameMap = () => {
-
   // Generates an array of pixel elements
   const generatePixels = () => {
     const pixels: PixelMap = new Map();
-    for (let y = 0; y < mapConfig.MapHeight; y++) {
+
+    for (let y = 0; y < mapConfig.MapHeight; y++) {      
       for (let x = 0; x < mapConfig.MapWidth; x++) {
         const randomGuild: Guild = Math.round(Math.random() * 8);
         pixels.set({ x, y }, randomGuild);
@@ -52,7 +49,7 @@ const GameMap = () => {
           width={mapConfig.PixelSize}
           height={mapConfig.PixelSize}
           color={color}
-          onClick={conquer}
+          onClick={(event) => conquer(coordinate)}
         />
       )
     }
@@ -67,27 +64,9 @@ const GameMap = () => {
    * 
    * @note Upon change, the map is automatically refreshed. 
    */
-  function conquer(event: {
-    x: number;
-    y: number;
-  }) {
-    const x = event.x / 32;
-    const y = event.y / 32;
-  
+  function conquer(coordinate: Coordinate) {
     const newPixelMap = new Map(pixelMap);
-    for (const [key, value] of pixelMap) {
-      if (key.x === x && key.y === y) {
-
-        // Returning if the pixel is owned already by client guild
-        if (value === defaultGuild) {
-          return;
-        }
-
-        // Conquering the pixel
-        newPixelMap.set(key, defaultGuild);
-        break;
-      }
-    }
+    newPixelMap.set(coordinate, defaultGuild);
     setPixelMap(newPixelMap);
   }
 
@@ -107,8 +86,6 @@ const GameMap = () => {
           <Container>{pixelElements}</Container>
         </Viewport>
       </Stage>
-
-      <Fov />
     </>
   );
 }

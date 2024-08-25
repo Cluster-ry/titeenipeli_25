@@ -33,7 +33,6 @@ function AppRouter() {
                     justifyContent: "center",
                   }}
                 >
-                  Game Slot
                   <GameMap />
                 </div>
               }
@@ -41,7 +40,6 @@ function AppRouter() {
           }
         />
         <Route path="/map" element={<GameMap />} />
-
         <Route path="/test" element={<ApiTestClient />} />
       </Routes>
     </Router>
