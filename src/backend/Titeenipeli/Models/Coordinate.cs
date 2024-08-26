@@ -18,7 +18,7 @@ public struct Coordinate
         {
             return this;
         }
-        
+
         return new Coordinate()
         {
             X = X - user.SpawnX,
