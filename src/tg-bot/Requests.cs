@@ -8,9 +8,9 @@ public static class Requests
 {
     private readonly static HttpClient Client = new HttpClient();
 
-    public async static Task<int> CreateUserRequestAsync(string uri, string json)
+    public async static Task<int> CreateUserRequestAsync(string host, string json)
     {
-        string url = $"{uri}/api/v1/users";
+        string url = $"{host}/api/v1/users";
 
         try
         {
@@ -29,7 +29,7 @@ public static class Requests
                 JsonConvert.DeserializeObject<Dictionary<string, string>>(responseBody);
 
             // Console.WriteLine($"body: '{bodyJson}'\nguild: '{bodyJson["guild"]}'");
-            return bodyJson["guild"] != null ? 0 : 1;
+            return bodyJson?["guild"] != null ? 0 : 1;
         }
         catch (Exception e)
         {
@@ -43,9 +43,9 @@ public static class Requests
         return Client.DefaultRequestHeaders.Authorization;
     }
 
-    public async static Task SetGuildRequestAsync(string ip, string json)
+    public async static Task SetGuildRequestAsync(string host, string json)
     {
-        string url = $"{ip}/api/v1/users";
+        string url = $"{host}/api/v1/users";
 
         try
         {

@@ -7,9 +7,9 @@ namespace Titeenipeli_bot;
 internal class TgBot
 {
     // Variables
-    private static string? token;
-    private static TelegramBotClient? bot;
-    private static string? uri;
+    private static string? _token;
+    private static TelegramBotClient? _bot;
+    private static string? _uri;
 
     private static void Main(string[] args)
     {
@@ -19,26 +19,26 @@ internal class TgBot
                                        .AddJsonFile("appsettings.json")
                                        .Build();
 
-        token = configuration["token"];
-        uri = configuration["uri"];
-        if (token is null)
+        _token = configuration["token"];
+        _uri = configuration["URI"];
+        if (_token is null)
         {
             Console.WriteLine("Unable to find token, exiting...");
             return;
         }
 
-        if (string.IsNullOrEmpty(uri))
+        if (string.IsNullOrEmpty(_uri))
         {
             Console.WriteLine("Unable to set uri, exiting...");
             return;
         }
 
-        bot = new TelegramBotClient(token);
-        Handlers handlers = new Handlers(bot, uri);
+        _bot = new TelegramBotClient(_token);
+        Handlers handlers = new Handlers(_bot, _uri);
         using CancellationTokenSource cts = new CancellationTokenSource();
 
         // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool, so we use cancellation token
-        bot.StartReceiving(
+        _bot.StartReceiving(
             handlers.HandleUpdate,
             errorHandler: handlers.HandleError,
             cancellationToken: cts.Token
