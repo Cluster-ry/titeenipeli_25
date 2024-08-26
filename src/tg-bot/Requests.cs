@@ -8,7 +8,7 @@ public static class Requests
 {
     private readonly static HttpClient Client = new HttpClient();
 
-    public async static Task<int> CreateUserRequestAsync(string host, string json)
+    public static async Task<int> CreateUserRequestAsync(string host, string json)
     {
         string url = $"{host}/api/v1/users";
 
@@ -43,7 +43,7 @@ public static class Requests
         return Client.DefaultRequestHeaders.Authorization;
     }
 
-    public async static Task SetGuildRequestAsync(string host, string json)
+    public static async Task SetGuildRequestAsync(string host, string json)
     {
         string url = $"{host}/api/v1/users";
 

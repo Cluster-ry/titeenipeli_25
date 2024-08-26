@@ -147,29 +147,28 @@ public class Handlers(TelegramBotClient bot, string url)
     {
         // InlineKeyboardMarkup markup = new(Array.Empty<InlineKeyboardButton>());
 
-        if (query.Data == AcceptButton)
-        {
-            // Close the query to end the client-side loading animation
-            await bot.AnswerCallbackQueryAsync(query.Id);
-
-            // Replace menu text and keyboard
-            await bot.EditMessageTextAsync(
-                query.Message!.Chat.Id,
-                query.Message.MessageId,
-                "Thank you! Your guild has been set!",
-                ParseMode.Html,
-                replyMarkup: InlineKeyboardMarkup.Empty()
-            );
-
-            Thread.Sleep(1 * 1000);
-
-            await HandleUser(query.From);
-        }
-        else
+        if (query.Data != AcceptButton)
         {
             // this should never happen
             await bot.SendTextMessageAsync(query.Message!.Chat.Id, $"you pressed '{query}'");
+            return;
         }
+
+        // Close the query to end the client-side loading animation
+        await bot.AnswerCallbackQueryAsync(query.Id);
+
+        // Replace menu text and keyboard
+        await bot.EditMessageTextAsync(
+            query.Message!.Chat.Id,
+            query.Message.MessageId,
+            "Thank you! Your guild has been set!",
+            ParseMode.Html,
+            replyMarkup: InlineKeyboardMarkup.Empty()
+        );
+
+        // quick break before spamming user with more messages
+        // Thread.Sleep(1 * 1000);
+        await HandleUser(query.From);
     }
 
     private async Task HandleUser(User user)
