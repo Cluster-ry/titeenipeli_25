@@ -13,16 +13,36 @@ public class Handlers(TelegramBotClient bot, string url)
     // Variables
     private readonly static Dictionary<guildEnum, string> GuildDict = new Dictionary<guildEnum, string>
     {
-        { guildEnum.Cluster, "Cluster (lappeen Ranta)" },
-        { guildEnum.OulunTietoteekkarit, "Otit (Oulu)" },
-        { guildEnum.Digit, "Digit (Turku)" },
-        { guildEnum.Date, "Date (Turku)" },
-        { guildEnum.Tietokilta, "Tik (Otaniemi)" },
-        { guildEnum.Algo, "Algo (Jyväskylä)" },
-        { guildEnum.Tutti, "Tutti (Vaasa)" },
-        { guildEnum.Sosa, "Sosa (Lahti)" },
-        { guildEnum.TietoTeekkarikilta, "TiTe (Tampere)" },
-        { guildEnum.Datateknologerna, "Datateknologerna (Åbo)"}
+        {
+            guildEnum.Cluster, "Cluster (lappeen Ranta)"
+        },
+        {
+            guildEnum.OulunTietoteekkarit, "Otit (Oulu)"
+        },
+        {
+            guildEnum.Digit, "Digit (Turku)"
+        },
+        {
+            guildEnum.Date, "Date (Turku)"
+        },
+        {
+            guildEnum.Tietokilta, "Tik (Otaniemi)"
+        },
+        {
+            guildEnum.Algo, "Algo (Jyväskylä)"
+        },
+        {
+            guildEnum.Tutti, "Tutti (Vaasa)"
+        },
+        {
+            guildEnum.Sosa, "Sosa (Lahti)"
+        },
+        {
+            guildEnum.TietoTeekkarikilta, "TiTe (Tampere)"
+        },
+        {
+            guildEnum.Datateknologerna, "Datateknologerna (Åbo)"
+        }
     };
 
     // Pre-assign menu text
@@ -88,20 +108,21 @@ public class Handlers(TelegramBotClient bot, string url)
         Console.WriteLine(
             $"[{DateTime.Now:dd-MM-yyyy HH:mm:ss}] User '{user.FirstName}' wrote '{text}'"
         );
-        
+
         // When we get a command, we react accordingly
         if (text.StartsWith('/'))
         {
             await HandleCommand(user, text);
             return;
         }
-        
+
         if (GuildDict.ContainsValue(text))
         {
             guildEnum chosenGuild = GuildDict.FirstOrDefault(x => x.Value == text).Key;
-            await SendGuildData(user, (int) chosenGuild); // changed since api takes the guild as int
+            await SendGuildData(user, (int)chosenGuild); // changed since api takes the guild as int
             return;
         }
+
         // Lastly, if the text has no meaning we tell user that we ain't chatGPT
         await bot.SendTextMessageAsync(user.Id, "Sorry, but I'm no chatbot. Use /start.");
     }
@@ -161,7 +182,7 @@ public class Handlers(TelegramBotClient bot, string url)
                 "Sending data to the game...",
                 replyMarkup: null
             );
-            
+
             UserProfilePhotos userPhotos = await bot.GetUserProfilePhotosAsync(user.Id, 0, 1);
             PhotoSize dummy = userPhotos.Photos[0][0]; // with this you can only get the fileID
             // the download URL includes the token, which shouldn't be sent (at-least without encryption)
@@ -169,18 +190,32 @@ public class Handlers(TelegramBotClient bot, string url)
 
             Dictionary<string, string> json = new Dictionary<string, string>
             {
-                { "id", user.Id.ToString() },
-                { "firstName", user.FirstName },
-                { "lastName", user.LastName ?? "" },
-                { "username", user.Username ?? "" },
-                { "photoUrl", "" },
-                { "authDate", DateTime.Now.ToString(CultureInfo.CurrentCulture) },
-                { "hash", "" } // TODO: create hash
+                {
+                    "id", user.Id.ToString()
+                },
+                {
+                    "firstName", user.FirstName
+                },
+                {
+                    "lastName", user.LastName ?? ""
+                },
+                {
+                    "username", user.Username ?? ""
+                },
+                {
+                    "photoUrl", ""
+                },
+                {
+                    "authDate", DateTime.Now.ToString(CultureInfo.CurrentCulture)
+                },
+                {
+                    "hash", ""
+                } // TODO: create hash
             };
 
 
             int result = await Requests.CreateUserRequestAsync(url, JsonConvert.SerializeObject(json));
-            
+
             // if results is not a 0, a guild must be set
             if (result == 0)
             {
@@ -226,12 +261,14 @@ public class Handlers(TelegramBotClient bot, string url)
     {
         Dictionary<string, string> guildJson = new Dictionary<string, string>
         {
-            { "guild", guild.ToString() }
+            {
+                "guild", guild.ToString()
+            }
         };
         try
         {
             await Requests.SetGuildRequestAsync(url, JsonConvert.SerializeObject(guildJson));
-            
+
             await bot.SendTextMessageAsync(
                 user.Id,
                 $"You selected your guild! Now start the game with /game.",

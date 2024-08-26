@@ -25,8 +25,9 @@ public static class Requests
 
             response.EnsureSuccessStatusCode();
             string responseBody = await response.Content.ReadAsStringAsync();
-            Dictionary<string, string>? bodyJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseBody);
-            
+            Dictionary<string, string>? bodyJson =
+                JsonConvert.DeserializeObject<Dictionary<string, string>>(responseBody);
+
             // Console.WriteLine($"body: '{bodyJson}'\nguild: '{bodyJson["guild"]}'");
             return bodyJson["guild"] != null ? 0 : 1;
         }

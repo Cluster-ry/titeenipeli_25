@@ -14,8 +14,8 @@
         <PackageReference Include="Telegram.Bot.Extensions.Polling" Version="1.0.0"/>
     </ItemGroup>
     <ItemGroup>
-      <None Update="appsettings.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 </Project>
