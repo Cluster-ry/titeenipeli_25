@@ -18,13 +18,11 @@ public struct Coordinate
         {
             return this;
         }
-        else
+        
+        return new Coordinate()
         {
-            return new Coordinate()
-            {
-                X = X - user.SpawnX,
-                Y = Y - user.SpawnY
-            };
-        }
+            X = X - user.SpawnX,
+            Y = Y - user.SpawnY
+        };
     }
 }
