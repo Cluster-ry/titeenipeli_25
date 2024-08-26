@@ -8,11 +8,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Titeenipeli_bot;
 
-public class Handlers(TelegramBotClient bot)
+public class Handlers(TelegramBotClient bot, string url)
 {
     // Variables
-    private readonly string _url = "http://localhost:5129"; // TODO: get from IConfiguration
-
     private readonly static Dictionary<guildEnum, string> GuildDict = new Dictionary<guildEnum, string>
     {
         { guildEnum.Cluster, "Cluster (lappeen Ranta)" },
@@ -181,7 +179,7 @@ public class Handlers(TelegramBotClient bot)
             };
 
 
-            int result = await Requests.CreateUserRequestAsync(_url, JsonConvert.SerializeObject(json));
+            int result = await Requests.CreateUserRequestAsync(url, JsonConvert.SerializeObject(json));
             
             // if results is not a 0, a guild must be set
             if (result == 0)
@@ -232,7 +230,7 @@ public class Handlers(TelegramBotClient bot)
         };
         try
         {
-            await Requests.SetGuildRequestAsync(_url, JsonConvert.SerializeObject(guildJson));
+            await Requests.SetGuildRequestAsync(url, JsonConvert.SerializeObject(guildJson));
             
             await bot.SendTextMessageAsync(
                 user.Id,
@@ -256,7 +254,7 @@ public class Handlers(TelegramBotClient bot)
         await bot.SendTextMessageAsync(
             user.Id,
             $"Open the following link to enter the game:\n\n" +
-            $"{_url}?token={header}" //TODO: Proper url
+            $"{url}?token={header}" //TODO: Proper game url
         );
     }
 }

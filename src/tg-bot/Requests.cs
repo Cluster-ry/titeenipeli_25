@@ -1,6 +1,5 @@
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json.Nodes;
 using Newtonsoft.Json;
 
 namespace Titeenipeli_bot;
@@ -28,7 +27,7 @@ public static class Requests
             string responseBody = await response.Content.ReadAsStringAsync();
             Dictionary<string, string>? bodyJson = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseBody);
             
-            Console.WriteLine($"body: '{bodyJson}'\nguild: '{bodyJson["guild"]}'");
+            // Console.WriteLine($"body: '{bodyJson}'\nguild: '{bodyJson["guild"]}'");
             return bodyJson["guild"] != null ? 0 : 1;
         }
         catch (Exception e)
@@ -60,10 +59,6 @@ public static class Requests
              */
 
             response.EnsureSuccessStatusCode();
-            // api gives a new jwt token once the guild has been set 
-            string responseBody = await response.Content.ReadAsStringAsync();
-            
-
         }
         catch (Exception e)
         {
