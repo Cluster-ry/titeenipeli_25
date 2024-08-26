@@ -119,7 +119,7 @@ public class Handlers(TelegramBotClient bot, string url)
         if (GuildDict.ContainsValue(text))
         {
             guildEnum chosenGuild = GuildDict.FirstOrDefault(x => x.Value == text).Key;
-            await SendGuildData(user, (int)chosenGuild); // changed since api takes the guild as int
+            await SendGuildData(user, chosenGuild); // changed since api takes the guild as int
             return;
         }
 
@@ -256,7 +256,7 @@ public class Handlers(TelegramBotClient bot, string url)
         );
     }
 
-    private async Task SendGuildData(User user, int guild)
+    private async Task SendGuildData(User user, guildEnum guild)
     {
         Dictionary<string, string> guildJson = new Dictionary<string, string>
         {
