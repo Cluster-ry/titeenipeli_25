@@ -23,14 +23,12 @@ public struct Coordinate(int x, int y)
         {
             return this;
         }
-        else
+
+        return new Coordinate()
         {
-            return new Coordinate()
-            {
-                X = X - user.SpawnX,
-                Y = Y - user.SpawnY
-            };
-        }
+            X = X - user.SpawnX,
+            Y = Y - user.SpawnY
+        };
     }
 
     internal void Deconstruct(out int x, out int y)
