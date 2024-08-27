@@ -19,30 +19,48 @@ const defaultGuild = 6;   // For testing
  * client. 
  */
 const GameMap = () => {
+
+  const guildValues: (number | undefined)[] = [0, 1, 2, 3, 4, 5, 6, 7];
+  
+  /** 
+   * Making sure a pixel is owned by a guild
+   */  
+  const checkPixelGuild = (coordinate: Coordinate, pixels: PixelMap) => {
+    return guildValues.includes(pixels.get(coordinate));
+  }
+
   // Generates an array of pixel elements
   const generatePixels = () => {
     const pixels: PixelMap = new Map();
 
-    for (let y = 0; y < mapConfig.MapHeight; y++) {      
+    // Currently generated pixels with the following for-loop 
+    for (let y = 0; y < mapConfig.MapHeight; y++) {
       for (let x = 0; x < mapConfig.MapWidth; x++) {
         const randomGuild: Guild = Math.round(Math.random() * 8);
         pixels.set({ x, y }, randomGuild);
+        // Excluding coordinates from render if they are not owned by a guild
       }
     }
     return pixels;
   }
-  
+
   const [pixelMap, setPixelMap] = useState(generatePixels());
-  
+
+
+
   const pixelElements = useMemo(() => {
-    const pixelElements = [];  
+    const pixelElements = [];
     for (const [coordinate, guild] of pixelMap) {
       const rectangleX = coordinate.x * mapConfig.PixelSize;
       const rectangleY = coordinate.y * mapConfig.PixelSize;
       const color = guildColor(guild);
-  
+
+      if (!checkPixelGuild(coordinate, pixelMap)) {
+        continue;
+      }
+
       pixelElements.push(
-        <Rectangle 
+        <Rectangle
           key={coordinate.x * 1000 + coordinate.y}
           x={rectangleX}
           y={rectangleY}
