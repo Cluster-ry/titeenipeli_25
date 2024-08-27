@@ -49,7 +49,7 @@ const GameMap = () => {
           width={mapConfig.PixelSize}
           height={mapConfig.PixelSize}
           color={color}
-          onClick={(event) => conquer(coordinate)}
+          onClick={() => conquer(coordinate)}
         />
       )
     }
@@ -67,7 +67,7 @@ const GameMap = () => {
   function conquer(coordinate: Coordinate) {
     const newPixelMap = new Map(pixelMap);
     newPixelMap.set(coordinate, defaultGuild);
-    setPixelMap(newPixelMap);
+    setPixelMap(newPixelMap);   // To be replaced by GRPC
   }
 
   return (

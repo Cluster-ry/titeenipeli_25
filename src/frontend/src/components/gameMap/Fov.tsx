@@ -1,4 +1,3 @@
-import { mapConfig } from "./MapConfig";
 import { useEffect, useState } from "react";
 
 
@@ -13,7 +12,7 @@ const Fov = () => {
 
     // Current hook for getting the boundaries
     useEffect(() => {
-        getBoundaries();
+        updatePlayerBoundaries();
     }, []);
 
     // For testing whether the boundaries work
@@ -24,45 +23,12 @@ const Fov = () => {
         console.log(lowerY)
     }, [upperX, upperY, lowerX, lowerY])
 
-    /**
-     * Gathering all the pixels that are within the range of the client.
-     * 
-     * @rules
-     */
-    const getPixelsInRange = () => {        
-    }
 
-    const updatePreliminaryBoundaries = () => {
+    const updatePlayerBoundaries = () => {
         setLowerY(playerCoordinate.y - fovRange);
         setUpperY(playerCoordinate.y + fovRange);
         setLowerX(playerCoordinate.x - fovRange);
         setUpperX(playerCoordinate.x + fovRange);    
-    }
-
-    /**
-     * Getting the fov for-loop caps by seeing if the user is near the map boundaries 
-     */
-    const getBoundaries = () => {
-        
-        // Upper Y
-        if (upperY > mapConfig.MapHeight) {
-            setUpperY(upperY - (playerCoordinate.y + upperY - mapConfig.MapHeight));
-        }
-
-        // Lower Y
-        if (lowerY < 0) {
-            setLowerY(0);
-        }
-
-        // Upper X
-        if (upperX > mapConfig.MapWidth) {
-            setUpperX(upperX - (playerCoordinate.x + upperX - mapConfig.MapWidth));
-        }
-
-        // Lower X
-        if (lowerX < 0) {
-            setLowerX(0);
-        }
     }
 
     return <></>
