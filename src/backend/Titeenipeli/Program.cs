@@ -12,7 +12,7 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Titeenipeli.Context;
-using Titeenipeli.gRPC;
+using Titeenipeli.Grpc;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
@@ -167,6 +167,7 @@ public static class Program
 
         builder.Services.AddGrpc();
         builder.Services.AddGrpcReflection();
+        GrpcServiceRegister.AddSingletonGRPCServices(builder.Services);
 
         AddBackgroundServices(builder.Services);
         AddRepositoryServices(builder.Services);
@@ -202,7 +203,7 @@ public static class Program
 
         app.MapControllers();
 
-        GRPCServiceRegister.AddGRPCServices(app);
+        GrpcServiceRegister.AddGRPCServices(app);
 
         app.Run();
     }

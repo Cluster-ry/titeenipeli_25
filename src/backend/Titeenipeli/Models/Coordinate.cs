@@ -1,12 +1,28 @@
+using Titeenipeli.Schema;
+
 namespace Titeenipeli.Models;
 
-public class Coordinate
+public struct Coordinate
 {
-    public int X { get; init; }
-    public int Y { get; init; }
+    public int X { get; set; }
+    public int Y { get; set; }
 
     public static Coordinate operator +(Coordinate a, Coordinate b)
     {
         return new Coordinate { X = a.X + b.X, Y = a.Y + b.Y };
+    }
+
+    public Coordinate ToSpawnRelativeCoordinate(User? user)
+    {
+        if (user == null)
+        {
+            return this;
+        }
+
+        return new Coordinate()
+        {
+            X = X - user.SpawnX,
+            Y = Y - user.SpawnY
+        };
     }
 }
