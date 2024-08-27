@@ -229,8 +229,6 @@ public class Handlers(TelegramBotClient bot, string url)
                     replyMarkup: null
                 );
 
-                // After a small-time window, jump straight to choosing your guild
-                Thread.Sleep(1000);
                 await SendGuildMenu(user);
             }
         }
