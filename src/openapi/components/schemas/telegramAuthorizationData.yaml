@@ -1,6 +1,7 @@
 type: object
 properties:
-  id: integer
+  id:
+    type: integer
   firstName:
     type: string
   lastName:
@@ -8,8 +9,4 @@ properties:
   username:
     type: string
   photoUrl:
-    type: string
-  authDate:
-    type: string
-  hash:
     type: string
