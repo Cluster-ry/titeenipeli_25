@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
-import { Guild, guildColor } from "./guild/Guild";
+import { guildColor } from "./guild/Guild";
 import { mapConfig } from "./MapConfig";
 import { PixelMap } from "../../models/PixelMap";
 import { Coordinate } from "../../models/Coordinate";
@@ -19,9 +19,15 @@ const defaultGuild = 6;   // For testing
  * client. 
  */
 const GameMap = () => {
-
-  const guildValues: (number | undefined)[] = [0, 1, 2, 3, 4, 5, 6, 7];
   
+  const fovRange: number = 10;
+  const playerCoordinate: Coordinate = { x: 1, y: 1 };
+  const guildValues: (number | undefined)[] = [0, 1, 2, 3, 4, 5, 6, 7];  
+
+  // A set to store existing pixels, as in a Map they need to be accessed
+  // with object reference.
+  let existingPixels = new Set<string>();
+
   /** 
    * Making sure a pixel is owned by a guild
    */  
@@ -34,11 +40,10 @@ const GameMap = () => {
     const pixels: PixelMap = new Map();
 
     // Currently generated pixels with the following for-loop 
-    for (let y = 0; y < mapConfig.MapHeight; y++) {
-      for (let x = 0; x < mapConfig.MapWidth; x++) {
-        const randomGuild: Guild = Math.round(Math.random() * 8);
-        pixels.set({ x, y }, randomGuild);
-        // Excluding coordinates from render if they are not owned by a guild
+    for (let y = playerCoordinate.y - fovRange; y < playerCoordinate.y + fovRange; y++) {
+      for (let x = playerCoordinate.x; x < playerCoordinate.x + fovRange; x++) {
+        pixels.set({ x, y }, Math.random() * 8);
+        existingPixels.add(`${x},${y}`);
       }
     }
     return pixels;
@@ -46,22 +51,21 @@ const GameMap = () => {
 
   const [pixelMap, setPixelMap] = useState(generatePixels());
 
-
-
   const pixelElements = useMemo(() => {
     const pixelElements = [];
+
     for (const [coordinate, guild] of pixelMap) {
       const rectangleX = coordinate.x * mapConfig.PixelSize;
       const rectangleY = coordinate.y * mapConfig.PixelSize;
-      const color = guildColor(guild);
+      let color = guildColor(guild);
 
       if (!checkPixelGuild(coordinate, pixelMap)) {
-        continue;
-      }
-
+        color = guildColor(undefined);
+      } 
+      existingPixels.add(`${coordinate.x},${coordinate.y}`)
       pixelElements.push(
         <Rectangle
-          key={coordinate.x * 1000 + coordinate.y}
+          key={`${coordinate.x},${coordinate.y}`}
           x={rectangleX}
           y={rectangleY}
           width={mapConfig.PixelSize}
@@ -85,6 +89,18 @@ const GameMap = () => {
   function conquer(coordinate: Coordinate) {
     const newPixelMap = new Map(pixelMap);
     newPixelMap.set(coordinate, defaultGuild);
+    
+  
+    // Reveal surrounding pixels within fovRange
+    for (let y = coordinate.y - fovRange; y < coordinate.y + fovRange; y++) {
+      for (let x = coordinate.x; x < coordinate.x + fovRange; x++) {
+        if (existingPixels.has(`${x},${y}`)) {
+          continue;
+        }
+        newPixelMap.set({ x, y }, Math.random() * 8);
+        existingPixels.add(`${x},${y}`)
+      }
+    }
     setPixelMap(newPixelMap);   // To be replaced by GRPC
   }
 
