@@ -12,7 +12,6 @@ using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Titeenipeli.Context;
-using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;

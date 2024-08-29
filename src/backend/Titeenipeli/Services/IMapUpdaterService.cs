@@ -1,7 +1,7 @@
 using Titeenipeli.Models;
 using Titeenipeli.Schema;
 
-namespace Titeenipeli.GameLogic;
+namespace Titeenipeli.Services;
 
 public interface IMapUpdaterWrapper
 {

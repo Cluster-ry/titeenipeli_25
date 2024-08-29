@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Titeenipeli.Enums;
+using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Services;
 using Titeenipeli.Models;
@@ -7,7 +8,7 @@ using Titeenipeli.Options;
 using Titeenipeli.Schema;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
 
-namespace Titeenipeli.GameLogic;
+namespace Titeenipeli.Services;
 
 public class MapUpdaterWrapper(
         IServiceScopeFactory scopeFactory,
@@ -95,7 +96,7 @@ public class MapUpdaterWrapper(
         List<GrpcMapChangeInput> changes = [];
         foreach ((Coordinate, PixelModel) changedPixel in changedPixels)
         {
-            LoopNearbyPixelsInsideFogOfWar((Coordinate coordinate) =>
+            LoopNearbyPixelsInsideFogOfWar((coordinate) =>
             {
                 Pixel pixel = pixel2DArray[coordinate.Y, coordinate.X];
                 nearbyPixels[coordinate] = new()

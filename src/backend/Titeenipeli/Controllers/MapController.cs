@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Enums;
 using Titeenipeli.Extensions;
-using Titeenipeli.GameLogic;
 using Titeenipeli.Inputs;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
