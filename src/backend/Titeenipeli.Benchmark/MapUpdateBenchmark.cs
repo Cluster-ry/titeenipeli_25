@@ -159,7 +159,7 @@ public class MapUpdateBenchmark
     {
         foreach (var (x, y, owner) in _moveSequence)
         {
-            _mapUpdater.PlacePixel(_map, (x, y), owner);
+            _mapUpdater.PlacePixel(_map, new (x, y), owner);
         }
     }
 }
