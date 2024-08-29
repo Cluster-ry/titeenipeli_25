@@ -63,6 +63,8 @@ const GameMap = () => {
         color = guildColor(undefined);
       } 
       existingPixels.add(`${coordinate.x},${coordinate.y}`)
+
+      // Rendering the pixel in the form of Rectangle
       pixelElements.push(
         <Rectangle
           key={`${coordinate.x},${coordinate.y}`}
@@ -89,16 +91,14 @@ const GameMap = () => {
   function conquer(coordinate: Coordinate) {
     const newPixelMap = new Map(pixelMap);
     newPixelMap.set(coordinate, defaultGuild);
-    
-  
+      
     // Reveal surrounding pixels within fovRange
     for (let y = coordinate.y - fovRange; y < coordinate.y + fovRange; y++) {
-      for (let x = coordinate.x; x < coordinate.x + fovRange; x++) {
+      for (let x = coordinate.x - fovRange; x < coordinate.x + fovRange; x++) {
         if (existingPixels.has(`${x},${y}`)) {
           continue;
         }
         newPixelMap.set({ x, y }, Math.random() * 8);
-        existingPixels.add(`${x},${y}`)
       }
     }
     setPixelMap(newPixelMap);   // To be replaced by GRPC
