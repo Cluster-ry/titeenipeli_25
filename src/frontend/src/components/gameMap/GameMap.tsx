@@ -26,7 +26,7 @@ const GameMap = () => {
 
   // A set to store existing pixels, as in a Map they need to be accessed
   // with object reference.
-  let existingPixels = new Set<string>();
+  const existingPixels = new Set<string>();
 
   /** 
    * Making sure a pixel is owned by a guild
@@ -42,7 +42,7 @@ const GameMap = () => {
     // Currently generated pixels with the following for-loop 
     for (let y = playerCoordinate.y - fovRange; y < playerCoordinate.y + fovRange; y++) {
       for (let x = playerCoordinate.x; x < playerCoordinate.x + fovRange; x++) {
-        pixels.set({ x, y }, Math.random() * 8);
+        pixels.set({ x, y }, undefined);
         existingPixels.add(`${x},${y}`);
       }
     }
@@ -63,7 +63,7 @@ const GameMap = () => {
         color = guildColor(undefined);
       } 
       existingPixels.add(`${coordinate.x},${coordinate.y}`)
-
+      
       // Rendering the pixel in the form of Rectangle
       pixelElements.push(
         <Rectangle
@@ -98,7 +98,7 @@ const GameMap = () => {
         if (existingPixels.has(`${x},${y}`)) {
           continue;
         }
-        newPixelMap.set({ x, y }, Math.random() * 8);
+        newPixelMap.set({ x, y }, undefined);
       }
     }
     setPixelMap(newPixelMap);   // To be replaced by GRPC
