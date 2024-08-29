@@ -1,8 +1,9 @@
 package main
 
 import (
-	v1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
-	"github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/helm/v3"
+	v1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
+	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/helm/v3"
+	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -25,28 +26,29 @@ func main() {
 			return err
 		}
 
-		chartArgs := helm.ChartArgs{
-			Chart:   pulumi.String("apache"),
-			Version: pulumi.String("8.12.1"),
+		v1.NewNamespace(ctx, "cert-manager", &v1.NamespaceArgs{
+			Metadata: &metav1.ObjectMetaArgs{
+				Name: pulumi.String("cert-manager"),
+			}},
+			pulumi.Providers(k8sProvider))
+
+		certManagerChartArgs := helm.ChartArgs{
+			Chart:   pulumi.String("cert-manager"),
+			Version: pulumi.String("v1.15.3"),
 			FetchArgs: helm.FetchArgs{
-				Repo: pulumi.String("https://raw.githubusercontent.com/bitnami/charts/archive-full-index/bitnami"),
+				Repo: pulumi.String("https://charts.jetstack.io"),
+			},
+			Namespace: pulumi.String("cert-manager"),
+			Values: pulumi.Map{
+				"crds": pulumi.Map{
+					"enabled": pulumi.Bool(true),
+				},
 			},
 		}
 
-		chart, err := helm.NewChart(ctx, "apache-chart", chartArgs,
+		helm.NewChart(ctx, "cert-manager", certManagerChartArgs,
 			pulumi.Providers(k8sProvider))
-		if err != nil {
-			return err
-		}
 
-		ip := chart.GetResource("v1/Service", "apache-chart", "").
-			ApplyT(func(input interface{}) pulumi.StringPtrOutput {
-				service := input.(*v1.Service)
-				return service.Status.LoadBalancer().
-					Ingress().Index(pulumi.Int(0)).Ip()
-			})
-
-		ctx.Export("apacheServiceIP", ip)
 		ctx.Export("kubeconfig", pulumi.ToSecret(kubeconfig))
 		ctx.Export("clusterName", k8sCluster.ManagedCluster.Name)
 

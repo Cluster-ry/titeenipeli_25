@@ -5,8 +5,8 @@ import (
 
 	cs "github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2"
 	"github.com/pulumi/pulumi-azure-native-sdk/resources/v2"
-	"github.com/pulumi/pulumi-azuread/sdk/v4/go/azuread"
-	"github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes"
+	"github.com/pulumi/pulumi-azuread/sdk/v5/go/azuread"
+	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -16,14 +16,14 @@ type ClusterInfo struct {
 }
 
 func buildCluster(ctx *pulumi.Context, cfg Config) (*ClusterInfo, error) {
-	resourceGroup, err := resources.NewResourceGroup(ctx, "rg", nil)
+	resourceGroup, err := resources.NewResourceGroup(ctx, "titeenipeli-rg", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	adApp, err := azuread.NewApplication(ctx, "app",
+	adApp, err := azuread.NewApplication(ctx, "titeenipeli-app",
 		&azuread.ApplicationArgs{
-			DisplayName: pulumi.String("app"),
+			DisplayName: pulumi.String("titeenipeli-app"),
 		})
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func buildCluster(ctx *pulumi.Context, cfg Config) (*ClusterInfo, error) {
 
 	adSp, err := azuread.NewServicePrincipal(ctx, "service-principal",
 		&azuread.ServicePrincipalArgs{
-			ApplicationId: adApp.ApplicationId,
+			ClientId: adApp.ClientId,
 		})
 	if err != nil {
 		return nil, err
@@ -40,7 +40,6 @@ func buildCluster(ctx *pulumi.Context, cfg Config) (*ClusterInfo, error) {
 	adSpPassword, err := azuread.NewServicePrincipalPassword(ctx, "sp-password",
 		&azuread.ServicePrincipalPasswordArgs{
 			ServicePrincipalId: adSp.ID(),
-			Value:              cfg.Password,
 			EndDate:            pulumi.String("2099-01-01T00:00:00Z"),
 		})
 	if err != nil {
@@ -77,7 +76,7 @@ func buildCluster(ctx *pulumi.Context, cfg Config) (*ClusterInfo, error) {
 			},
 			NodeResourceGroup: pulumi.String("node-resource-group"),
 			ServicePrincipalProfile: cs.ManagedClusterServicePrincipalProfileArgs{
-				ClientId: adApp.ApplicationId,
+				ClientId: adApp.ClientId,
 				Secret:   adSpPassword.Value,
 			},
 		})
