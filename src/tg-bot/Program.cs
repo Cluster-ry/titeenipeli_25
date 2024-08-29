@@ -2,46 +2,53 @@
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
 
-namespace Titeenipeli_bot
+namespace Titeenipeli_bot;
+
+internal class TgBot
 {
-    class TgBot
+    // Variables
+    private static string? _token;
+    private static TelegramBotClient? _bot;
+    private static string? _uri;
+
+    private static void Main(string[] args)
     {
-        // Variables
-        private static string token;
-        private static TelegramBotClient bot;
+        // Initializing the bot with its token
+        IConfiguration configuration = new ConfigurationBuilder()
+                                       .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
+                                       .AddJsonFile("appsettings.json")
+                                       .Build();
 
-        static void Main(string[] args)
+        _token = configuration["token"];
+        _uri = configuration["URI"];
+        if (_token is null)
         {
-            // Initializing the bot with its token
-            IConfiguration configuration = new ConfigurationBuilder()
-                .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
-                .Build();
-
-            token = configuration["token"];
-            if (token is null)
-            {
-                Console.WriteLine("Unable to find token, exiting...");
-                return;
-            }
-
-            bot = new TelegramBotClient(token);
-            Handlers handlers = new(bot);
-            // Runnin the bot
-            using CancellationTokenSource cts = new CancellationTokenSource();
-
-            // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool, so we use cancellation token
-            bot.StartReceiving(
-                updateHandler: handlers.HandleUpdate,
-                errorHandler: handlers.HandleError,
-                cancellationToken: cts.Token
-            );
-
-            // Tell the user the bot is online
-            Console.WriteLine("TiteenipeliBot is running and is listening for updates. Press enter to stop");
-            Console.ReadLine();
-
-            // Send cancellation request to stop the bot
-            cts.Cancel();
+            Console.WriteLine("Unable to find token, exiting...");
+            return;
         }
+
+        if (string.IsNullOrEmpty(_uri))
+        {
+            Console.WriteLine("Unable to set uri, exiting...");
+            return;
+        }
+
+        _bot = new TelegramBotClient(_token);
+        Handlers handlers = new Handlers(_bot, _uri);
+        using CancellationTokenSource cts = new CancellationTokenSource();
+
+        // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool, so we use cancellation token
+        _bot.StartReceiving(
+            handlers.HandleUpdate,
+            errorHandler: handlers.HandleError,
+            cancellationToken: cts.Token
+        );
+
+        // Tell the user the bot is online
+        Console.WriteLine("TiteenipeliBot is running and is listening for updates. Press enter to stop");
+        Console.ReadLine();
+
+        // Send cancellation request to stop the bot
+        cts.Cancel();
     }
 }
