@@ -79,7 +79,7 @@ func buildCluster(ctx *pulumi.Context, cfg Config) (*ClusterInfo, error) {
 				ClientId: adApp.ClientId,
 				Secret:   adSpPassword.Value,
 			},
-		})
+		}, pulumi.DependsOn([]pulumi.Resource{adSp}))
 
 	return &ClusterInfo{
 		ManagedCluster: k8sCluster,
