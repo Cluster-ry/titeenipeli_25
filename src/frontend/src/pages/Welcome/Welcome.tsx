@@ -1,8 +1,26 @@
 import { PropsWithChildren } from "react";
 import { LogoContainer } from "./LogoContainer";
 import { GreetingContainer } from "./GreetingContainer";
+import { postLogin } from "../../api/login";
+import { useNavigate } from "react-router-dom";
+import { postUsers, putUsers } from "../../api/users";
 
 export const Welcome = () => {
+  const navigate = useNavigate();
+  async function login() {
+    await postLogin({ username: "test", password: "test123" });
+    /*await postUsers({
+      id: "1",
+      firstName: "test",
+      lastName: "test",
+      username: "test",
+      photoUrl: "",
+      authDate: "",
+      hash: "",
+    });*/
+    navigate("/Map");
+  }
+
   return (
     <>
       <VerticalHalfContainer>
@@ -17,7 +35,7 @@ export const Welcome = () => {
             paddingTop: "1vh",
           }}
         >
-          <GreetingContainer />
+          <GreetingContainer login={login} />
         </div>
       </VerticalHalfContainer>
       AppVersion

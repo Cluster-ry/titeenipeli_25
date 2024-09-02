@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@9.5.0",
   "scripts": {
-    "dev": "export NODE_OPTIONS=--use-openssl-ca && vite",
+    "dev": "set NODE_OPTIONS=--use-openssl-ca && vite",
     "build": "pnpm generate-grpc && pnpm build-tsc-vite",
     "build-tsc-vite": "tsc && vite build",
     "generate-grpc": "rimraf src/generated/grpc && mkdirp -p src/generated/grpc && pnpm compile-grpc-components && pnpm compile-grpc-services",
@@ -19,6 +19,7 @@
     "@protobuf-ts/grpcweb-transport": "^2.9.4",
     "@protobuf-ts/runtime": "^2.9.4",
     "@protobuf-ts/runtime-rpc": "^2.9.4",
+    "@tanstack/react-query": "^5.53.3",
     "axios": "^1.7.2",
     "pixi-viewport": "^5.0.3",
     "pixi.js": "^7.4.2",

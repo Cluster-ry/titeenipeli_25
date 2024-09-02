@@ -1,4 +1,4 @@
-export const GreetingContainer = () => {
+export const GreetingContainer = (props: { login: () => void }) => {
   return (
     <div
       style={{
@@ -25,7 +25,7 @@ export const GreetingContainer = () => {
           padding: "1vh",
         }}
       >
-        <DieButton onClick={() => undefined} />
+        <DieButton onClick={props.login} />
       </div>
       For whom are you fighting for?
     </div>
