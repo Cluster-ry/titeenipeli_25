@@ -4,7 +4,6 @@ using Titeenipeli.Models;
 
 namespace Titeenipeli.GameLogic;
 
-using Coordinates = (int x, int y);
 using AreaNodes = Dictionary<int, Node>;
 
 public class MapUpdater
@@ -21,9 +20,9 @@ public class MapUpdater
     /// <param name="map">The game map - should include border pixels. Mutated according to the update event.</param>
     /// <param name="pixelCoordinates">The coordinates of the new pixel</param>
     /// <param name="placingGuild">The guild placing the new pixel</param>
-    public void PlacePixel(Map map, Coordinates pixelCoordinates, GuildName placingGuild)
+    public List<(Coordinate, PixelModel)> PlacePixel(Map map, Coordinate pixelCoordinates, GuildName placingGuild)
     {
-        map.Pixels[pixelCoordinates.y, pixelCoordinates.x]
+        map.Pixels[pixelCoordinates.X, pixelCoordinates.Y]
             = new PixelModel { Owner = placingGuild, Type = PixelType.Normal };
 
         // TODO uncomment once _PlaceWithCache is implemented
@@ -47,9 +46,11 @@ public class MapUpdater
             nodes.Remove(nodeIndex);
         }
 
-        _CutNodesWithoutSpawn(map, nodes);
+        List<(Coordinate, PixelModel)> changedPixels = _CutNodesWithoutSpawn(map, nodes);
 
         _cachedNodes = nodes;
+
+        return changedPixels;
     }
 
     private HashSet<int> _GetNonSurroundedNodes(AreaNodes nodes, int justAddedNode)
@@ -59,7 +60,7 @@ public class MapUpdater
         return nonSurroundedNodeIndexes;
     }
 
-    private (AreaNodes, int) _PlaceWithCache(Map map, Coordinates pixelCoordinates, GuildName placingGuild)
+    private (AreaNodes, int) _PlaceWithCache(Map map, Coordinate pixelCoordinates, GuildName placingGuild)
     {
         throw new NotImplementedException();
     }
@@ -76,54 +77,54 @@ public class MapUpdater
     /// <param name="pixelCoordinates">The coordinates of the last added pixel</param>
     /// <param name="placingGuild">The guild that placed the last added pixel</param>
     /// <returns></returns>
-    private (AreaNodes, int) _ConstructMapAdjacencyNodes(Map map, Coordinates pixelCoordinates,
+    private (AreaNodes, int) _ConstructMapAdjacencyNodes(Map map, Coordinate pixelCoordinates,
         GuildName placingGuild)
     {
-        var ySize = map.Pixels.GetUpperBound(0) + 1;
-        var xSize = map.Pixels.GetUpperBound(1) + 1;
+        var xSize = map.Pixels.GetUpperBound(0) + 1;
+        var ySize = map.Pixels.GetUpperBound(1) + 1;
         var nodes = new AreaNodes();
-        var nodeMap = new int[ySize, xSize];
-        nodes[0] = _CreateOutsideNode(ySize, xSize);
+        var nodeMap = new int[xSize, ySize];
+        nodes[0] = _CreateOutsideNode(xSize, ySize);
         var nextNode = 1;
         for (var y = 1; y < ySize; y++)
         {
             for (var x = 1; x < xSize; x++)
             {
-                var currentPixelGuild = map.Pixels[y, x].Owner;
+                var currentPixelGuild = map.Pixels[x, y].Owner;
                 var (leftNode, aboveNode) = TryMerge(currentPixelGuild, nodeMap, y, x, nodes);
 
-                var isSpawnNode = map.Pixels[y, x].Type == PixelType.Spawn;
+                var isSpawnNode = map.Pixels[x, y].Type == PixelType.Spawn;
 
                 if (nodes[leftNode].Guild == currentPixelGuild)
                 {
-                    AddPixelToNodeWithNeighbour(nodes, leftNode, (x, y), isSpawnNode, aboveNode, nodeMap);
+                    AddPixelToNodeWithNeighbour(nodes, leftNode, new(x, y), isSpawnNode, aboveNode, nodeMap);
                 }
                 else if (nodes[aboveNode].Guild == currentPixelGuild)
                 {
-                    AddPixelToNodeWithNeighbour(nodes, aboveNode, (x, y), isSpawnNode, leftNode, nodeMap);
+                    AddPixelToNodeWithNeighbour(nodes, aboveNode, new(x, y), isSpawnNode, leftNode, nodeMap);
                 }
                 else
                 {
                     nodes[nextNode] = new Node
                     {
-                        Pixels = { (x, y) },
+                        Pixels = { new(x, y) },
                         Guild = currentPixelGuild,
                         Neighbours = { aboveNode, leftNode },
                         HasSpawn = isSpawnNode
                     };
                     nodes[leftNode].Neighbours.Add(nextNode);
                     nodes[aboveNode].Neighbours.Add(nextNode);
-                    nodeMap[y, x] = nextNode;
+                    nodeMap[x, y] = nextNode;
                     nextNode++;
                 }
             }
         }
 
-        var justAddedNode = nodeMap[pixelCoordinates.y, pixelCoordinates.x];
+        var justAddedNode = nodeMap[pixelCoordinates.X, pixelCoordinates.Y];
         return (nodes, justAddedNode);
     }
 
-    private static void AddPixelToNodeWithNeighbour(AreaNodes nodes, int destinationNode, Coordinates coordinates,
+    private static void AddPixelToNodeWithNeighbour(AreaNodes nodes, int destinationNode, Coordinate coordinates,
         bool isSpawnNode,
         int neighbourNode, int[,] nodeMap)
     {
@@ -131,13 +132,13 @@ public class MapUpdater
         nodes[destinationNode].HasSpawn = nodes[destinationNode].HasSpawn || isSpawnNode;
         nodes[destinationNode].Neighbours.Add(neighbourNode);
         nodes[neighbourNode].Neighbours.Add(destinationNode);
-        nodeMap[coordinates.y, coordinates.x] = destinationNode;
+        nodeMap[coordinates.X, coordinates.Y] = destinationNode;
     }
 
     private (int, int) TryMerge(GuildName? mergingGuild, int[,] nodeMap, int y, int x, AreaNodes nodes)
     {
-        var leftNode = nodeMap[y, x - 1];
-        var aboveNode = nodeMap[y - 1, x];
+        var leftNode = nodeMap[x - 1, y];
+        var aboveNode = nodeMap[x, y - 1];
 
         if (leftNode == aboveNode)
         {
@@ -163,14 +164,14 @@ public class MapUpdater
         var outsideNode = new Node { Guild = null };
         for (var x = 0; x < xSize; x++)
         {
-            outsideNode.Pixels.Add((x, 0));
-            outsideNode.Pixels.Add((x, ySize - 1));
+            outsideNode.Pixels.Add(new(x, 0));
+            outsideNode.Pixels.Add(new(x, ySize - 1));
         }
 
         for (var y = 0; y < xSize; y++)
         {
-            outsideNode.Pixels.Add((0, y));
-            outsideNode.Pixels.Add((xSize - 1, y));
+            outsideNode.Pixels.Add(new(0, y));
+            outsideNode.Pixels.Add(new(xSize - 1, y));
         }
 
         return outsideNode;
@@ -189,7 +190,7 @@ public class MapUpdater
 
         foreach (var (x, y) in nodes[largerNodeIndex].Pixels)
         {
-            nodeMap[y, x] = smallerNodeIndex;
+            nodeMap[x, y] = smallerNodeIndex;
         }
 
         nodes[smallerNodeIndex].Pixels.UnionWith(nodes[largerNodeIndex].Pixels);
@@ -231,25 +232,31 @@ public class MapUpdater
         }
     }
 
-    private void _FillNode(Map map, Node node, GuildName? newGuild)
+    private List<(Coordinate, PixelModel)> _FillNode(Map map, Node node, GuildName? newGuild)
     {
+        List<(Coordinate, PixelModel)> changedPixels = [];
         foreach (var (x, y) in node.Pixels)
         {
-            if (map.Pixels[y, x].Type == PixelType.Spawn)
+            if (map.Pixels[x, y].Type == PixelType.Spawn)
             {
                 continue;
             }
 
-            map.Pixels[y, x].Owner = newGuild;
-            map.Pixels[y, x].Type = PixelType.Normal;
+            map.Pixels[x, y].Owner = newGuild;
+            map.Pixels[x, y].Type = PixelType.Normal;
+            changedPixels.Add((new(x, y), map.Pixels[x, y]));
         }
+        return changedPixels;
     }
 
-    private void _CutNodesWithoutSpawn(Map map, AreaNodes nodes)
+    private List<(Coordinate, PixelModel)> _CutNodesWithoutSpawn(Map map, AreaNodes nodes)
     {
+        List<(Coordinate, PixelModel)> allChangedPixels = [];
         foreach (var node in nodes.Values.Where(node => node is { HasSpawn: false, Guild: not null }))
         {
-            _FillNode(map, node, null);
+            List<(Coordinate, PixelModel)> changedPixels = _FillNode(map, node, null);
+            allChangedPixels.Concat(changedPixels);
         }
+        return allChangedPixels;
     }
 }

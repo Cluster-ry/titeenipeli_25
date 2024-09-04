@@ -158,6 +158,7 @@ public static class Program
                .AddPolicy("MustHaveGuild", policy => policy.Requirements.Add(new MustHaveGuildRequirement()));
 
         builder.Services.AddSingleton<IAuthorizationHandler, MustHaveGuildHandler>();
+        builder.Services.AddSingleton<IMapUpdaterWrapper, MapUpdaterWrapper>();
 
         builder.Services.AddControllers()
                .AddNewtonsoftJson(options =>
