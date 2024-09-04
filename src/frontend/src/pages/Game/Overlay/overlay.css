@@ -86,6 +86,7 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  pointer-events: all;
 }
 
 /* Bottom Overlay */
@@ -117,6 +118,7 @@
   background: #75757580;
   border: 5px solid #757575;
   border-radius: 8px;
+  pointer-events: all;
 }
 
 .bottom-overlay__button__icon {
@@ -138,4 +140,5 @@
   width: 100%;
   height: 100%;
   z-index: 1;
+  pointer-events: none;
 }

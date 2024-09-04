@@ -13,7 +13,7 @@ export default defineConfig({
         target: "https://localhost:7222",
       },
       "^/api": {
-        target: "http://localhost:8080",
+        target: "https://localhost:7222",
       },
     }),
   ],

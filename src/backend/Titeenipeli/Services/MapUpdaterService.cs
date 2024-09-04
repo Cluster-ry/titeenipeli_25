@@ -27,13 +27,15 @@ public class MapUpdaterWrapper(
     public Task PlacePixel(Coordinate pixelCoordinates, User newOwner)
     {
         GuildName newGuild = (newOwner?.Guild?.Name) ?? throw new Exception("Unable to get guild name");
+        var borderfiedCoordinate = pixelCoordinates + new Coordinate(1, 1);
 
         return Task.Run(() =>
         {
             lock (_mapUpdater)
             {
                 (Map map, Pixel[,] pixelArray) = GetMap();
-                List<(Coordinate, PixelModel)> changedPixels = _mapUpdater.PlacePixel(map, pixelCoordinates, newGuild);
+                List<(Coordinate, PixelModel)> changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newGuild);
+                changedPixels.Add((borderfiedCoordinate, new PixelModel { Type = PixelType.Normal, Owner = newOwner.Guild.Name }));
                 DoGrpcUpdate(pixelArray, changedPixels, newOwner);
                 DoDatabaseUpdate(pixelArray, changedPixels, newOwner);
             }
@@ -78,7 +80,7 @@ public class MapUpdaterWrapper(
         {
             PixelModel mapPixel = new PixelModel
             {
-                Type = PixelType.Normal,
+                Type = pixel.User?.SpawnX == pixel.X && pixel.User?.SpawnY == pixel.Y ? PixelType.Spawn : PixelType.Normal,
                 Owner = pixel.User?.Guild?.Name,
                 OwnPixel = false
             };
@@ -102,7 +104,7 @@ public class MapUpdaterWrapper(
                 nearbyPixels[coordinate] = new()
                 {
                     Coordinate = coordinate - new Coordinate(1, 1),
-                    User = pixel.User
+                    User = pixel?.User
                 };
             }, changedPixel.Item1);
 
@@ -144,8 +146,8 @@ public class MapUpdaterWrapper(
                 },
                 pixel = new
                 {
-                    x = changedPixel.Item1.X,
-                    y = changedPixel.Item1.Y
+                    x = changedPixel.Item1.X - 1,
+                    y = changedPixel.Item1.Y - 1
                 }
             });
 
@@ -170,7 +172,7 @@ public class MapUpdaterWrapper(
 
     private void LoopNearbyPixelsInsideFogOfWar(Action<Coordinate> action, Coordinate aroundCoordinate)
     {
-        int fogOfWarDistance = _gameOptions.FogOfWarDistance;
+        int fogOfWarDistance = _gameOptions.FogOfWarDistance * 2;
         int minY = Math.Clamp(aroundCoordinate.Y - fogOfWarDistance, 0, _gameOptions.Height);
         int maxY = Math.Clamp(aroundCoordinate.Y + fogOfWarDistance, 0, _gameOptions.Height);
         int minX = Math.Clamp(aroundCoordinate.X - fogOfWarDistance, 0, _gameOptions.Width);

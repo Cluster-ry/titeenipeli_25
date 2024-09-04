@@ -71,15 +71,16 @@ public class MapController : ControllerBase
         Map map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
         map = CalculateFogOfWar(map);
+        Map inversedMap = InverseMap(map);
 
         GetPixelsResult result = new GetPixelsResult
         {
             PlayerSpawn = new Coordinate
             {
-                X = user.SpawnX,
-                Y = user.SpawnY
+                X = user.SpawnX - map.MinViewableX,
+                Y = user.SpawnY - map.MinViewableY
             },
-            Pixels = map.Pixels
+            Pixels = inversedMap.Pixels
         };
 
         return Ok(result);
@@ -113,7 +114,7 @@ public class MapController : ControllerBase
             Y = user.SpawnY + pixelsInput.Y
         };
 
-        if (IsValidPlacement(globalCoordinate, user))
+        if (!IsValidPlacement(globalCoordinate, user))
         {
             ErrorResult error = new ErrorResult
             {
@@ -259,7 +260,11 @@ public class MapController : ControllerBase
             Pixels = new PixelModel[map.MaxViewableX - (map.MinViewableX + 1),
                 map.MaxViewableY - (map.MinViewableY + 1)],
             Width = map.MaxViewableX - (map.MinViewableX + 1),
-            Height = map.MaxViewableY - (map.MinViewableY + 1)
+            Height = map.MaxViewableY - (map.MinViewableY + 1),
+            MinViewableX = map.MinViewableX,
+            MinViewableY = map.MinViewableY,
+            MaxViewableX = map.MaxViewableX,
+            MaxViewableY = map.MaxViewableY
         };
 
         int offsetX = map.MinViewableX + 1;
@@ -284,6 +289,23 @@ public class MapController : ControllerBase
         }
 
         return trimmedMap;
+    }
+
+    private static Map InverseMap(Map map) {
+        Map inversedMap = new Map
+        {
+            Pixels = new PixelModel[map.Height, map.Width],
+            Width = map.Height,
+            Height = map.Width
+        };
+        for (int x = 0; x < map.Width; x++)
+        {
+            for (int y = 0; y < map.Height; y++)
+            {
+                inversedMap.Pixels[y, x] = map.Pixels[x, y];
+            }
+        }
+        return inversedMap;
     }
 
     private bool IsValidPlacement(Coordinate pixelCoordinate, User user)

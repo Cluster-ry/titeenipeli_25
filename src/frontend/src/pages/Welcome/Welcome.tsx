@@ -3,7 +3,6 @@ import { LogoContainer } from "./LogoContainer";
 import { GreetingContainer } from "./GreetingContainer";
 import { postLogin } from "../../api/login";
 import { useNavigate } from "react-router-dom";
-import { postUsers, putUsers } from "../../api/users";
 
 export const Welcome = () => {
   const navigate = useNavigate();
@@ -18,7 +17,7 @@ export const Welcome = () => {
       authDate: "",
       hash: "",
     });*/
-    navigate("/Map");
+    navigate("/game");
   }
 
   return (

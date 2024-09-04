@@ -1,16 +1,12 @@
-import { useMemo, useState } from "react";
-
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
 import { guildColor } from "./guild/Guild";
 import { mapConfig } from "./MapConfig";
-import { PixelMap } from "../../models/PixelMap";
 import { Coordinate } from "../../models/Coordinate";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getPixels, postPixels } from "../../api/map";
-import { Pixel } from "../../models/Pixel";
-const defaultGuild = 6; // For testing
+import useGameMapStore, { ConnectionStatus } from "../../stores/store";
+import { postPixels } from "../../api/map";
+import { useState } from "react";
 
 /**
  * @component GameMap
@@ -21,21 +17,8 @@ const defaultGuild = 6; // For testing
  * client.
  */
 const GameMap = () => {
-  // Generates an array of pixel elements
-  const generateMap = (pixelResults: Pixel[][]) => {
-    const pixels: PixelMap = new Map();
-
-    pixelResults.map((layer, y) => {
-      layer.map((pixel, x) => {
-        if (pixel) {
-          pixels.set({ x, y }, pixel.owner);
-        } else {
-          pixels.set({ x, y }, undefined);
-        }
-      });
-    });
-    return pixels;
-  };
+  const gameMapStore = useGameMapStore((state) => state);
+  useState(gameMapStore.initializeMap)
 
   /**
    * Executes when the client conquers a pixel for their guild.
@@ -45,67 +28,51 @@ const GameMap = () => {
    * @note Upon change, the map is automatically refreshed.
    */
   async function conquer(coordinate: Coordinate) {
-    let res = await postPixels(coordinate);
-    console.log(res);
-
-    /*const newPixelMap = new Map(pixelMap);
-    newPixelMap.set(coordinate, defaultGuild);
-    setPixelMap(newPixelMap); // To be replaced by GRPC*/
+    await postPixels(coordinate);
   }
 
-  const queryClient = useQueryClient();
-  const { isPending, error, data } = useQuery({
-    queryKey: ["map"],
-    queryFn: getPixels,
-  });
-
-  if (isPending) {
+  if (gameMapStore.connectionStatus === ConnectionStatus.Disconnected) {
+    return <span>Disconnected</span>;
+  } else if (gameMapStore.connectionStatus === ConnectionStatus.Connecting) {
     return <span>Loading...</span>;
   }
-  if (error) {
-    return <span>Error: {error.message}</span>;
-  }
-  if ("data" in data) {
-    console.log(data.data);
-    let map = generateMap(data.data.pixels);
-    const pixelElements = [];
-    for (const [coordinate, guild] of map) {
-      const rectangleX = coordinate.x * mapConfig.PixelSize;
-      const rectangleY = coordinate.y * mapConfig.PixelSize;
-      const color = guildColor(guild);
 
-      pixelElements.push(
-        <Rectangle
-          key={coordinate.x * 1000 + coordinate.y}
-          x={rectangleX}
-          y={rectangleY}
-          width={mapConfig.PixelSize}
-          height={mapConfig.PixelSize}
-          color={color}
-          onClick={() => conquer(coordinate)}
-        />
-      );
-    }
+  const pixelElements = [];
+  for (const [coordinate, pixel] of gameMapStore.pixels) {
+    const rectangleX = coordinate.x * mapConfig.PixelSize;
+    const rectangleY = coordinate.y * mapConfig.PixelSize;
+    const color = guildColor(pixel?.owner);
 
-    return (
-      <>
-        <Stage
-          width={window.innerWidth}
-          height={window.innerHeight}
-          options={{ background: 0xffffff, resizeTo: window }}
-        >
-          <Viewport
-            width={window.innerWidth}
-            height={window.innerHeight}
-            maxWidth={mapConfig.MapWidth * mapConfig.PixelSize}
-            maxHeight={mapConfig.MapHeight * mapConfig.PixelSize}
-          >
-            <Container>{pixelElements}</Container>
-          </Viewport>
-        </Stage>
-      </>
+    pixelElements.push(
+      <Rectangle
+        key={coordinate.x * 1000 + coordinate.y}
+        x={rectangleX}
+        y={rectangleY}
+        width={mapConfig.PixelSize}
+        height={mapConfig.PixelSize}
+        color={color}
+        onClick={() => conquer(coordinate)}
+      />
     );
   }
+
+  return (
+    <>
+      <Stage
+        width={window.innerWidth}
+        height={window.innerHeight}
+        options={{ background: 0xffffff, resizeTo: window }}
+      >
+        <Viewport
+          width={window.innerWidth}
+          height={window.innerHeight}
+          boundingBox={gameMapStore.pixelsBoundingBox}
+        >
+          <Container>{pixelElements}</Container>
+        </Viewport>
+      </Stage>
+    </>
+  );
 };
 
 export default GameMap;

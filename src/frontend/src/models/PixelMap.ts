@@ -1,4 +1,4 @@
 import { Coordinate } from "./Coordinate";
-import Guild from "./enum/Guild";
+import { Pixel } from "./Pixel";
 
-export type PixelMap = Map<Coordinate, Guild | undefined>;
+export type PixelMap = Map<Coordinate, Pixel | undefined>;

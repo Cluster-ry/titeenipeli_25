@@ -1,5 +1,5 @@
 export interface Pixel {
   type: string;
-  owner: number;
+  owner: number | undefined;
   ownPixel: boolean;
 }
