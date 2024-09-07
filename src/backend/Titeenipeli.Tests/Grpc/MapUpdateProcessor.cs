@@ -110,7 +110,7 @@ public class MapUpdateProcessorTest
 
 
     [TestCaseSource(nameof(IncrementalMapUpdateTestCases))]
-    public async Task GrpcMapUpdateProcessorTests(int[,] inputMap, List<GrpcMapChangeInput> changes, int[,] outputMap)
+    public async Task GrpcMapUpdateProcessorTests(int[,] inputMap, List<MapChange> changes, int[,] outputMap)
     {
         Dictionary<Coordinate, GrpcChangePixel> newPixels = MapUtils.MatrixOfUsersToPixels(inputMap, _users);
         GrpcMapChangesInput input = new(newPixels, changes);
@@ -141,8 +141,8 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Emp },
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
-                new List<GrpcMapChangeInput> {
-                    new GrpcMapChangeInput(new Coordinate {X = 5, Y = 5}, null, _otherUser)
+                new List<MapChange> {
+                    new MapChange(new Coordinate {X = 5, Y = 5}, null, _otherUser)
                 },
                 new[,]
                 {
@@ -175,8 +175,8 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Emp },
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
-                new List<GrpcMapChangeInput> {
-                    new GrpcMapChangeInput(new Coordinate {X = 5, Y = 5}, null, CurrentUser)
+                new List<MapChange> {
+                    new MapChange(new Coordinate {X = 5, Y = 5}, null, CurrentUser)
                 },
                 new[,]
                 {
@@ -209,8 +209,8 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Emp },
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
-                new List<GrpcMapChangeInput> {
-                    new GrpcMapChangeInput(new Coordinate {X = 5, Y = 5}, CurrentUser, _otherUser)
+                new List<MapChange> {
+                    new MapChange(new Coordinate {X = 5, Y = 5}, CurrentUser, _otherUser)
                 },
                 new[,]
                 {
@@ -243,32 +243,32 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Emp },
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
-                new List<GrpcMapChangeInput> {
-                    new GrpcMapChangeInput(new Coordinate {X = 5, Y = 6}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 2, Y = 2}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 3, Y = 2}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 4, Y = 2}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 5, Y = 2}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 6, Y = 2}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 7, Y = 2}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 8, Y = 2}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 8, Y = 3}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 8, Y = 4}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 8, Y = 5}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 8, Y = 6}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 8, Y = 7}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 8, Y = 8}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 7, Y = 8}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 6, Y = 8}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 5, Y = 8}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 4, Y = 8}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 3, Y = 8}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 2, Y = 8}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 2, Y = 7}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 2, Y = 6}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 2, Y = 5}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 2, Y = 4}, null, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 2, Y = 3}, null, _otherUser),
+                new List<MapChange> {
+                    new MapChange(new Coordinate {X = 5, Y = 6}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 2, Y = 2}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 3, Y = 2}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 4, Y = 2}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 5, Y = 2}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 6, Y = 2}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 7, Y = 2}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 8, Y = 2}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 8, Y = 3}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 8, Y = 4}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 8, Y = 5}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 8, Y = 6}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 8, Y = 7}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 8, Y = 8}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 7, Y = 8}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 6, Y = 8}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 5, Y = 8}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 4, Y = 8}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 3, Y = 8}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 2, Y = 8}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 2, Y = 7}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 2, Y = 6}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 2, Y = 5}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 2, Y = 4}, null, _otherUser),
+                    new MapChange(new Coordinate {X = 2, Y = 3}, null, _otherUser),
                 },
                 new[,]
                 {
@@ -301,8 +301,8 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Emp },
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
-                new List<GrpcMapChangeInput> {
-                    new GrpcMapChangeInput(new Coordinate {X = 5, Y = 5}, CurrentUser, _otherUser)
+                new List<MapChange> {
+                    new MapChange(new Coordinate {X = 5, Y = 5}, CurrentUser, _otherUser)
                 },
                 new[,]
                 {
@@ -335,8 +335,8 @@ public class MapUpdateProcessorTest
                     { Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth },
                     { Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth },
                 },
-                new List<GrpcMapChangeInput> {
-                    new GrpcMapChangeInput(new Coordinate {X = 0, Y = 0}, null, CurrentUser)
+                new List<MapChange> {
+                    new MapChange(new Coordinate {X = 0, Y = 0}, null, CurrentUser)
                 },
                 new[,]
                 {
@@ -369,8 +369,8 @@ public class MapUpdateProcessorTest
                     { Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth },
                     { Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth },
                 },
-                new List<GrpcMapChangeInput> {
-                    new GrpcMapChangeInput(new Coordinate {X = 0, Y = 0}, CurrentUser, _otherUser)
+                new List<MapChange> {
+                    new MapChange(new Coordinate {X = 0, Y = 0}, CurrentUser, _otherUser)
                 },
                 new[,]
                 {
@@ -403,10 +403,10 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
-                new List<GrpcMapChangeInput> {
-                    new GrpcMapChangeInput(new Coordinate {X = 1, Y = 1}, CurrentUser, _otherUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 2, Y = 1}, _otherUser, CurrentUser),
-                    new GrpcMapChangeInput(new Coordinate {X = 1, Y = 2}, null, _otherUser),
+                new List<MapChange> {
+                    new MapChange(new Coordinate {X = 1, Y = 1}, CurrentUser, _otherUser),
+                    new MapChange(new Coordinate {X = 2, Y = 1}, _otherUser, CurrentUser),
+                    new MapChange(new Coordinate {X = 1, Y = 2}, null, _otherUser),
                 },
                 new[,]
                 {

@@ -103,10 +103,12 @@ public class MapController : ControllerBase
             return BadRequest();
         }
 
+        /*
         if (!_rateLimitService.CanPlacePixel(user))
         {
             return new TooManyRequestsResult("Try again later", _rateLimitService.TimeBeforeNextPixel(user));
         }
+        */
 
         Coordinate globalCoordinate = new Coordinate
         {
@@ -291,7 +293,8 @@ public class MapController : ControllerBase
         return trimmedMap;
     }
 
-    private static Map InverseMap(Map map) {
+    private static Map InverseMap(Map map)
+    {
         Map inversedMap = new Map
         {
             Pixels = new PixelModel[map.Height, map.Width],

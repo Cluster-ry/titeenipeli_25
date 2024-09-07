@@ -8,6 +8,7 @@ import { AxiosResponse } from "axios";
 import { ViewportBoundigBox } from "../components/gameMap/Viewport";
 import { getGrpcClient } from "../core/grpc/grpcClient";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
+import PixelType from "../models/enum/PixelType";
 
 // The amount of rows and columns in the map. These can be
 // changed to alter the map size.
@@ -80,18 +81,18 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
     const pixels = get().pixels;
     for (const update of incrementalUpdateResponse.updates) {
       pixels.set(
-        {
+        JSON.stringify({
           x: update.spawnRelativeCoordinate?.x ?? 0,
           y: update.spawnRelativeCoordinate?.y ?? 0,
-        },
+        }),
         {
-          type: "normal",
-          owner: update.owner === 0 ? undefined: update.owner - 1,
+          type: update.type as unknown as PixelType,
+          owner: update.owner === 0 ? undefined : update.owner - 1,
           ownPixel: update.ownPixel,
         }
       );
     }
-    set((state) => ({ ...state, pixels: pixels }))
+    set((state) => ({ ...state, pixels: pixels }));
   },
 
   setPlayerGuild: (guild: number) =>
@@ -105,7 +106,7 @@ const mapMatrixToMapDictionary = (results: GetPixelsResult) => {
 
   results.pixels.map((layer, y) => {
     layer.map((pixel, x) => {
-      pixels.set({ x: x - playerX, y: y - playerY }, pixel);
+      pixels.set(JSON.stringify({ x: x - playerX, y: y - playerY }), pixel);
     });
   });
   return pixels;
@@ -116,7 +117,8 @@ const computeBoundingBox = (pixels: PixelMap): ViewportBoundigBox => {
   let minY = Number.MAX_SAFE_INTEGER;
   let maxX = Number.MIN_SAFE_INTEGER;
   let maxY = Number.MIN_SAFE_INTEGER;
-  for (const [coordinate, _] of pixels) {
+  for (const [serializedCoordinate, _] of pixels) {
+    const coordinate = JSON.parse(serializedCoordinate)
     if (coordinate.x < minX) minX = coordinate.x;
     if (coordinate.y < minY) minY = coordinate.y;
     if (coordinate.x > maxX) maxX = coordinate.x;

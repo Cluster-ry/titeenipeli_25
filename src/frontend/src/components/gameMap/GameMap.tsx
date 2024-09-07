@@ -1,12 +1,13 @@
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
-import { guildColor } from "./guild/Guild";
+import { pixelColor } from "./guild/Guild";
 import { mapConfig } from "./MapConfig";
 import { Coordinate } from "../../models/Coordinate";
 import useGameMapStore, { ConnectionStatus } from "../../stores/store";
 import { postPixels } from "../../api/map";
 import { useState } from "react";
+import PixelType from "../../models/enum/PixelType";
 
 /**
  * @component GameMap
@@ -18,7 +19,7 @@ import { useState } from "react";
  */
 const GameMap = () => {
   const gameMapStore = useGameMapStore((state) => state);
-  useState(gameMapStore.initializeMap)
+  useState(gameMapStore.initializeMap);
 
   /**
    * Executes when the client conquers a pixel for their guild.
@@ -38,14 +39,15 @@ const GameMap = () => {
   }
 
   const pixelElements = [];
-  for (const [coordinate, pixel] of gameMapStore.pixels) {
+  for (const [serializedCoordinate, pixel] of gameMapStore.pixels) {
+    const coordinate = JSON.parse(serializedCoordinate);
     const rectangleX = coordinate.x * mapConfig.PixelSize;
     const rectangleY = coordinate.y * mapConfig.PixelSize;
-    const color = guildColor(pixel?.owner);
+    const color = pixelColor(pixel)
 
     pixelElements.push(
       <Rectangle
-        key={coordinate.x * 1000 + coordinate.y}
+        key={`x:${coordinate.x} y:${coordinate.y}`}
         x={rectangleX}
         y={rectangleY}
         width={mapConfig.PixelSize}

@@ -1,4 +1,3 @@
-import { Coordinate } from "./Coordinate";
 import { Pixel } from "./Pixel";
 
-export type PixelMap = Map<Coordinate, Pixel | undefined>;
+export type PixelMap = Map<string, Pixel | undefined>;
