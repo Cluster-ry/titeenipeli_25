@@ -165,7 +165,7 @@ const computeBoundingBox = (pixels: PixelMap): ViewportBoundigBox => {
   let minY = Number.MAX_SAFE_INTEGER;
   let maxX = Number.MIN_SAFE_INTEGER;
   let maxY = Number.MIN_SAFE_INTEGER;
-  for (const [serializedCoordinate, _] of pixels) {
+  for (const [serializedCoordinate] of pixels) {
     const coordinate = JSON.parse(serializedCoordinate);
     if (coordinate.x < minX) minX = coordinate.x;
     if (coordinate.y < minY) minY = coordinate.y;

@@ -26,6 +26,7 @@ export async function withRetry<T>(
 
   // Backout retry.
   let attempt = settings.standardRetryCount;
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     attempt++;
     try {
