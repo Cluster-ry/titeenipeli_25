@@ -14,7 +14,12 @@ func main() {
 			return err
 		}
 
-		k8sCluster, err := buildCluster(ctx, cfg)
+		entraInfo, err := buildEntra(ctx)
+		if err != nil {
+			return err
+		}
+
+		k8sCluster, err := buildCluster(ctx, cfg, *entraInfo)
 		if err != nil {
 			return err
 		}

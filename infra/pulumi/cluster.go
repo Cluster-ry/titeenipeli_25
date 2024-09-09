@@ -5,7 +5,6 @@ import (
 
 	cs "github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2"
 	"github.com/pulumi/pulumi-azure-native-sdk/resources/v2"
-	"github.com/pulumi/pulumi-azuread/sdk/v5/go/azuread"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -15,40 +14,10 @@ type ClusterInfo struct {
 	ResourceGroup  *resources.ResourceGroup
 }
 
-func buildCluster(ctx *pulumi.Context, cfg Config) (*ClusterInfo, error) {
-	resourceGroup, err := resources.NewResourceGroup(ctx, "titeenipeli-rg", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	adApp, err := azuread.NewApplication(ctx, "titeenipeli-app",
-		&azuread.ApplicationArgs{
-			DisplayName: pulumi.String("titeenipeli-app"),
-		})
-	if err != nil {
-		return nil, err
-	}
-
-	adSp, err := azuread.NewServicePrincipal(ctx, "service-principal",
-		&azuread.ServicePrincipalArgs{
-			ClientId: adApp.ClientId,
-		})
-	if err != nil {
-		return nil, err
-	}
-
-	adSpPassword, err := azuread.NewServicePrincipalPassword(ctx, "sp-password",
-		&azuread.ServicePrincipalPasswordArgs{
-			ServicePrincipalId: adSp.ID(),
-			EndDate:            pulumi.String("2099-01-01T00:00:00Z"),
-		})
-	if err != nil {
-		return nil, err
-	}
-
+func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInfo, error) {
 	k8sCluster, _ := cs.NewManagedCluster(ctx, "cluster",
 		&cs.ManagedClusterArgs{
-			ResourceGroupName: resourceGroup.Name,
+			ResourceGroupName: entra.ResourceGroup.Name,
 			AgentPoolProfiles: cs.ManagedClusterAgentPoolProfileArray{
 				cs.ManagedClusterAgentPoolProfileArgs{
 					Count:        pulumi.Int(cfg.NodeCount),
@@ -61,8 +30,16 @@ func buildCluster(ctx *pulumi.Context, cfg Config) (*ClusterInfo, error) {
 					Type:         pulumi.String("VirtualMachineScaleSets"),
 				},
 			},
-			DnsPrefix:         resourceGroup.Name,
-			EnableRBAC:        pulumi.Bool(true),
+			DnsPrefix:  entra.ResourceGroup.Name,
+			EnableRBAC: pulumi.Bool(true),
+			OidcIssuerProfile: &cs.ManagedClusterOIDCIssuerProfileArgs{
+				Enabled: pulumi.Bool(true),
+			},
+			SecurityProfile: &cs.ManagedClusterSecurityProfileArgs{
+				WorkloadIdentity: &cs.ManagedClusterSecurityProfileWorkloadIdentityArgs{
+					Enabled: pulumi.Bool(true),
+				},
+			},
 			KubernetesVersion: pulumi.String(cfg.K8sVersion),
 			LinuxProfile: cs.ContainerServiceLinuxProfileArgs{
 				AdminUsername: pulumi.String(cfg.AdminUserName),
@@ -76,14 +53,14 @@ func buildCluster(ctx *pulumi.Context, cfg Config) (*ClusterInfo, error) {
 			},
 			NodeResourceGroup: pulumi.String("node-resource-group"),
 			ServicePrincipalProfile: cs.ManagedClusterServicePrincipalProfileArgs{
-				ClientId: adApp.ClientId,
-				Secret:   adSpPassword.Value,
+				ClientId: entra.Application.ClientId,
+				Secret:   entra.ServicerPrincipalPassword.Value,
 			},
-		}, pulumi.DependsOn([]pulumi.Resource{adSp}))
+		})
 
 	return &ClusterInfo{
 		ManagedCluster: k8sCluster,
-		ResourceGroup:  resourceGroup,
+		ResourceGroup:  entra.ResourceGroup,
 	}, nil
 }
 
