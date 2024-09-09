@@ -7,6 +7,6 @@ public class PixelWithType
 {
     public Coordinate Location { get; init; }
     public PixelType Type { get; set; }
-    public User? User { get; set; }
+    public User? Owner { get; set; }
 
 }

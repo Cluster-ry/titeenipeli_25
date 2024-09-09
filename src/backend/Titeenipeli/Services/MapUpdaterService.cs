@@ -77,7 +77,7 @@ public class MapUpdaterWrapper(
             {
                 Location = new(pixel.X, pixel.Y),
                 Type = PixelType.Normal,
-                User = pixel.User
+                Owner = pixel.User
             };
 
             map[pixel.X + 1, pixel.Y + 1] = mapPixel;
@@ -105,7 +105,7 @@ public class MapUpdaterWrapper(
                 nearbyPixels[coordinate] = new()
                 {
                     Coordinate = coordinate,
-                    User = pixel?.User
+                    User = pixel?.Owner
                 };
             }, changedPixel.Coordinate);
 

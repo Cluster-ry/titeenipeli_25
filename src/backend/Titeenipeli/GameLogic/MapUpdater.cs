@@ -24,10 +24,10 @@ public class MapUpdater
     public List<MapChange> PlacePixel(PixelWithType[,] map, Coordinate pixelCoordinates, User placingUser)
     {
         List<MapChange> allChangedPixels = [];
-        User? oldOwner = map[pixelCoordinates.X, pixelCoordinates.Y].User;
+        User? oldOwner = map[pixelCoordinates.X, pixelCoordinates.Y].Owner;
         allChangedPixels.Add(new() { Coordinate = pixelCoordinates - new Coordinate(1, 1), OldOwner = oldOwner, NewOwner = placingUser });
         map[pixelCoordinates.X, pixelCoordinates.Y]
-            = new PixelWithType { Location = pixelCoordinates - new Coordinate(1, 1), Type = PixelType.Normal, User = placingUser };
+            = new PixelWithType { Location = pixelCoordinates - new Coordinate(1, 1), Type = PixelType.Normal, Owner = placingUser };
 
         // TODO uncomment once _PlaceWithCache is implemented
         // TODO  - this should drop time complexity to O(log n) from O(n) if done right (MIT approved)
@@ -93,7 +93,7 @@ public class MapUpdater
         {
             for (var x = 1; x < xSize; x++)
             {
-                var currentPixelGuild = map[x, y].User?.Guild?.Name;
+                var currentPixelGuild = map[x, y].Owner?.Guild?.Name;
                 var (leftNode, aboveNode) = TryMerge(currentPixelGuild, nodeMap, y, x, nodes);
 
                 var isSpawnNode = map[x, y].Type == PixelType.Spawn;
@@ -246,9 +246,9 @@ public class MapUpdater
                 continue;
             }
 
-            MapChange change = new() { Coordinate = new Coordinate(x - 1, y - 1), OldOwner = map[x, y].User, NewOwner = placingUser };
+            MapChange change = new() { Coordinate = new Coordinate(x - 1, y - 1), OldOwner = map[x, y].Owner, NewOwner = placingUser };
             changedPixels.Add(change);
-            map[x, y].User = placingUser;
+            map[x, y].Owner = placingUser;
             map[x, y].Type = PixelType.Normal;
         }
         return changedPixels;
