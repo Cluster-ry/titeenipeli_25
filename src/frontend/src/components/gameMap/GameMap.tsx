@@ -7,7 +7,6 @@ import { Coordinate } from "../../models/Coordinate";
 import useGameMapStore, { ConnectionStatus } from "../../stores/store";
 import { postPixels } from "../../api/map";
 import { useState } from "react";
-import PixelType from "../../models/enum/PixelType";
 
 /**
  * @component GameMap
@@ -43,7 +42,7 @@ const GameMap = () => {
     const coordinate = JSON.parse(serializedCoordinate);
     const rectangleX = coordinate.x * mapConfig.PixelSize;
     const rectangleY = coordinate.y * mapConfig.PixelSize;
-    const color = pixelColor(pixel)
+    const color = pixelColor(pixel);
 
     pixelElements.push(
       <Rectangle

@@ -46,6 +46,7 @@ export class GrpcClient {
     callback: (connected: boolean) => Promise<void> | void
   ) {
     this.onConnectionStatusChangedCallbacks.push(callback);
+    callback(this.incrementalMapUpdateClient?.connected ?? false);
   }
 
   unRegisterOnConnectionStatusChangedListener(

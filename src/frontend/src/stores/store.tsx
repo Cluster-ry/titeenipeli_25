@@ -1,3 +1,7 @@
+import {
+  instanceOfClientApiError,
+  type ClientApiError,
+} from "../models/ClientApiError";
 import { create } from "zustand";
 import { PlayerCoordinates } from "../models/PlayerCoordinates";
 import { Guild } from "../components/gameMap/guild/Guild";
@@ -9,6 +13,7 @@ import { ViewportBoundigBox } from "../components/gameMap/Viewport";
 import { getGrpcClient } from "../core/grpc/grpcClient";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
 import PixelType from "../models/enum/PixelType";
+import withRetry from "../utils/retryUtils";
 
 // The amount of rows and columns in the map. These can be
 // changed to alter the map size.
@@ -24,11 +29,14 @@ interface GameMap {
   playerGuild: Guild;
   pixels: PixelMap;
   pixelsBoundingBox: ViewportBoundigBox;
-  mapSet: boolean;
+  initialized: boolean;
   connectionStatus: ConnectionStatus;
+  incrementalUpdateBuffer: Array<IncrementalMapUpdateResponse>;
 
   initializeMap: () => void;
+  reconnect: () => void;
   setPixels: (pixelMap: PixelMap) => void;
+  handleGrpcConnectionStatusChanges: (connected: boolean) => void;
   doIncrementalUpdate: (
     incrementalUpdateResponse: IncrementalMapUpdateResponse
   ) => void;
@@ -40,10 +48,29 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
   playerGuild: 2, // Cluster as default for TESTING
   pixelsBoundingBox: { minX: 0, minY: 0, maxX: 0, maxY: 0 },
   pixels: new Map(),
-  mapSet: false,
+  initialized: false,
   connectionStatus: ConnectionStatus.Disconnected,
+  incrementalUpdateBuffer: [],
 
   initializeMap: async () => {
+    if (get().initialized === true) {
+      return;
+    }
+    set((state) => ({
+      ...state,
+      initialized: true,
+    }));
+
+    const grpcClient = getGrpcClient();
+    grpcClient.incrementalMapUpdateClient?.registerOnResponseListener(
+      get().doIncrementalUpdate
+    );
+    grpcClient.registerOnConnectionStatusChangedListener(
+      get().handleGrpcConnectionStatusChanges
+    );
+  },
+
+  reconnect: async () => {
     if (get().connectionStatus !== ConnectionStatus.Disconnected) {
       return;
     }
@@ -52,21 +79,27 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
       ...state,
       connectionStatus: ConnectionStatus.Connecting,
     }));
-    const grpcClient = getGrpcClient();
-    grpcClient.incrementalMapUpdateClient?.registerOnResponseListener(
-      get().doIncrementalUpdate
-    );
-    // TODO: Hack, proper error handling should be done.
-    const getPixelsResults =
-      (await getPixels()) as AxiosResponse<GetPixelsResult>;
+
+    const getPixelsResults = await withRetry(async () => {
+      const getPixelsResults = await getPixels();
+      if (instanceOfClientApiError(getPixelsResults)) {
+        const error = getPixelsResults as ClientApiError;
+        throw new Error(error.msg);
+      }
+      return getPixelsResults as AxiosResponse<GetPixelsResult>;
+    });
+
     const pixels = mapMatrixToMapDictionary(getPixelsResults.data);
     const pixelsBoundingBox = computeBoundingBox(pixels);
+
     set((state) => ({
       ...state,
       connectionStatus: ConnectionStatus.Connected,
       pixelsBoundingBox,
       pixels: pixels,
     }));
+
+    get().doIncrementalUpdate({ updates: [] });
   },
 
   setConnectionStatus: (connectionStatus: ConnectionStatus) =>
@@ -75,24 +108,39 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
   setPixels: (pixelMap: PixelMap) =>
     set((state) => ({ ...state, pixels: pixelMap })),
 
+  handleGrpcConnectionStatusChanges: (connected: boolean) => {
+    set((state) => ({
+      ...state,
+      connectionStatus: ConnectionStatus.Disconnected,
+    }));
+
+    if (connected) {
+      get().reconnect();
+    }
+  },
+
   doIncrementalUpdate: (
     incrementalUpdateResponse: IncrementalMapUpdateResponse
   ) => {
-    const pixels = get().pixels;
-    for (const update of incrementalUpdateResponse.updates) {
-      pixels.set(
-        JSON.stringify({
-          x: update.spawnRelativeCoordinate?.x ?? 0,
-          y: update.spawnRelativeCoordinate?.y ?? 0,
-        }),
-        {
-          type: update.type as unknown as PixelType,
-          owner: update.owner === 0 ? undefined : update.owner - 1,
-          ownPixel: update.ownPixel,
-        }
-      );
+    const incrementalUpdateBuffer = get().incrementalUpdateBuffer;
+    incrementalUpdateBuffer.push(incrementalUpdateResponse);
+
+    if (get().connectionStatus === ConnectionStatus.Connected) {
+      for (const incrementalUpdate of incrementalUpdateBuffer) {
+        const pixels = get().pixels;
+        parseIncrementalUpdate(pixels, incrementalUpdate);
+
+        const pixelsBoundingBox = computeBoundingBox(pixels);
+        set((state) => ({
+          ...state,
+          pixelsBoundingBox,
+          pixels,
+          incrementalUpdateBuffer: [],
+        }));
+      }
+    } else {
+      set((state) => ({ ...state, incrementalUpdateBuffer }));
     }
-    set((state) => ({ ...state, pixels: pixels }));
   },
 
   setPlayerGuild: (guild: number) =>
@@ -118,7 +166,7 @@ const computeBoundingBox = (pixels: PixelMap): ViewportBoundigBox => {
   let maxX = Number.MIN_SAFE_INTEGER;
   let maxY = Number.MIN_SAFE_INTEGER;
   for (const [serializedCoordinate, _] of pixels) {
-    const coordinate = JSON.parse(serializedCoordinate)
+    const coordinate = JSON.parse(serializedCoordinate);
     if (coordinate.x < minX) minX = coordinate.x;
     if (coordinate.y < minY) minY = coordinate.y;
     if (coordinate.x > maxX) maxX = coordinate.x;
@@ -130,6 +178,25 @@ const computeBoundingBox = (pixels: PixelMap): ViewportBoundigBox => {
     maxX,
     maxY,
   };
+};
+
+const parseIncrementalUpdate = (
+  pixels: PixelMap,
+  incrementalUpdateResponse: IncrementalMapUpdateResponse
+) => {
+  for (const update of incrementalUpdateResponse.updates) {
+    pixels.set(
+      JSON.stringify({
+        x: update.spawnRelativeCoordinate?.x ?? 0,
+        y: update.spawnRelativeCoordinate?.y ?? 0,
+      }),
+      {
+        type: update.type as unknown as PixelType,
+        owner: update.owner === 0 ? undefined : update.owner - 1,
+        ownPixel: update.ownPixel,
+      }
+    );
+  }
 };
 
 export default useGameMapStore;
