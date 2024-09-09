@@ -4,7 +4,7 @@ using Titeenipeli.Schema;
 
 namespace Titeenipeli.Grpc.Common;
 
-public class GrpcConnection<TResponseStream> : IGrpcConnection<TResponseStream> where TResponseStream: new()
+public class GrpcConnection<TResponseStream> : IGrpcConnection<TResponseStream> where TResponseStream : new()
 {
     private const int MaxChannelSize = 100;
     private const int KeepAliveFrequencyInSeconds = 15;
@@ -31,8 +31,10 @@ public class GrpcConnection<TResponseStream> : IGrpcConnection<TResponseStream> 
     private async Task KeepAlive()
     {
         Task queueCompletion = ResponseStreamQueue.Reader.Completion;
-        while (!queueCompletion.IsCompleted) {
-            if (_lastMessageSent > DateTime.Now - TimeSpan.FromSeconds(KeepAliveFrequencyInSeconds)) {
+        while (!queueCompletion.IsCompleted)
+        {
+            if (_lastMessageSent > DateTime.Now - TimeSpan.FromSeconds(KeepAliveFrequencyInSeconds))
+            {
                 continue;
             }
 
@@ -70,7 +72,8 @@ public class GrpcConnection<TResponseStream> : IGrpcConnection<TResponseStream> 
 
     public void Dispose()
     {
-        if (disposed) {
+        if (disposed)
+        {
             return;
         }
         disposed = true;

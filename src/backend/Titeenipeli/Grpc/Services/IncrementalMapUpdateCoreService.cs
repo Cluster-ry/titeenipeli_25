@@ -50,7 +50,8 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
         connection.Dispose();
         dictionaryOutput.TryRemove(connection.Id, out _);
 
-        if (dictionaryOutput.Count == 0) {
+        if (dictionaryOutput.Count == 0)
+        {
             _connections.TryRemove(connection.User.Id, out _);
         }
     }
