@@ -3,7 +3,7 @@ using Titeenipeli.Schema;
 
 namespace Titeenipeli.Services;
 
-public interface IMapUpdaterWrapper
+public interface IMapUpdaterService
 {
     public Task PlacePixel(Coordinate pixelCoordinates, User newOwner);
 }

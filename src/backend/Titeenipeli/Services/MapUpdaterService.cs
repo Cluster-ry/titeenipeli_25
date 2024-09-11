@@ -10,11 +10,11 @@ using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Services;
 
-public class MapUpdaterWrapper(
+public class MapUpdaterService(
         IServiceScopeFactory scopeFactory,
         GameOptions gameOptions,
         IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService
-    ) : IMapUpdaterWrapper
+    ) : IMapUpdaterService
 {
     private const int BorderWidth = 1;
 
