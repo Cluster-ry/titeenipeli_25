@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Enums;
@@ -23,9 +22,9 @@ public class MapController : ControllerBase
 
     private readonly GameOptions _gameOptions;
 
-    private readonly IGameEventRepositoryService _gameEventRepositoryService;
     private readonly IMapRepositoryService _mapRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
+    private readonly IMapUpdaterService _mapUpdaterService;
 
     private readonly JwtService _jwtService;
     private readonly RateLimitService _rateLimitService;
@@ -35,14 +34,14 @@ public class MapController : ControllerBase
                          RateLimitService rateLimitService,
                          IUserRepositoryService userRepositoryService,
                          IMapRepositoryService mapRepositoryService,
-                         IGameEventRepositoryService gameEventRepositoryService)
+                         IMapUpdaterService mapUpdaterService)
     {
         _gameOptions = gameOptions;
         _rateLimitService = rateLimitService;
         _userRepositoryService = userRepositoryService;
         _mapRepositoryService = mapRepositoryService;
-        _gameEventRepositoryService = gameEventRepositoryService;
         _jwtService = jwtService;
+        _mapUpdaterService = mapUpdaterService;
     }
 
     [HttpGet]
@@ -87,7 +86,7 @@ public class MapController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult PostPixels([FromBody] PostPixelsInput pixelsInput)
+    public async Task<IActionResult> PostPixels([FromBody] PostPixelsInput pixelsInput)
     {
         JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
 
@@ -148,26 +147,10 @@ public class MapController : ControllerBase
         }
 
 
-        pixelToUpdate.User = user;
-        _mapRepositoryService.Update(pixelToUpdate);
+        await _mapUpdaterService.PlacePixel(globalCoordinate, user);
 
         user.LastPlacement = DateTime.UtcNow;
         _userRepositoryService.Update(user);
-
-        GameEvent gameEvent = new GameEvent
-        {
-            User = user,
-            // TODO: This is only temporary, fix this when GameEvent structure is more clear
-            Event = JsonSerializer.Serialize("{ " +
-                                             "   'eventType': 'SetPixel'," +
-                                             "   'coordinates': {" +
-                                             "       'x': " + globalCoordinate.X + "," +
-                                             "       'y': " + globalCoordinate.Y + "," +
-                                             "   }" +
-                                             "}")
-        };
-
-        _gameEventRepositoryService.Add(gameEvent);
 
         return Ok();
     }

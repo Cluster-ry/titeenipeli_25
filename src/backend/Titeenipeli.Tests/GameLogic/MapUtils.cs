@@ -32,7 +32,7 @@ public static class MapUtils
             for (var x = 1; x < xSize + 1; x++)
             {
                 var pixelData = owners[y - 1, x - 1];
-                map[y, x] = new PixelModel
+                map[x, y] = new PixelModel
                 {
                     OwnPixel = false,
                     Type = pixelData.isSpawn ? PixelType.Spawn : PixelType.Normal,
@@ -52,7 +52,7 @@ public static class MapUtils
         {
             for (var x = 1; x < size + 1; x++)
             {
-                map[y, x] = new PixelModel
+                map[x, y] = new PixelModel
                 {
                     OwnPixel = false,
                     Type = PixelType.Normal,
@@ -63,7 +63,7 @@ public static class MapUtils
 
         foreach (var (x, y, owner) in spawnPoints)
         {
-            map[y, x] = new PixelModel { OwnPixel = false, Type = PixelType.Spawn, Owner = owner };
+            map[x, y] = new PixelModel { OwnPixel = false, Type = PixelType.Spawn, Owner = owner };
         }
 
         return new Map { Pixels = map, Height = size, Width = size };
@@ -71,21 +71,21 @@ public static class MapUtils
 
     private static PixelModel[,] BuildMapBorders(int xSize, int ySize)
     {
-        var map = new PixelModel[ySize + 2, xSize + 2];
+        var map = new PixelModel[xSize + 2, ySize + 2];
         for (var x = 0; x < xSize + 2; x++)
         {
-            map[0, x] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
+            map[x, 0] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
         }
 
         for (var y = 1; y < ySize + 1; y++)
         {
-            map[y, 0] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
-            map[y, xSize + 1] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
+            map[0, y] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
+            map[xSize + 1, y] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
         }
 
         for (var x = 0; x < xSize + 2; x++)
         {
-            map[ySize + 1, x] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
+            map[x, ySize + 1] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
         }
 
         return map;
@@ -93,14 +93,14 @@ public static class MapUtils
 
     public static string MapAsColours(Map map)
     {
-        var ySize = map.Pixels.GetUpperBound(0) + 1;
-        var xSize = map.Pixels.GetUpperBound(1) + 1;
+        var xSize = map.Pixels.GetUpperBound(0) + 1;
+        var ySize = map.Pixels.GetUpperBound(1) + 1;
         var builder = new StringBuilder();
         for (var y = 0; y < ySize; y++)
         {
             for (var x = 0; x < xSize; x++)
             {
-                var pixelOwner = map.Pixels[y, x].Owner;
+                var pixelOwner = map.Pixels[x, y].Owner;
                 if (pixelOwner is null)
                 {
                     builder.Append(' ');
@@ -119,14 +119,14 @@ public static class MapUtils
 
     public static string MapAsNumbers(Map map)
     {
-        var ySize = map.Pixels.GetUpperBound(0) + 1;
-        var xSize = map.Pixels.GetUpperBound(1) + 1;
+        var xSize = map.Pixels.GetUpperBound(0) + 1;
+        var ySize = map.Pixels.GetUpperBound(1) + 1;
         var builder = new StringBuilder();
         for (var y = 0; y < ySize; y++)
         {
             for (var x = 0; x < xSize; x++)
             {
-                var pixelOwner = map.Pixels[y, x].Owner;
+                var pixelOwner = map.Pixels[x, y].Owner;
                 if (pixelOwner is null)
                 {
                     builder.Append(' ');
