@@ -39,9 +39,13 @@ paths:
   /map/pixels:
     $ref: "./paths/map/pixels.yaml"
   /users:
-    $ref: "./paths/users.yaml"
+    $ref: "./paths/users/users.yaml"
+  /users/authenticate:
+    $ref: "./paths/users/authenticate.yaml"
 
 components:
   securitySchemes:
     bearerAuth:
       $ref: "./components/securitySchemas/bearerAuth.yaml"
+    botAuth:
+      $ref: "./components/securitySchemas/botAuth.yaml"

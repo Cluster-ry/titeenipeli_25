@@ -24,7 +24,7 @@ public class MapController : ControllerBase
 
     private readonly IMapRepositoryService _mapRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
-    private readonly IMapUpdaterWrapper _mapUpdaterWrapper;
+    private readonly IMapUpdaterService _mapUpdaterService;
 
     private readonly JwtService _jwtService;
     private readonly RateLimitService _rateLimitService;
@@ -34,14 +34,14 @@ public class MapController : ControllerBase
                          RateLimitService rateLimitService,
                          IUserRepositoryService userRepositoryService,
                          IMapRepositoryService mapRepositoryService,
-                         IMapUpdaterWrapper mapUpdaterWrapper)
+                         IMapUpdaterService mapUpdaterService)
     {
         _gameOptions = gameOptions;
         _rateLimitService = rateLimitService;
         _userRepositoryService = userRepositoryService;
         _mapRepositoryService = mapRepositoryService;
         _jwtService = jwtService;
-        _mapUpdaterWrapper = mapUpdaterWrapper;
+        _mapUpdaterService = mapUpdaterService;
     }
 
     [HttpGet]
@@ -150,7 +150,7 @@ public class MapController : ControllerBase
         }
 
 
-        await _mapUpdaterWrapper.PlacePixel(globalCoordinate, user);
+        await _mapUpdaterService.PlacePixel(globalCoordinate, user);
 
         user.LastPlacement = DateTime.UtcNow;
         _userRepositoryService.Update(user);
