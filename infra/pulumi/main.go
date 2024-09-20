@@ -28,10 +28,11 @@ func main() {
 			return err
 		}
 
-		domain, err := createSubDomainZone(ctx, entraInfo, cfg, "test", identity)
+		domain, err := createSubDomainZone(ctx, entraInfo, cfg, "test")
 		if err != nil {
 			return err
 		}
+		addDNSZoneContributorRoleToId(ctx, domain, identity)
 
 		k8sProvider, err := buildProvider(ctx, kubeconfig)
 		if err != nil {
