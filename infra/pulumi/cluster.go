@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 
 	cs "github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2"
+	managedidentity "github.com/pulumi/pulumi-azure-native-sdk/managedidentity/v2"
 	"github.com/pulumi/pulumi-azure-native-sdk/resources/v2"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -57,6 +58,25 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 				Secret:   entra.ServicerPrincipalPassword.Value,
 			},
 		})
+
+	mgIdent, err := managedidentity.NewUserAssignedIdentity(ctx, "userAssignedIdentity", &managedidentity.UserAssignedIdentityArgs{
+		ResourceGroupName: entra.ResourceGroup.Name,
+		ResourceName:      pulumi.String("AKS_service_account"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	managedidentity.NewFederatedIdentityCredential(ctx, "federatedIdentityCredential", &managedidentity.FederatedIdentityCredentialArgs{
+		Audiences: pulumi.StringArray{
+			pulumi.String("api://AzureADTokenExchange"),
+		},
+		FederatedIdentityCredentialResourceName: mgIdent.Name,
+		Issuer:                                  k8sCluster.OidcIssuerProfile.Elem().IssuerURL(),
+		ResourceGroupName:                       entra.ResourceGroup.Name,
+		ResourceName:                            pulumi.String("AKS_service_account"),
+		Subject:                                 pulumi.String("system:serviceaccount:titeenipeli:keyvault"),
+	})
 
 	return &ClusterInfo{
 		ManagedCluster: k8sCluster,
