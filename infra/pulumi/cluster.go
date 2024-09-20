@@ -35,8 +35,8 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 	if err != nil {
 		return nil, err
 	}
-	sleep, err := time.NewSleep(ctx, "wait5Seconds", &time.SleepArgs{
-		CreateDuration: pulumi.String("5s"),
+	sleep, err := time.NewSleep(ctx, "wait30Seconds", &time.SleepArgs{
+		CreateDuration: pulumi.String("30s"),
 	}, pulumi.DependsOn([]pulumi.Resource{
 		previous,
 	}))

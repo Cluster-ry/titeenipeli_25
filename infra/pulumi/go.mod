@@ -15,6 +15,7 @@ require (
 	github.com/pulumi/pulumi-tls/sdk/v5 v5.0.4
 	github.com/pulumi/pulumi/sdk/v3 v3.133.0
 	github.com/pulumiverse/pulumi-time/sdk v0.1.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
