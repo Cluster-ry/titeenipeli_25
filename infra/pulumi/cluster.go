@@ -8,6 +8,9 @@ import (
 	managedidentity "github.com/pulumi/pulumi-azure-native-sdk/managedidentity/v2"
 	"github.com/pulumi/pulumi-azure-native-sdk/resources/v2"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
+	"github.com/pulumi/pulumi-null/sdk/go/null"
+	"github.com/pulumiverse/pulumi-time/sdk/go/time"
+
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
@@ -22,9 +25,29 @@ type workloadIdentities struct {
 }
 
 func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInfo, error) {
+	// These are here as there seems to be some kind of bug with the readiness
+	// of the service principal that causes pulumi to try and create k8s cluster
+	// before service principal can be found. This 30s delay should remedy it.
+	previous, err := null.NewResource(ctx, "waiting", nil,
+		pulumi.DependsOn([]pulumi.Resource{
+			entra.ServicePrincipal,
+		}))
+	if err != nil {
+		return nil, err
+	}
+	sleep, err := time.NewSleep(ctx, "wait5Seconds", &time.SleepArgs{
+		CreateDuration: pulumi.String("5s"),
+	}, pulumi.DependsOn([]pulumi.Resource{
+		previous,
+	}))
+	if err != nil {
+		return nil, err
+	}
+
 	k8sCluster, _ := cs.NewManagedCluster(ctx, "cluster",
 		&cs.ManagedClusterArgs{
 			ResourceGroupName: entra.ResourceGroup.Name,
+			ResourceName:      pulumi.String(cfg.ClusterName),
 			AgentPoolProfiles: cs.ManagedClusterAgentPoolProfileArray{
 				cs.ManagedClusterAgentPoolProfileArgs{
 					Count:        pulumi.Int(cfg.NodeCount),
@@ -63,7 +86,10 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 				ClientId: entra.Application.ClientId,
 				Secret:   entra.ServicerPrincipalPassword.Value,
 			},
-		})
+		},
+		pulumi.DependsOn([]pulumi.Resource{
+			sleep,
+		}))
 
 	return &ClusterInfo{
 		ManagedCluster: k8sCluster,

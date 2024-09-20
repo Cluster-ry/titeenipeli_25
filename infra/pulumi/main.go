@@ -16,11 +16,6 @@ func main() {
 			return err
 		}
 
-		domain, err := createSubDomainZone(ctx, entraInfo, cfg, "test")
-		if err != nil {
-			return err
-		}
-
 		k8sCluster, err := buildCluster(ctx, cfg, *entraInfo)
 		if err != nil {
 			return err
@@ -28,7 +23,15 @@ func main() {
 
 		kubeconfig := getKubeconfig(ctx, k8sCluster)
 
-		createNewIdentity(ctx, k8sCluster, "test", "titeenipeli")
+		identity, err := createNewIdentity(ctx, k8sCluster, "dnszone", "cert-manager")
+		if err != nil {
+			return err
+		}
+
+		domain, err := createSubDomainZone(ctx, entraInfo, cfg, "test", identity)
+		if err != nil {
+			return err
+		}
 
 		k8sProvider, err := buildProvider(ctx, kubeconfig)
 		if err != nil {

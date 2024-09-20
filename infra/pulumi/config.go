@@ -16,6 +16,7 @@ type Config struct {
 	NodeCount        int
 	NodeSize         string
 	BaseDomain       string
+	ClusterName      string
 }
 
 func configure(ctx *pulumi.Context) (Config, error) {
@@ -80,6 +81,11 @@ func configure(ctx *pulumi.Context) (Config, error) {
 	out.BaseDomain = cfg.Get("domain")
 	if out.BaseDomain == "" {
 		out.BaseDomain = "cluster2017.fi"
+	}
+
+	out.ClusterName = cfg.Get("clusterName")
+	if out.ClusterName == "" {
+		out.ClusterName = "titeenipeli-k8s"
 	}
 
 	return out, nil

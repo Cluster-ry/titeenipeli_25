@@ -3,9 +3,7 @@ package main
 import (
 	"github.com/pulumi/pulumi-azure-native-sdk/resources/v2"
 	"github.com/pulumi/pulumi-azuread/sdk/v5/go/azuread"
-	"github.com/pulumi/pulumi-null/sdk/go/null"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"github.com/pulumiverse/pulumi-time/sdk/go/time"
 )
 
 type EntraInfo struct {
@@ -45,22 +43,6 @@ func buildEntra(ctx *pulumi.Context) (*EntraInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// These are here as there seems to be some kind of bug with the readiness
-	// of the service principal that causes pulumi to try and create k8s cluster
-	// before service principal can be found. This 30s delay should remedy it.
-	previous, err := null.NewResource(ctx, "previous", nil,
-		pulumi.DependsOn([]pulumi.Resource{
-			adSpPassword,
-		}))
-	if err != nil {
-		return nil, err
-	}
-	time.NewSleep(ctx, "wait5Seconds", &time.SleepArgs{
-		CreateDuration: pulumi.String("5s"),
-	}, pulumi.DependsOn([]pulumi.Resource{
-		previous,
-	}))
 
 	return &EntraInfo{
 		ResourceGroup:             resourceGroup,
