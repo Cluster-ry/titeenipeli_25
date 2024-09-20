@@ -16,12 +16,19 @@ func main() {
 			return err
 		}
 
+		domain, err := createSubDomainZone(ctx, entraInfo, cfg, "test")
+		if err != nil {
+			return err
+		}
+
 		k8sCluster, err := buildCluster(ctx, cfg, *entraInfo)
 		if err != nil {
 			return err
 		}
 
 		kubeconfig := getKubeconfig(ctx, k8sCluster)
+
+		createNewIdentity(ctx, k8sCluster, "test", "titeenipeli")
 
 		k8sProvider, err := buildProvider(ctx, kubeconfig)
 		if err != nil {
@@ -30,6 +37,7 @@ func main() {
 
 		buildCharts(ctx, k8sProvider)
 
+		ctx.Export("domainName", domain.Name)
 		ctx.Export("kubeconfig", pulumi.ToSecret(kubeconfig))
 		ctx.Export("clusterName", k8sCluster.ManagedCluster.Name)
 

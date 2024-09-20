@@ -15,6 +15,7 @@ type Config struct {
 	SshPublicKey     pulumi.StringInput
 	NodeCount        int
 	NodeSize         string
+	BaseDomain       string
 }
 
 func configure(ctx *pulumi.Context) (Config, error) {
@@ -74,6 +75,11 @@ func configure(ctx *pulumi.Context) (Config, error) {
 	out.NodeSize = cfg.Get("nodeSize")
 	if out.NodeSize == "" {
 		out.NodeSize = "Standard_D2_v2"
+	}
+
+	out.BaseDomain = cfg.Get("domain")
+	if out.BaseDomain == "" {
+		out.BaseDomain = "cluster2017.fi"
 	}
 
 	return out, nil

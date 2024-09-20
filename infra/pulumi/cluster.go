@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"fmt"
 
 	cs "github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2"
 	managedidentity "github.com/pulumi/pulumi-azure-native-sdk/managedidentity/v2"
@@ -13,6 +14,11 @@ import (
 type ClusterInfo struct {
 	ManagedCluster *cs.ManagedCluster
 	ResourceGroup  *resources.ResourceGroup
+}
+
+type workloadIdentities struct {
+	UserAssignedIdentity        *managedidentity.UserAssignedIdentity
+	FederatedIdentityCredential *managedidentity.FederatedIdentityCredential
 }
 
 func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInfo, error) {
@@ -59,25 +65,6 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 			},
 		})
 
-	mgIdent, err := managedidentity.NewUserAssignedIdentity(ctx, "userAssignedIdentity", &managedidentity.UserAssignedIdentityArgs{
-		ResourceGroupName: entra.ResourceGroup.Name,
-		ResourceName:      pulumi.String("AKS_service_account"),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	managedidentity.NewFederatedIdentityCredential(ctx, "federatedIdentityCredential", &managedidentity.FederatedIdentityCredentialArgs{
-		Audiences: pulumi.StringArray{
-			pulumi.String("api://AzureADTokenExchange"),
-		},
-		FederatedIdentityCredentialResourceName: mgIdent.Name,
-		Issuer:                                  k8sCluster.OidcIssuerProfile.Elem().IssuerURL(),
-		ResourceGroupName:                       entra.ResourceGroup.Name,
-		ResourceName:                            pulumi.String("AKS_service_account"),
-		Subject:                                 pulumi.String("system:serviceaccount:titeenipeli:keyvault"),
-	})
-
 	return &ClusterInfo{
 		ManagedCluster: k8sCluster,
 		ResourceGroup:  entra.ResourceGroup,
@@ -109,4 +96,34 @@ func buildProvider(
 	return kubernetes.NewProvider(ctx, "k8s-provider", &kubernetes.ProviderArgs{
 		Kubeconfig: kubeConfig,
 	})
+}
+
+func createNewIdentity(ctx *pulumi.Context, info *ClusterInfo, name pulumi.String, namespace pulumi.String) (*workloadIdentities, error) {
+	mgIdent, err := managedidentity.NewUserAssignedIdentity(ctx, "userAssignedIdentity", &managedidentity.UserAssignedIdentityArgs{
+		ResourceGroupName: info.ResourceGroup.Name,
+		ResourceName:      name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	fic, err := managedidentity.NewFederatedIdentityCredential(ctx, "federatedIdentityCredential", &managedidentity.FederatedIdentityCredentialArgs{
+		Audiences: pulumi.StringArray{
+			pulumi.String("api://AzureADTokenExchange"),
+		},
+		FederatedIdentityCredentialResourceName: mgIdent.Name,
+		Issuer:                                  info.ManagedCluster.OidcIssuerProfile.Elem().IssuerURL(),
+		ResourceGroupName:                       info.ResourceGroup.Name,
+		ResourceName:                            name,
+		Subject:                                 pulumi.String(fmt.Sprintf("system:serviceaccount:%s:%s", namespace, name)),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &workloadIdentities{
+		UserAssignedIdentity:        mgIdent,
+		FederatedIdentityCredential: fic,
+	}, nil
+
 }
