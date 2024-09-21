@@ -38,6 +38,18 @@ func buildCharts(ctx *pulumi.Context, k8sProvider *kubernetes.Provider) error {
 	helm.NewChart(ctx, "cert-manager", certManagerChartArgs,
 		pulumi.Providers(k8sProvider))
 
+	/*
+		zoneName := domain.Name.ApplyT(func(name string) string {
+			return name
+		}).(pulumi.StringOutput)
+
+		helm.NewChart(ctx, "certmanager-certs", helm.ChartArgs{
+			Path: pulumi.String("./helm/certmanager-certs"),
+			Values: pulumi.Map{
+				"zoneName": pulumi.String(zoneName),
+			},
+		})
+	*/
 	return nil
 }
 

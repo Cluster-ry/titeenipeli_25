@@ -23,7 +23,7 @@ func main() {
 
 		kubeconfig := getKubeconfig(ctx, k8sCluster)
 
-		identity, err := createNewIdentity(ctx, k8sCluster, "dnszone", "cert-manager")
+		identity, err := createNewIdentity(ctx, k8sCluster, "cert-manager", "cert-manager")
 		if err != nil {
 			return err
 		}
@@ -39,6 +39,7 @@ func main() {
 			return err
 		}
 
+		installFlux(ctx, k8sCluster, k8sProvider)
 		buildCharts(ctx, k8sProvider)
 
 		ctx.Export("domainName", domain.Name)
