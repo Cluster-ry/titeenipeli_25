@@ -1,4 +1,6 @@
-export const GreetingContainer = (props: { login: () => void }) => {
+type GreetingContainerProps = { login: () => void; }
+
+export const GreetingContainer = ({ login }: GreetingContainerProps) => {
   return (
     <div
       style={{
@@ -25,7 +27,7 @@ export const GreetingContainer = (props: { login: () => void }) => {
           padding: "1vh",
         }}
       >
-        <DieButton onClick={props.login} />
+        <DieButton onClick={login} />
       </div>
       For whom are you fighting for?
     </div>
