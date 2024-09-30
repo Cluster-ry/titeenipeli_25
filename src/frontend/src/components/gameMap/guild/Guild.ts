@@ -1,16 +1,17 @@
 import { Pixel } from "../../../models/Pixel";
+import Guild from "../../../models/enum/Guild";
 import PixelType from "../../../models/enum/PixelType";
 
-export enum Guild {
-  Tietokilta = 0,
-  Algo = 1,
-  Cluster = 2,
-  OulunTietoteekkarit = 3,
-  TietoTeekkarikilta = 4,
-  Digit = 5,
-  Datateknologerna = 6,
-  Sosa = 7,
-}
+const guildColorMapping: Record<Guild, number> = {
+  [Guild.Tietokilta]: 0xd50000,
+  [Guild.Algo]: 0xc51162,
+  [Guild.Cluster]: 0xaa00ff,
+  [Guild.OulunTietoteekkarit]: 0x6200ea,
+  [Guild.TietoTeekkarikilta]: 0x304ffe,
+  [Guild.Digit]: 0x2962ff,
+  [Guild.Datateknologerna]: 0x0091ea,
+  [Guild.Sosa]: 0x00b8d4,
+};
 
 export function pixelColor(pixel: Pixel | undefined): number {
   if (!pixel) {
@@ -19,26 +20,11 @@ export function pixelColor(pixel: Pixel | undefined): number {
 
   if (pixel.type === PixelType.MapBorder) {
     return 0xfcba03;
-  } else {
-    switch (pixel.owner) {
-      case Guild.Tietokilta:
-        return 0xd50000;
-      case Guild.Algo:
-        return 0xc51162;
-      case Guild.Cluster:
-        return 0xaa00ff;
-      case Guild.OulunTietoteekkarit:
-        return 0x6200ea;
-      case Guild.TietoTeekkarikilta:
-        return 0x304ffe;
-      case Guild.Digit:
-        return 0x2962ff;
-      case Guild.Datateknologerna:
-        return 0x0091ea;
-      case Guild.Sosa:
-        return 0x00b8d4;
-      default:
-        return 0x000000;
-    }
   }
+
+  if (pixel.owner === undefined) {
+    return 0x000000;
+  }
+
+  return guildColorMapping[pixel.owner as Guild] ?? 0x000000;
 }

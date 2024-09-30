@@ -4,7 +4,6 @@ import {
 } from "../models/ClientApiError";
 import { create } from "zustand";
 import { PlayerCoordinates } from "../models/PlayerCoordinates";
-import { Guild } from "../components/gameMap/guild/Guild";
 import { PixelMap } from "../models/PixelMap";
 import { getPixels } from "../api/map";
 import { GetPixelsResult } from "../models/Get/GetPixelsResult";
@@ -14,6 +13,7 @@ import { getGrpcClient } from "../core/grpc/grpcClient";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
 import PixelType from "../models/enum/PixelType";
 import withRetry from "../utils/retryUtils";
+import Guild from "../models/enum/Guild";
 
 // The amount of rows and columns in the map. These can be
 // changed to alter the map size.
