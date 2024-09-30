@@ -6,7 +6,7 @@ import { mapConfig } from "./MapConfig";
 import { Coordinate } from "../../models/Coordinate";
 import useGameMapStore, { ConnectionStatus } from "../../stores/store";
 import { postPixels } from "../../api/map";
-import { useState } from "react";
+import { useMemo } from "react";
 
 /**
  * @component GameMap
@@ -18,7 +18,9 @@ import { useState } from "react";
  */
 const GameMap = () => {
   const gameMapStore = useGameMapStore((state) => state);
-  useState(gameMapStore.initializeMap);
+  useMemo(() => {
+    gameMapStore.initializeMap();
+  }, []);
 
   /**
    * Executes when the client conquers a pixel for their guild.
