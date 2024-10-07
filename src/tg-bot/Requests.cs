@@ -42,29 +42,4 @@ public static class Requests
     {
         return Client.DefaultRequestHeaders.Authorization;
     }
-
-    public static async Task SetGuildRequestAsync(string host, string json)
-    {
-        string url = $"{host}/api/v1/users";
-
-        try
-        {
-            StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await Client.PutAsync(url, content);
-
-            //DEBUG
-            /*
-            Console.WriteLine($"Made the following PUT Request:\n'{response.RequestMessage}'");
-            Console.WriteLine($"\nContent:\n{await content.ReadAsStringAsync()}");
-            Console.WriteLine($"\nResponse:\n'{response}'");
-             */
-
-            response.EnsureSuccessStatusCode();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine($"exception on SetGuild: '{e}'");
-            throw;
-        }
-    }
 }

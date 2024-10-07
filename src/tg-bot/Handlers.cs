@@ -201,15 +201,6 @@ public class Handlers(TelegramBotClient bot, string url)
                 {
                     "username", user.Username ?? ""
                 },
-                {
-                    "photoUrl", ""
-                },
-                {
-                    "authDate", DateTime.Now.ToString(CultureInfo.CurrentCulture)
-                },
-                {
-                    "hash", ""
-                } // TODO: create hash
             };
 
 
@@ -256,15 +247,27 @@ public class Handlers(TelegramBotClient bot, string url)
 
     private async Task SendGuildData(User user, guildEnum guild)
     {
-        Dictionary<string, string> guildJson = new Dictionary<string, string>
+        Dictionary<string, string> json = new Dictionary<string, string>
         {
+            {
+                "id", user.Id.ToString()
+            },
+            {
+                "firstName", user.FirstName
+            },
+            {
+                "lastName", user.LastName ?? ""
+            },
+            {
+                "username", user.Username ?? ""
+            },
             {
                 "guild", guild.ToString()
             }
         };
         try
         {
-            await Requests.SetGuildRequestAsync(url, JsonConvert.SerializeObject(guildJson));
+            await Requests.CreateUserRequestAsync(url, JsonConvert.SerializeObject(json));
 
             await bot.SendTextMessageAsync(
                 user.Id,

@@ -1,7 +1,7 @@
 post:
   tags:
     - users
-  summary: "Creates user."
+  summary: "Creates or logs in user."
   operationId: "postUsers"
   requestBody:
     description: "User details received from Telegram."
@@ -15,27 +15,5 @@ post:
       $ref: "../../components/responses/200TelegramAuthorization.yaml"
     "403":
       $ref: "../../components/responses/403AuthorizationError.yaml"
-  security:
-    - botAuth: []
-
-put:
-  tags:
-    - users
-  summary: "Sets guild for the user."
-  operationId: "putUsers"
-  requestBody:
-    description: "New guild details."
-    required: true
-    content:
-      application/json:
-        schema:
-          $ref: "../../components/schemas/guild.yaml"
-  responses:
-    "200":
-      description: Guild details updated!
-    "400":
-      $ref: "../../components/responses/400ClientError.yaml"
-    "401":
-      $ref: "../../components/responses/401Unauthorized.yaml"
   security:
     - botAuth: []

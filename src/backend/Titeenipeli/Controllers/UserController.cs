@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using Titeenipeli.Enums;
-using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
 using Titeenipeli.Models;
+using Titeenipeli.Options;
 using Titeenipeli.Results;
 using Titeenipeli.Schema;
 using Titeenipeli.Services;
@@ -15,17 +15,17 @@ namespace Titeenipeli.Controllers;
 [Route("users")]
 public class UserController : ControllerBase
 {
+    private readonly BotOptions _botOptions;
     private readonly IGuildRepositoryService _guildRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
-    private readonly JwtService _jwtService;
     private readonly SpawnGeneratorService _spawnGeneratorService;
 
-    public UserController(JwtService jwtService,
+    public UserController(BotOptions botOptions,
                           SpawnGeneratorService spawnGeneratorService,
                           IUserRepositoryService userRepositoryService,
                           IGuildRepositoryService guildRepositoryService)
     {
-        _jwtService = jwtService;
+        _botOptions = botOptions;
         _spawnGeneratorService = spawnGeneratorService;
         _userRepositoryService = userRepositoryService;
         _guildRepositoryService = guildRepositoryService;
@@ -34,69 +34,52 @@ public class UserController : ControllerBase
     [HttpPost]
     public IActionResult PostUsers([FromBody] PostUsersInput usersInput)
     {
-        User? user = _userRepositoryService.GetByTelegramId(usersInput.Id);
+        BadRequestObjectResult? botTokenError = IsBotTokenValid(Request.Headers);
+        if (botTokenError != null)
+        {
+            return botTokenError;
+        }
+
+        User? user = _userRepositoryService.GetByTelegramId(usersInput.TelegramId);
 
         if (user == null)
         {
-            user = new User
-            {
-                Guild = null,
-                Code = "",
-
-                SpawnX = -1,
-                SpawnY = -1,
-
-                // TODO: Validate telegram credentials before creating a new user
-                TelegramId = usersInput.Id,
-                FirstName = usersInput.FirstName,
-                LastName = usersInput.LastName,
-                Username = usersInput.Username,
-                PhotoUrl = usersInput.PhotoUrl,
-                AuthDate = usersInput.AuthDate,
-                Hash = usersInput.Hash
-            };
-
-            _userRepositoryService.Add(user);
+            BadRequestObjectResult? createUserError = CreateNewUser(usersInput);
+            if (createUserError != null) {
+                return createUserError;
+            }
         }
 
-        Response.Cookies.AppendJwtCookie(_jwtService, user);
-
-        return Ok(new PostUserResult
-        {
-            Guild = user.Guild?.Name.ToString()
-        });
+        // Todo: Should return single use authentication token.
+        return Ok();
     }
 
-    [HttpPut]
-    [Authorize]
-    public IActionResult PutUsers([FromBody] PutUsersInput input)
+    private BadRequestObjectResult? IsBotTokenValid(IHeaderDictionary headers)
     {
-        JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
-
-        bool validGuild = Enum.TryParse(input.Guild, out GuildName guildName);
-
-        if (jwtClaim == null)
+        StringValues botToken;
+        bool botTokenRetrieved = headers.TryGetValue("X-BOT-KEY", out botToken);
+        if (botTokenRetrieved && botToken == _botOptions.Token)
         {
-            return BadRequest();
+            return null;
         }
-
-        if (!validGuild)
+        else
         {
             ErrorResult error = new ErrorResult
             {
-                Title = "Invalid guild",
-                Code = 400,
-                Description = "Provide valid guild"
+                Title = "Invalid bot token",
+                Code = 403,
+                Description = "Bot token is invalid, is client bot at all?"
             };
 
             return BadRequest(error);
         }
+    }
 
-        User? user = _userRepositoryService.GetById(jwtClaim.Id);
+    private BadRequestObjectResult? CreateNewUser(PostUsersInput usersInput)
+    {
+        bool validGuild = Enum.TryParse(usersInput.Guild, out GuildName guildName);
         Guild? guild = _guildRepositoryService.GetByName(guildName);
-
-
-        if (user == null || guild == null || user.Guild != null)
+        if (!validGuild || guild == null)
         {
             ErrorResult error = new ErrorResult
             {
@@ -110,14 +93,22 @@ public class UserController : ControllerBase
 
         Coordinate spawnPoint = _spawnGeneratorService.GetSpawnPoint(guildName);
 
-        user.SpawnX = spawnPoint.X;
-        user.SpawnY = spawnPoint.Y;
-        user.Guild = guild;
+        User user = new User
+        {
+            Guild = guild,
+            Code = "",
 
-        _userRepositoryService.Update(user);
+            SpawnX = spawnPoint.X,
+            SpawnY = spawnPoint.Y,
 
-        // Update the claim because users guild has changed
-        Response.Cookies.AppendJwtCookie(_jwtService, user);
-        return Ok();
+            TelegramId = usersInput.TelegramId,
+            FirstName = usersInput.FirstName,
+            LastName = usersInput.LastName,
+            Username = usersInput.Username,
+        };
+
+        _userRepositoryService.Add(user);
+
+        return null;
     }
 }

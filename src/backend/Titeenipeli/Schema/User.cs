@@ -30,14 +30,5 @@ public class User : Entity
 
     [StringLength(64)]
     public required string Username { get; init; }
-
-    [StringLength(64)]
-    public required string PhotoUrl { get; init; }
-
-    [StringLength(64)]
-    public required string AuthDate { get; init; }
-
-    [StringLength(64)]
-    public required string Hash { get; init; }
     #endregion
 }
