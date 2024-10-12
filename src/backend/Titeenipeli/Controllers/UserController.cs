@@ -45,13 +45,18 @@ public class UserController : ControllerBase
         if (user == null)
         {
             BadRequestObjectResult? createUserError = CreateNewUser(usersInput);
-            if (createUserError != null) {
+            if (createUserError != null)
+            {
                 return createUserError;
             }
         }
 
         // Todo: Should return single use authentication token.
-        return Ok();
+        PostUsersResult postUsersResult = new()
+        {
+            Token = "Test123"
+        };
+        return Ok(postUsersResult);
     }
 
     private BadRequestObjectResult? IsBotTokenValid(IHeaderDictionary headers)
@@ -84,7 +89,7 @@ public class UserController : ControllerBase
             ErrorResult error = new ErrorResult
             {
                 Title = "Invalid guild",
-                Code = 400,
+                Code = 1414,
                 Description = "Provide valid guild"
             };
 

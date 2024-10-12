@@ -1,44 +1,47 @@
 ﻿using Telegram.Bot;
 using Microsoft.Extensions.Configuration;
 using System.Reflection;
+using TiteenipeliBot.Options;
 
-namespace Titeenipeli_bot;
+namespace TiteenipeliBot;
 
 internal class TgBot
 {
-    // Variables
-    private static string? _token;
-    private static TelegramBotClient? _bot;
-    private static string? _uri;
-
     private static void Main(string[] args)
     {
-        // Initializing the bot with its token
-        IConfiguration configuration = new ConfigurationBuilder()
+        TelegramOptions telegramOptions = new TelegramOptions();
+        BackendOptions backendOptions = new BackendOptions();
+        IConfigurationRoot configurationRoot = new ConfigurationManager()
                                        .AddUserSecrets(Assembly.GetExecutingAssembly(), true)
                                        .AddJsonFile("appsettings.json")
                                        .Build();
+        configurationRoot.GetSection("Telegram").Bind(telegramOptions);
+        configurationRoot.GetSection("Backend").Bind(backendOptions);
 
-        _token = configuration["token"];
-        _uri = configuration["URI"];
-        if (_token is null)
+        if (telegramOptions.Token is null)
         {
-            Console.WriteLine("Unable to find token, exiting...");
+            Console.WriteLine("Unable to get Telegram bot token, exiting...");
             return;
         }
 
-        if (string.IsNullOrEmpty(_uri))
+        if (string.IsNullOrEmpty(backendOptions.Url))
         {
-            Console.WriteLine("Unable to set uri, exiting...");
+            Console.WriteLine("Unable to get backend URL, exiting...");
             return;
         }
 
-        _bot = new TelegramBotClient(_token);
-        Handlers handlers = new Handlers(_bot, _uri);
+        if (string.IsNullOrEmpty(backendOptions.Token))
+        {
+            Console.WriteLine("Unable to get backend token, exiting...");
+            return;
+        }
+
+        TelegramBotClient bot = new TelegramBotClient(telegramOptions.Token);
+        Handlers handlers = new Handlers(bot, backendOptions);
         using CancellationTokenSource cts = new CancellationTokenSource();
 
         // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool, so we use cancellation token
-        _bot.StartReceiving(
+        bot.StartReceiving(
             handlers.HandleUpdate,
             errorHandler: handlers.HandleError,
             cancellationToken: cts.Token
