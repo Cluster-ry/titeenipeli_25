@@ -83,9 +83,9 @@ public class MapUpdateProcessor
 
     private void ComputeUserLosses()
     {
-        IEnumerable<GrpcMapChangeInput> changesCausingLosses = _mapChangesInput.Changes.Where((change) =>
+        IEnumerable<MapChange> changesCausingLosses = _mapChangesInput.Changes.Where((change) =>
             change.OldOwner?.Id == _user?.Id);
-        foreach (GrpcMapChangeInput change in changesCausingLosses)
+        foreach (MapChange change in changesCausingLosses)
         {
             ComputeSurroundingPixelVisibility(change);
 
@@ -100,9 +100,9 @@ public class MapUpdateProcessor
 
     private void ComputeNormalPixelChanges()
     {
-        IEnumerable<GrpcMapChangeInput> normalChanges = _mapChangesInput.Changes.Where((change) =>
+        IEnumerable<MapChange> normalChanges = _mapChangesInput.Changes.Where((change) =>
             change.OldOwner?.Id != _user?.Id && change.NewOwner?.Id != _user?.Id);
-        foreach (GrpcMapChangeInput change in normalChanges)
+        foreach (MapChange change in normalChanges)
         {
             bool insideFogOfWar = _visibilityMap.GetVisibility(change.Coordinate);
             if (insideFogOfWar)
@@ -114,9 +114,9 @@ public class MapUpdateProcessor
 
     private void ComputeUserWins()
     {
-        IEnumerable<GrpcMapChangeInput> winChanges = _mapChangesInput.Changes.Where((change) =>
+        IEnumerable<MapChange> winChanges = _mapChangesInput.Changes.Where((change) =>
             change.NewOwner?.Id == _user?.Id);
-        foreach (GrpcMapChangeInput change in winChanges)
+        foreach (MapChange change in winChanges)
         {
             LoopNearbyPixelsInsideFogOfWar(
                 AddStandardChange,
@@ -125,7 +125,7 @@ public class MapUpdateProcessor
         }
     }
 
-    private void ComputeSurroundingPixelVisibility(GrpcMapChangeInput change)
+    private void ComputeSurroundingPixelVisibility(MapChange change)
     {
         LoopNearbyPixelsInsideFogOfWar(
             AddNotOwnedChangeIfNotInsideFogOfWar,

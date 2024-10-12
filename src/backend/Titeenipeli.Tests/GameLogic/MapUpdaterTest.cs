@@ -51,7 +51,7 @@ public class MapUpdaterTest
 
         foreach (var placedPixel in placedPixels)
         {
-            _mapUpdater.PlacePixel(map, placedPixel.coordinates, placedPixel.guild);
+            _mapUpdater.PlacePixel(map, placedPixel.coordinates, MapUtils.GuildNameToUser(placedPixel.guild));
             Console.WriteLine("--------------");
             Console.WriteLine(MapUtils.MapAsNumbers(map));
         }
@@ -60,9 +60,10 @@ public class MapUpdaterTest
         {
             for (var y = 0; y < resultingMap.GetUpperBound(0); y++)
             {
-                map.Pixels[x + 1, y + 1].Owner.Should().Be(resultingMap[y, x].guild,
+                var guildName = map[x + 1, y + 1].Owner?.Guild?.Name;
+                guildName.Should().Be(resultingMap[y, x].guild,
                     $"Expected pixel in [{x}, {y}] to be owned by {resultingMap[y, x].guild}, " +
-                    $"but was owned by {map.Pixels[x + 1, y + 1].Owner}\n\n" +
+                    $"but was owned by {map[x + 1, y + 1].Owner}\n\n" +
                     $"{MapUtils.MapAsColours(map)}");
             }
         }
@@ -329,6 +330,24 @@ public class MapUpdaterTest
                     { None, None, None, None, None },
                     { None, None, None, Algo, ALGO }
                 }).SetName("Should not cut J-shape when another guild places pixel");
+            yield return new TestCaseData(
+                new[,]
+                {
+                    { None, None, None, None, None },
+                    { None, None, None, None, None },
+                    { None, CLUS, Clus, Clus, None },
+                    { None, None, None, None, None },
+                    { None, None, None, None, None }
+                },
+                new[] { (GuildName.Cluster, new Coordinate(4, 2)) },
+                new[,]
+                {
+                    { None, None, None, None, None },
+                    { None, None, None, Clus, None },
+                    { None, Clus, Clus, Clus, None },
+                    { None, None, None, None, None },
+                    { None, None, None, None, None }
+                }).SetName("Should not cut reverse L-shape when L top is set last");
         }
     }
 }

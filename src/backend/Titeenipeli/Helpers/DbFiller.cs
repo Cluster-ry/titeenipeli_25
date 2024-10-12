@@ -66,7 +66,6 @@ public static class DbFiller
 
         if (!dbContext.Map.Any())
         {
-            Random random = new Random(1);
             for (int x = 0; x < gameOptions.Width; x++)
             {
                 for (int y = 0; y < gameOptions.Height; y++)
@@ -75,7 +74,7 @@ public static class DbFiller
                     {
                         X = x,
                         Y = y,
-                        User = random.Next(10) < 1 && x > 3 && y > 3 && x < 17 && y < 17 ? testUser : testOpponent
+                        User = null
                     });
                 }
             }

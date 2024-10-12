@@ -8,7 +8,6 @@ import { PropsWithChildren } from "react";
 import { Game as GameHolder } from "./pages/Game/Game";
 import GameMap from "./components/gameMap/GameMap.tsx";
 
-
 function AppShell({ children }: PropsWithChildren) {
   return <div className="app-shell">{children}</div>;
 }
@@ -49,7 +48,7 @@ function AppRouter() {
 function App() {
   return (
     <AppShell>
-      <AppRouter />
+        <AppRouter />
     </AppShell>
   );
 }

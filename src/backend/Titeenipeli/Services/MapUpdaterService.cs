@@ -26,38 +26,36 @@ public class MapUpdaterService(
 
     public Task PlacePixel(Coordinate pixelCoordinates, User newOwner)
     {
-        GuildName newGuild = (newOwner?.Guild?.Name) ?? throw new Exception("Unable to get guild name");
+        var borderfiedCoordinate = pixelCoordinates + new Coordinate(1, 1);
 
         return Task.Run(() =>
         {
             lock (_mapUpdater)
             {
-                (Map map, Pixel[,] pixelArray) = GetMap();
-                List<(Coordinate, PixelModel)> changedPixels = _mapUpdater.PlacePixel(map, pixelCoordinates, newGuild);
-                DoGrpcUpdate(pixelArray, changedPixels, newOwner);
-                DoDatabaseUpdate(pixelArray, changedPixels, newOwner);
+                PixelWithType[,] map = GetMap();
+                List<MapChange> changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
+
+                DoGrpcUpdate(map, changedPixels);
+                DoDatabaseUpdate(changedPixels, newOwner);
             }
         });
     }
 
-    private (Map, Pixel[,]) GetMap()
+    private PixelWithType[,] GetMap()
     {
+        User[] users;
         Pixel[] pixels;
         using (var scope = _scopeFactory.CreateScope())
         {
+            IUserRepositoryService userRepositoryService = scope.ServiceProvider.GetRequiredService<IUserRepositoryService>();
+            users = [.. userRepositoryService.GetAll()];
             IMapRepositoryService mapRepositoryService = scope.ServiceProvider.GetRequiredService<IMapRepositoryService>();
             pixels = [.. mapRepositoryService.GetAll()];
         }
         int width = _gameOptions.Width + 2 * BorderWidth;
         int height = _gameOptions.Height + 2 * BorderWidth;
 
-        Pixel[,] pixel2DArray = new Pixel[width, height];
-        Map map = new Map
-        {
-            Pixels = new PixelModel[width, height],
-            Width = width,
-            Height = height
-        };
+        PixelWithType[,] map = new PixelWithType[width, height];
 
         for (int x = 0; x < width; x++)
         {
@@ -65,9 +63,8 @@ public class MapUpdaterService(
             {
                 if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
                 {
-                    map.Pixels[x, y] = new PixelModel
+                    map[x, y] = new PixelWithType
                     {
-                        OwnPixel = false,
                         Type = PixelType.MapBorder
                     };
                 }
@@ -76,64 +73,64 @@ public class MapUpdaterService(
 
         foreach (Pixel pixel in pixels)
         {
-            PixelModel mapPixel = new PixelModel
+            PixelWithType mapPixel = new()
             {
+                Location = new(pixel.X, pixel.Y),
                 Type = PixelType.Normal,
-                Owner = pixel.User?.Guild?.Name,
-                OwnPixel = false
+                Owner = pixel.User
             };
 
-            pixel2DArray[pixel.X + 1, pixel.Y + 1] = pixel;
-            map.Pixels[pixel.X + 1, pixel.Y + 1] = mapPixel;
+            map[pixel.X + 1, pixel.Y + 1] = mapPixel;
         }
 
-        return (map, pixel2DArray);
+        MarkSpawns(map, users);
+
+        return map;
     }
 
-    private void DoGrpcUpdate(Pixel[,] pixel2DArray, List<(Coordinate, PixelModel)> changedPixels, User newOwner)
+    private static void MarkSpawns(PixelWithType[,] map, IEnumerable<User> users)
+    {
+        foreach (User user in users) map[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
+    }
+
+    private void DoGrpcUpdate(PixelWithType[,] pixels, List<MapChange> changedPixels)
     {
         Dictionary<Coordinate, GrpcChangePixel> nearbyPixels = [];
-        List<GrpcMapChangeInput> changes = [];
-        foreach ((Coordinate, PixelModel) changedPixel in changedPixels)
+        List<MapChange> changes = [];
+        foreach (MapChange changedPixel in changedPixels)
         {
             LoopNearbyPixelsInsideFogOfWar((coordinate) =>
             {
-                Pixel pixel = pixel2DArray[coordinate.Y, coordinate.X];
+                PixelWithType pixel = pixels[coordinate.X + 1, coordinate.Y + 1];
                 nearbyPixels[coordinate] = new()
                 {
-                    Coordinate = coordinate - new Coordinate(1, 1),
-                    User = pixel.User
+                    Coordinate = coordinate,
+                    User = pixel?.Owner
                 };
-            }, changedPixel.Item1);
+            }, changedPixel.Coordinate);
 
-            changes.Add(new()
-            {
-                Coordinate = changedPixel.Item1 - new Coordinate(1, 1),
-                OldOwner = pixel2DArray[changedPixel.Item1.X, changedPixel.Item1.Y].User,
-                NewOwner = changedPixel.Item2.Owner == null ? null : newOwner
-            });
+            changes.Add(changedPixel);
         }
 
         GrpcMapChangesInput mapChanges = new(nearbyPixels, changes);
         _incrementalMapUpdateCoreService.UpdateUsersMapState(mapChanges);
     }
 
-    private void DoDatabaseUpdate(Pixel[,] pixel2DArray, List<(Coordinate, PixelModel)> changedPixels, User newOwner)
+    private void DoDatabaseUpdate(List<MapChange> changedPixels, User newOwner)
     {
         List<object> gameEvents = new();
-        foreach ((Coordinate, PixelModel) changedPixel in changedPixels)
+        foreach (MapChange changedPixel in changedPixels)
         {
-            Pixel pixel = pixel2DArray[changedPixel.Item1.X, changedPixel.Item1.Y];
-            User? computedNewOwner = changedPixel.Item2.Owner == null ? null : newOwner;
+            User? computedNewOwner = changedPixel.NewOwner == null ? null : newOwner;
 
             gameEvents.Add(new
             {
                 fromUser = new
                 {
-                    userId = pixel.User?.Id,
-                    userName = pixel.User?.Username,
-                    guildId = pixel.User?.Guild?.Id,
-                    guildName = pixel.User?.Guild?.Name
+                    userId = changedPixel.NewOwner?.Id,
+                    userName = changedPixel.NewOwner?.Username,
+                    guildId = changedPixel.NewOwner?.Guild?.Id,
+                    guildName = changedPixel.NewOwner?.Guild?.Name
                 },
                 toUser = new
                 {
@@ -144,16 +141,16 @@ public class MapUpdaterService(
                 },
                 pixel = new
                 {
-                    x = changedPixel.Item1.X,
-                    y = changedPixel.Item1.Y
+                    x = changedPixel.Coordinate.X,
+                    y = changedPixel.Coordinate.Y
                 }
             });
 
-            pixel.User = computedNewOwner;
             using (var scope = _scopeFactory.CreateScope())
             {
                 IMapRepositoryService mapRepositoryService = scope.ServiceProvider.GetRequiredService<IMapRepositoryService>();
-                mapRepositoryService.Update(pixel);
+                Pixel newPixel = new() { X = changedPixel.Coordinate.X, Y = changedPixel.Coordinate.Y, User = changedPixel.NewOwner };
+                mapRepositoryService.Update(newPixel);
             }
         }
 
@@ -170,7 +167,7 @@ public class MapUpdaterService(
 
     private void LoopNearbyPixelsInsideFogOfWar(Action<Coordinate> action, Coordinate aroundCoordinate)
     {
-        int fogOfWarDistance = _gameOptions.FogOfWarDistance;
+        int fogOfWarDistance = _gameOptions.FogOfWarDistance * 2;
         int minY = Math.Clamp(aroundCoordinate.Y - fogOfWarDistance, 0, _gameOptions.Height);
         int maxY = Math.Clamp(aroundCoordinate.Y + fogOfWarDistance, 0, _gameOptions.Height);
         int minX = Math.Clamp(aroundCoordinate.X - fogOfWarDistance, 0, _gameOptions.Width);

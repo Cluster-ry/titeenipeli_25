@@ -35,7 +35,8 @@ public class IncrementalMapUpdateService(
             throw new RpcException(new Status(StatusCode.PermissionDenied, "User couldn't be found."));
         }
 
-        GrpcConnection<IncrementalMapUpdateResponse> grpcConnection = new(user, responseStream);
+        GrpcConnection<IncrementalMapUpdateResponse> grpcConnection =
+            new(user, responseStream, _incrementalMapUpdateCoreService.RemoveGrpcConnection);
         _incrementalMapUpdateCoreService.AddGrpcConnection(grpcConnection);
 
         IncrementalMapUpdateResponse incrementalResponse = new();

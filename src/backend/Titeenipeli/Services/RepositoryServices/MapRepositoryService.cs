@@ -43,18 +43,19 @@ public class MapRepositoryService : IMapRepositoryService
 
     public void Update(Pixel pixel)
     {
-        Pixel? existingUser = GetByCoordinate(new Coordinate
+        Pixel? existingPixel = GetByCoordinate(new Coordinate
         {
             X = pixel.X,
             Y = pixel.Y
         });
 
-        if (existingUser == null)
+        if (existingPixel == null)
         {
             throw new Exception("Pixel doesn't exist.");
         }
 
-        _dbContext.Entry(existingUser).CurrentValues.SetValues(pixel);
+        existingPixel.User = pixel.User;
+        _dbContext.Update(existingPixel);
         _dbContext.SaveChanges();
     }
 

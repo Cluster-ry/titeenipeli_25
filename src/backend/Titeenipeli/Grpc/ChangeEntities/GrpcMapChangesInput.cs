@@ -4,10 +4,10 @@ namespace Titeenipeli.Grpc.ChangeEntities;
 
 public class GrpcMapChangesInput
 {
-    public List<GrpcMapChangeInput> Changes;
+    public List<MapChange> Changes;
     public Dictionary<Coordinate, GrpcChangePixel> NewPixels;
 
-    public GrpcMapChangesInput(Dictionary<Coordinate, GrpcChangePixel> newPixels, List<GrpcMapChangeInput> changes)
+    public GrpcMapChangesInput(Dictionary<Coordinate, GrpcChangePixel> newPixels, List<MapChange> changes)
     {
         NewPixels = newPixels;
         Changes = changes;

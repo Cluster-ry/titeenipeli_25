@@ -42,10 +42,17 @@ public class IncrementalMapUpdateCoreService : IIncrementalMapUpdateCoreService
     {
         ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>? dictionaryOutput;
         bool retrievalSucceeded = _connections.TryGetValue(connection.User.Id, out dictionaryOutput);
-        if (retrievalSucceeded)
+        if (!retrievalSucceeded || dictionaryOutput == null)
         {
-            connection.Dispose();
-            dictionaryOutput?.TryRemove(connection.Id, out _);
+            return;
+        }
+
+        connection.Dispose();
+        dictionaryOutput.TryRemove(connection.Id, out _);
+
+        if (dictionaryOutput.Count == 0)
+        {
+            _connections.TryRemove(connection.User.Id, out _);
         }
     }
 

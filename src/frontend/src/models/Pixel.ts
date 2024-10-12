@@ -1,5 +1,7 @@
+import PixelType from "./enum/PixelType";
+
 export interface Pixel {
-  type: string;
-  owner: number;
+  type: PixelType;
+  owner: number | undefined;
   ownPixel: boolean;
 }
