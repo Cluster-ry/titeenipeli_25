@@ -34,6 +34,11 @@ public class UserRepositoryService : IUserRepositoryService
         return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.TelegramId == telegramId);
     }
 
+    public User? GetByAuthenticationToken(string token)
+    {
+        return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.AuthenticationToken == token);
+    }
+
     public void Add(User user)
     {
         _dbContext.Users.Add(user);

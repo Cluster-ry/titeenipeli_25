@@ -16,6 +16,9 @@ public class User : Entity
 
     public DateTime LastPlacement { get; set; } = DateTime.MinValue;
     public int PixelBucket { get; set; } = 0;
+    [StringLength(32)]
+    public string? AuthenticationToken { get; set; }
+    public DateTime? AuthenticationTokenExpiryTime { get; set; }
 
 
     #region Telegram

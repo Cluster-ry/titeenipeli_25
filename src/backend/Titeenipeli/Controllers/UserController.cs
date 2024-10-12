@@ -1,6 +1,8 @@
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Titeenipeli.Enums;
+using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
@@ -13,23 +15,20 @@ namespace Titeenipeli.Controllers;
 
 [ApiController]
 [Route("users")]
-public class UserController : ControllerBase
+public class UserController(BotOptions botOptions,
+                      SpawnGeneratorService spawnGeneratorService,
+                      IUserRepositoryService userRepositoryService,
+                      IGuildRepositoryService guildRepositoryService,
+                      JwtService jwtService) : ControllerBase
 {
-    private readonly BotOptions _botOptions;
-    private readonly IGuildRepositoryService _guildRepositoryService;
-    private readonly IUserRepositoryService _userRepositoryService;
-    private readonly SpawnGeneratorService _spawnGeneratorService;
+    private const int _loginTokenLength = 32;
+    private static readonly TimeSpan _loginTokenExpiryTime = TimeSpan.FromMinutes(10);
 
-    public UserController(BotOptions botOptions,
-                          SpawnGeneratorService spawnGeneratorService,
-                          IUserRepositoryService userRepositoryService,
-                          IGuildRepositoryService guildRepositoryService)
-    {
-        _botOptions = botOptions;
-        _spawnGeneratorService = spawnGeneratorService;
-        _userRepositoryService = userRepositoryService;
-        _guildRepositoryService = guildRepositoryService;
-    }
+    private readonly BotOptions _botOptions = botOptions;
+    private readonly IGuildRepositoryService _guildRepositoryService = guildRepositoryService;
+    private readonly IUserRepositoryService _userRepositoryService = userRepositoryService;
+    private readonly SpawnGeneratorService _spawnGeneratorService = spawnGeneratorService;
+    private readonly JwtService _jwtService = jwtService;
 
     [HttpPost]
     public IActionResult PostUsers([FromBody] PostUsersInput usersInput)
@@ -44,19 +43,64 @@ public class UserController : ControllerBase
 
         if (user == null)
         {
-            BadRequestObjectResult? createUserError = CreateNewUser(usersInput);
-            if (createUserError != null)
+            user = CreateNewUser(usersInput);
+            if (user == null)
             {
-                return createUserError;
+                return BadRequest(new ErrorResult
+                {
+                    Title = "Invalid guild",
+                    Code = 1414,
+                    Description = "Provide valid guild"
+                });
             }
         }
 
-        // Todo: Should return single use authentication token.
+        string token = CreateNewLoginTokenForUser(user);
         PostUsersResult postUsersResult = new()
         {
-            Token = "Test123"
+            Token = token
         };
         return Ok(postUsersResult);
+    }
+
+    [HttpPost("authenticate")]
+    public IActionResult PostAuthenticate([FromBody] PostAuthenticateInput loginInput)
+    {
+        // TODO: Should be removed before production!
+        if (loginInput.Token.Length < 32)
+        {
+            return DebugLogin(loginInput.Token);
+        }
+        // ------------------------------------------
+
+        User? user = _userRepositoryService.GetByAuthenticationToken(loginInput.Token);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+        if (user.AuthenticationTokenExpiryTime < DateTime.UtcNow)
+        {
+            return Unauthorized();
+        }
+
+        user.AuthenticationToken = null;
+        user.AuthenticationTokenExpiryTime = null;
+        _userRepositoryService.Update(user);
+
+        Response.Cookies.AppendJwtCookie(_jwtService, user);
+        return Ok();
+    }
+
+    private IActionResult DebugLogin(string telegramId)
+    {
+        User? user = _userRepositoryService.GetByTelegramId(telegramId);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
+        Response.Cookies.AppendJwtCookie(_jwtService, user);
+        return Ok();
     }
 
     private BadRequestObjectResult? IsBotTokenValid(IHeaderDictionary headers)
@@ -80,25 +124,18 @@ public class UserController : ControllerBase
         }
     }
 
-    private BadRequestObjectResult? CreateNewUser(PostUsersInput usersInput)
+    private User? CreateNewUser(PostUsersInput usersInput)
     {
         bool validGuild = Enum.TryParse(usersInput.Guild, out GuildName guildName);
         Guild? guild = _guildRepositoryService.GetByName(guildName);
         if (!validGuild || guild == null)
         {
-            ErrorResult error = new ErrorResult
-            {
-                Title = "Invalid guild",
-                Code = 1414,
-                Description = "Provide valid guild"
-            };
-
-            return BadRequest(error);
+            return null;
         }
 
         Coordinate spawnPoint = _spawnGeneratorService.GetSpawnPoint(guildName);
 
-        User user = new User
+        User user = new()
         {
             Guild = guild,
             Code = "",
@@ -114,6 +151,18 @@ public class UserController : ControllerBase
 
         _userRepositoryService.Add(user);
 
-        return null;
+        return user;
+    }
+
+    private string CreateNewLoginTokenForUser(User user)
+    {
+        ReadOnlySpan<char> characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        string token = RandomNumberGenerator.GetString(characters, _loginTokenLength);
+
+        user.AuthenticationToken = token;
+        user.AuthenticationTokenExpiryTime = DateTime.UtcNow + _loginTokenExpiryTime;
+        _userRepositoryService.Update(user);
+
+        return token;
     }
 }
