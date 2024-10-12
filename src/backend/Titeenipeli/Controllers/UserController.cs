@@ -19,7 +19,8 @@ public class UserController(BotOptions botOptions,
                       SpawnGeneratorService spawnGeneratorService,
                       IUserRepositoryService userRepositoryService,
                       IGuildRepositoryService guildRepositoryService,
-                      JwtService jwtService) : ControllerBase
+                      JwtService jwtService,
+                      IMapRepositoryService mapRepositoryService) : ControllerBase
 {
     private const int _loginTokenLength = 32;
     private static readonly TimeSpan _loginTokenExpiryTime = TimeSpan.FromMinutes(10);
@@ -28,6 +29,7 @@ public class UserController(BotOptions botOptions,
     private readonly IGuildRepositoryService _guildRepositoryService = guildRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService = userRepositoryService;
     private readonly SpawnGeneratorService _spawnGeneratorService = spawnGeneratorService;
+    private readonly IMapRepositoryService _mapRepositoryService = mapRepositoryService;
     private readonly JwtService _jwtService = jwtService;
 
     [HttpPost]
@@ -150,6 +152,13 @@ public class UserController(BotOptions botOptions,
         };
 
         _userRepositoryService.Add(user);
+
+        Pixel pixel = new() {
+            X = spawnPoint.X,
+            Y = spawnPoint.Y,
+            User = user
+        };
+        _mapRepositoryService.Update(pixel);
 
         return user;
     }

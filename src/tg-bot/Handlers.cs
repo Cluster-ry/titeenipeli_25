@@ -244,7 +244,7 @@ public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
 
     private async Task SendGame(User user, string token)
     {
-        string loginUrl = $"{backendOptions.Url}?token={token}";
+        string loginUrl = $"{backendOptions.FrontendUrl}?token={token}";
         await bot.SendTextMessageAsync(
             user.Id,
             $"Open the following link to enter the game:\n\n" +

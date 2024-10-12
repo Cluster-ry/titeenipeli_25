@@ -6,7 +6,6 @@ using Titeenipeli.Inputs;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Results;
-using Titeenipeli.Results.CustomStatusCodes;
 using Titeenipeli.Schema;
 using Titeenipeli.Services;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
@@ -188,7 +187,7 @@ public class MapController : ControllerBase
             {
                 Type = PixelType.Normal,
                 Owner = pixel.User?.Guild?.Name,
-                OwnPixel = pixel.User == user
+                OwnPixel = pixel.User?.Id == user?.Id
             };
 
             map.Pixels[pixel.X + 1, pixel.Y + 1] = mapPixel;
@@ -199,7 +198,7 @@ public class MapController : ControllerBase
 
     private static void MarkSpawns(Map map, IEnumerable<User> users)
     {
-        foreach (User user in users) map.Pixels[user.SpawnX, user.SpawnY].Type = PixelType.Spawn;
+        foreach (User user in users) map.Pixels[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
     }
 
     private Map CalculateFogOfWar(Map map)
@@ -244,9 +243,9 @@ public class MapController : ControllerBase
         fogOfWarMap.MaxViewableX = int.Max(maxX + 1, fogOfWarMap.MaxViewableX);
         fogOfWarMap.MaxViewableY = int.Max(maxY + 1, fogOfWarMap.MaxViewableY);
 
-        for (int x = minY; x <= maxY; x++)
+        for (int x = minX; x <= maxX; x++)
         {
-            for (int y = minX; y <= maxX; y++)
+            for (int y = minY; y <= maxY; y++)
             {
                 fogOfWarMap.Pixels[x, y] = map.Pixels[x, y];
             }

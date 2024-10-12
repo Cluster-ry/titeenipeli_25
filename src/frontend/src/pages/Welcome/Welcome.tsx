@@ -1,24 +1,38 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import { LogoContainer } from "./LogoContainer";
 import { GreetingContainer } from "./GreetingContainer";
-import { postLogin } from "../../api/login";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { postUsersAuthenticate } from "../../api/users";
 
 export const Welcome = () => {
   const navigate = useNavigate();
   async function login() {
-    await postLogin({ username: "test", password: "test123" });
-    /*await postUsers({
-      id: "1",
-      firstName: "test",
-      lastName: "test",
-      username: "test",
-      photoUrl: "",
-      authDate: "",
-      hash: "",
-    });*/
-    navigate("/game");
+
+    window.location.href = "https://web.telegram.org"
   }
+
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  useEffect(() => {
+    const token = searchParams.get("token")
+    if (token === null) {
+      return
+    }
+    handleToken(token)
+
+    async function handleToken(token: string) {
+      const authenticationInput = {token: token}
+      try {
+        const response = await postUsersAuthenticate(authenticationInput) 
+        if (response.status === 200) {
+          navigate("/game")
+        }
+      } catch (error) {
+        setSearchParams({})
+        console.log(error)
+      }
+    }
+  }, []);
 
   return (
     <>
