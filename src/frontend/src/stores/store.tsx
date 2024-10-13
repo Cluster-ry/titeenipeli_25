@@ -1,22 +1,29 @@
+/**
+  * A store file that provides Zustand state management for the client-side 
+  * of the titeenipelit project.
+  */
+
+// From installed dependencies
+import { create } from "zustand";
+import { AxiosResponse } from "axios";
+
+// Model imports 
+import { PlayerCoordinates } from "../models/PlayerCoordinates";
+import { PixelMap } from "../models/PixelMap";
+import PixelType from "../models/enum/PixelType";
+import Guild from "../models/enum/Guild";
+import { GetPixelsResult } from "../models/Get/GetPixelsResult";
 import {
   instanceOfClientApiError,
   type ClientApiError,
 } from "../models/ClientApiError";
-import { create } from "zustand";
-import { PlayerCoordinates } from "../models/PlayerCoordinates";
-import { PixelMap } from "../models/PixelMap";
+
 import { getPixels } from "../api/map";
-import { GetPixelsResult } from "../models/Get/GetPixelsResult";
-import { AxiosResponse } from "axios";
 import { ViewportBoundigBox } from "../components/gameMap/Viewport";
 import { getGrpcClient } from "../core/grpc/grpcClient";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
-import PixelType from "../models/enum/PixelType";
 import withRetry from "../utils/retryUtils";
-import Guild from "../models/enum/Guild";
 
-// The amount of rows and columns in the map. These can be
-// changed to alter the map size.
 
 export enum ConnectionStatus {
   Disconnected,
@@ -44,23 +51,32 @@ interface GameMap {
 }
 
 export const useGameMapStore = create<GameMap>((set, get) => ({
-  playerSpawn: { x: 0, y: 0 }, // Subject to change
-  playerGuild: 2, // Cluster as default for TESTING
+  playerSpawn: { x: 0, y: 0 },          // Subject to change
+  playerGuild: 2,                       // Cluster as default for TESTING
   pixelsBoundingBox: { minX: 0, minY: 0, maxX: 0, maxY: 0 },
   pixels: new Map(),
   initialized: false,
   connectionStatus: ConnectionStatus.Disconnected,
   incrementalUpdateBuffer: [],
 
+  
+  /**
+   * Initializes the map. Makes sure it has not been done already and
+   * calls the GRPC client.
+   */ 
   initializeMap: async () => {
+    // Returning if the map has already been initialized
     if (get().initialized === true) {
       return;
     }
+
+    // Setting the status to initialized
     set((state) => ({
       ...state,
       initialized: true,
     }));
 
+    // Calling the GRPC client
     const grpcClient = getGrpcClient();
     grpcClient.incrementalMapUpdateClient?.registerOnResponseListener(
       get().doIncrementalUpdate
@@ -70,16 +86,22 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
     );
   },
 
+  /**
+   * Attempts to reconnect the user if their current status is 
+   * disconnected.
+   */ 
   reconnect: async () => {
     if (get().connectionStatus !== ConnectionStatus.Disconnected) {
       return;
     }
 
+    // Setting the status to "connecting"
     set((state) => ({
       ...state,
       connectionStatus: ConnectionStatus.Connecting,
     }));
 
+    // Updating the current state of the map for the user 
     const getPixelsResults = await withRetry(async () => {
       const getPixelsResults = await getPixels();
       if (instanceOfClientApiError(getPixelsResults)) {
@@ -92,6 +114,7 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
     const pixels = mapMatrixToMapDictionary(getPixelsResults.data);
     const pixelsBoundingBox = computeBoundingBox(pixels);
 
+    // With the map updated, the user has successfully reconnected
     set((state) => ({
       ...state,
       connectionStatus: ConnectionStatus.Connected,
@@ -108,6 +131,10 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
   setPixels: (pixelMap: PixelMap) =>
     set((state) => ({ ...state, pixels: pixelMap })),
 
+  /**
+   * Sets the connection status to "disconnected", but attempts to reconnect
+   * if given 
+   */ 
   handleGrpcConnectionStatusChanges: (connected: boolean) => {
     set((state) => ({
       ...state,
