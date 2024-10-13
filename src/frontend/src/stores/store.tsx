@@ -185,17 +185,21 @@ const parseIncrementalUpdate = (
   incrementalUpdateResponse: IncrementalMapUpdateResponse
 ) => {
   for (const update of incrementalUpdateResponse.updates) {
-    pixels.set(
-      JSON.stringify({
-        x: update.spawnRelativeCoordinate?.x ?? 0,
-        y: update.spawnRelativeCoordinate?.y ?? 0,
-      }),
-      {
-        type: update.type as unknown as PixelType,
+    const pixelType = update.type as unknown as PixelType;
+    const pixelKey = JSON.stringify({
+      x: update.spawnRelativeCoordinate?.x ?? 0,
+      y: update.spawnRelativeCoordinate?.y ?? 0,
+    });
+
+    if (pixelType !== PixelType.FogOfWar) {
+      pixels.set(pixelKey, {
+        type: pixelType,
         owner: update.owner === 0 ? undefined : update.owner - 1,
         ownPixel: update.ownPixel,
-      }
-    );
+      });
+    } else {
+      pixels.delete(pixelKey);
+    }
   }
 };
 
