@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren, useEffect } from "react";
 import { LogoContainer } from "./LogoContainer";
 import { GreetingContainer } from "./GreetingContainer";
 import { useNavigate, useSearchParams } from "react-router-dom";

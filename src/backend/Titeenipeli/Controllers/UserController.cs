@@ -153,7 +153,8 @@ public class UserController(BotOptions botOptions,
 
         _userRepositoryService.Add(user);
 
-        Pixel pixel = new() {
+        Pixel pixel = new()
+        {
             X = spawnPoint.X,
             Y = spawnPoint.Y,
             User = user
