@@ -13,15 +13,15 @@ public class UpdatePixelBucketsService(GameOptions gameOptions, IUserRepositoryS
     {
         foreach (GuildName guildName in Enum.GetValues(typeof(GuildName)))
         {
-            User[] guildUsers = userRepositoryService.GetByGuild(guildName);
-            UpdateGuildBuckets(guildUsers);
+            UpdateGuildBuckets(guildName);
         }
 
         await Task.CompletedTask;
     }
 
-    private void UpdateGuildBuckets(User[] guildUsers)
+    private void UpdateGuildBuckets(GuildName guildName)
     {
+        User[] guildUsers = userRepositoryService.GetByGuild(guildName);
         if (guildUsers.Length == 0)
         {
             return;

@@ -37,7 +37,7 @@ public class UserRepositoryService : IUserRepositoryService
 
     public User[] GetByGuild(GuildName guildName)
     {
-        return [.. _dbContext.Users.Include(user => user.Guild).Where(user => user.Guild != null && user.Guild.Name == guildName)];
+        return _dbContext.Users.Include(user => user.Guild).Where(user => user.Guild != null && user.Guild.Name == guildName).ToArray();
     }
 
     public void Add(User user)
