@@ -38,7 +38,7 @@ public static class Program
         builder.Services.AddSingleton(jwtOptions);
 
         BotOptions botOptions = new BotOptions();
-        builder.Configuration.GetSection("BOT").Bind(botOptions);
+        builder.Configuration.GetSection("Bot").Bind(botOptions);
         builder.Services.AddSingleton(botOptions);
 
         GameOptions gameOptions = new GameOptions();
