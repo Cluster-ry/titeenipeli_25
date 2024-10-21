@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
+using Titeenipeli.Enums;
 using Titeenipeli.Schema;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
 
@@ -32,6 +33,11 @@ public class UserRepositoryService : IUserRepositoryService
     public User? GetByTelegramId(string telegramId)
     {
         return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.TelegramId == telegramId);
+    }
+
+    public User[] GetByGuild(GuildName guildName)
+    {
+        return _dbContext.Users.Include(user => user.Guild).Where(user => user.Guild != null && user.Guild.Name == guildName).ToArray();
     }
 
     public void Add(User user)

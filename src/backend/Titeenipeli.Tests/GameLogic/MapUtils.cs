@@ -100,7 +100,6 @@ public static class MapUtils
             Code = "",
             SpawnX = 0,
             SpawnY = 0,
-            LastPlacement = new(),
             PixelBucket = 0,
             TelegramId = "",
             FirstName = "",

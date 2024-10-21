@@ -43,7 +43,6 @@ public static class Program
 
         builder.Services.AddScoped<JwtService>();
         builder.Services.AddScoped<SpawnGeneratorService>();
-        builder.Services.AddScoped<RateLimitService>();
 
         // Adding OpenTelemetry tracing and metrics
         IOpenTelemetryBuilder openTelemetry = builder.Services.AddOpenTelemetry();
@@ -212,6 +211,7 @@ public static class Program
     private static void AddBackgroundServices(IServiceCollection services)
     {
         TimeSpan updateCumulativeScoresServicePeriod = TimeSpan.FromMinutes(1);
+        TimeSpan updatePixelBucketsServicePeriod = TimeSpan.FromMinutes(1);
 
         services.AddScoped<IUpdateCumulativeScoresService, UpdateCumulativeScoresService>();
         services.AddHostedService(
@@ -221,6 +221,14 @@ public static class Program
                     serviceProvider,
                     GetNonNullService<ILogger<UpdateCumulativeScoresService>>(serviceProvider),
                     updateCumulativeScoresServicePeriod));
+        services.AddScoped<IUpdatePixelBucketsService, UpdatePixelBucketsService>();
+        services.AddHostedService(
+            serviceProvider =>
+                new AsynchronousTimedBackgroundService<
+                    IUpdatePixelBucketsService, UpdatePixelBucketsService>(
+                    serviceProvider,
+                    GetNonNullService<ILogger<UpdatePixelBucketsService>>(serviceProvider),
+                    updatePixelBucketsServicePeriod));
     }
 
     private static void AddRepositoryServices(IServiceCollection services)
