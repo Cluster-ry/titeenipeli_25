@@ -1,47 +1,46 @@
-using System.Globalization;
-using System.Net.Http.Headers;
-using Newtonsoft.Json;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using TiteenipeliBot.BackendApiClient;
+using TiteenipeliBot.BackendApiClient.Inputs;
 
-namespace Titeenipeli_bot;
+namespace TiteenipeliBot;
 
-public class Handlers(TelegramBotClient bot, string url)
+public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
 {
     // Variables
-    private readonly static Dictionary<guildEnum, string> GuildDict = new Dictionary<guildEnum, string>
+    private readonly static Dictionary<GuildEnum, string> GuildDict = new Dictionary<GuildEnum, string>
     {
         {
-            guildEnum.Cluster, "Cluster (lappeen Ranta)"
+            GuildEnum.Cluster, "Cluster (lappeen Ranta)"
         },
         {
-            guildEnum.OulunTietoteekkarit, "Otit (Oulu)"
+            GuildEnum.OulunTietoteekkarit, "Otit (Oulu)"
         },
         {
-            guildEnum.Digit, "Digit (Turku)"
+            GuildEnum.Digit, "Digit (Turku)"
         },
         {
-            guildEnum.Date, "Date (Turku)"
+            GuildEnum.Date, "Date (Turku)"
         },
         {
-            guildEnum.Tietokilta, "Tik (Otaniemi)"
+            GuildEnum.Tietokilta, "Tik (Otaniemi)"
         },
         {
-            guildEnum.Algo, "Algo (Jyväskylä)"
+            GuildEnum.Algo, "Algo (Jyväskylä)"
         },
         {
-            guildEnum.Tutti, "Tutti (Vaasa)"
+            GuildEnum.Tutti, "Tutti (Vaasa)"
         },
         {
-            guildEnum.Sosa, "Sosa (Lahti)"
+            GuildEnum.Sosa, "Sosa (Lahti)"
         },
         {
-            guildEnum.TietoTeekkarikilta, "TiTe (Tampere)"
+            GuildEnum.TietoTeekkarikilta, "TiTe (Tampere)"
         },
         {
-            guildEnum.Datateknologerna, "Datateknologerna (Åbo)"
+            GuildEnum.Datateknologerna, "Datateknologerna (Åbo)"
         }
     };
 
@@ -52,16 +51,16 @@ public class Handlers(TelegramBotClient bot, string url)
     private const string AcceptButton = "I Accept";
 
     // pre-assigned Keyboard buttons
-    private readonly static KeyboardButton ClusterButton = new KeyboardButton(GuildDict[guildEnum.Cluster]);
-    private readonly static KeyboardButton OtitButton = new KeyboardButton(GuildDict[guildEnum.OulunTietoteekkarit]);
-    private readonly static KeyboardButton DigitButton = new KeyboardButton(GuildDict[guildEnum.Digit]);
-    private readonly static KeyboardButton DateButton = new KeyboardButton(GuildDict[guildEnum.Date]);
-    private readonly static KeyboardButton TikButton = new KeyboardButton(GuildDict[guildEnum.Tietokilta]);
-    private readonly static KeyboardButton AlgoButton = new KeyboardButton(GuildDict[guildEnum.Algo]);
-    private readonly static KeyboardButton TuttiButton = new KeyboardButton(GuildDict[guildEnum.Tutti]);
-    private readonly static KeyboardButton SosaButton = new KeyboardButton(GuildDict[guildEnum.Sosa]);
-    private readonly static KeyboardButton TiTeButton = new KeyboardButton(GuildDict[guildEnum.TietoTeekkarikilta]);
-    private readonly static KeyboardButton ÅboButton = new KeyboardButton(GuildDict[guildEnum.Datateknologerna]);
+    private readonly static KeyboardButton ClusterButton = new(GuildDict[GuildEnum.Cluster]);
+    private readonly static KeyboardButton OtitButton = new(GuildDict[GuildEnum.OulunTietoteekkarit]);
+    private readonly static KeyboardButton DigitButton = new(GuildDict[GuildEnum.Digit]);
+    private readonly static KeyboardButton DateButton = new(GuildDict[GuildEnum.Date]);
+    private readonly static KeyboardButton TikButton = new(GuildDict[GuildEnum.Tietokilta]);
+    private readonly static KeyboardButton AlgoButton = new(GuildDict[GuildEnum.Algo]);
+    private readonly static KeyboardButton TuttiButton = new(GuildDict[GuildEnum.Tutti]);
+    private readonly static KeyboardButton SosaButton = new(GuildDict[GuildEnum.Sosa]);
+    private readonly static KeyboardButton TiTeButton = new(GuildDict[GuildEnum.TietoTeekkarikilta]);
+    private readonly static KeyboardButton ÅboButton = new(GuildDict[GuildEnum.Datateknologerna]);
 
     // Build keyboards
     private readonly static ReplyKeyboardMarkup GuildKeyboard = new ReplyKeyboardMarkup(
@@ -74,23 +73,29 @@ public class Handlers(TelegramBotClient bot, string url)
     ]);
 
     // Each time a user interacts with the bot, this method is called
-    public async Task HandleUpdate(ITelegramBotClient _, Update update, CancellationToken cancellationToken)
+    public async Task HandleUpdate(ITelegramBotClient _, Update update, CancellationToken __)
     {
         switch (update.Type)
         {
             // A message was received
             case UpdateType.Message:
-                await HandleMessage(update.Message);
+                if (update.Message != null)
+                {
+                    await HandleMessage(update.Message);
+                }
                 break;
 
             // A button was pressed
             case UpdateType.CallbackQuery:
-                await HandleButton(update.CallbackQuery);
+                if (update.CallbackQuery != null)
+                {
+                    await HandleButton(update.CallbackQuery);
+                }
                 break;
         }
     }
 
-    public async Task HandleError(ITelegramBotClient _, Exception exception, CancellationToken cancellationToken)
+    public async Task HandleError(ITelegramBotClient _, Exception exception, CancellationToken __)
     {
         await Console.Error.WriteLineAsync($"Exception at the bot: '{exception.Message}'");
         throw new Exception();
@@ -118,8 +123,8 @@ public class Handlers(TelegramBotClient bot, string url)
 
         if (GuildDict.ContainsValue(text))
         {
-            guildEnum chosenGuild = GuildDict.FirstOrDefault(x => x.Value == text).Key;
-            await SendGuildData(user, chosenGuild); // changed since api takes the guild as int
+            GuildEnum chosenGuild = GuildDict.FirstOrDefault(x => x.Value == text).Key;
+            await SendGuildData(user, chosenGuild);
             return;
         }
 
@@ -132,11 +137,8 @@ public class Handlers(TelegramBotClient bot, string url)
         // Here you can find every command and the associated method for running it
         switch (command)
         {
-            case "/guild":
-                await SendGuildMenu(user);
-                break;
-            case "/start" or "/game":
-                await HandleUser(user);
+            case "/start" or "/login":
+                await HandleUserCreationOrLogin(user);
                 break;
         }
 
@@ -166,59 +168,22 @@ public class Handlers(TelegramBotClient bot, string url)
             replyMarkup: InlineKeyboardMarkup.Empty()
         );
 
-        // quick break before spamming user with more messages
-        // Thread.Sleep(1 * 1000);
-        await HandleUser(query.From);
+        await HandleUserCreationOrLogin(query.From);
     }
 
-    private async Task HandleUser(User user)
+    private async Task HandleUserCreationOrLogin(User user)
     {
         try
         {
-            // this message prob should be updated and not just spam more messages.
-            await bot.SendTextMessageAsync(
-                user.Id,
-                "Sending data to the game...",
-                replyMarkup: null
-            );
+            BackendClient apiClient = new(backendOptions);
 
-            UserProfilePhotos userPhotos = await bot.GetUserProfilePhotosAsync(user.Id, 0, 1);
-            PhotoSize dummy = userPhotos.Photos[0][0]; // with this you can only get the fileID
-            // the download URL includes the token, which shouldn't be sent (at-least without encryption)
-            // TODO: find a way to send photo without token 
-
-            Dictionary<string, string> json = new Dictionary<string, string>
-            {
-                {
-                    "id", user.Id.ToString()
-                },
-                {
-                    "firstName", user.FirstName
-                },
-                {
-                    "lastName", user.LastName ?? ""
-                },
-                {
-                    "username", user.Username ?? ""
-                },
-                {
-                    "photoUrl", ""
-                },
-                {
-                    "authDate", DateTime.Now.ToString(CultureInfo.CurrentCulture)
-                },
-                {
-                    "hash", ""
-                } // TODO: create hash
-            };
-
-
-            int result = await Requests.CreateUserRequestAsync(url, JsonConvert.SerializeObject(json));
+            PostUsersInput userInput = new(user);
+            string? token = await apiClient.CreateUserOrLoginRequest(userInput);
 
             // if results is not a 0, a guild must be set
-            if (result == 0)
+            if (token != null)
             {
-                await SendGame(user);
+                await SendGame(user, token);
             }
             else
             {
@@ -254,23 +219,18 @@ public class Handlers(TelegramBotClient bot, string url)
         );
     }
 
-    private async Task SendGuildData(User user, guildEnum guild)
+    private async Task SendGuildData(User user, GuildEnum guild)
     {
-        Dictionary<string, string> guildJson = new Dictionary<string, string>
-        {
-            {
-                "guild", guild.ToString()
-            }
-        };
         try
         {
-            await Requests.SetGuildRequestAsync(url, JsonConvert.SerializeObject(guildJson));
+            BackendClient apiClient = new(backendOptions);
 
-            await bot.SendTextMessageAsync(
-                user.Id,
-                $"You selected your guild! Now start the game with /game.",
-                replyMarkup: new ReplyKeyboardRemove()
-            );
+            PostUsersInput userInput = new(user)
+            {
+                Guild = guild.ToString()
+            };
+            string? token = await apiClient.CreateUserOrLoginRequest(userInput) ?? throw new Exception("Token was unexpectedly null.");
+            await SendGame(user, token);
         }
         catch (Exception)
         {
@@ -282,13 +242,14 @@ public class Handlers(TelegramBotClient bot, string url)
         }
     }
 
-    private async Task SendGame(User user)
+    private async Task SendGame(User user, string token)
     {
-        AuthenticationHeaderValue? header = Requests.GetAuthHeader(); // replace this with proper user token
+        string loginUrl = $"{backendOptions.Url}?token={token}";
         await bot.SendTextMessageAsync(
             user.Id,
             $"Open the following link to enter the game:\n\n" +
-            $"{url}?token={header}" //TODO: Proper game url
+            $"<a href=\"{loginUrl}\">{loginUrl}</a>",
+            parseMode: ParseMode.Html
         );
     }
 }

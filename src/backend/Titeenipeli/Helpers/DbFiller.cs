@@ -39,10 +39,7 @@ public static class DbFiller
             TelegramId = "test",
             FirstName = "",
             LastName = "",
-            Username = "",
-            PhotoUrl = "",
-            AuthDate = "",
-            Hash = ""
+            Username = ""
         };
 
         User testOpponent = new User
@@ -55,10 +52,7 @@ public static class DbFiller
             TelegramId = "opponent",
             FirstName = "",
             LastName = "",
-            Username = "",
-            PhotoUrl = "",
-            AuthDate = "",
-            Hash = ""
+            Username = ""
         };
 
 

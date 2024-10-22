@@ -106,9 +106,6 @@ public static class MapUtils
 
             LastName = "",
             Username = "",
-            PhotoUrl = "",
-            AuthDate = "",
-            Hash = ""
         };
     }
 
