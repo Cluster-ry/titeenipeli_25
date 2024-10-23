@@ -106,7 +106,7 @@ public class UserController(BotOptions botOptions,
     private BadRequestObjectResult? IsBotTokenValid(IHeaderDictionary headers)
     {
         StringValues botToken;
-        bool botTokenRetrieved = headers.TryGetValue("X-BOT-KEY", out botToken);
+        bool botTokenRetrieved = headers.TryGetValue(_botOptions.AuthorizationHeaderName, out botToken);
         if (botTokenRetrieved && botToken == _botOptions.Token)
         {
             return null;
