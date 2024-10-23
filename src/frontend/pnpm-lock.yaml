@@ -68,7 +68,7 @@ importers:
         version: 7.10.0(eslint@8.57.0)(typescript@5.4.5)
       '@vitejs/plugin-react-swc':
         specifier: ^3.7.0
-        version: 3.7.0(vite@5.2.11(@types/node@20.14.11))
+        version: 3.7.0(vite@5.2.14(@types/node@20.14.11))
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -94,14 +94,14 @@ importers:
         specifier: ^7.10.0
         version: 7.10.0(eslint@8.57.0)(typescript@5.4.5)
       vite:
-        specifier: ^5.2.11
-        version: 5.2.11(@types/node@20.14.11)
+        specifier: ^5.2.14
+        version: 5.2.14(@types/node@20.14.11)
       vite-plugin-http2-proxy:
         specifier: ^0.4.3
-        version: 0.4.3(vite@5.2.11(@types/node@20.14.11))
+        version: 0.4.3(vite@5.2.14(@types/node@20.14.11))
       vite-plugin-mkcert:
         specifier: ^1.17.5
-        version: 1.17.5(vite@5.2.11(@types/node@20.14.11))
+        version: 1.17.5(vite@5.2.14(@types/node@20.14.11))
 
 packages:
 
@@ -1716,8 +1716,8 @@ packages:
     peerDependencies:
       vite: '>=3'
 
-  vite@5.2.11:
-    resolution: {integrity: sha512-HndV31LWW05i1BLPMUCE1B9E9GFbOu1MbenhS58FuK6owSO5qHm7GiCotrNY1YE5rMeQSFBGmT5ZaLEjFizgiQ==}
+  vite@5.2.14:
+    resolution: {integrity: sha512-TFQLuwWLPms+NBNlh0D9LZQ+HXW471COABxw/9TEUBrjuHMo9BrYBPrN/SYAwIuVL+rLerycxiLT41t4f5MZpA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
@@ -2470,10 +2470,10 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@vitejs/plugin-react-swc@3.7.0(vite@5.2.11(@types/node@20.14.11))':
+  '@vitejs/plugin-react-swc@3.7.0(vite@5.2.14(@types/node@20.14.11))':
     dependencies:
       '@swc/core': 1.5.7
-      vite: 5.2.11(@types/node@20.14.11)
+      vite: 5.2.14(@types/node@20.14.11)
     transitivePeerDependencies:
       - '@swc/helpers'
 
@@ -3354,22 +3354,22 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  vite-plugin-http2-proxy@0.4.3(vite@5.2.11(@types/node@20.14.11)):
+  vite-plugin-http2-proxy@0.4.3(vite@5.2.14(@types/node@20.14.11)):
     dependencies:
       http2-proxy: 5.0.53
-      vite: 5.2.11(@types/node@20.14.11)
+      vite: 5.2.14(@types/node@20.14.11)
 
-  vite-plugin-mkcert@1.17.5(vite@5.2.11(@types/node@20.14.11)):
+  vite-plugin-mkcert@1.17.5(vite@5.2.14(@types/node@20.14.11)):
     dependencies:
       '@octokit/rest': 20.1.1
       axios: 1.7.4(debug@4.3.4)
       debug: 4.3.4
       picocolors: 1.0.1
-      vite: 5.2.11(@types/node@20.14.11)
+      vite: 5.2.14(@types/node@20.14.11)
     transitivePeerDependencies:
       - supports-color
 
-  vite@5.2.11(@types/node@20.14.11):
+  vite@5.2.14(@types/node@20.14.11):
     dependencies:
       esbuild: 0.20.2
       postcss: 8.4.38
