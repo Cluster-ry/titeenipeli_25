@@ -8,22 +8,21 @@ import { create } from "zustand";
 import { AxiosResponse } from "axios";
 
 // Model imports 
-import { PlayerCoordinates } from "../models/PlayerCoordinates";
-import { PixelMap } from "../models/PixelMap";
-import PixelType from "../models/enum/PixelType";
-import Guild from "../models/enum/Guild";
-import { GetPixelsResult } from "../models/Get/GetPixelsResult";
+import { PlayerCoordinates }  from "../models/PlayerCoordinates";
+import { PixelMap }           from "../models/PixelMap";
+import PixelType              from "../models/enum/PixelType";
+import Guild                  from "../models/enum/Guild";
+import { GetPixelsResult }    from "../models/Get/GetPixelsResult";
 import {
   instanceOfClientApiError,
   type ClientApiError,
 } from "../models/ClientApiError";
 
-import { getPixels } from "../api/map";
+import { getPixels }          from "../api/map";
 import { ViewportBoundigBox } from "../components/gameMap/Viewport";
-import { getGrpcClient } from "../core/grpc/grpcClient";
+import { getGrpcClient }      from "../core/grpc/grpcClient";
+import withRetry              from "../utils/retryUtils";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
-import withRetry from "../utils/retryUtils";
-
 
 export enum ConnectionStatus {
   Disconnected,
@@ -59,7 +58,7 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
   connectionStatus: ConnectionStatus.Disconnected,
   incrementalUpdateBuffer: [],
 
-  
+
   /**
    * Initializes the map. Makes sure it has not been done already and
    * calls the GRPC client.
@@ -146,6 +145,9 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
     }
   },
 
+  /**
+   *
+   */
   doIncrementalUpdate: (
     incrementalUpdateResponse: IncrementalMapUpdateResponse
   ) => {

@@ -1,12 +1,15 @@
+
+import { PropsWithChildren } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import ApiTestClient from "./components/ApiClientTest";
-import { Welcome } from "./pages/Welcome/Welcome";
+
+import GameMap                from "./components/gameMap/GameMap.tsx";
+import ApiTestClient          from "./components/ApiClientTest";
+import { Welcome }            from "./pages/Welcome/Welcome";
+import { Game as GameHolder } from "./pages/Game/Game";
+
 import "./App.css";
 import "./assets/PressStart2P-Regular.ttf";
-import { PropsWithChildren } from "react";
 
-import { Game as GameHolder } from "./pages/Game/Game";
-import GameMap from "./components/gameMap/GameMap.tsx";
 
 function AppShell({ children }: PropsWithChildren) {
   return <div className="app-shell">{children}</div>;
