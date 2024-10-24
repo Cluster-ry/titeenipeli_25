@@ -1,12 +1,25 @@
+/**
+ * This file contains a bunch of tests on the client side. The purpose 
+ * of these tests is to make sure the APIs work so that the 
+ * communication with the back-end is functional.
+ *
+ * Contains the following test:
+ * 1) POST request for logging in
+ * 2) POST request for /api/v1/users
+ * 3) PUT request for /api/v1/users 
+ * 4) GET request for /api/v1/map/pixels
+ * 5) POST request for /api/v1/map/pixels
+ * 6) POST request for /ctf
+ */
 import { api } from "../api/index";
 
-import { PostUsersInput } from "../models/Post/PostUsersInput";
-import { PostLoginInput } from "../models/Post/PostLoginInput";
-import { PostCtfInput } from "../models/Post/PostCtfInput";
-import { PostPixelsInput } from "../models/Post/PostPixelsInput";
-import { PutUsersInput } from "../models/Put/PutUsersInput";
+import { PostUsersInput }   from "../models/Post/PostUsersInput";
+import { PostLoginInput }   from "../models/Post/PostLoginInput";
+import { PostCtfInput }     from "../models/Post/PostCtfInput";
+import { PostPixelsInput }  from "../models/Post/PostPixelsInput";
+import { PutUsersInput }    from "../models/Put/PutUsersInput";
 
-export default function ApiTestClient() {
+const ApiTestClient = () => {
 
     const logInTest = async (event: { preventDefault: () => void; }) => {
         event.preventDefault();
@@ -88,3 +101,5 @@ export default function ApiTestClient() {
         </>
     )
 }
+
+export default ApiTestClient;

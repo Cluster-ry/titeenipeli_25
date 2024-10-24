@@ -11,11 +11,19 @@ import "./App.css";
 import "./assets/PressStart2P-Regular.ttf";
 
 
-function AppShell({ children }: PropsWithChildren) {
+const AppShell = ({ children }: PropsWithChildren) => {
   return <div className="app-shell">{children}</div>;
 }
 
-function AppRouter() {
+/**
+ * AppRouter
+ * Contains the following routes:
+ * 1) /
+ * 2) /game 
+ * 3) /map
+ * 4) /test
+ */
+const AppRouter = () => {
   return (
     <Router>
       <Routes>
@@ -48,7 +56,7 @@ function AppRouter() {
   );
 }
 
-function App() {
+const App = () => {
   return (
     <AppShell>
         <AppRouter />

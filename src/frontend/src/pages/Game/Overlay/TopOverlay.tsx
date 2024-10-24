@@ -6,11 +6,11 @@ type TopOverlayProps = PropsWithChildren<{
   bucketPoints: number;
 }>;
 
-function TopOverlay({
+const TopOverlay = ({
   children: scores,
   cooldown,
   bucketPoints,
-}: TopOverlayProps) {
+}: TopOverlayProps) => {
   return (
     <div className="top-overlay top-gradient">
       <div className="top-overlay__left">{scores}</div>
