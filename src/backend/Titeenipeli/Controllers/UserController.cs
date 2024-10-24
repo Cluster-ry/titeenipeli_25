@@ -15,20 +15,23 @@ namespace Titeenipeli.Controllers;
 
 [ApiController]
 [Route("users")]
-public class UserController(BotOptions botOptions,
+public class UserController(
+                      IWebHostEnvironment webHostEnvironment,
+                      BotOptions botOptions,
                       SpawnGeneratorService spawnGeneratorService,
                       IUserRepositoryService userRepositoryService,
                       IGuildRepositoryService guildRepositoryService,
                       JwtService jwtService) : ControllerBase
 {
     private const int _loginTokenLength = 32;
-    private static readonly TimeSpan _loginTokenExpiryTime = TimeSpan.FromMinutes(10);
 
+    private readonly IWebHostEnvironment _webHostEnvironment = webHostEnvironment;
     private readonly BotOptions _botOptions = botOptions;
     private readonly IGuildRepositoryService _guildRepositoryService = guildRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService = userRepositoryService;
     private readonly SpawnGeneratorService _spawnGeneratorService = spawnGeneratorService;
     private readonly JwtService _jwtService = jwtService;
+    private readonly TimeSpan _loginTokenExpiryTime = TimeSpan.FromMinutes(botOptions.LoginTokenExpirationInMinutes);
 
     [HttpPost]
     public IActionResult PostUsers([FromBody] PostUsersInput usersInput)
@@ -49,7 +52,7 @@ public class UserController(BotOptions botOptions,
                 return BadRequest(new ErrorResult
                 {
                     Title = "Invalid guild",
-                    Code = 1414,
+                    Code = ErrorCode.InvalidGuild,
                     Description = "Provide valid guild"
                 });
             }
@@ -67,7 +70,7 @@ public class UserController(BotOptions botOptions,
     public IActionResult PostAuthenticate([FromBody] PostAuthenticateInput loginInput)
     {
         // TODO: Should be removed before production!
-        if (loginInput.Token.Length < 32)
+        if (_webHostEnvironment.IsDevelopment() && loginInput.Token.Length < 32)
         {
             return DebugLogin(loginInput.Token);
         }
@@ -116,7 +119,7 @@ public class UserController(BotOptions botOptions,
             ErrorResult error = new ErrorResult
             {
                 Title = "Invalid bot token",
-                Code = 403,
+                Code = ErrorCode.InvalidBotToken,
                 Description = "Bot token is invalid, is client bot at all?"
             };
 
