@@ -145,9 +145,6 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
     }
   },
 
-  /**
-   *
-   */
   doIncrementalUpdate: (
     incrementalUpdateResponse: IncrementalMapUpdateResponse
   ) => {
