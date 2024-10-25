@@ -14,6 +14,9 @@ public class User : Entity
     public required int SpawnX { get; set; }
     public required int SpawnY { get; set; }
     public float PixelBucket { get; set; } = 10;
+    [StringLength(32)]
+    public string? AuthenticationToken { get; set; }
+    public DateTime? AuthenticationTokenExpiryTime { get; set; }
 
 
     #region Telegram

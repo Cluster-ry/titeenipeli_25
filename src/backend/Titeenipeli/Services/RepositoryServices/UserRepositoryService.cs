@@ -40,6 +40,11 @@ public class UserRepositoryService : IUserRepositoryService
         return _dbContext.Users.Include(user => user.Guild).Where(user => user.Guild != null && user.Guild.Name == guildName).ToArray();
     }
 
+    public User? GetByAuthenticationToken(string token)
+    {
+        return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.AuthenticationToken == token);
+    }
+
     public void Add(User user)
     {
         _dbContext.Users.Add(user);

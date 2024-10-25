@@ -36,7 +36,7 @@ public static class DbFiller
             Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
             SpawnX = 5,
             SpawnY = 5,
-            TelegramId = "test",
+            TelegramId = "0",
             FirstName = "",
             LastName = "",
             Username = ""
@@ -49,7 +49,7 @@ public static class DbFiller
                     throw new InvalidOperationException(),
             SpawnX = 3,
             SpawnY = 2,
-            TelegramId = "opponent",
+            TelegramId = "1",
             FirstName = "",
             LastName = "",
             Username = ""

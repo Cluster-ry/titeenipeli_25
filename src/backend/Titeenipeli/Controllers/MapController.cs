@@ -116,7 +116,7 @@ public class MapController : ControllerBase
             ErrorResult error = new ErrorResult
             {
                 Title = "Invalid pixel placement",
-                Code = 400,
+                Code = ErrorCode.InvalidPixelPlacement,
                 Description = "Try another pixel"
             };
 
@@ -137,7 +137,7 @@ public class MapController : ControllerBase
             ErrorResult error = new ErrorResult
             {
                 Title = "Pixel is a spawn point",
-                Code = 400,
+                Code = ErrorCode.PixelIsSpawnPoint,
                 Description = "Spawn pixels cannot be captured"
             };
 
