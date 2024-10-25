@@ -138,7 +138,7 @@ public class MapUpdateProcessor
         bool insideFogOfWar = _visibilityMap.GetVisibility(coordinate);
         if (!insideFogOfWar)
         {
-            AddNotOwnedChange(coordinate, PixelTypes.Normal);
+            AddNotOwnedChange(coordinate, PixelTypes.FogOfWar);
         }
     }
 
