@@ -26,7 +26,7 @@ public class SpawnGeneratorService
         do
         {
             spawnCoordinate = _mapCenter + _spawnGenerator.GetSpawnPoint(guildName);
-        } while (!_mapRepositoryService.IsValid(spawnCoordinate) && _mapRepositoryService.IsSpawn(spawnCoordinate));
+        } while (!_mapRepositoryService.IsValid(spawnCoordinate) || _mapRepositoryService.IsSpawn(spawnCoordinate));
 
         return spawnCoordinate;
     }

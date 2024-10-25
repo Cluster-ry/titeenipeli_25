@@ -24,7 +24,7 @@ internal class TgBot
             return;
         }
 
-        if (string.IsNullOrEmpty(backendOptions.Url))
+        if (string.IsNullOrEmpty(backendOptions.BackendUrl))
         {
             Console.WriteLine("Unable to get backend URL, exiting...");
             return;

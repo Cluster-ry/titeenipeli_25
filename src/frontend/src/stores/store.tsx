@@ -9,7 +9,7 @@ import { getPixels } from "../api/map";
 import { GetPixelsResult } from "../models/Get/GetPixelsResult";
 import { AxiosResponse } from "axios";
 import { ViewportBoundigBox } from "../components/gameMap/Viewport";
-import { getGrpcClient } from "../core/grpc/grpcClient";
+import { GrpcClient } from "../core/grpc/grpcClient";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
 import PixelType from "../models/enum/PixelType";
 import withRetry from "../utils/retryUtils";
@@ -61,7 +61,7 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
       initialized: true,
     }));
 
-    const grpcClient = getGrpcClient();
+    const grpcClient = GrpcClient.getGrpcClient();
     grpcClient.incrementalMapUpdateClient?.registerOnResponseListener(
       get().doIncrementalUpdate
     );

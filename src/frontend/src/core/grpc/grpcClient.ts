@@ -2,7 +2,7 @@ import { GrpcWebFetchTransport } from "@protobuf-ts/grpcweb-transport";
 import IncrementalMapUpdateClient from "./incrementalMapUpdateClient";
 
 export class GrpcClient {
-  static instance = new GrpcClient();
+  static instance: GrpcClient | null = null;
 
   transport: GrpcWebFetchTransport;
 
@@ -71,10 +71,13 @@ export class GrpcClient {
     const index = this.onErrorCallbacks.indexOf(callback);
     this.onErrorCallbacks.splice(index, 1);
   }
-}
 
-export function getGrpcClient() {
-  return GrpcClient.instance;
+  public static getGrpcClient() {
+    if (GrpcClient.instance === null) {
+      GrpcClient.instance = new GrpcClient()
+    }
+    return GrpcClient.instance;
+  }
 }
 
 export default GrpcClient;

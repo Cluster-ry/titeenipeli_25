@@ -18,7 +18,7 @@ public class BackendClient(BackendOptions backendOptions)
 
     public async Task<string?> CreateUserOrLoginRequest(PostUsersInput userInput)
     {
-        string url = $"{_backendOptions.Url}/api/v1/users";
+        string url = $"{_backendOptions.BackendUrl}/api/v1/users";
         string json = JsonConvert.SerializeObject(userInput, _serializerSettings);
 
         try
