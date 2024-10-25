@@ -6,6 +6,7 @@ using Titeenipeli.Inputs;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Results;
+using Titeenipeli.Results.CustomStatusCodes;
 using Titeenipeli.Schema;
 using Titeenipeli.Services;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
@@ -26,17 +27,14 @@ public class MapController : ControllerBase
     private readonly IMapUpdaterService _mapUpdaterService;
 
     private readonly JwtService _jwtService;
-    private readonly RateLimitService _rateLimitService;
 
     public MapController(GameOptions gameOptions,
                          JwtService jwtService,
-                         RateLimitService rateLimitService,
                          IUserRepositoryService userRepositoryService,
                          IMapRepositoryService mapRepositoryService,
                          IMapUpdaterService mapUpdaterService)
     {
         _gameOptions = gameOptions;
-        _rateLimitService = rateLimitService;
         _userRepositoryService = userRepositoryService;
         _mapRepositoryService = mapRepositoryService;
         _jwtService = jwtService;
@@ -102,12 +100,10 @@ public class MapController : ControllerBase
             return BadRequest();
         }
 
-        /*
-        if (!_rateLimitService.CanPlacePixel(user))
+        if (user.PixelBucket < 1)
         {
-            return new TooManyRequestsResult("Try again later", _rateLimitService.TimeBeforeNextPixel(user));
+            return new TooManyRequestsResult("Try again later", TimeSpan.FromMinutes(1));
         }
-        */
 
         Coordinate globalCoordinate = new Coordinate
         {
@@ -120,7 +116,7 @@ public class MapController : ControllerBase
             ErrorResult error = new ErrorResult
             {
                 Title = "Invalid pixel placement",
-                Code = 400,
+                Code = ErrorCode.InvalidPixelPlacement,
                 Description = "Try another pixel"
             };
 
@@ -141,7 +137,7 @@ public class MapController : ControllerBase
             ErrorResult error = new ErrorResult
             {
                 Title = "Pixel is a spawn point",
-                Code = 400,
+                Code = ErrorCode.PixelIsSpawnPoint,
                 Description = "Spawn pixels cannot be captured"
             };
 
@@ -151,7 +147,7 @@ public class MapController : ControllerBase
 
         await _mapUpdaterService.PlacePixel(globalCoordinate, user);
 
-        user.LastPlacement = DateTime.UtcNow;
+        user.PixelBucket--;
         _userRepositoryService.Update(user);
 
         return Ok();

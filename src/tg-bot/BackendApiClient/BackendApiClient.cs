@@ -24,7 +24,7 @@ public class BackendClient(BackendOptions backendOptions)
         try
         {
             StringContent content = new(json, Encoding.UTF8, "application/json");
-            content.Headers.Add("X-BOT-KEY", _backendOptions.Token);
+            content.Headers.Add(_backendOptions.AuthorizationHeaderName, _backendOptions.Token);
             HttpResponseMessage response = await _httpClient.PostAsync(url, content);
 
             if (response.StatusCode == HttpStatusCode.BadRequest)
