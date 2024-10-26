@@ -33,25 +33,28 @@ public static class Program
         builder.Services.AddDbContext<ApiDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
 
-        JwtOptions jwtOptions = new JwtOptions();
+        var jwtOptions = new JwtOptions();
         builder.Configuration.GetSection("JWT").Bind(jwtOptions);
         builder.Services.AddSingleton(jwtOptions);
 
-        GameOptions gameOptions = new GameOptions();
+        var botOptions = new BotOptions();
+        builder.Configuration.GetSection("Bot").Bind(botOptions);
+        builder.Services.AddSingleton(botOptions);
+
+        var gameOptions = new GameOptions();
         builder.Configuration.GetSection("Game").Bind(gameOptions);
         builder.Services.AddSingleton(gameOptions);
 
         builder.Services.AddScoped<JwtService>();
         builder.Services.AddScoped<SpawnGeneratorService>();
-        builder.Services.AddScoped<RateLimitService>();
 
         // Adding OpenTelemetry tracing and metrics
         IOpenTelemetryBuilder openTelemetry = builder.Services.AddOpenTelemetry();
 
         string openTelemetryEndpoint = builder.Configuration["OpenTelemetryEndpoint"] ?? "localhost:4318";
 
-        openTelemetry.ConfigureResource(resource => resource
-            .AddService(builder.Environment.ApplicationName));
+        openTelemetry.ConfigureResource(resource =>
+            resource.AddService(builder.Environment.ApplicationName));
 
         openTelemetry.WithMetrics(metrics =>
         {
@@ -125,8 +128,11 @@ public static class Program
 
         builder.Services.AddAuthentication(options =>
         {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultAuthenticateScheme =
+                JwtBearerDefaults.AuthenticationScheme;
+
+            options.DefaultChallengeScheme =
+                JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(options =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
@@ -141,7 +147,8 @@ public static class Program
                     new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtOptions.Secret)),
                 TokenDecryptionKey =
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Encryption))
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtOptions.Encryption))
             };
 
             options.Events = new JwtBearerEvents
@@ -155,20 +162,26 @@ public static class Program
         });
 
         builder.Services.AddAuthorizationBuilder()
-               .AddPolicy("MustHaveGuild", policy => policy.Requirements.Add(new MustHaveGuildRequirement()));
+               .AddPolicy("MustHaveGuild",
+                   policy => policy.Requirements.Add(new MustHaveGuildRequirement()));
 
-        builder.Services.AddSingleton<IAuthorizationHandler, MustHaveGuildHandler>();
-        builder.Services.AddSingleton<IMapUpdaterService, MapUpdaterService>();
+        builder.Services
+               .AddSingleton<IAuthorizationHandler,
+                   MustHaveGuildHandler>();
+
+        builder.Services
+               .AddSingleton<IMapUpdaterService, MapUpdaterService>();
 
         builder.Services.AddControllers()
                .AddNewtonsoftJson(options =>
                {
-                   options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                   options.SerializerSettings.ContractResolver =
+                       new CamelCasePropertyNamesContractResolver();
                });
 
         builder.Services.AddGrpc();
         builder.Services.AddGrpcReflection();
-        GrpcServiceRegister.AddSingletonGRPCServices(builder.Services);
+        GrpcServiceRegister.AddSingletonGrpcServices(builder.Services);
 
         AddBackgroundServices(builder.Services);
         AddRepositoryServices(builder.Services);
@@ -178,7 +191,7 @@ public static class Program
         using (IServiceScope scope = app.Services.CreateScope())
         {
             IServiceProvider services = scope.ServiceProvider;
-            ApiDbContext dbContext = services.GetRequiredService<ApiDbContext>();
+            var dbContext = services.GetRequiredService<ApiDbContext>();
 
             DbFiller.Clear(dbContext);
             dbContext.Database.EnsureCreated();
@@ -204,7 +217,7 @@ public static class Program
 
         app.MapControllers();
 
-        GrpcServiceRegister.AddGRPCServices(app);
+        GrpcServiceRegister.AddGrpcServices(app);
 
         app.Run();
     }
@@ -212,24 +225,56 @@ public static class Program
     private static void AddBackgroundServices(IServiceCollection services)
     {
         TimeSpan updateCumulativeScoresServicePeriod = TimeSpan.FromMinutes(1);
+        TimeSpan updatePixelBucketsServicePeriod = TimeSpan.FromMinutes(1);
 
-        services.AddScoped<IUpdateCumulativeScoresService, UpdateCumulativeScoresService>();
+        services
+            .AddScoped<IUpdateCumulativeScoresService,
+                UpdateCumulativeScoresService>();
         services.AddHostedService(
             serviceProvider =>
                 new AsynchronousTimedBackgroundService<
-                    IUpdateCumulativeScoresService, UpdateCumulativeScoresService>(
+                    IUpdateCumulativeScoresService,
+                    UpdateCumulativeScoresService>(
                     serviceProvider,
-                    GetNonNullService<ILogger<UpdateCumulativeScoresService>>(serviceProvider),
+                    GetNonNullService<ILogger<UpdateCumulativeScoresService>>(
+                        serviceProvider),
                     updateCumulativeScoresServicePeriod));
+
+        services
+            .AddScoped<IUpdatePixelBucketsService,
+                UpdatePixelBucketsService>();
+        services.AddHostedService(
+            serviceProvider =>
+                new AsynchronousTimedBackgroundService<
+                    IUpdatePixelBucketsService,
+                    UpdatePixelBucketsService>(
+                    serviceProvider,
+                    GetNonNullService<ILogger<UpdatePixelBucketsService>>(
+                        serviceProvider),
+                    updatePixelBucketsServicePeriod));
     }
 
     private static void AddRepositoryServices(IServiceCollection services)
     {
-        services.AddScoped<IUserRepositoryService, UserRepositoryService>();
-        services.AddScoped<IGuildRepositoryService, GuildRepositoryService>();
-        services.AddScoped<IMapRepositoryService, MapRepositoryService>();
-        services.AddScoped<IGameEventRepositoryService, GameEventRepositoryService>();
-        services.AddScoped<ICtfFlagRepositoryService, CtfFlagRepositoryService>();
+        services
+            .AddScoped<IUserRepositoryService,
+                UserRepositoryService>();
+
+        services
+            .AddScoped<IGuildRepositoryService,
+                GuildRepositoryService>();
+
+        services
+            .AddScoped<IMapRepositoryService,
+                MapRepositoryService>();
+
+        services
+            .AddScoped<IGameEventRepositoryService,
+                GameEventRepositoryService>();
+
+        services
+            .AddScoped<ICtfFlagRepositoryService,
+                CtfFlagRepositoryService>();
     }
 
     private static TService GetNonNullService<TService>(IServiceProvider serviceProvider)

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
-import { getGrpcClient } from "../core/grpc/grpcClient";
+import { GrpcClient } from "../core/grpc/grpcClient";
 
 const GRPCTest = () =>  {
   const [grpcConnectionStatus, setGrpcConnectionStatus] = useState(false);
   const [latestGrpcResponse, setLatestGrpcResponse] =
     useState<IncrementalMapUpdateResponse>();
 
-  const grpcClient = getGrpcClient();
+  const grpcClient = GrpcClient.getGrpcClient();
   grpcClient.registerOnConnectionStatusChangedListener(setGrpcConnectionStatus);
   grpcClient.incrementalMapUpdateClient?.registerOnResponseListener(
     setLatestGrpcResponse

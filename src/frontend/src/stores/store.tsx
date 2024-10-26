@@ -25,7 +25,12 @@ import GameMap from "../models/GameMap";
 
 import { getPixels } from "../api/map";
 import ViewportBoundigBox from "../models/ViewportBoundigBox";
-import { getGrpcClient } from "../core/grpc/grpcClient";
+
+import { GetPixelsResult } from "../models/Get/GetPixelsResult";
+import { AxiosResponse } from "axios";
+import { GrpcClient } from "../core/grpc/grpcClient";
+import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
+import PixelType from "../models/enum/PixelType";
 import withRetry from "../utils/retryUtils";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
 
@@ -57,7 +62,8 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
     }));
 
     // Calling the GRPC client
-    const grpcClient = getGrpcClient();
+
+    const grpcClient = GrpcClient.getGrpcClient();
     grpcClient.incrementalMapUpdateClient?.registerOnResponseListener(
       get().doIncrementalUpdate
     );
@@ -192,17 +198,21 @@ const parseIncrementalUpdate = (
   incrementalUpdateResponse: IncrementalMapUpdateResponse
 ) => {
   for (const update of incrementalUpdateResponse.updates) {
-    pixels.set(
-      JSON.stringify({
-        x: update.spawnRelativeCoordinate?.x ?? 0,
-        y: update.spawnRelativeCoordinate?.y ?? 0,
-      }),
-      {
-        type: update.type as unknown as PixelType,
+    const pixelType = update.type as unknown as PixelType;
+    const pixelKey = JSON.stringify({
+      x: update.spawnRelativeCoordinate?.x ?? 0,
+      y: update.spawnRelativeCoordinate?.y ?? 0,
+    });
+
+    if (pixelType !== PixelType.FogOfWar) {
+      pixels.set(pixelKey, {
+        type: pixelType,
         owner: update.owner === 0 ? undefined : update.owner - 1,
         ownPixel: update.ownPixel,
-      }
-    );
+      });
+    } else {
+      pixels.delete(pixelKey);
+    }
   }
 };
 

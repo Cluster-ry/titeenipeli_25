@@ -59,10 +59,7 @@ public class MapUpdateProcessorTest
         TelegramId = "",
         FirstName = "Own user",
         LastName = "",
-        Username = "",
-        PhotoUrl = "",
-        AuthDate = "",
-        Hash = ""
+        Username = ""
     };
     private static readonly User _otherUser = new()
     {
@@ -74,10 +71,7 @@ public class MapUpdateProcessorTest
         TelegramId = "",
         FirstName = "Other user",
         LastName = "",
-        Username = "",
-        PhotoUrl = "",
-        AuthDate = "",
-        Hash = ""
+        Username = ""
     };
     private static readonly List<User> _users = new() {
         CurrentUser,

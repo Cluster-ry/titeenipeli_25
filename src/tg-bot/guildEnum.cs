@@ -1,6 +1,6 @@
-﻿namespace Titeenipeli_bot;
+﻿namespace TiteenipeliBot;
 
-public enum guildEnum
+public enum GuildEnum
 {
     Tietokilta = 0,
     Algo = 1,

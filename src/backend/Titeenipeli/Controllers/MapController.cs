@@ -27,17 +27,14 @@ public class MapController : ControllerBase
     private readonly IMapUpdaterService _mapUpdaterService;
 
     private readonly JwtService _jwtService;
-    private readonly RateLimitService _rateLimitService;
 
     public MapController(GameOptions gameOptions,
                          JwtService jwtService,
-                         RateLimitService rateLimitService,
                          IUserRepositoryService userRepositoryService,
                          IMapRepositoryService mapRepositoryService,
                          IMapUpdaterService mapUpdaterService)
     {
         _gameOptions = gameOptions;
-        _rateLimitService = rateLimitService;
         _userRepositoryService = userRepositoryService;
         _mapRepositoryService = mapRepositoryService;
         _jwtService = jwtService;
@@ -103,12 +100,10 @@ public class MapController : ControllerBase
             return BadRequest();
         }
 
-        /*
-        if (!_rateLimitService.CanPlacePixel(user))
+        if (user.PixelBucket < 1)
         {
-            return new TooManyRequestsResult("Try again later", _rateLimitService.TimeBeforeNextPixel(user));
+            return new TooManyRequestsResult("Try again later", TimeSpan.FromMinutes(1));
         }
-        */
 
         Coordinate globalCoordinate = new Coordinate
         {
@@ -121,7 +116,7 @@ public class MapController : ControllerBase
             ErrorResult error = new ErrorResult
             {
                 Title = "Invalid pixel placement",
-                Code = 400,
+                Code = ErrorCode.InvalidPixelPlacement,
                 Description = "Try another pixel"
             };
 
@@ -142,7 +137,7 @@ public class MapController : ControllerBase
             ErrorResult error = new ErrorResult
             {
                 Title = "Pixel is a spawn point",
-                Code = 400,
+                Code = ErrorCode.PixelIsSpawnPoint,
                 Description = "Spawn pixels cannot be captured"
             };
 
@@ -152,7 +147,7 @@ public class MapController : ControllerBase
 
         await _mapUpdaterService.PlacePixel(globalCoordinate, user);
 
-        user.LastPlacement = DateTime.UtcNow;
+        user.PixelBucket--;
         _userRepositoryService.Update(user);
 
         return Ok();
@@ -188,7 +183,7 @@ public class MapController : ControllerBase
             {
                 Type = PixelType.Normal,
                 Owner = pixel.User?.Guild?.Name,
-                OwnPixel = pixel.User == user
+                OwnPixel = pixel.User?.Id == user?.Id
             };
 
             map.Pixels[pixel.X + 1, pixel.Y + 1] = mapPixel;
@@ -199,7 +194,7 @@ public class MapController : ControllerBase
 
     private static void MarkSpawns(Map map, IEnumerable<User> users)
     {
-        foreach (User user in users) map.Pixels[user.SpawnX, user.SpawnY].Type = PixelType.Spawn;
+        foreach (User user in users) map.Pixels[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
     }
 
     private Map CalculateFogOfWar(Map map)
@@ -244,9 +239,9 @@ public class MapController : ControllerBase
         fogOfWarMap.MaxViewableX = int.Max(maxX + 1, fogOfWarMap.MaxViewableX);
         fogOfWarMap.MaxViewableY = int.Max(maxY + 1, fogOfWarMap.MaxViewableY);
 
-        for (int x = minY; x <= maxY; x++)
+        for (int x = minX; x <= maxX; x++)
         {
-            for (int y = minX; y <= maxX; y++)
+            for (int y = minY; y <= maxY; y++)
             {
                 fogOfWarMap.Pixels[x, y] = map.Pixels[x, y];
             }

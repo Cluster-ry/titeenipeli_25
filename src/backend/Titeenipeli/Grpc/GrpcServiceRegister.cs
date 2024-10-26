@@ -4,17 +4,17 @@ namespace Titeenipeli.Grpc;
 
 public static class GrpcServiceRegister
 {
-    public static void AddSingletonGRPCServices(IServiceCollection services)
+    public static void AddSingletonGrpcServices(IServiceCollection services)
     {
         services.AddSingleton<IIncrementalMapUpdateCoreService, IncrementalMapUpdateCoreService>();
     }
 
-    public static void AddGRPCServices(WebApplication app)
+    public static void AddGrpcServices(WebApplication app)
     {
         app.UseGrpcWeb();
         app.MapGrpcService<IncrementalMapUpdateService>().EnableGrpcWeb();
 
-        IWebHostEnvironment env = app.Environment;
+        var env = app.Environment;
         if (env.IsDevelopment())
         {
             app.MapGrpcReflectionService();

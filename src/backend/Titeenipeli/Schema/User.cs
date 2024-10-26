@@ -13,9 +13,10 @@ public class User : Entity
 
     public required int SpawnX { get; set; }
     public required int SpawnY { get; set; }
-
-    public DateTime LastPlacement { get; set; } = DateTime.MinValue;
-    public int PixelBucket { get; set; } = 0;
+    public float PixelBucket { get; set; } = 10;
+    [StringLength(32)]
+    public string? AuthenticationToken { get; set; }
+    public DateTime? AuthenticationTokenExpiryTime { get; set; }
 
 
     #region Telegram
@@ -30,14 +31,5 @@ public class User : Entity
 
     [StringLength(64)]
     public required string Username { get; init; }
-
-    [StringLength(64)]
-    public required string PhotoUrl { get; init; }
-
-    [StringLength(64)]
-    public required string AuthDate { get; init; }
-
-    [StringLength(64)]
-    public required string Hash { get; init; }
     #endregion
 }

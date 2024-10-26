@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Titeenipeli.Enums;
 using Titeenipeli.Inputs;
 using Titeenipeli.Results;
 using Titeenipeli.Schema;
@@ -31,7 +32,7 @@ public class CtfController : ControllerBase
         ErrorResult error = new ErrorResult
         {
             Title = "Invalid flag",
-            Code = 400,
+            Code = ErrorCode.InvalidCtfFlag,
             Description = "Better luck next time"
         };
 

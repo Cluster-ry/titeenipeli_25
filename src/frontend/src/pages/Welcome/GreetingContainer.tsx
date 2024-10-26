@@ -16,7 +16,7 @@ export const GreetingContainer = ({ login }: GreetingContainerProps) => {
           "radial-gradient(50% 50% at 50% 50%, #FFFFFF 61.83%, #D9D9D9 100%)",
       }}
     >
-      Greetings "Username"
+      Greetings fighter! Log in using Telegram!
       <div
         style={{
           width: "60%",
@@ -29,7 +29,6 @@ export const GreetingContainer = ({ login }: GreetingContainerProps) => {
       >
         <DieButton onClick={login} />
       </div>
-      For whom are you fighting for?
     </div>
   );
 };
