@@ -43,22 +43,19 @@ public class UserController(
     [Authorize(Policy = "MustHaveGuild")]
     public IActionResult CurrentUser()
     {
-        var jwtclaim = HttpContext.GetUser(_jwtService);
-        if (jwtclaim is null) return Unauthorized(new { message = "Invalid jwt or missing JWToken" });
+        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
+        if (user is null) return Unauthorized();
 
-        var userClaim = _userRepositoryService.GetById(jwtclaim.Id);
-        if (userClaim is null) return Unauthorized(new { message = "No user defined" }); //Should not happen?
-
-        return Ok(new UserResult(userClaim));
+        return Ok(new UserResult(user));
     }
 
-    private class UserResult
+    public class UserResult
     {
-        int Id { get; init; }
-        string Username { get; init; }
-        string FirstName { get; init; }
-        string LastName { get; init; }
-        int Guild { get; init; }
+        public int Id { get; init; }
+        public string Username { get; init; }
+        public string FirstName { get; init; }
+        public string LastName { get; init; }
+        public int Guild { get; init; }
 
 
         public UserResult(User user)
