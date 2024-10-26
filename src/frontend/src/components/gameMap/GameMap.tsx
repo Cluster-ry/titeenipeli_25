@@ -1,12 +1,13 @@
-import { Container, Stage } from "@pixi/react";
+import {Container, Stage} from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
-import { pixelColor } from "./guild/Guild";
-import { mapConfig } from "./MapConfig";
-import { Coordinate } from "../../models/Coordinate";
-import useGameMapStore, { ConnectionStatus } from "../../stores/store";
-import { postPixels } from "../../api/map";
-import { useMemo } from "react";
+import {pixelColor} from "./guild/Guild";
+import {mapConfig} from "./MapConfig";
+import {Coordinate} from "../../models/Coordinate";
+import useGameMapStore, {ConnectionStatus} from "../../stores/store";
+import {postPixels} from "../../api/map";
+import {useMemo} from "react";
+import PixelType from "../../models/enum/PixelType.ts";
 
 /**
  * @component GameMap
@@ -52,7 +53,7 @@ const GameMap = () => {
         x={rectangleX}
         y={rectangleY}
         isOwn={pixel?.ownPixel ?? false}
-        isSpawn={false}
+        isSpawn={pixel?.type === PixelType.Spawn}
         width={mapConfig.PixelSize}
         height={mapConfig.PixelSize}
         color={color}
