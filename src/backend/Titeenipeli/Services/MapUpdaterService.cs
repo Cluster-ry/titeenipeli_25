@@ -155,7 +155,11 @@ public class MapUpdaterService(
                                                 .GetRequiredService<IMapRepositoryService>();
 
                 Pixel newPixel = new()
-                    { X = changedPixel.Coordinate.X, Y = changedPixel.Coordinate.Y, User = changedPixel.NewOwner };
+                {
+                    X = changedPixel.Coordinate.X,
+                    Y = changedPixel.Coordinate.Y,
+                    User = changedPixel.NewOwner
+                };
 
                 mapRepositoryService.Update(newPixel);
             }
