@@ -9,7 +9,7 @@ import { PostCtfInput } from "../models/Post/PostCtfInput";
 import { PostPixelsInput } from "../models/Post/PostPixelsInput";
 
 
-export default function ApiTestClient() {
+export function ApiTestClient() {
     const getMapTest = async(event: { preventDefault: () => void; }) => {
         event.preventDefault();
         api.map.getPixels();
