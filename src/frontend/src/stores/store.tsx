@@ -22,17 +22,11 @@ import {
   type ClientApiError,
 } from "../models/ClientApiError";
 import GameMap from "../models/GameMap";
-
 import { getPixels } from "../api/map";
 import ViewportBoundigBox from "../models/ViewportBoundigBox";
-
-import { GetPixelsResult } from "../models/Get/GetPixelsResult";
-import { AxiosResponse } from "axios";
 import { GrpcClient } from "../core/grpc/grpcClient";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
-import PixelType from "../models/enum/PixelType";
 import withRetry from "../utils/retryUtils";
-import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
 
 
 export const useGameMapStore = create<GameMap>((set, get) => ({
