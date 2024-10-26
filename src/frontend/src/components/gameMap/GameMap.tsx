@@ -6,9 +6,10 @@ import ConnectionStatus from "../../models/enum/ConnectionStatus";
 import { pixelColor } from "./guild/Guild";
 import { mapConfig } from "./MapConfig";
 import { Coordinate } from "../../models/Coordinate";
-import useGameMapStore from "../../stores/store";
+import useGameMapStore from "../../stores/mapStore.tsx";
 import { postPixels } from "../../api/map";
 import PixelType from "../../models/enum/PixelType.ts";
+import { useUserStore } from "../../stores/userStore.ts";
 
 /**
  * @component GameMap
@@ -24,6 +25,7 @@ import PixelType from "../../models/enum/PixelType.ts";
  */
 const GameMap = () => {
     const gameMapStore = useGameMapStore((state) => state);
+    const { user } = useUserStore();
     useMemo(() => {
         gameMapStore.initializeMap();
     }, []);
@@ -58,7 +60,7 @@ const GameMap = () => {
                 key={`x:${coordinate.x} y:${coordinate.y}`}
                 x={rectangleX}
                 y={rectangleY}
-                isOwn={pixel?.ownPixel ?? false}
+                isOwn={pixel?.owner === user?.id}
                 isSpawn={pixel?.type === PixelType.Spawn}
                 width={mapConfig.PixelSize}
                 height={mapConfig.PixelSize}
