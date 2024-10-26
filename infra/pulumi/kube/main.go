@@ -14,12 +14,15 @@ func main() {
 			return fmt.Errorf("error referencing stack: %w", err)
 		}
 		kubeconfig := referencedStack.GetOutput(pulumi.String("kubeconfig")).AsStringOutput()
+		domainName := referencedStack.GetOutput(pulumi.String("domainName")).AsStringOutput()
+		titeenipeliRG := referencedStack.GetOutput(pulumi.String("titeenipeliRG")).AsStringOutput()
+		certManagerIdentityClientId := referencedStack.GetOutput(pulumi.String("certManagerIdentityClientId")).AsStringOutput()
 
 		k8sProvider, err := buildProvider(ctx, kubeconfig)
 		if err != nil {
 			return err
 		}
-		buildCharts(ctx, k8sProvider)
+		buildCharts(ctx, k8sProvider, domainName, certManagerIdentityClientId, titeenipeliRG)
 
 		return nil
 	})

@@ -4,15 +4,30 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/pulumi/pulumi-azure/sdk/v5/go/azure/core"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	v1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/helm/v3"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
+
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 	"gopkg.in/yaml.v2"
 )
 
-func buildCharts(ctx *pulumi.Context, k8sProvider *kubernetes.Provider) error {
+func buildCharts(
+	ctx *pulumi.Context,
+	k8sProvider *kubernetes.Provider,
+	domainName pulumi.StringOutput,
+	certManagerIdentityClientId pulumi.StringOutput, titeenipeliRG pulumi.StringOutput) error {
+
+	subscription, err := core.LookupSubscription(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	conf := config.New(ctx, "")
+	email := conf.RequireSecret("email")
 
 	v1.NewNamespace(ctx, "cert-manager", &v1.NamespaceArgs{
 		Metadata: &metav1.ObjectMetaArgs{
@@ -38,18 +53,17 @@ func buildCharts(ctx *pulumi.Context, k8sProvider *kubernetes.Provider) error {
 	helm.NewChart(ctx, "cert-manager", certManagerChartArgs,
 		pulumi.Providers(k8sProvider))
 
-	/*
-		zoneName := domain.Name.ApplyT(func(name string) string {
-			return name
-		}).(pulumi.StringOutput)
+	helm.NewChart(ctx, "certmanager-certs", helm.ChartArgs{
+		Path: pulumi.String("./helm/certmanager-certs"),
+		Values: pulumi.Map{
+			"hostedZoneName": domainName,
+			"clientID":       certManagerIdentityClientId,
+			"subscriptionID": pulumi.String(subscription.SubscriptionId),
+			"titeenipeliRG":  titeenipeliRG,
+			"email":          email,
+		},
+	}, pulumi.Provider(k8sProvider))
 
-		helm.NewChart(ctx, "certmanager-certs", helm.ChartArgs{
-			Path: pulumi.String("./helm/certmanager-certs"),
-			Values: pulumi.Map{
-				"zoneName": pulumi.String(zoneName),
-			},
-		})
-	*/
 	return nil
 }
 
