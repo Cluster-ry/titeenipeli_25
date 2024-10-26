@@ -42,6 +42,7 @@
     "eslint-plugin-react-refresh": "^0.4.7",
     "grpc-tools": "^1.12.4",
     "mkdirp": "^3.0.1",
+    "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.10.0",
