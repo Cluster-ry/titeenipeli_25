@@ -2,7 +2,7 @@ import { useState } from "react";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
 import { GrpcClient } from "../core/grpc/grpcClient";
 
-export default function GRPCTest() {
+const GRPCTest = () =>  {
   const [grpcConnectionStatus, setGrpcConnectionStatus] = useState(false);
   const [latestGrpcResponse, setLatestGrpcResponse] =
     useState<IncrementalMapUpdateResponse>();
@@ -20,3 +20,5 @@ export default function GRPCTest() {
     </div>
   )
 }
+
+export default GRPCTest;

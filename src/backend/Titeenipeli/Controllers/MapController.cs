@@ -67,7 +67,7 @@ public class MapController : ControllerBase
 
         Map map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
-        map = CalculateFogOfWar(map);
+        map = CalculateFogOfWar(map, user.Id);
         Map inversedMap = InverseMap(map);
 
         GetPixelsResult result = new GetPixelsResult
@@ -170,7 +170,6 @@ public class MapController : ControllerBase
                 {
                     map.Pixels[x, y] = new PixelModel
                     {
-                        OwnPixel = false,
                         Type = PixelType.MapBorder
                     };
                 }
@@ -182,8 +181,8 @@ public class MapController : ControllerBase
             PixelModel mapPixel = new PixelModel
             {
                 Type = PixelType.Normal,
-                Owner = pixel.User?.Guild?.Name,
-                OwnPixel = pixel.User?.Id == user?.Id
+                Guild = pixel.User?.Guild?.Name,
+                Owner = pixel.User?.Id ?? 0,
             };
 
             map.Pixels[pixel.X + 1, pixel.Y + 1] = mapPixel;
@@ -197,7 +196,7 @@ public class MapController : ControllerBase
         foreach (User user in users) map.Pixels[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
     }
 
-    private Map CalculateFogOfWar(Map map)
+    private Map CalculateFogOfWar(Map map, int userId)
     {
         int width = map.Pixels.GetLength(0);
         int height = map.Pixels.GetLength(1);
@@ -212,7 +211,7 @@ public class MapController : ControllerBase
         {
             for (int y = 0; y < height; y++)
             {
-                if (map.Pixels[x, y].OwnPixel)
+                if (map.Pixels[x, y].Owner == userId)
                 {
                     fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new Coordinate
                     {

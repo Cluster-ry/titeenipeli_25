@@ -6,7 +6,7 @@ type GameProps = {
   slot: ReactNode;
 };
 
-function Game({ slot }: GameProps) {
+const Game = ({ slot }: GameProps) => {
   return (
     <div className="game-container">
       <div className="slot-container">{slot}</div>

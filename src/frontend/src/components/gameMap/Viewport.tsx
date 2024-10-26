@@ -1,23 +1,12 @@
-import React from "react";
 import * as PIXI from "pixi.js";
 import { Rectangle } from 'pixi.js';
 import { PixiComponent, useApp } from "@pixi/react";
 import { Viewport as PixiViewport } from "pixi-viewport";
 import { mapConfig } from "./MapConfig";
 
-export interface ViewportBoundigBox {
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
-}
+import ViewportProps from "../../models/ViewportProps";
+import ViewportBoundigBox from "../../models/ViewportBoundigBox";
 
-export interface ViewportProps {
-  width: number;
-  height: number;
-  boundingBox: ViewportBoundigBox;
-  children?: React.ReactNode;
-}
 
 export interface PixiComponentViewportProps extends ViewportProps {
   app: PIXI.Application;

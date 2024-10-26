@@ -1,6 +1,6 @@
 import "./overlay.css";
 
-function BottomOverlay() {
+const BottomOverlay = () => {
   return (
     <div className="bottom-overlay bottom-gradient">
       <div className="bottom-overlay__button">
