@@ -1,14 +1,6 @@
 import { Sprite } from "@pixi/react";
 import { Texture } from "pixi.js";
-
-interface RectangleProps {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  color: number;
-  onClick: (event: { x: number; y: number; color: number }) => void;
-}
+import RectangleProps from "../../models/RectangleProps";
 
 const Rectangle = (props: RectangleProps) => {
 

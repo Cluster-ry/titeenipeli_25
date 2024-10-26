@@ -2,6 +2,12 @@ import { Pixel } from "../../../models/Pixel";
 import Guild from "../../../models/enum/Guild";
 import PixelType from "../../../models/enum/PixelType";
 
+/**
+ * The color mapping for each of the Sofware Engineering guilds
+ *
+ * All guilds have their own dedicated color, and it is shown 
+ * on the game map in the conquered pixels.
+ */
 const guildColorMapping: Record<Guild, number> = {
   [Guild.Tietokilta]: 0xd50000,
   [Guild.Algo]: 0xc51162,
