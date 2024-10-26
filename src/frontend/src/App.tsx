@@ -1,10 +1,9 @@
-
 import { PropsWithChildren } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import GameMap                from "./components/gameMap/GameMap.tsx";
-import ApiTestClient          from "./components/ApiClientTest";
-import { Welcome }            from "./pages/Welcome/Welcome";
+import GameMap from "./components/gameMap/GameMap.tsx";
+import ApiTestClient from "./components/ApiClientTest";
+import { Welcome } from "./pages/Welcome/Welcome";
 import { Game as GameHolder } from "./pages/Game/Game";
 
 import "./App.css";
@@ -17,6 +16,10 @@ const AppShell = ({ children }: PropsWithChildren) => {
 
 /**
  * AppRouter
+ * =========
+ * Handles cases in which specific components/pages are rendered when the 
+ * client enters a specified path within the application.
+ *
  * Contains the following routes:
  * 1) /
  * 2) /game 
@@ -56,6 +59,11 @@ const AppRouter = () => {
   );
 }
 
+/**
+ * @Component - App
+ * ================
+ * The main entry point of the application
+ */
 const App = () => {
   return (
     <AppShell>

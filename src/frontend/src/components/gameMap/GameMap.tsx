@@ -3,14 +3,16 @@ import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
 import { useMemo } from "react";
 
+import ConnectionStatus from "../../models/enum/ConnectionStatus";
 import { pixelColor } from "./guild/Guild";
 import { mapConfig } from "./MapConfig";
 import { Coordinate } from "../../models/Coordinate";
-import useGameMapStore, { ConnectionStatus } from "../../stores/store";
+import useGameMapStore from "../../stores/store";
 import { postPixels } from "../../api/map";
 
 /**
  * @component GameMap
+ * ==================
  *
  * Wraps up all the processes for fetching data from API for map creation.
  * Processes the data in a quadtree data structure in order to present

@@ -1,53 +1,34 @@
 /**
-  * A store file that provides Zustand state management for the client-side 
-  * of the titeenipelit project.
-  */
+ * @StateManagement
+ * ================
+ * A store file that provides Zustand state management for the client-side 
+ * of the titeenipelit 2025 project.
+ *
+ * The state management within this file concentrates in the map displayed 
+ * to the client.
+ */
 
 // From installed dependencies
 import { create } from "zustand";
 import { AxiosResponse } from "axios";
 
 // Model imports 
-import { PlayerCoordinates } from "../models/PlayerCoordinates";
 import { PixelMap } from "../models/PixelMap";
 import PixelType from "../models/enum/PixelType";
-import Guild from "../models/enum/Guild";
+import ConnectionStatus from "../models/enum/ConnectionStatus";
 import { GetPixelsResult } from "../models/Get/GetPixelsResult";
 import {
   instanceOfClientApiError,
   type ClientApiError,
 } from "../models/ClientApiError";
+import GameMap from "../models/GameMap";
 
 import { getPixels } from "../api/map";
-import { ViewportBoundigBox } from "../components/gameMap/Viewport";
+import ViewportBoundigBox from "../models/ViewportBoundigBox";
 import { getGrpcClient } from "../core/grpc/grpcClient";
 import withRetry from "../utils/retryUtils";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
 
-export enum ConnectionStatus {
-  Disconnected,
-  Connecting,
-  Connected,
-}
-
-interface GameMap {
-  playerSpawn: PlayerCoordinates;
-  playerGuild: Guild;
-  pixels: PixelMap;
-  pixelsBoundingBox: ViewportBoundigBox;
-  initialized: boolean;
-  connectionStatus: ConnectionStatus;
-  incrementalUpdateBuffer: Array<IncrementalMapUpdateResponse>;
-
-  initializeMap: () => void;
-  reconnect: () => void;
-  setPixels: (pixelMap: PixelMap) => void;
-  handleGrpcConnectionStatusChanges: (connected: boolean) => void;
-  doIncrementalUpdate: (
-    incrementalUpdateResponse: IncrementalMapUpdateResponse
-  ) => void;
-  setPlayerGuild: (guild: number) => void;
-}
 
 export const useGameMapStore = create<GameMap>((set, get) => ({
   playerSpawn: { x: 0, y: 0 },          // Subject to change
