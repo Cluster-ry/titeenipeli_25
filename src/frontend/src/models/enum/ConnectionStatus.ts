@@ -1,7 +1,7 @@
 enum ConnectionStatus {
-  Disconnected,
-  Connecting,
-  Connected,
+    Disconnected,
+    Connecting,
+    Connected,
 }
 
 export default ConnectionStatus;

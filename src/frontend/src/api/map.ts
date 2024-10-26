@@ -6,30 +6,28 @@ import { ClientApiOk } from "../models/ClientApiOk";
 
 const PIXELS_URL = "api/v1/map/pixels";
 
-export async function getPixels(): Promise<
-  AxiosResponse<GetPixelsResult> | ClientApiError
-> {
-  try {
-    const response = await axios.get<GetPixelsResult>(PIXELS_URL);
+export async function getPixels(): Promise<AxiosResponse<GetPixelsResult> | ClientApiError> {
+    try {
+        const response = await axios.get<GetPixelsResult>(PIXELS_URL);
 
-    console.log("Success.");
-    return response;
-  } catch (error) {
-    console.error(error);
-    return { msg: "Request unsuccessful." };
-  }
+        console.log("Success.");
+        return response;
+    } catch (error) {
+        console.error(error);
+        return { msg: "Request unsuccessful." };
+    }
 }
 
 export async function postPixels(
-  postPixelsInput: PostPixelsInput
+    postPixelsInput: PostPixelsInput,
 ): Promise<AxiosResponse<ClientApiOk> | ClientApiError> {
-  try {
-    const response = axios.post<ClientApiOk>(PIXELS_URL, postPixelsInput);
+    try {
+        const response = axios.post<ClientApiOk>(PIXELS_URL, postPixelsInput);
 
-    console.log("Success.");
-    return response;
-  } catch (error) {
-    console.error(error);
-    return { msg: "Request unsuccessful." };
-  }
+        console.log("Success.");
+        return response;
+    } catch (error) {
+        console.error(error);
+        return { msg: "Request unsuccessful." };
+    }
 }
