@@ -34,17 +34,19 @@ func main() {
 		}
 		addDNSZoneContributorRoleToId(ctx, domain, identity)
 
-		k8sProvider, err := buildProvider(ctx, kubeconfig)
-		if err != nil {
-			return err
-		}
+		/*
+			k8sProvider, err := buildProvider(ctx, kubeconfig)
+			if err != nil {
+				return err
+			}
 
-		installFlux(ctx, k8sCluster, k8sProvider)
-		buildCharts(ctx, k8sProvider)
-
+			buildCharts(ctx, k8sProvider)
+		*/
+		// Exports
 		ctx.Export("domainName", domain.Name)
 		ctx.Export("kubeconfig", pulumi.ToSecret(kubeconfig))
 		ctx.Export("clusterName", k8sCluster.ManagedCluster.Name)
+		ctx.Export("titeenipeliRG", k8sCluster.ResourceGroup.Name)
 
 		return nil
 	})
