@@ -22,7 +22,7 @@ public class MapUpdateProcessor
 
     private readonly Dictionary<Coordinate, IncrementalMapUpdate> _pixelWireChanges = [];
 
-    private VisibilityMap _visibilityMap;
+    private readonly VisibilityMap _visibilityMap;
 
     public MapUpdateProcessor(
             IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
