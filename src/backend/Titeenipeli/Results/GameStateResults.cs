@@ -1,0 +1,23 @@
+using Titeenipeli.Enums;
+
+namespace Titeenipeli.Results;
+
+public class GameStateResults
+{
+    public required PixelBucket PixelBucket { get; init; }
+
+    public required List<Score> Scores { get; init; }
+}
+
+public class PixelBucket
+{
+    public required int Amount { get; init; }
+    public required int MaxAmount { get; init; }
+    public required int IncreasePerMinute { get; init; }
+}
+
+public class Score
+{
+    public required GuildName Guild { get; init; }
+    public required int Amount { get; init; }
+}

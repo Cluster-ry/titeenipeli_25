@@ -19,18 +19,7 @@ public class IncrementalMapUpdateService(
     {
         var httpContext = context.GetHttpContext();
 
-        var jwtClaim = httpContext.GetUser(jwtService);
-        if (jwtClaim == null)
-        {
-            throw new RpcException(new Status(StatusCode.PermissionDenied,
-                "Missing or invalid authentication cookie."));
-        }
-
-        var user = userRepositoryService.GetById(jwtClaim.Id);
-        if (user == null)
-        {
-            throw new RpcException(new Status(StatusCode.PermissionDenied, "User couldn't be found."));
-        }
+        var user = httpContext.GetUser(jwtService, userRepositoryService);
 
         GrpcConnection<IncrementalMapUpdateResponse> grpcConnection =
             new(user, responseStream, incrementalMapUpdateCoreService.RemoveGrpcConnection);

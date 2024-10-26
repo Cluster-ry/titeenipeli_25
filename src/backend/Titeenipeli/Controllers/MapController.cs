@@ -14,7 +14,7 @@ using Titeenipeli.Services.RepositoryServices.Interfaces;
 namespace Titeenipeli.Controllers;
 
 [ApiController]
-[Route("map/pixels")]
+[Route("state/map/pixels")]
 [Authorize(Policy = "MustHaveGuild")]
 public class MapController : ControllerBase
 {
@@ -44,19 +44,7 @@ public class MapController : ControllerBase
     [HttpGet]
     public IActionResult GetPixels()
     {
-        JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
-
-        if (jwtClaim == null)
-        {
-            return BadRequest();
-        }
-
-        User? user = _userRepositoryService.GetById(jwtClaim.Id);
-
-        if (user == null)
-        {
-            return BadRequest();
-        }
+        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
 
         User[] users = _userRepositoryService.GetAll().ToArray();
         Pixel[] pixels = _mapRepositoryService.GetAll().ToArray();
@@ -86,19 +74,7 @@ public class MapController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> PostPixels([FromBody] PostPixelsInput pixelsInput)
     {
-        JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
-
-        if (jwtClaim == null)
-        {
-            return BadRequest();
-        }
-
-        User? user = _userRepositoryService.GetById(jwtClaim.Id);
-
-        if (user == null)
-        {
-            return BadRequest();
-        }
+        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
 
         if (user.PixelBucket < 1)
         {
