@@ -1,6 +1,9 @@
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Extensions;
 using Titeenipeli.Enums;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
@@ -34,6 +37,34 @@ public class UserController(
     private readonly IMapRepositoryService _mapRepositoryService = mapRepositoryService;
     private readonly JwtService _jwtService = jwtService;
     private readonly TimeSpan _loginTokenExpiryTime = TimeSpan.FromMinutes(botOptions.LoginTokenExpirationInMinutes);
+
+
+    [HttpGet("current")]
+    [Authorize(Policy = "MustHaveGuild")]
+    public IActionResult CurrentUser()
+    {
+        var jwtclaim = HttpContext.GetUser(_jwtService);
+        if(jwtclaim is null) return Unauthorized(new {message = "Invalid jwt or missing JWToken"});
+
+        var userClaim = _userRepositoryService.GetById(jwtclaim.Id);
+        if(userClaim is null) return Unauthorized(new {message = "No user defined"}); //Should not happen?
+
+        return Ok(new UserResult(userClaim));
+    }
+
+    private class UserResult
+    {
+        string Username {get; init;}
+        string TelegramId {get; init;}
+        string Guild {get; init;}
+
+
+        public UserResult(User user){
+            Username = user.Username;
+            TelegramId = user.TelegramId;
+            Guild = user.Guild?.Name.GetDisplayName() ?? "Undefined guild";
+        }
+    }
 
     [HttpPost]
     public IActionResult PostUsers([FromBody] PostUsersInput usersInput)
