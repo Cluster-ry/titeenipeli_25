@@ -1,6 +1,6 @@
-name: titeenipeli-k8s
+name: titeenipelifoundation
 runtime: go
-description: Titeenipeli azure stack
+description: Titeenipeli azure foundation stack
 config:
   pulumi:tags:
     value:

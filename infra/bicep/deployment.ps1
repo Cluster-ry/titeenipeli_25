@@ -1,8 +1,8 @@
 # Note: you need to be logged in via az login before using this script
-$rgName="pulumi_infra"
+$rgName="pulumi_infra_kube"
 $location="swedencentral"
 $key='infra'
-$storageAccountName='pulumititeenipeli1' # change this to unique 3-23 lower character string
+$storageAccountName='titeenipelikube' # change this to unique 3-23 lower character string
 
 # Create resource group where bicep resources are going to be deployed
 az group create --name $rgName --location $location
