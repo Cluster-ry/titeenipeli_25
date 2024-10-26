@@ -1,9 +1,9 @@
-import ViewportBoundigBox from "./ViewportBoundigBox";
+import ViewportBoundingBox from "./ViewportBoundingBox.ts";
 
 interface ViewportProps {
     width: number;
     height: number;
-    boundingBox: ViewportBoundigBox;
+    boundingBox: ViewportBoundingBox;
     children?: React.ReactNode;
 }
 

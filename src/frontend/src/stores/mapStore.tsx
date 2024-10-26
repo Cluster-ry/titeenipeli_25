@@ -20,7 +20,7 @@ import { GetPixelsResult } from "../models/Get/GetPixelsResult";
 import { instanceOfClientApiError, type ClientApiError } from "../models/ClientApiError";
 import GameMap from "../models/GameMap";
 import { getPixels } from "../api/map";
-import ViewportBoundigBox from "../models/ViewportBoundigBox";
+import ViewportBoundingBox from "../models/ViewportBoundingBox.ts";
 import { GrpcClient } from "../core/grpc/grpcClient";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
 import withRetry from "../utils/retryUtils";
@@ -154,7 +154,7 @@ const mapMatrixToMapDictionary = (results: GetPixelsResult) => {
     return pixels;
 };
 
-const computeBoundingBox = (pixels: PixelMap): ViewportBoundigBox => {
+const computeBoundingBox = (pixels: PixelMap): ViewportBoundingBox => {
     let minX = Number.MAX_SAFE_INTEGER;
     let minY = Number.MAX_SAFE_INTEGER;
     let maxX = Number.MIN_SAFE_INTEGER;
@@ -185,8 +185,8 @@ const parseIncrementalUpdate = (pixels: PixelMap, incrementalUpdateResponse: Inc
         if (pixelType !== PixelType.FogOfWar) {
             pixels.set(pixelKey, {
                 type: pixelType,
-                owner: update.owner === 0 ? undefined : update.owner - 1,
-                ownPixel: update.ownPixel,
+                guild: update.guild ? (update.guild as number) - 1 : undefined,
+                owner: update.owner?.id,
             });
         } else {
             pixels.delete(pixelKey);

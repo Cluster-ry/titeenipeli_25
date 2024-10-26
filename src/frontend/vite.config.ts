@@ -11,9 +11,11 @@ export default defineConfig({
         http2Proxy({
             "^/Map.MapUpdate/": {
                 target: "https://localhost:7222",
+                secure: false,
             },
             "^/api": {
                 target: "https://localhost:7222",
+                secure: false,
             },
         }),
     ],

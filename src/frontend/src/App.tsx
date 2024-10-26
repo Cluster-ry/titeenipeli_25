@@ -8,6 +8,7 @@ import { Game as GameHolder } from "./pages/Game/Game";
 
 import "./App.css";
 import "./assets/PressStart2P-Regular.ttf";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const AppShell = ({ children }: PropsWithChildren) => {
     return <div className="app-shell">{children}</div>;
@@ -64,10 +65,13 @@ const AppRouter = () => {
  * The main entry point of the application
  */
 const App = () => {
+    const queryClient = new QueryClient();
     return (
-        <AppShell>
-            <AppRouter />
-        </AppShell>
+        <QueryClientProvider client={queryClient}>
+            <AppShell>
+                <AppRouter />
+            </AppShell>
+        </QueryClientProvider>
     );
 };
 
