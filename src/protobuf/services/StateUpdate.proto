@@ -1,7 +1,8 @@
 syntax = "proto3";
 
-import "components/enums/pixelOwners.proto";
+import "components/enums/pixelGuild.proto";
 import "components/enums/pixelTypes.proto";
+import "components/schemas/pixelUser.proto";
 import "components/schemas/relativeCoordinate.proto";
 
 option csharp_namespace = "GrpcGeneratedServices";
@@ -17,8 +18,8 @@ message IncrementalMapUpdateResponse {
   message IncrementalMapUpdate {
     RelativeCoordinate spawnRelativeCoordinate = 1;
     PixelTypes type = 2;
-    PixelOwners owner = 3;
-    bool ownPixel = 4;
+    PixelGuild guild = 3;
+    PixelUser owner = 4;
   }  
 }
 

@@ -179,8 +179,8 @@ public class MapUpdateProcessor
 
         bool isNewSpawn = coordinate.X == newPixel.User?.SpawnX && coordinate.Y == newPixel.User?.SpawnY;
         PixelTypes type = isNewSpawn ? PixelTypes.Spawn : PixelTypes.Normal;
-        PixelOwners owner = ConvertGuildToPixelOwners(newPixel.User?.Guild?.Name);
-        bool ownPixel = newPixel.User?.Id == _user?.Id;
+        PixelGuild guild = ConvertGuildToPixelGuild(newPixel.User?.Guild?.Name);
+        PixelUser owner = new PixelUser() { Id = _user?.Id ?? 0 };
 
         IncrementalMapUpdate mapUpdate = new()
         {
@@ -190,8 +190,8 @@ public class MapUpdateProcessor
                 Y = spawnRelativeCoordinate.Y
             },
             Type = type,
+            Guild = guild,
             Owner = owner,
-            OwnPixel = ownPixel
         };
         _pixelWireChanges[coordinate] = mapUpdate;
     }
@@ -208,16 +208,16 @@ public class MapUpdateProcessor
                 Y = spawnRelativeCoordinate.Y
             },
             Type = pixelType,
-            Owner = PixelOwners.Nobody,
-            OwnPixel = false
+            Guild = PixelGuild.Nobody,
+            Owner = new PixelUser() { Id = 0 },
         };
         _pixelWireChanges[coordinate] = mapUpdate;
     }
 
-    private static PixelOwners ConvertGuildToPixelOwners(GuildName? guildName)
+    private static PixelGuild ConvertGuildToPixelGuild(GuildName? guildName)
     {
-        bool success = Enum.TryParse(guildName.ToString(), false, out PixelOwners result);
-        return success ? result : PixelOwners.Nobody;
+        bool success = Enum.TryParse(guildName.ToString(), false, out PixelGuild result);
+        return success ? result : PixelGuild.Nobody;
     }
 
     private bool IsInsideMap(Coordinate coordinate)
