@@ -54,7 +54,7 @@ public class UserController(
 
     private class UserResult
     {
-        int Id {get; init;}
+        int Id { get; init; }
         string Username { get; init; }
         string FirstName { get; init; }
         string LastName { get; init; }
