@@ -2,20 +2,30 @@ import { Sprite } from "@pixi/react";
 import { Texture } from "pixi.js";
 import RectangleProps from "../../models/RectangleProps";
 
-const Rectangle = (props: RectangleProps) => {
+
+const Rectangle = ({color, onClick, x, y, width, height, isOwn, isSpawn}: RectangleProps) => {
 
   // When a client clicks a pixel
   const handleClick = () => {
-    props.onClick({ x: props.x, y: props.y, color: props.color });
+    onClick({ x: x, y: y });
   };
+
+  let calculatedLightness = color.lightness;
+  if (isOwn) {
+    calculatedLightness += 10
+  }
+
+  if (isSpawn) {
+    calculatedLightness -= 20
+  }
 
   return (
     <Sprite
-      position={{ x: props.x, y: props.y }}
-      tint={props.color}
+      position={{ x: x, y: y }}
+      tint={`hsla(${color.hue}, ${color.saturation}%, ${calculatedLightness}%, ${color.alpha ?? 100}%)`}
       texture={Texture.WHITE}
-      width={props.width}
-      height={props.height}
+      width={width}
+      height={height}
       cullable={true}
       eventMode="dynamic"
       pointertap={handleClick}
