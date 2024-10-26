@@ -22,7 +22,7 @@ import GameMap from "../models/GameMap";
 import { getPixels } from "../api/map";
 import ViewportBoundingBox from "../models/ViewportBoundingBox.ts";
 import { GrpcClient } from "../core/grpc/grpcClient";
-import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
+import { IncrementalMapUpdateResponse } from "../generated/grpc/services/StateUpdate";
 import withRetry from "../utils/retryUtils";
 
 export const useGameMapStore = create<GameMap>((set, get) => ({
