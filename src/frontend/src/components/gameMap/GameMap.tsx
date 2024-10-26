@@ -51,6 +51,8 @@ const GameMap = () => {
         key={`x:${coordinate.x} y:${coordinate.y}`}
         x={rectangleX}
         y={rectangleY}
+        isOwn={pixel?.ownPixel ?? false}
+        isSpawn={false}
         width={mapConfig.PixelSize}
         height={mapConfig.PixelSize}
         color={color}

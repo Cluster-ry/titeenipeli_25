@@ -22,11 +22,11 @@ const Rectangle = ({color, onClick, x, y, width, height, isOwn, isSpawn}: Rectan
 
   let calculatedLightness = color.lightness;
   if (isOwn) {
-    calculatedLightness -= 10
+    calculatedLightness += 10
   }
 
   if (isSpawn) {
-    calculatedLightness += 20
+    calculatedLightness -= 20
   }
 
   return (
