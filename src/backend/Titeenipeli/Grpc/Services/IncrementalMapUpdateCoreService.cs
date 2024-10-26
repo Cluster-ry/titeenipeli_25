@@ -1,5 +1,8 @@
+using System.Collections.Concurrent;
 using System.Threading.Channels;
+using GrpcGeneratedServices;
 using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.Grpc.Common;
 using Titeenipeli.Grpc.Controllers;
 using Titeenipeli.Options;
 
@@ -39,11 +42,15 @@ public class IncrementalMapUpdateCoreService : GrpcService, IIncrementalMapUpdat
     private async Task GenerateAndRunMapUpdateTasks(GrpcMapChangesInput mapChangesInput)
     {
         List<Task> updateTasks = new(Connections.Count);
-        updateTasks.AddRange(Connections
-                             .Select(connectionKeyValuePair => new MapUpdateProcessor(this,
-                                 mapChangesInput,
-                                 connectionKeyValuePair.Value, _gameOptions))
-                             .Select(mapUpdateProcessor => Task.Run(mapUpdateProcessor.Process)));
+        foreach (KeyValuePair<int, ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>>
+                     connectionKeyValuePair in Connections)
+        {
+            MapUpdateProcessor mapUpdateProcessor =
+                new(this, mapChangesInput, connectionKeyValuePair.Value, _gameOptions);
+
+            var updateTask = Task.Run(mapUpdateProcessor.Process);
+            updateTasks.Add(updateTask);
+        }
 
         try
         {
