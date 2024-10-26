@@ -55,13 +55,15 @@ public class UserController(
     private class UserResult
     {
         string Username {get; init;}
-        string TelegramId {get; init;}
+        string FirstName {get; init;}
+        string LastName {get; init;}
         string Guild {get; init;}
 
 
         public UserResult(User user){
             Username = user.Username;
-            TelegramId = user.TelegramId;
+            FirstName = user.FirstName;
+            LastName = user.LastName;
             Guild = user.Guild?.Name.GetDisplayName() ?? "Undefined guild";
         }
     }
