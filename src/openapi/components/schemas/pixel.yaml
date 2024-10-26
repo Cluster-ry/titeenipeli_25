@@ -5,4 +5,4 @@ properties:
   guild:
     $ref: "../enums/pixelGuild.yaml"
   owner:
-    $ref: "../enums/pixelUser.yaml"
+    type: int

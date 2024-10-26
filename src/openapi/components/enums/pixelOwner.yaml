@@ -1,8 +1,0 @@
-oneOf:
-  - codeGen: namedEnum
-    type: string
-    oneOf:
-      - const: Nobody
-        title: Nobody
-        description: Pixel is owned by nobody.
-  - $ref: "./user.yaml"
