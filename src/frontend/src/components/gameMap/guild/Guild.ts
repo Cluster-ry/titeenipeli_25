@@ -31,9 +31,9 @@ export function pixelColor(pixel?: Pixel): HslaColour {
     return {hue: 44, saturation: 98, lightness: 50};
   }
 
-  if (pixel.owner === undefined) {
+  if (pixel.guild === undefined) {
     return black;
   }
 
-  return guildColorMapping[pixel.owner as Guild] ?? black;
+  return guildColorMapping[pixel.guild as Guild] ?? black;
 }
