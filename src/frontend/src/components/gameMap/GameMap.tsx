@@ -1,7 +1,7 @@
 import { Container, Stage } from "@pixi/react";
-import Viewport             from "./Viewport";
-import Rectangle            from "./Rectangle";
-import { useMemo }          from "react";
+import Viewport from "./Viewport";
+import Rectangle from "./Rectangle";
+import { useMemo } from "react";
 
 import { pixelColor } from "./guild/Guild";
 import { mapConfig } from "./MapConfig";

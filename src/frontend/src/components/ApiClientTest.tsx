@@ -13,11 +13,11 @@
  */
 import { api } from "../api/index";
 
-import { PostUsersInput }   from "../models/Post/PostUsersInput";
-import { PostLoginInput }   from "../models/Post/PostLoginInput";
-import { PostCtfInput }     from "../models/Post/PostCtfInput";
-import { PostPixelsInput }  from "../models/Post/PostPixelsInput";
-import { PutUsersInput }    from "../models/Put/PutUsersInput";
+import { PostUsersInput } from "../models/Post/PostUsersInput";
+import { PostLoginInput } from "../models/Post/PostLoginInput";
+import { PostCtfInput } from "../models/Post/PostCtfInput";
+import { PostPixelsInput } from "../models/Post/PostPixelsInput";
+import { PutUsersInput } from "../models/Put/PutUsersInput";
 
 const ApiTestClient = () => {
 
