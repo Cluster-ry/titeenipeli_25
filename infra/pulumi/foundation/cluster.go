@@ -125,7 +125,7 @@ func buildProvider(
 }
 
 func createNewIdentity(ctx *pulumi.Context, info *ClusterInfo, name pulumi.String, namespace pulumi.String) (*workloadIdentities, error) {
-	mgIdent, err := managedidentity.NewUserAssignedIdentity(ctx, "userAssignedIdentity", &managedidentity.UserAssignedIdentityArgs{
+	mgIdent, err := managedidentity.NewUserAssignedIdentity(ctx, fmt.Sprintf("userAssignedIdentity_%s", name), &managedidentity.UserAssignedIdentityArgs{
 		ResourceGroupName: info.ResourceGroup.Name,
 		ResourceName:      name,
 	})
@@ -133,7 +133,7 @@ func createNewIdentity(ctx *pulumi.Context, info *ClusterInfo, name pulumi.Strin
 		return nil, err
 	}
 
-	fic, err := managedidentity.NewFederatedIdentityCredential(ctx, "federatedIdentityCredential", &managedidentity.FederatedIdentityCredentialArgs{
+	fic, err := managedidentity.NewFederatedIdentityCredential(ctx, fmt.Sprintf("federatedIdentityCredential_%s", name), &managedidentity.FederatedIdentityCredentialArgs{
 		Audiences: pulumi.StringArray{
 			pulumi.String("api://AzureADTokenExchange"),
 		},

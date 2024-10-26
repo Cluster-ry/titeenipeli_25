@@ -23,7 +23,12 @@ func main() {
 
 		kubeconfig := getKubeconfig(ctx, k8sCluster)
 
-		identity, err := createNewIdentity(ctx, k8sCluster, "cert-manager", "cert-manager")
+		certManagerIdentity, err := createNewIdentity(ctx, k8sCluster, "cert-manager", "cert-manager")
+		if err != nil {
+			return err
+		}
+
+		externalDnsIdentity, err := createNewIdentity(ctx, k8sCluster, "external-dns", "external-dns")
 		if err != nil {
 			return err
 		}
@@ -32,11 +37,14 @@ func main() {
 		if err != nil {
 			return err
 		}
-		addDNSZoneContributorRoleToId(ctx, domain, identity)
+		addDNSZoneContributorRoleToId(ctx, domain, certManagerIdentity, "cert")
+		addDNSZoneContributorRoleToId(ctx, domain, externalDnsIdentity, "dns")
+		addResourceGroupReaderRoleToId(ctx, k8sCluster.ResourceGroup, externalDnsIdentity, "dns")
 
 		// Exports
 		ctx.Export("domainName", domain.Name)
-		ctx.Export("certManagerIdentityClientId", pulumi.ToSecret(identity.UserAssignedIdentity.ClientId))
+		ctx.Export("certManagerIdentityClientId", pulumi.ToSecret(certManagerIdentity.UserAssignedIdentity.ClientId))
+		ctx.Export("externalDnsIdentityClientId", pulumi.ToSecret(externalDnsIdentity.UserAssignedIdentity.ClientId))
 		ctx.Export("kubeconfig", pulumi.ToSecret(kubeconfig))
 		ctx.Export("clusterName", k8sCluster.ManagedCluster.Name)
 		ctx.Export("titeenipeliRG", k8sCluster.ResourceGroup.Name)

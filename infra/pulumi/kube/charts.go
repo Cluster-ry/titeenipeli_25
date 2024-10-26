@@ -19,7 +19,9 @@ func buildCharts(
 	ctx *pulumi.Context,
 	k8sProvider *kubernetes.Provider,
 	domainName pulumi.StringOutput,
-	certManagerIdentityClientId pulumi.StringOutput, titeenipeliRG pulumi.StringOutput) error {
+	certManagerClientId pulumi.StringOutput,
+	externalDnsClientId pulumi.StringOutput,
+	titeenipeliRG pulumi.StringOutput) error {
 
 	subscription, err := core.LookupSubscription(ctx, nil)
 	if err != nil {
@@ -35,11 +37,6 @@ func buildCharts(
 		}},
 		pulumi.Providers(k8sProvider))
 
-	values, err := mapValues("./values/cert-manager/values.yaml")
-	if err != nil {
-		return err
-	}
-
 	certManagerChartArgs := helm.ChartArgs{
 		Chart:   pulumi.String("cert-manager"),
 		Version: pulumi.String("v1.15.3"),
@@ -47,7 +44,19 @@ func buildCharts(
 			Repo: pulumi.String("https://charts.jetstack.io"),
 		},
 		Namespace: pulumi.String("cert-manager"),
-		Values:    pulumi.Map(values),
+		Values: pulumi.Map{
+			"podLabels": pulumi.Map{
+				"azure.workload.identity/use": pulumi.String("true"),
+			},
+			"serviceAccount": pulumi.Map{
+				"labels": pulumi.Map{
+					"azure.workload.identity/use": pulumi.String("true"),
+				},
+			},
+			"crds": pulumi.Map{
+				"enabled": pulumi.String("true"),
+			},
+		},
 	}
 
 	helm.NewChart(ctx, "cert-manager", certManagerChartArgs,
@@ -57,12 +66,72 @@ func buildCharts(
 		Path: pulumi.String("./helm/certmanager-certs"),
 		Values: pulumi.Map{
 			"hostedZoneName": domainName,
-			"clientID":       certManagerIdentityClientId,
+			"clientID":       certManagerClientId,
 			"subscriptionID": pulumi.String(subscription.SubscriptionId),
 			"titeenipeliRG":  titeenipeliRG,
 			"email":          email,
 		},
 	}, pulumi.Provider(k8sProvider))
+
+	v1.NewNamespace(ctx, "external-dns", &v1.NamespaceArgs{
+		Metadata: &metav1.ObjectMetaArgs{
+			Name: pulumi.String("external-dns"),
+		}},
+		pulumi.Providers(k8sProvider))
+
+	helm.NewChart(ctx, "external-dns-secrets", helm.ChartArgs{
+		Path: pulumi.String("./helm/external-dns-secret"),
+		Values: pulumi.Map{
+			"tenantId":       externalDnsClientId,
+			"subscriptionID": pulumi.String(subscription.SubscriptionId),
+			"resourceGroup":  titeenipeliRG,
+		},
+		Namespace: pulumi.String("external-dns"),
+	}, pulumi.Provider(k8sProvider))
+
+	externalDnsChartArgs := helm.ChartArgs{
+		Chart:   pulumi.String("external-dns"),
+		Version: pulumi.String("1.15.0"),
+		FetchArgs: helm.FetchArgs{
+			Repo: pulumi.String("https://kubernetes-sigs.github.io/external-dns/"),
+		},
+		Namespace: pulumi.String("external-dns"),
+		Values: pulumi.Map{
+			"fullnameOverride": pulumi.String("external-dns"),
+			"serviceAccount": pulumi.Map{
+				"labels": pulumi.Map{
+					"azure.workload.identity/use": pulumi.String("true"),
+				},
+				"annotations": pulumi.Map{
+					"azure.workload.identity/client-id": externalDnsClientId,
+				},
+			},
+			"podLabels": pulumi.Map{
+				"azure.workload.identity/use": pulumi.String("true"),
+			},
+			"extraVolumes": pulumi.Array{
+				pulumi.Map{
+					"name": pulumi.String("azure-config-file"),
+					"secret": pulumi.Map{
+						"secretName": pulumi.String("external-dns-azure"),
+					},
+				},
+			},
+			"extraVolumeMounts": pulumi.Array{
+				pulumi.Map{
+					"name":      pulumi.String("azure-config-file"),
+					"mountPath": pulumi.String("/etc/kubernetes"),
+					"readOnly":  pulumi.Bool(true),
+				},
+			},
+			"provider": pulumi.Map{
+				"name": pulumi.String("azure"),
+			},
+		},
+	}
+
+	helm.NewChart(ctx, "external-dns", externalDnsChartArgs,
+		pulumi.Providers(k8sProvider))
 
 	return nil
 }

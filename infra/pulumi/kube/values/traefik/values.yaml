@@ -1,0 +1,36 @@
+persistence:
+  enabled: true
+  size: 128Mi
+serviceAccountAnnotations:
+  - azure.workload.identity/tenant-id: ""
+  - azure.workload.identity/client-id: ""
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "{{ letsencrypt_email }}"
+      #caServer: https://acme-v02.api.letsencrypt.org/directory # Production server
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory # Staging server
+      dnsChallenge:
+        provider: azuredns
+      storage: /data/acme.json
+deployment:
+  annotations:
+    - azure.workload.identity/use: "true"
+  initContainers:
+    - name: volume-permissions
+      image: busybox:latest
+      command: ["sh", "-c", "ls -la /; touch /data/acme.json; chmod -v 600 /data/acme.json"]
+      volumeMounts:
+      - mountPath: /data
+        name: data
+podSecurityContext:
+  fsGroup: 65532
+  fsGroupChangePolicy: "OnRootMismatch"
+service:
+  spec:
+    type: LoadBalancer
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: "{{ azure_node_resource_group }}"
+    service.beta.kubernetes.io/azure-pip-name: "{{ azure_resource_group }}"
+    service.beta.kubernetes.io/azure-dns-label-name: "{{ azure_resource_group }}"
+    service.beta.kubernetes.io/azure-allowed-ip-ranges: "{{ ip_range | join(',') }}"

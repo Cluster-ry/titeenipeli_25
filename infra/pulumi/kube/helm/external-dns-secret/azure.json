@@ -1,0 +1,6 @@
+{
+    "tenantId": {{ .Values.tenantId | quote }},
+    "subscriptionId": {{ .Values.subscriptionID | quote }},
+    "resourceGroup": {{ .Values.resourceGroup | quote }},
+    "useWorkloadIdentityExtension": true
+}

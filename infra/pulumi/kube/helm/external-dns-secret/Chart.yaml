@@ -1,0 +1,9 @@
+apiVersion: v2
+name: external-dns-secret
+description: external dns secret for use in titeetipeli
+
+type: application
+
+version: 0.1.0
+
+appVersion: "1.16.0"
