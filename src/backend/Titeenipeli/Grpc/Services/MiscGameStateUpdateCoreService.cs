@@ -10,8 +10,7 @@ public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) 
 {
     public async void UpdateMiscGameState(GrpcMiscGameStateUpdateInput gameStateUpdateInput)
     {
-        ConcurrentDictionary<int, IGrpcConnection<MiscStateUpdateResponse>>? userConnections;
-        var success = Connections.TryGetValue(gameStateUpdateInput.User.Id, out userConnections);
+        var success = Connections.TryGetValue(gameStateUpdateInput.User.Id, out var userConnections);
         if (!success || userConnections == null)
         {
             return;
