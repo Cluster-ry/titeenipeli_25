@@ -3,16 +3,16 @@ import { GameOverlay } from "./Overlay/GameOverlay";
 import "./game.css";
 
 type GameProps = {
-  slot: ReactNode;
+    slot: ReactNode;
 };
 
 const Game = ({ slot }: GameProps) => {
-  return (
-    <div className="game-container">
-      <div className="slot-container">{slot}</div>
-      <GameOverlay />
-    </div>
-  );
-}
+    return (
+        <div className="game-container">
+            <div className="slot-container">{slot}</div>
+            <GameOverlay />
+        </div>
+    );
+};
 
 export { Game };

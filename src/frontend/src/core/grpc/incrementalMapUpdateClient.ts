@@ -14,10 +14,10 @@ export default class IncrementalMapUpdateClient extends ServerStreamingServiceCl
       incrementalMapUpdateRequest
     );
 
-    for await (const response of serverStreaming.responses) {
-      await this.callCallbacks(response)
-    }
+        for await (const response of serverStreaming.responses) {
+            await this.callCallbacks(response);
+        }
 
-    await serverStreaming.status;
-  }
+        await serverStreaming.status;
+    }
 }

@@ -5,5 +5,5 @@ import * as users from "./users";
 export const api = {
     ctf: ctf,
     map: map,
-    users: users
-}
+    users: users,
+};

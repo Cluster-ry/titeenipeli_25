@@ -3,6 +3,6 @@ export interface ClientApiError {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function instanceOfClientApiError(data: any): data is ClientApiError { 
-    return 'msg' in data; 
-} 
+export function instanceOfClientApiError(data: any): data is ClientApiError {
+    return "msg" in data;
+}
