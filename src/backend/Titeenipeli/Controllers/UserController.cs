@@ -44,23 +44,24 @@ public class UserController(
     public IActionResult CurrentUser()
     {
         var jwtclaim = HttpContext.GetUser(_jwtService);
-        if(jwtclaim is null) return Unauthorized(new {message = "Invalid jwt or missing JWToken"});
+        if (jwtclaim is null) return Unauthorized(new { message = "Invalid jwt or missing JWToken" });
 
         var userClaim = _userRepositoryService.GetById(jwtclaim.Id);
-        if(userClaim is null) return Unauthorized(new {message = "No user defined"}); //Should not happen?
+        if (userClaim is null) return Unauthorized(new { message = "No user defined" }); //Should not happen?
 
         return Ok(new UserResult(userClaim));
     }
 
     private class UserResult
     {
-        string Username {get; init;}
-        string FirstName {get; init;}
-        string LastName {get; init;}
-        string Guild {get; init;}
+        string Username { get; init; }
+        string FirstName { get; init; }
+        string LastName { get; init; }
+        string Guild { get; init; }
 
 
-        public UserResult(User user){
+        public UserResult(User user)
+        {
             Username = user.Username;
             FirstName = user.FirstName;
             LastName = user.LastName;
