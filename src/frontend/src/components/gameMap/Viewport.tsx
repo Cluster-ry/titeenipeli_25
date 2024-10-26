@@ -5,7 +5,7 @@ import { Viewport as PixiViewport } from "pixi-viewport";
 import { mapConfig } from "./MapConfig";
 
 import ViewportProps from "../../models/ViewportProps";
-import ViewportBoundigBox from "../../models/ViewportBoundigBox";
+import ViewportBoundingBox from "../../models/ViewportBoundingBox.ts";
 
 export interface PixiComponentViewportProps extends ViewportProps {
     app: PIXI.Application;
@@ -64,13 +64,13 @@ const PixiComponentViewport = PixiComponent("Viewport", {
     },
 });
 
-const computeDimensions = (boundingBox: ViewportBoundigBox) => {
+const computeDimensions = (boundingBox: ViewportBoundingBox) => {
     const maxWidth = (boundingBox.minX / 2 + boundingBox.maxX) * mapConfig.PixelSize;
     const maxHeight = (boundingBox.minY / 2 + boundingBox.maxY) * mapConfig.PixelSize;
     return { maxWidth, maxHeight };
 };
 
-const computeBounceRectangle = (boundingBox: ViewportBoundigBox) => {
+const computeBounceRectangle = (boundingBox: ViewportBoundingBox) => {
     const bounceRectangle = new Rectangle();
     bounceRectangle.x = (boundingBox.minX - extraPadding) * mapConfig.PixelSize;
     bounceRectangle.y = (boundingBox.minY - extraPadding) * mapConfig.PixelSize;
