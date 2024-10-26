@@ -2,6 +2,7 @@ param location string
 param storageAccountName string
 param tenantId string
 param key string
+param key2 string
 param uid string
 
 var storageBlobDataContributorID = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
@@ -59,6 +60,18 @@ resource keyvault 'Microsoft.KeyVault/vaults@2023-07-01' = {
 
 resource keyvaultKey 'Microsoft.KeyVault/vaults/keys@2023-07-01' = {
   name: key
+  parent: keyvault
+  properties: {
+    attributes: {
+      enabled: true
+      exportable: false
+    }
+    kty: 'RSA'
+  }
+}
+
+resource keyvaultKey2 'Microsoft.KeyVault/vaults/keys@2023-07-01' = {
+  name: key2
   parent: keyvault
   properties: {
     attributes: {
