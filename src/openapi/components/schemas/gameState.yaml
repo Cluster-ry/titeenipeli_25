@@ -7,7 +7,7 @@ properties:
         type: int
       maxAmount:
         type: int
-      ratePerMinute:
+      increasePerMinute:
         type: float
   scores:
     type: array
