@@ -54,18 +54,20 @@ public class UserController(
 
     private class UserResult
     {
+        int Id {get; init;}
         string Username { get; init; }
         string FirstName { get; init; }
         string LastName { get; init; }
-        string Guild { get; init; }
+        int Guild { get; init; }
 
 
         public UserResult(User user)
         {
+            Id = user.Id;
             Username = user.Username;
             FirstName = user.FirstName;
             LastName = user.LastName;
-            Guild = user.Guild?.Name.GetDisplayName() ?? "Undefined guild";
+            Guild = user.Guild?.Id ?? -1;
         }
     }
 
