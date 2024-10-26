@@ -28,9 +28,9 @@ export function pixelColor(pixel: Pixel | undefined): number {
     return 0xfcba03;
   }
 
-  if (pixel.owner === undefined) {
+  if (pixel.guild === undefined) {
     return 0x000000;
   }
 
-  return guildColorMapping[pixel.owner as Guild] ?? 0x000000;
+  return guildColorMapping[pixel.guild as Guild] ?? 0x000000;
 }
