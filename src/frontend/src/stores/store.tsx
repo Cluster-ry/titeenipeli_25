@@ -10,7 +10,7 @@ import { GetPixelsResult } from "../models/Get/GetPixelsResult";
 import { AxiosResponse } from "axios";
 import { ViewportBoundigBox } from "../components/gameMap/Viewport";
 import { GrpcClient } from "../core/grpc/grpcClient";
-import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
+import { IncrementalMapUpdateResponse } from "../generated/grpc/services/StateUpdate";
 import PixelType from "../models/enum/PixelType";
 import withRetry from "../utils/retryUtils";
 import Guild from "../models/enum/Guild";

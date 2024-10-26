@@ -5,7 +5,7 @@ import "components/enums/pixelTypes.proto";
 import "components/schemas/relativeCoordinate.proto";
 
 option csharp_namespace = "GrpcGeneratedServices";
-package Map;
+package Game;
 
 message IncrementalMapUpdateRequest {
 
@@ -22,6 +22,15 @@ message IncrementalMapUpdateResponse {
   }  
 }
 
-service MapUpdate {
-  rpc GetIncremental(IncrementalMapUpdateRequest) returns (stream IncrementalMapUpdateResponse);
+message MiscStateUpdateRequest {
+
+}
+
+message MiscStateUpdateResponse {
+  uint32 pixelBucket = 1;
+}
+
+service StateUpdate {
+  rpc GetIncrementalMapUpdate(IncrementalMapUpdateRequest) returns (stream IncrementalMapUpdateResponse);
+  rpc GetMiscGameStateUpdate(MiscStateUpdateRequest) returns (stream MiscStateUpdateResponse);
 }

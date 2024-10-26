@@ -8,17 +8,17 @@ using Titeenipeli.Options;
 
 namespace Titeenipeli.Grpc.Services;
 
-public class IncrementalMapUpdateCoreService : GrpcService, IIncrementalMapUpdateCoreService
+public class IncrementalMapUpdateCoreService : GrpcService<IncrementalMapUpdateResponse>, IIncrementalMapUpdateCoreService
 {
     private const int MaxChannelSize = 100;
 
-    private readonly ILogger<IncrementalMapUpdateService> _logger;
+    private readonly ILogger<StateUpdateService> _logger;
     private readonly GameOptions _gameOptions;
 
     private readonly Channel<GrpcMapChangesInput> _mapChangeQueue =
         Channel.CreateBounded<GrpcMapChangesInput>(MaxChannelSize);
 
-    public IncrementalMapUpdateCoreService(ILogger<IncrementalMapUpdateService> logger, GameOptions gameOptions)
+    public IncrementalMapUpdateCoreService(ILogger<StateUpdateService> logger, GameOptions gameOptions)
     {
         _logger = logger;
         _gameOptions = gameOptions;

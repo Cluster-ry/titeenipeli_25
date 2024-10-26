@@ -1,4 +1,6 @@
 using Titeenipeli.Enums;
+using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.Grpc.Services;
 using Titeenipeli.Options;
 using Titeenipeli.Schema;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
@@ -7,7 +9,7 @@ namespace Titeenipeli.Services.BackgroundServices;
 
 public interface IUpdatePixelBucketsService : IAsynchronousTimedBackgroundService;
 
-public class UpdatePixelBucketsService(GameOptions gameOptions, IUserRepositoryService userRepositoryService) : IUpdatePixelBucketsService
+public class UpdatePixelBucketsService(GameOptions gameOptions, IUserRepositoryService userRepositoryService, IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService) : IUpdatePixelBucketsService
 {
     public async Task DoWork()
     {
@@ -40,6 +42,12 @@ public class UpdatePixelBucketsService(GameOptions gameOptions, IUserRepositoryS
                 user.PixelBucket = gameOptions.MaximumPixelBucket;
             }
             userRepositoryService.Update(user);
+
+            GrpcMiscGameStateUpdateInput stateUpdate = new()
+            {
+                User = user
+            };
+            miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
         }
     }
 }
