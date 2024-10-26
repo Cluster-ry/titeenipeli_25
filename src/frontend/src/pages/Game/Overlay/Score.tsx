@@ -6,7 +6,7 @@ type ScoreProps = {
   position: number;
 };
 
-function Score({ guild, score, position }: ScoreProps) {
+const Score = ({ guild, score, position }: ScoreProps) => {
   return (
     <div key={guild} className="top-overlay__score-container">
       <span>{guild.at(0)}</span>

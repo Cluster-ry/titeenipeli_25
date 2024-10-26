@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-
 const Fov = () => {
     const fovRange = 10;    // Value for local testing, removed later
     const playerCoordinate = {x: 1, y: 1}

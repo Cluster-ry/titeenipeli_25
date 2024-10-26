@@ -1,17 +1,7 @@
 import { Sprite } from "@pixi/react";
 import { Texture } from "pixi.js";
-import {HslaColour} from "../../models/HslaColour.ts";
+import RectangleProps from "../../models/RectangleProps";
 
-interface RectangleProps {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  isSpawn: boolean;
-  isOwn: boolean;
-  color: HslaColour;
-  onClick: (event: { x: number; y: number; }) => void;
-}
 
 const Rectangle = ({color, onClick, x, y, width, height, isOwn, isSpawn}: RectangleProps) => {
 

@@ -1,7 +1,13 @@
+/**
+ * This file contains a bunch of tests on the client side. The purpose 
+ * of these tests is to make sure the APIs work so that the 
+ * communication with the back-end is functional.
+ */
 import { api } from "../api/index";
 
 import { PostCtfInput } from "../models/Post/PostCtfInput";
 import { PostPixelsInput } from "../models/Post/PostPixelsInput";
+
 
 export default function ApiTestClient() {
     const getMapTest = async(event: { preventDefault: () => void; }) => {
@@ -40,3 +46,5 @@ export default function ApiTestClient() {
         </>
     )
 }
+
+export default ApiTestClient;

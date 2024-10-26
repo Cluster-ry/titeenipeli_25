@@ -2,7 +2,7 @@ import { BottomOverlay } from "./BottomOverlay";
 import { Score } from "./Score";
 import { TopOverlay } from "./TopOverlay";
 
-function GameOverlay() {
+const GameOverlay = () => {
   return (
     <div className="overlay">
       <TopOverlay cooldown={0} bucketPoints={100}>

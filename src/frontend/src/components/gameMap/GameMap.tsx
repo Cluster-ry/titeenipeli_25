@@ -1,21 +1,26 @@
 import {Container, Stage} from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
-import {pixelColor} from "./guild/Guild";
-import {mapConfig} from "./MapConfig";
-import {Coordinate} from "../../models/Coordinate";
-import useGameMapStore, {ConnectionStatus} from "../../stores/store";
-import {postPixels} from "../../api/map";
-import {useMemo} from "react";
+import { useMemo } from "react";
+import ConnectionStatus from "../../models/enum/ConnectionStatus";
+import { pixelColor } from "./guild/Guild";
+import { mapConfig } from "./MapConfig";
+import { Coordinate } from "../../models/Coordinate";
+import useGameMapStore from "../../stores/store";
+import { postPixels } from "../../api/map";
 import PixelType from "../../models/enum/PixelType.ts";
 
 /**
  * @component GameMap
+ * ==================
  *
  * Wraps up all the processes for fetching data from API for map creation.
  * Processes the data in a quadtree data structure in order to present
  * a scalable and optimized map to guarantee a good experience for the
  * client.
+ *
+ * The map is rendered only if the client has a valid connection. Otherwise,
+ * a span element indicates the current status.
  */
 const GameMap = () => {
   const gameMapStore = useGameMapStore((state) => state);
@@ -33,12 +38,14 @@ const GameMap = () => {
   async function conquer(coordinate: Coordinate) {
     await postPixels(coordinate);
   }
-
+  
+  // Handling undesired states. Returning if the client is not connected
   if (gameMapStore.connectionStatus === ConnectionStatus.Disconnected) {
     return <span>Disconnected</span>;
   } else if (gameMapStore.connectionStatus === ConnectionStatus.Connecting) {
     return <span>Loading...</span>;
   }
+
 
   const pixelElements = [];
   for (const [serializedCoordinate, pixel] of gameMapStore.pixels) {
