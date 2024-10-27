@@ -1,10 +1,9 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Telegram.Bot;
-using Titeenipeli.Bot;
 using Titeenipeli.Bot.Options;
 
-namespace TiteenipeliBot;
+namespace Titeenipeli.Bot;
 
 internal class Program
 {
