@@ -1,11 +1,12 @@
 import { Coordinate, useNewMapStore } from "../stores/newMapStore.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPixels } from "../api/map.ts";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/StateUpdate.ts";
 import PixelType from "../models/enum/PixelType.ts";
 import { GetPixelsResult } from "../models/Get/GetPixelsResult.ts";
 import { Pixel } from "../models/Pixel.ts";
+import GrpcClient from "../core/grpc/grpcClient.ts";
 
 export const useMapUpdating = () => {
     const mapQueryKey = "map";
@@ -22,7 +23,7 @@ export const useMapUpdating = () => {
             if (pixelType !== PixelType.FogOfWar) {
                 setPixel(pixelCoordinates, {
                     type: pixelType,
-                    guild: updatedPixel.guild,
+                    guild: updatedPixel.guild ? (updatedPixel.guild as number) - 1 : undefined,
                     owner: updatedPixel.owner?.id,
                     ...pixelCoordinates,
                 });
@@ -41,7 +42,8 @@ export const useMapUpdating = () => {
     const { data, isSuccess } = useQuery({
         queryKey: [mapQueryKey],
         queryFn: getPixels,
-        refetchInterval: false,
+        refetchOnReconnect: "always",
+        refetchOnMount: "always",
     });
 
     const mapMatrixToMapDictionary = useCallback((results: GetPixelsResult) => {
@@ -83,30 +85,42 @@ export const useMapUpdating = () => {
     const onIncrementalUpdate = useCallback(
         (incrementalUpdateResponse: IncrementalMapUpdateResponse) => {
             if (!isSuccess || incrementalUpdateBuffer.length > 0) {
+                console.log("Storing update, success:", isSuccess, status);
+                console.log("Update buffer:", incrementalUpdateBuffer);
                 incrementalUpdateBuffer.push(incrementalUpdateResponse);
                 // Technically this else-branch is not fully parallel-safe. Return here if race conditions occur!
             } else {
+                console.log("Consuming separate update:", incrementalUpdateResponse);
                 consumeUpdate(incrementalUpdateResponse);
             }
         },
-        [incrementalUpdateBuffer],
+        [incrementalUpdateBuffer, isSuccess, data, status],
     );
 
     const ensureMap = useCallback(async () => {
         setMap(null);
-        await queryClient.invalidateQueries({ queryKey: [mapQueryKey] });
+        await queryClient.resetQueries({ queryKey: [mapQueryKey] });
     }, []);
 
     useEffect(() => {
+        console.log("Rendering useMapUpdating hook. Success:", isSuccess);
         if (isSuccess) {
             if (map === null) {
                 const mappedPixels = mapMatrixToMapDictionary(data.data);
+                console.log("Fetched map:", mappedPixels);
                 setMap(mappedPixels);
                 setPixelsBoundingBox(computeBoundingBox(mappedPixels));
             }
+            console.log("Consuming updates as part of the rendering process");
             consumeUpdates();
         }
     }, [isSuccess]);
 
-    return { onIncrementalUpdate, ensureMap };
+    const grpcClient = GrpcClient.getGrpcClient();
+    useMemo(() => {
+        console.log("Registering GRPC client");
+        grpcClient.incrementalMapUpdateClient?.registerOnResponseListener(onIncrementalUpdate);
+    }, []);
+
+    return { ensureMap };
 };

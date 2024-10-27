@@ -1,15 +1,14 @@
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
-import { useMemo } from "react";
-import ConnectionStatus from "../../models/enum/ConnectionStatus";
 import { pixelColor } from "./guild/Guild";
 import { mapConfig } from "./MapConfig";
 import { Coordinate } from "../../models/Coordinate";
-import useGameMapStore from "../../stores/mapStore.tsx";
 import { postPixels } from "../../api/map";
 import PixelType from "../../models/enum/PixelType.ts";
-import { useUserStore } from "../../stores/userStore.ts";
+import { useNewMapStore } from "../../stores/newMapStore.ts";
+import { useMapUpdating } from "../../hooks/useMapUpdating.ts";
+import { useUser } from "../../hooks/useUser.ts";
 
 /**
  * @component GameMap
@@ -24,11 +23,9 @@ import { useUserStore } from "../../stores/userStore.ts";
  * a span element indicates the current status.
  */
 const GameMap = () => {
-    const gameMapStore = useGameMapStore((state) => state);
-    const { user } = useUserStore();
-    useMemo(() => {
-        gameMapStore.initializeMap();
-    }, []);
+    const { map, pixelsBoundingBox } = useNewMapStore();
+    useMapUpdating();
+    const user = useUser();
 
     /**
      * Executes when the client conquers a pixel for their guild.
@@ -42,15 +39,18 @@ const GameMap = () => {
     }
 
     // Handling undesired states. Returning if the client is not connected
-    if (gameMapStore.connectionStatus === ConnectionStatus.Disconnected) {
-        return <span>Disconnected</span>;
-    } else if (gameMapStore.connectionStatus === ConnectionStatus.Connecting) {
+    // if (gameMapStore.connectionStatus === ConnectionStatus.Disconnected) {
+    //     return <span>Disconnected</span>;
+    // } else if (gameMapStore.connectionStatus === ConnectionStatus.Connecting) {
+    //     return <span>Loading...</span>;
+    // }
+
+    if (map === null) {
         return <span>Loading...</span>;
     }
 
     const pixelElements = [];
-    for (const [serializedCoordinate, pixel] of gameMapStore.pixels) {
-        const coordinate = JSON.parse(serializedCoordinate);
+    for (const [coordinate, pixel] of map) {
         const rectangleX = coordinate.x * mapConfig.PixelSize;
         const rectangleY = coordinate.y * mapConfig.PixelSize;
         const color = pixelColor(pixel);
@@ -70,6 +70,13 @@ const GameMap = () => {
         );
     }
 
+    const mappedBoundingBox = {
+        minY: pixelsBoundingBox.min.y,
+        minX: pixelsBoundingBox.min.x,
+        maxY: pixelsBoundingBox.max.y,
+        maxX: pixelsBoundingBox.max.x,
+    };
+
     return (
         <>
             <Stage
@@ -77,11 +84,7 @@ const GameMap = () => {
                 height={window.innerHeight}
                 options={{ background: 0xffffff, resizeTo: window }}
             >
-                <Viewport
-                    width={window.innerWidth}
-                    height={window.innerHeight}
-                    boundingBox={gameMapStore.pixelsBoundingBox}
-                >
+                <Viewport width={window.innerWidth} height={window.innerHeight} boundingBox={mappedBoundingBox}>
                     <Container>{pixelElements}</Container>
                 </Viewport>
             </Stage>
