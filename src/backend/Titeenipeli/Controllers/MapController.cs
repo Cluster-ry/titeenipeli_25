@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Titeenipeli.Database.Services.Interfaces;
 using Titeenipeli.Enumeration;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
@@ -9,7 +10,6 @@ using Titeenipeli.Results;
 using Titeenipeli.Results.CustomStatusCodes;
 using Titeenipeli.Schema;
 using Titeenipeli.Services;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
 

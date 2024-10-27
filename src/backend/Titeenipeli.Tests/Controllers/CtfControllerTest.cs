@@ -1,12 +1,12 @@
+using FluentAssertions;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Moq;
+using NUnit.Framework;
 using Titeenipeli.Controllers;
+using Titeenipeli.Database.Services.Interfaces;
 using Titeenipeli.Inputs;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
-using NUnit.Framework;
-using FluentAssertions;
 
 namespace Titeenipeli.Tests.Controllers;
 

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Titeenipeli.Database.Services.Interfaces;
 using Titeenipeli.Enumeration;
 using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
@@ -6,7 +7,6 @@ using Titeenipeli.Grpc.Services;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Services;
 

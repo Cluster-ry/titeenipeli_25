@@ -1,7 +1,7 @@
 using Titeenipeli.Models;
 using Titeenipeli.Schema;
 
-namespace Titeenipeli.Services.RepositoryServices.Interfaces;
+namespace Titeenipeli.Database.Services.Interfaces;
 
 public interface IMapRepositoryService : IEntityRepositoryService<Pixel>
 {

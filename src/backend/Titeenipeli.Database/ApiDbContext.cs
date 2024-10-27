@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Titeenipeli.Schema;
 
-namespace Titeenipeli.Context;
+namespace Titeenipeli.Database;
 
 public class ApiDbContext : DbContext
 {
@@ -37,9 +37,9 @@ public class ApiDbContext : DbContext
                                                              State: EntityState.Added or EntityState.Modified
                                                          });
 
-        foreach (EntityEntry entity in entities)
+        foreach (var entity in entities)
         {
-            DateTime now = DateTime.UtcNow; // current datetime
+            var now = DateTime.UtcNow; // current datetime
 
             if (entity.State == EntityState.Added)
             {

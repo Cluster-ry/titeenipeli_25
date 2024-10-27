@@ -1,4 +1,4 @@
-namespace Titeenipeli.Services.RepositoryServices.Interfaces;
+namespace Titeenipeli.Database.Services.Interfaces;
 
 public interface IEntityRepositoryService<T>
 {

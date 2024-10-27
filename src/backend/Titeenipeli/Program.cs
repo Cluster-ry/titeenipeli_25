@@ -10,15 +10,15 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Titeenipeli.Context;
+using Titeenipeli.Database;
+using Titeenipeli.Database.Services;
+using Titeenipeli.Database.Services.Interfaces;
 using Titeenipeli.Grpc;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
 using Titeenipeli.Services.BackgroundServices;
-using Titeenipeli.Services.RepositoryServices;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli;
 

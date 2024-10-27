@@ -1,8 +1,7 @@
-using Titeenipeli.Context;
+using Titeenipeli.Database.Services.Interfaces;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 
-namespace Titeenipeli.Services.RepositoryServices;
+namespace Titeenipeli.Database.Services;
 
 public class CtfFlagRepositoryService : ICtfFlagRepositoryService
 {

@@ -1,10 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using Titeenipeli.Context;
+using Titeenipeli.Database.Services.Interfaces;
 using Titeenipeli.Enumeration;
 using Titeenipeli.Schema;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 
-namespace Titeenipeli.Services.RepositoryServices;
+namespace Titeenipeli.Database.Services;
 
 public class GuildRepositoryService : IGuildRepositoryService
 {

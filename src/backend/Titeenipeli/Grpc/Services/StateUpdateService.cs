@@ -1,10 +1,10 @@
 ﻿using Grpc.Core;
 using GrpcGeneratedServices;
+using Titeenipeli.Database.Services.Interfaces;
 using Titeenipeli.Extensions;
 using Titeenipeli.Grpc.Common;
 using Titeenipeli.Schema;
 using Titeenipeli.Services;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Grpc.Services;
 

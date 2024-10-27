@@ -42,5 +42,11 @@
 
     <ItemGroup>
         <ProjectReference Include="../Titeenipeli.Enumeration/Titeenipeli.Enumeration.csproj"/>
+        <ProjectReference Include="..\Titeenipeli.Database\Titeenipeli.Database.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Context\"/>
+        <Folder Include="Models\"/>
     </ItemGroup>
 </Project>

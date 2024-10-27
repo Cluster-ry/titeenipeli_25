@@ -1,10 +1,9 @@
-using Titeenipeli.Grpc.ChangeEntities;
-using GrpcGeneratedServices;
 using System.Collections.Generic;
-using Titeenipeli.Models;
 using Google.Protobuf.Collections;
-using Titeenipeli.Schema;
+using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.Models;
 using Titeenipeli.Options;
+using Titeenipeli.Schema;
 using static GrpcGeneratedServices.IncrementalMapUpdateResponse.Types;
 
 namespace Titeenipeli.Tests.Grpc;
@@ -38,7 +37,7 @@ public static class MapUtils
         return pixels;
     }
 
-    public static int[,] GrpcUpdatesToUserMap(RepeatedField<IncrementalMapUpdateResponse.Types.IncrementalMapUpdate> updates, GameOptions gameOptions)
+    public static int[,] GrpcUpdatesToUserMap(RepeatedField<IncrementalMapUpdate> updates, GameOptions gameOptions)
     {
         int fogOfWarDistance = gameOptions.FogOfWarDistance;
         int padding = fogOfWarDistance * 2;
