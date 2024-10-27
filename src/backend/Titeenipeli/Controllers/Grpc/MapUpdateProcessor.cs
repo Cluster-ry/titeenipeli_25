@@ -1,12 +1,13 @@
 using System.Collections.Concurrent;
 using GrpcGeneratedServices;
-using Titeenipeli.Enumeration;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
 using Titeenipeli.Grpc.Services;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
-using Titeenipeli.Schema;
 using static GrpcGeneratedServices.IncrementalMapUpdateResponse.Types;
 
 namespace Titeenipeli.Controllers.Grpc;
@@ -168,7 +169,7 @@ public class MapUpdateProcessor
             return;
         }
 
-        Coordinate spawnRelativeCoordinate = coordinate.ToSpawnRelativeCoordinate(_user);
+        var spawnRelativeCoordinate = ToSpawnRelativeCoordinate(coordinate, _user);
 
         GrpcChangePixel newPixel;
         bool foundValue = _mapChangesInput.NewPixels.TryGetValue(coordinate, out newPixel);
@@ -198,7 +199,7 @@ public class MapUpdateProcessor
 
     private void AddNotOwnedChange(Coordinate coordinate, PixelTypes pixelType)
     {
-        Coordinate spawnRelativeCoordinate = coordinate.ToSpawnRelativeCoordinate(_user);
+        var spawnRelativeCoordinate = ToSpawnRelativeCoordinate(coordinate, _user);
 
         IncrementalMapUpdate mapUpdate = new()
         {
@@ -250,5 +251,19 @@ public class MapUpdateProcessor
                 _incrementalMapUpdateCoreService.RemoveGrpcConnection(connection);
             }
         }
+    }
+
+    public Coordinate ToSpawnRelativeCoordinate(Coordinate coordinate, User? user)
+    {
+        if (user == null)
+        {
+            return coordinate;
+        }
+
+        return new Coordinate
+        {
+            X = coordinate.X - user.SpawnX,
+            Y = coordinate.Y - user.SpawnY
+        };
     }
 }

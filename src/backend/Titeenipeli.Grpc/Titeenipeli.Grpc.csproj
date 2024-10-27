@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Titeenipeli.Models\Titeenipeli.Models.csproj"/>
+        <ProjectReference Include="..\Titeenipeli.Common\Titeenipeli.Common.csproj"/>
     </ItemGroup>
 
 </Project>

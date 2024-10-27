@@ -30,8 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Titeenipeli.Enumeration/Titeenipeli.Enumeration.csproj"/>
-        <ProjectReference Include="..\Titeenipeli.Database\Titeenipeli.Database.csproj"/>
+        <ProjectReference Include="..\Titeenipeli.Common\Titeenipeli.Common.csproj"/>
         <ProjectReference Include="../Titeenipeli.Grpc/Titeenipeli.Grpc.csproj"/>
     </ItemGroup>
 </Project>

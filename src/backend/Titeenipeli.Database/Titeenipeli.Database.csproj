@@ -11,9 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Titeenipeli.Enumeration\Titeenipeli.Enumeration.csproj"/>
-        <ProjectReference Include="..\Titeenipeli.Models\Titeenipeli.Models.csproj"/>
-        <ProjectReference Include="..\Titeenipeli.Schema\Titeenipeli.Schema.csproj"/>
+        <ProjectReference Include="..\Titeenipeli.Common\Titeenipeli.Common.csproj"/>
     </ItemGroup>
 
 </Project>

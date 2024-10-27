@@ -7,7 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Titeenipeli.Schema\Titeenipeli.Schema.csproj"/>
+        <ProjectReference Include="..\Titeenipeli.Common\Titeenipeli.Common.csproj"/>
+        <ProjectReference Include="..\Titeenipeli.Database\Titeenipeli.Database.csproj"/>
     </ItemGroup>
 
 </Project>

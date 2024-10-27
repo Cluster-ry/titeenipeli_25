@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using Google.Protobuf.Collections;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Models;
 using Titeenipeli.Grpc.ChangeEntities;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
-using Titeenipeli.Schema;
 using static GrpcGeneratedServices.IncrementalMapUpdateResponse.Types;
 
 namespace Titeenipeli.Tests.Grpc;

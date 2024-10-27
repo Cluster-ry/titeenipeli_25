@@ -3,10 +3,10 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Moq;
 using NUnit.Framework;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Controllers;
-using Titeenipeli.Database.Services.Interfaces;
 using Titeenipeli.Inputs;
-using Titeenipeli.Schema;
 
 namespace Titeenipeli.Tests.Controllers;
 

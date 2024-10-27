@@ -8,14 +8,15 @@ using GrpcGeneratedServices;
 using JetBrains.Annotations;
 using Moq;
 using NUnit.Framework;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 using Titeenipeli.Controllers.Grpc;
-using Titeenipeli.Enumeration;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
 using Titeenipeli.Grpc.Services;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
-using Titeenipeli.Schema;
 
 namespace Titeenipeli.Tests.Grpc;
 

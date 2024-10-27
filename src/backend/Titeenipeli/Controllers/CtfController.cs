@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Titeenipeli.Database.Services.Interfaces;
-using Titeenipeli.Enumeration;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Enums;
 using Titeenipeli.Inputs;
 using Titeenipeli.Results;
-using Titeenipeli.Schema;
 
 namespace Titeenipeli.Controllers;
 

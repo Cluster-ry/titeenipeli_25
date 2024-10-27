@@ -1,5 +1,5 @@
-using Titeenipeli.Enumeration;
-using Titeenipeli.Models;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 using Titeenipeli.Options;
 
 namespace Titeenipeli.GameLogic;

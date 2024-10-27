@@ -1,3 +1,4 @@
+using Titeenipeli.Common.Models;
 using Titeenipeli.Models;
 
 namespace Titeenipeli.Grpc.ChangeEntities;

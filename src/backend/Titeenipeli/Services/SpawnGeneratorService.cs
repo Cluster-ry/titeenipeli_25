@@ -1,7 +1,7 @@
-using Titeenipeli.Database.Services.Interfaces;
-using Titeenipeli.Enumeration;
+using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
 
 namespace Titeenipeli.Services;

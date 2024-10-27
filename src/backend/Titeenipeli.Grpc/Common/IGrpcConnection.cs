@@ -1,5 +1,5 @@
 using System.Threading.Channels;
-using Titeenipeli.Schema;
+using Titeenipeli.Common.Database.Schema;
 
 namespace Titeenipeli.Grpc.Common;
 
