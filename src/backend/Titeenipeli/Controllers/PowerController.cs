@@ -24,7 +24,7 @@ public sealed class PowerController : ControllerBase
     private readonly JwtService _jwtServices;
     private readonly GameOptions _gameOptions;
 
-    private readonly IReadOnlyDictionary<string, Action<int, PowerInput>> powers;
+    private readonly IReadOnlyDictionary<string, Func<User, PowerInput, IActionResult>> powers;
     public PowerController(IMapRepositoryService mapRepositoryService,
                             IUserRepositoryService userRepositoryService,
                             IMapUpdaterService mapUpdaterService,
@@ -40,38 +40,41 @@ public sealed class PowerController : ControllerBase
         _jwtServices = jwtService;
         _gameOptions = gameOptions;
 
-        powers = new Dictionary<string, Action<int, PowerInput>>(){
+        powers = new Dictionary<string, Func<User, PowerInput, IActionResult>>(){
             {"Titeenikirves", HandleTiteenikirves}
         };
+
+        AddSupportedPowersToDatabase();
     }
 
     [HttpPost("Activate")]
     public IActionResult ActivatePower([FromBody] PowerInput body)
     {
-        var jwtClaim = HttpContext.GetUser(_jwtServices);
-        if (jwtClaim is null) return Unauthorized();
+        var user = HttpContext.GetUser(_jwtServices, _userRepositoryService);
+        if (user is null) return Unauthorized();
 
-        var userPowers = _powerupRepositoryService.UserPowers(jwtClaim.Id);
-        var userPower = userPowers?.FirstOrDefault(power => power.Id == body.Id);
+        var userPower = user.Powerups.FirstOrDefault(power => power.Id == body.Id);
         if (userPower is null) return Unauthorized();
 
         powers.TryGetValue(userPower.Name, out var handler);
-        if(handler is null) return Unauthorized(); //What should return?
+        if (handler is null) return BadRequest();
 
-        handler(jwtClaim.Id, body);
-
-        return Ok();
+        var result = handler(user, body);
+        if (result is OkObjectResult)
+        {
+            user.Powerups.Remove(userPower);
+            _userRepositoryService.Update(user);
+        }
+        return result;
     }
 
-    private void HandleTiteenikirves(int userId, PowerInput body)
+    private IActionResult HandleTiteenikirves(User user, PowerInput body)
     {
-        var user = _userRepositoryService.GetById(userId);
-        if(user is null) return;
-        
         var realX = user.SpawnX + body.Location.X;
         var realY = user.SpawnY + body.Location.Y;
 
-        if (body.direction is Direction.North or Direction.South)
+        if (body.direction is Direction.Undefined) return BadRequest();
+        else if (body.direction is Direction.North or Direction.South)
         {
             for (var y = 0; y < _gameOptions.Height; y++)
             {
@@ -91,13 +94,16 @@ public sealed class PowerController : ControllerBase
                 _mapUpdaterService.PlacePixel(new() { X = x, Y = realY + 1 }, user);
             }
         }
+
+        return Ok();
     }
 
 
-    private void AddSupportedPowersToDatabase(){
-        foreach(var name in powers.Keys)
+    private void AddSupportedPowersToDatabase()
+    {
+        foreach (var name in powers.Keys)
         {
-            _powerupRepositoryService.Add(new PowerUp(){Name=name});
+            _powerupRepositoryService.Add(new PowerUp() { Name = name });
         }
     }
 }
