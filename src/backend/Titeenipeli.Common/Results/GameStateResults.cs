@@ -1,6 +1,6 @@
 using Titeenipeli.Common.Enums;
 
-namespace Titeenipeli.Results;
+namespace Titeenipeli.Common.Results;
 
 public class GameStateResults
 {

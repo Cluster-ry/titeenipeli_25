@@ -1,4 +1,4 @@
-namespace TiteenipeliBot.Options;
+namespace Titeenipeli.Bot.Options;
 
 public class TelegramOptions
 {

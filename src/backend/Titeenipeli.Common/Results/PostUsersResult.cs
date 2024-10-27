@@ -1,4 +1,4 @@
-namespace TiteenipeliBot.BackendApiClient.Results;
+namespace Titeenipeli.Common.Results;
 
 public class PostUsersResult
 {

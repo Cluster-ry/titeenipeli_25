@@ -1,4 +1,4 @@
-namespace TiteenipeliBot;
+namespace Titeenipeli.Bot.Options;
 
 public class BackendOptions
 {
