@@ -9,13 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Grpc.AspNetCore" Version="2.63.0" />
-        <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.63.0" />
-        <PackageReference Include="Grpc.AspNetCore.Web" Version="2.63.0" />
-        <PackageReference Include="Grpc.Tools" Version="2.64.0">
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-          <PrivateAssets>all</PrivateAssets>
-        </PackageReference>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6"/>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.6"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.4"/>
@@ -30,14 +23,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="../../protobuf/**/*.proto" ProtoRoot="../../protobuf"/>
-    </ItemGroup>
-
-    <ItemGroup>
         <Content Include="../.dockerignore">
             <Link>.dockerignore</Link>
             <DependentUpon>Dockerfile</DependentUpon>
         </Content>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\Titeenipeli.Common\Titeenipeli.Common.csproj"/>
+        <ProjectReference Include="../Titeenipeli.Grpc/Titeenipeli.Grpc.csproj"/>
+    </ItemGroup>
 </Project>

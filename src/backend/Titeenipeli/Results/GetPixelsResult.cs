@@ -1,4 +1,4 @@
-using Titeenipeli.Models;
+using Titeenipeli.Common.Models;
 
 namespace Titeenipeli.Results;
 
