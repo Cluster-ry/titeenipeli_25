@@ -19,6 +19,7 @@ public class User : Entity
     public string? AuthenticationToken { get; set; }
     public DateTime? AuthenticationTokenExpiryTime { get; set; }
 
+    public required List<PowerUp> Powerups { get; set; }
 
     #region Telegram
     [StringLength(64)]

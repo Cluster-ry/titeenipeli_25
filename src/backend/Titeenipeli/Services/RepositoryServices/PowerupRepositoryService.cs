@@ -28,11 +28,6 @@ public sealed class PowerupRepositoryService : IPowerupRepositoryService
     {
         return _dbContext.PowerUps.Find(id);
     }
-
-    public IReadOnlyCollection<PowerUp>? UserPowers(int userid)
-    {
-        return _dbContext.UserPowerUps.Find(userid)?.PowerUps;
-    }
 }
 
 
