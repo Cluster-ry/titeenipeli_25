@@ -40,16 +40,12 @@ public class UserController(
 
 
     [HttpGet("current")]
-    [Authorize(Policy = "MustHaveGuild")]
+    [Authorize]
     public IActionResult CurrentUser()
     {
-        var jwtclaim = HttpContext.GetUser(_jwtService);
-        if (jwtclaim is null) return Unauthorized(new { message = "Invalid jwt or missing JWToken" });
+        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
 
-        var userClaim = _userRepositoryService.GetById(jwtclaim.Id);
-        if (userClaim is null) return Unauthorized(new { message = "No user defined" }); //Should not happen?
-
-        return Ok(new UserResult(userClaim));
+        return Ok(new UserResult(user));
     }
 
     public class UserResult
@@ -67,7 +63,7 @@ public class UserController(
             Username = user.Username;
             FirstName = user.FirstName;
             LastName = user.LastName;
-            Guild = user.Guild?.Id ?? -1;
+            Guild = user.Guild.Id;
         }
     }
 

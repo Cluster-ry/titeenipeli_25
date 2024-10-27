@@ -54,7 +54,7 @@ public class StateUpdateService(
     private User GetUserFromHttpContext(ServerCallContext context)
     {
         var httpContext = context.GetHttpContext();
-        var jwtClaim = httpContext.GetUser(jwtService);
+        var jwtClaim = httpContext.GetUser(jwtService, userRepositoryService);
         if (jwtClaim == null)
         {
             throw new RpcException(new Status(StatusCode.PermissionDenied,

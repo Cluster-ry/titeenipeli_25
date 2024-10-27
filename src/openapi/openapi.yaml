@@ -36,8 +36,10 @@ tags:
 paths:
   /ctf:
     $ref: "./paths/ctf.yaml"
-  /map/pixels:
-    $ref: "./paths/map/pixels.yaml"
+  /state/map/pixels:
+    $ref: "./paths/state/map/pixels.yaml"
+  /state/game:
+    $ref: "./paths/state/gameState.yaml"
   /users:
     $ref: "./paths/users/users.yaml"
   /users/authenticate:

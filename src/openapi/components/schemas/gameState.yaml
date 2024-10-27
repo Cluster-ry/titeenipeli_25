@@ -1,0 +1,20 @@
+type: object
+properties:
+  pixelBucket:
+    type: object
+    properties:
+      amount:
+        type: int
+      maxAmount:
+        type: int
+      increasePerMinute:
+        type: float
+  scores:
+    type: array
+    items:
+      type: object
+      properties:
+        guild:
+          $ref: "../enums/pixelGuild.yaml"
+        amount:
+          type: int

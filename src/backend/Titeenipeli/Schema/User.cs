@@ -5,7 +5,7 @@ namespace Titeenipeli.Schema;
 
 public class User : Entity
 {
-    public required Guild? Guild { get; set; }
+    public required Guild Guild { get; set; }
 
     [Column(TypeName = "VARCHAR")]
     [StringLength(64)]

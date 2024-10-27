@@ -35,5 +35,5 @@ export function pixelColor(pixel?: Pixel): HslaColour {
         return black;
     }
 
-    return guildColorMapping[pixel.guild as Guild] ?? black;
+    return guildColorMapping[pixel.guild as unknown as Guild] ?? black;
 }

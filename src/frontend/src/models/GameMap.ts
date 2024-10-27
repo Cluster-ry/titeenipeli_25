@@ -2,7 +2,7 @@ import { PlayerCoordinates } from "./PlayerCoordinates";
 import Guild from "./enum/Guild";
 import { PixelMap } from "./PixelMap";
 import ConnectionStatus from "./enum/ConnectionStatus";
-import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
+import { IncrementalMapUpdateResponse } from "../generated/grpc/services/StateUpdate";
 import ViewportBoundingBox from "./ViewportBoundingBox.ts";
 
 interface GameMap {

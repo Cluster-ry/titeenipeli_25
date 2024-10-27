@@ -1,8 +1,8 @@
 import PixelType from "./enum/PixelType";
-import { PixelOwner } from "../generated/grpc/components/enums/pixelOwner.ts";
+import { PixelGuild } from "../generated/grpc/components/enums/pixelGuild.ts";
 
 export interface Pixel {
     type: PixelType;
-    guild: PixelOwner | undefined;
+    guild: PixelGuild | undefined;
     owner: number | undefined;
 }
