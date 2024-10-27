@@ -148,7 +148,8 @@ const mapMatrixToMapDictionary = (results: GetPixelsResult) => {
 
     results.pixels.map((layer, y) => {
         layer.map((pixel, x) => {
-            pixels.set(JSON.stringify({ x: x - playerX, y: y - playerY }), pixel);
+            if (pixel.type !== PixelType.FogOfWar)
+                pixels.set(JSON.stringify({ x: x - playerX, y: y - playerY }), pixel);
         });
     });
     return pixels;

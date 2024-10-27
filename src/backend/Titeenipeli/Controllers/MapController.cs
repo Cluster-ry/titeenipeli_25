@@ -200,12 +200,7 @@ public class MapController : ControllerBase
     {
         int width = map.Pixels.GetLength(0);
         int height = map.Pixels.GetLength(1);
-        Map fogOfWarMap = new Map
-        {
-            Pixels = new PixelModel[width, height],
-            Width = width,
-            Height = height
-        };
+        Map fogOfWarMap = CreateEmptyMap(width, height);
 
         for (int x = 0; x < width; x++)
         {
@@ -223,6 +218,29 @@ public class MapController : ControllerBase
         }
 
         return TrimMap(fogOfWarMap);
+    }
+
+    private Map CreateEmptyMap(int width, int height)
+    {
+        Map map = new Map
+        {
+            Pixels = new PixelModel[width, height],
+            Width = width,
+            Height = height
+        };
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                map.Pixels[x, y] = new PixelModel()
+                {
+                    Type = PixelType.FogOfWar
+                };
+            }
+        }
+
+        return map;
     }
 
     private static Map MarkPixelsInFogOfWar(Map fogOfWarMap, Map map, Coordinate pixel,
