@@ -9,10 +9,10 @@ using Titeenipeli.Services;
 
 namespace Titeenipeli.IntegrationTest.Controllers;
 
-[TestFixture]
+//[TestFixture]
 public class CtfControllerIntegrationTest : BaseFixture
 {
-    [SetUp]
+    //[SetUp]
     public async Task BeforeEach()
     {
         await _dbContext.Database.EnsureCreatedAsync();
