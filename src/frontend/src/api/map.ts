@@ -22,14 +22,13 @@ export async function getPixels(): Promise<
 
 export async function postPixels(
   postPixelsInput: PostPixelsInput
-): Promise<AxiosResponse<ClientApiOk> | ClientApiError> {
+): Promise<boolean> {
   try {
-    const response = axios.post<ClientApiOk>(PIXELS_URL, postPixelsInput);
-
+    await axios.post<ClientApiOk>(PIXELS_URL, postPixelsInput);
     console.log("Success.");
-    return response;
+    return true;
   } catch (error) {
     console.error(error);
-    return { msg: "Request unsuccessful." };
+    return false;
   }
 }

@@ -1,14 +1,14 @@
+import { useMemo, useRef } from "react";
 import {Container, Stage} from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
-import { useMemo } from "react";
-import ConnectionStatus from "../../models/enum/ConnectionStatus";
 import { pixelColor } from "./guild/Guild";
 import { mapConfig } from "./MapConfig";
 import { Coordinate } from "../../models/Coordinate";
 import useGameMapStore from "../../stores/store";
 import { postPixels } from "../../api/map";
 import PixelType from "../../models/enum/PixelType.ts";
+import { EffectContainer, EffectContainerHandle } from "./EffectContainer.tsx";
 
 /**
  * @component GameMap
@@ -24,6 +24,7 @@ import PixelType from "../../models/enum/PixelType.ts";
  */
 const GameMap = () => {
   const gameMapStore = useGameMapStore((state) => state);
+  const effectRef = useRef<EffectContainerHandle>(null);
   useMemo(() => {
     gameMapStore.initializeMap();
   }, []);
@@ -36,15 +37,18 @@ const GameMap = () => {
    * @note Upon change, the map is automatically refreshed.
    */
   async function conquer(coordinate: Coordinate) {
-    await postPixels(coordinate);
+    const result = await postPixels(coordinate);
+    console.log(result);
+    if (!effectRef.current) console.error("Vittu");
+    result ? effectRef.current?.conqueredEffect(coordinate) : effectRef.current?.forbiddenEffect(coordinate);
   }
-  
+  /* 
   // Handling undesired states. Returning if the client is not connected
   if (gameMapStore.connectionStatus === ConnectionStatus.Disconnected) {
     return <span>Disconnected</span>;
   } else if (gameMapStore.connectionStatus === ConnectionStatus.Connecting) {
     return <span>Loading...</span>;
-  }
+  } */
 
 
   const pixelElements = [];
@@ -82,6 +86,7 @@ const GameMap = () => {
           boundingBox={gameMapStore.pixelsBoundingBox}
         >
           <Container>{pixelElements}</Container>
+          <EffectContainer ref={effectRef}/>
         </Viewport>
       </Stage>
     </>
