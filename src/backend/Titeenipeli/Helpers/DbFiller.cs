@@ -1,7 +1,7 @@
-using Titeenipeli.Context;
-using Titeenipeli.Enums;
+using Titeenipeli.Common.Database;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Enums;
 using Titeenipeli.Options;
-using Titeenipeli.Schema;
 
 namespace Titeenipeli.Helpers;
 

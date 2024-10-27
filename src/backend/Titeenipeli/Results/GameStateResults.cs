@@ -1,4 +1,4 @@
-using Titeenipeli.Enums;
+using Titeenipeli.Common.Enums;
 
 namespace Titeenipeli.Results;
 

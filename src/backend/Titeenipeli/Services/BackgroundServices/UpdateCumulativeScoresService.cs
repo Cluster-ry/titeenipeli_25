@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Titeenipeli.Context;
-using Titeenipeli.Schema;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
+using Titeenipeli.Common.Database;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services.Interfaces;
 
 namespace Titeenipeli.Services.BackgroundServices;
 

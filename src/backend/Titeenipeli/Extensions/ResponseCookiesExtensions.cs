@@ -1,4 +1,4 @@
-using Titeenipeli.Schema;
+using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Services;
 
 namespace Titeenipeli.Extensions;

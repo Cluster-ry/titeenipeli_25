@@ -3,9 +3,9 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
-using Titeenipeli.Models;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Models;
 using Titeenipeli.Options;
-using Titeenipeli.Schema;
 
 namespace Titeenipeli.Services;
 

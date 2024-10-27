@@ -1,14 +1,10 @@
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 using Titeenipeli.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Titeenipeli.Schema;
 using Titeenipeli.Extensions;
-using System.Net.WebSockets;
-using Microsoft.AspNetCore.Identity;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
-using System.Collections.Generic;
+using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Database.Schema;
 
 namespace Titeenipeli.Controllers;
 

@@ -1,20 +1,21 @@
-using JetBrains.Annotations;
-using Titeenipeli.Schema;
-using NUnit.Framework;
-using FluentAssertions;
-using Titeenipeli.Grpc.Controllers;
-using Titeenipeli.Grpc.ChangeEntities;
-using Titeenipeli.Grpc.Common;
-using System.Collections.Concurrent;
-using GrpcGeneratedServices;
-using Titeenipeli.Options;
-using System.Collections.Generic;
-using Titeenipeli.Models;
 using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using Titeenipeli.Grpc.Services;
+using FluentAssertions;
+using GrpcGeneratedServices;
+using JetBrains.Annotations;
 using Moq;
+using NUnit.Framework;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
+using Titeenipeli.Controllers.Grpc;
+using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.Grpc.Common;
+using Titeenipeli.Options;
+using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Tests.Grpc;
 
@@ -43,11 +44,11 @@ public class MapUpdateProcessorTest
 
     private static readonly Guild OwnGuild = new()
     {
-        Name = Enums.GuildName.Cluster
+        Name = GuildName.Cluster
     };
     private static readonly Guild OtherGuild = new()
     {
-        Name = Enums.GuildName.Tietokilta
+        Name = GuildName.Tietokilta
     };
     private static readonly User CurrentUser = new()
     {
