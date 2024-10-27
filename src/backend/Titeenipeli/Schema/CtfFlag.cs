@@ -8,4 +8,5 @@ public class CtfFlag : Entity
     [Column(TypeName = "VARCHAR")]
     [StringLength(64)]
     public required string Token { get; init; }
+    public PowerUp? Powerup { get; init; }
 }
