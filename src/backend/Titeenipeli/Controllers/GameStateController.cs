@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
 using Titeenipeli.Options;
-using Titeenipeli.Results;
 using Titeenipeli.Services;
 
 namespace Titeenipeli.Controllers;

@@ -1,4 +1,4 @@
-namespace Titeenipeli.Inputs;
+namespace Titeenipeli.Common.Inputs;
 
 public class PostUsersInput
 {

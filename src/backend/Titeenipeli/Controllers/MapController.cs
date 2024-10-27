@@ -4,11 +4,11 @@ using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
+using Titeenipeli.Common.Results;
+using Titeenipeli.Common.Results.CustomStatusCodes;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
-using Titeenipeli.Results;
-using Titeenipeli.Results.CustomStatusCodes;
 using Titeenipeli.Services;
 
 namespace Titeenipeli.Controllers;

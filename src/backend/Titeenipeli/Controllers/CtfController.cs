@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
-using Titeenipeli.Results;
 using Titeenipeli.Services;
 
 namespace Titeenipeli.Controllers;

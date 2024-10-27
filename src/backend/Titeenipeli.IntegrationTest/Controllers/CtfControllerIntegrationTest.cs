@@ -53,14 +53,16 @@ public class CtfControllerIntegrationTest : BaseFixture
 
     private Guild GenerateGuild()
     {
-        return new Guild{
+        return new Guild
+        {
             Name = Common.Enums.GuildName.Cluster,
         };
     }
 
     private User GenerateUser(Guild guild)
     {
-        return new User{
+        return new User
+        {
             Guild = guild,
             Code = "user",
             SpawnX = 0,

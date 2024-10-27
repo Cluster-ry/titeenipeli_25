@@ -1,8 +1,9 @@
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
-namespace Titeenipeli.Results.CustomStatusCodes;
+namespace Titeenipeli.Common.Results.CustomStatusCodes;
 
 public class TooManyRequestsResult : ObjectResult
 {
