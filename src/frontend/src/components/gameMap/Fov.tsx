@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 
-
 const Fov = () => {
-    const fovRange = 10;    // Value for local testing, removed later
-    const playerCoordinate = {x: 1, y: 1}
+    const fovRange = 10; // Value for local testing, removed later
+    const playerCoordinate = { x: 1, y: 1 };
 
     const [lowerY, setLowerY] = useState(playerCoordinate.y - fovRange);
     const [upperY, setUpperY] = useState(playerCoordinate.y + fovRange);
@@ -17,21 +16,20 @@ const Fov = () => {
 
     // For testing whether the boundaries work
     useEffect(() => {
-        console.log(upperX)
-        console.log(upperY)
-        console.log(lowerX)
-        console.log(lowerY)
-    }, [upperX, upperY, lowerX, lowerY])
-
+        console.log(upperX);
+        console.log(upperY);
+        console.log(lowerX);
+        console.log(lowerY);
+    }, [upperX, upperY, lowerX, lowerY]);
 
     const updatePlayerBoundaries = () => {
         setLowerY(playerCoordinate.y - fovRange);
         setUpperY(playerCoordinate.y + fovRange);
         setLowerX(playerCoordinate.x - fovRange);
-        setUpperX(playerCoordinate.x + fovRange);    
-    }
+        setUpperX(playerCoordinate.x + fovRange);
+    };
 
-    return <></>
-}
+    return <></>;
+};
 
-export default Fov; 
+export default Fov;

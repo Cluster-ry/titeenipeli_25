@@ -132,15 +132,15 @@ public class MapUpdaterService(
                 {
                     userId = changedPixel.NewOwner?.Id,
                     userName = changedPixel.NewOwner?.Username,
-                    guildId = changedPixel.NewOwner?.Guild?.Id,
-                    guildName = changedPixel.NewOwner?.Guild?.Name
+                    guildId = changedPixel.NewOwner?.Guild.Id,
+                    guildName = changedPixel.NewOwner?.Guild.Name
                 },
                 toUser = new
                 {
                     userId = computedNewOwner?.Id,
                     userName = computedNewOwner?.Username,
-                    guildId = computedNewOwner?.Guild?.Id,
-                    guildName = computedNewOwner?.Guild?.Name
+                    guildId = computedNewOwner?.Guild.Id,
+                    guildName = computedNewOwner?.Guild.Name
                 },
                 pixel = new
                 {

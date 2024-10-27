@@ -55,11 +55,11 @@ public static class MapUtils
         foreach (IncrementalMapUpdate update in updates)
         {
             int userId;
-            if (update.Owner == PixelOwners.Cluster)
+            if (update.Guild == PixelGuild.Cluster)
             {
                 userId = MapUpdateProcessorTest.Own;
             }
-            else if (update.Owner == PixelOwners.Tietokilta)
+            else if (update.Guild == PixelGuild.Tietokilta)
             {
                 userId = MapUpdateProcessorTest.Oth;
             }

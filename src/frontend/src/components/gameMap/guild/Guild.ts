@@ -1,30 +1,39 @@
 import { Pixel } from "../../../models/Pixel";
 import Guild from "../../../models/enum/Guild";
 import PixelType from "../../../models/enum/PixelType";
+import { HslaColour } from "../../../models/HslaColour.ts";
 
-const guildColorMapping: Record<Guild, number> = {
-  [Guild.Tietokilta]: 0xd50000,
-  [Guild.Algo]: 0xc51162,
-  [Guild.Cluster]: 0xaa00ff,
-  [Guild.OulunTietoteekkarit]: 0x6200ea,
-  [Guild.TietoTeekkarikilta]: 0x304ffe,
-  [Guild.Digit]: 0x2962ff,
-  [Guild.Datateknologerna]: 0x0091ea,
-  [Guild.Sosa]: 0x00b8d4,
+/**
+ * The color mapping for each of the Software Engineering guilds
+ *
+ * All guilds have their own dedicated color, and it is shown
+ * on the game map in the conquered pixels.
+ */
+const guildColorMapping: Record<Guild, HslaColour> = {
+    [Guild.Tietokilta]: { hue: 0, saturation: 100, lightness: 42 },
+    [Guild.Algo]: { hue: 333, saturation: 84, lightness: 42 },
+    [Guild.Cluster]: { hue: 280, saturation: 100, lightness: 50 },
+    [Guild.OulunTietoteekkarit]: { hue: 265, saturation: 100, lightness: 46 },
+    [Guild.TietoTeekkarikilta]: { hue: 231, saturation: 99, lightness: 59 },
+    [Guild.Digit]: { hue: 0, saturation: 100, lightness: 50 },
+    [Guild.Datateknologerna]: { hue: 203, saturation: 100, lightness: 46 },
+    [Guild.Sosa]: { hue: 188, saturation: 100, lightness: 42 },
 };
 
-export function pixelColor(pixel: Pixel | undefined): number {
-  if (!pixel) {
-    return 0x000000;
-  }
+export function pixelColor(pixel?: Pixel): HslaColour {
+    const black = { hue: 0, saturation: 0, lightness: 0 };
 
-  if (pixel.type === PixelType.MapBorder) {
-    return 0xfcba03;
-  }
+    if (!pixel) {
+        return black;
+    }
 
-  if (pixel.owner === undefined) {
-    return 0x000000;
-  }
+    if (pixel.type === PixelType.MapBorder) {
+        return { hue: 44, saturation: 98, lightness: 50 };
+    }
 
-  return guildColorMapping[pixel.owner as Guild] ?? 0x000000;
+    if (pixel.guild === undefined) {
+        return black;
+    }
+
+    return guildColorMapping[pixel.guild as unknown as Guild] ?? black;
 }

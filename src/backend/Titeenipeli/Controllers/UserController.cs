@@ -1,6 +1,9 @@
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Extensions;
 using Titeenipeli.Enums;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
@@ -34,6 +37,35 @@ public class UserController(
     private readonly IMapRepositoryService _mapRepositoryService = mapRepositoryService;
     private readonly JwtService _jwtService = jwtService;
     private readonly TimeSpan _loginTokenExpiryTime = TimeSpan.FromMinutes(botOptions.LoginTokenExpirationInMinutes);
+
+
+    [HttpGet("current")]
+    [Authorize]
+    public IActionResult CurrentUser()
+    {
+        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
+
+        return Ok(new UserResult(user));
+    }
+
+    public class UserResult
+    {
+        public int Id { get; init; }
+        public string Username { get; init; }
+        public string FirstName { get; init; }
+        public string LastName { get; init; }
+        public int Guild { get; init; }
+
+
+        public UserResult(User user)
+        {
+            Id = user.Id;
+            Username = user.Username;
+            FirstName = user.FirstName;
+            LastName = user.LastName;
+            Guild = user.Guild.Id;
+        }
+    }
 
     [HttpPost]
     public IActionResult PostUsers([FromBody] PostUsersInput usersInput)

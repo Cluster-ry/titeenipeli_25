@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
 using Titeenipeli.Enums;
 using Titeenipeli.Schema;
@@ -33,5 +34,18 @@ public class GuildRepositoryService : IGuildRepositoryService
     public Guild? GetByName(GuildName name)
     {
         return _dbContext.Guilds.FirstOrDefault(guild => guild.Name == name);
+    }
+
+    public void Update(Guild guild)
+    {
+        Guild? existingGuild = GetById(guild.Id);
+
+        if (existingGuild == null)
+        {
+            throw new Exception("Guild doesn't exist.");
+        }
+
+        _dbContext.Entry(existingGuild).CurrentValues.SetValues(guild);
+        _dbContext.SaveChanges();
     }
 }

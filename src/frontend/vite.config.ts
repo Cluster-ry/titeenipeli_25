@@ -5,19 +5,21 @@ import http2Proxy from "vite-plugin-http2-proxy";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    mkcert(),
-    http2Proxy({
-      "^/Map.MapUpdate/": {
-        target: "https://localhost:7222",
-      },
-      "^/api": {
-        target: "https://localhost:7222",
-      },
-    }),
-  ],
-  optimizeDeps: {
-    include: ["src/generated/**/*.js"],
-  },
+    plugins: [
+        react(),
+        mkcert(),
+        http2Proxy({
+            "^/Game.StateUpdate/": {
+                target: "https://localhost:7222",
+                secure: false,
+            },
+            "^/api": {
+                target: "https://localhost:7222",
+                secure: false,
+            },
+        }),
+    ],
+    optimizeDeps: {
+        include: ["src/generated/**/*.js"],
+    },
 });
