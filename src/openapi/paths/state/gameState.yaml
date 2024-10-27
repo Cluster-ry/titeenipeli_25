@@ -1,0 +1,12 @@
+get:
+  tags:
+    - "state"
+  summary: "Current game state excluding map data."
+  operationId: "getGameState"
+  responses:
+    "200":
+      $ref: "../../components/responses/200GetGameState.yaml"
+    "401":
+      $ref: "../../components/responses/401Unauthorized.yaml"
+  security:
+    - bearerAuth: []

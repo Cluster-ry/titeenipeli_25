@@ -1,6 +1,5 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -11,16 +10,14 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Titeenipeli.Context;
-using Titeenipeli.Grpc;
+using Titeenipeli.Common.Database;
+using Titeenipeli.Common.Database.Services;
+using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
-using Titeenipeli.Policies;
 using Titeenipeli.Services;
 using Titeenipeli.Services.BackgroundServices;
-using Titeenipeli.Services.RepositoryServices;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli;
 
@@ -160,14 +157,6 @@ public static class Program
                 }
             };
         });
-
-        builder.Services.AddAuthorizationBuilder()
-               .AddPolicy("MustHaveGuild",
-                   policy => policy.Requirements.Add(new MustHaveGuildRequirement()));
-
-        builder.Services
-               .AddSingleton<IAuthorizationHandler,
-                   MustHaveGuildHandler>();
 
         builder.Services
                .AddSingleton<IMapUpdaterService, MapUpdaterService>();

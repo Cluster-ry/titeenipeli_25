@@ -1,12 +1,12 @@
 using System.Text.Json;
-using Titeenipeli.Enums;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
-using Titeenipeli.Grpc.Services;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
-using Titeenipeli.Schema;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
+using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services;
 
@@ -132,15 +132,15 @@ public class MapUpdaterService(
                 {
                     userId = changedPixel.NewOwner?.Id,
                     userName = changedPixel.NewOwner?.Username,
-                    guildId = changedPixel.NewOwner?.Guild?.Id,
-                    guildName = changedPixel.NewOwner?.Guild?.Name
+                    guildId = changedPixel.NewOwner?.Guild.Id,
+                    guildName = changedPixel.NewOwner?.Guild.Name
                 },
                 toUser = new
                 {
                     userId = computedNewOwner?.Id,
                     userName = computedNewOwner?.Username,
-                    guildId = computedNewOwner?.Guild?.Id,
-                    guildName = computedNewOwner?.Guild?.Name
+                    guildId = computedNewOwner?.Guild.Id,
+                    guildName = computedNewOwner?.Guild.Name
                 },
                 pixel = new
                 {
