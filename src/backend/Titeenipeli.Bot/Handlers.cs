@@ -186,7 +186,7 @@ public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
                 LastName = user.LastName ?? "",
                 Username = user.Username ?? ""
             };
-            
+
             string? token = await apiClient.CreateUserOrLoginRequest(userInput);
 
             // if results is not a 0, a guild must be set
