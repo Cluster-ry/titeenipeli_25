@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Models", "Titee
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Schema", "Titeenipeli.Schema\Titeenipeli.Schema.csproj", "{074A3EBC-121E-4F29-99D4-6E548A7C50D4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Grpc", "Titeenipeli.Grpc\Titeenipeli.Grpc.csproj", "{E5842D8C-D160-435B-BDFF-13398B2F7301}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{074A3EBC-121E-4F29-99D4-6E548A7C50D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{074A3EBC-121E-4F29-99D4-6E548A7C50D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{074A3EBC-121E-4F29-99D4-6E548A7C50D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5842D8C-D160-435B-BDFF-13398B2F7301}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5842D8C-D160-435B-BDFF-13398B2F7301}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5842D8C-D160-435B-BDFF-13398B2F7301}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5842D8C-D160-435B-BDFF-13398B2F7301}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

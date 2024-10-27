@@ -9,7 +9,7 @@ using Titeenipeli.Options;
 using Titeenipeli.Schema;
 using static GrpcGeneratedServices.IncrementalMapUpdateResponse.Types;
 
-namespace Titeenipeli.Grpc.Controllers;
+namespace Titeenipeli.Controllers.Grpc;
 
 public class MapUpdateProcessor
 {

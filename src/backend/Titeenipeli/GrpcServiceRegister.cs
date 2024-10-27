@@ -1,6 +1,7 @@
 ﻿using Titeenipeli.Grpc.Services;
+using Titeenipeli.Services.Grpc;
 
-namespace Titeenipeli.Grpc;
+namespace Titeenipeli;
 
 public static class GrpcServiceRegister
 {

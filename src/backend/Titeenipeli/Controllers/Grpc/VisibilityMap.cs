@@ -1,6 +1,6 @@
 using Titeenipeli.Models;
 
-namespace Titeenipeli.Grpc.Controllers;
+namespace Titeenipeli.Controllers.Grpc;
 
 public class VisibilityMap(int mapWidth, int mapHeight, int fogOfWarDistance)
 {

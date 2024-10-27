@@ -13,7 +13,6 @@ using OpenTelemetry.Trace;
 using Titeenipeli.Database;
 using Titeenipeli.Database.Services;
 using Titeenipeli.Database.Services.Interfaces;
-using Titeenipeli.Grpc;
 using Titeenipeli.Helpers;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;

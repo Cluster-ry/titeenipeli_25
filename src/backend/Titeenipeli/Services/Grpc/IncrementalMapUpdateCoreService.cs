@@ -1,12 +1,13 @@
 using System.Collections.Concurrent;
 using System.Threading.Channels;
 using GrpcGeneratedServices;
+using Titeenipeli.Controllers.Grpc;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
-using Titeenipeli.Grpc.Controllers;
+using Titeenipeli.Grpc.Services;
 using Titeenipeli.Options;
 
-namespace Titeenipeli.Grpc.Services;
+namespace Titeenipeli.Services.Grpc;
 
 public class IncrementalMapUpdateCoreService : GrpcService<IncrementalMapUpdateResponse>, IIncrementalMapUpdateCoreService
 {
