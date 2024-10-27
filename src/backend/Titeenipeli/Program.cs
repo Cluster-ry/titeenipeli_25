@@ -265,6 +265,9 @@ public static class Program
         services
             .AddScoped<ICtfFlagRepositoryService,
                 CtfFlagRepositoryService>();
+
+        services.AddScoped<IPowerupRepositoryService,
+                PowerupRepositoryService>();
     }
 
     private static TService GetNonNullService<TService>(IServiceProvider serviceProvider)
