@@ -8,6 +8,7 @@ using System.Net.WebSockets;
 using Microsoft.AspNetCore.Identity;
 using Titeenipeli.Models;
 using Titeenipeli.Options;
+using System.Collections.Generic;
 
 namespace Titeenipeli.Controllers;
 
@@ -23,6 +24,7 @@ public sealed class PowerController : ControllerBase
     private readonly JwtService _jwtServices;
     private readonly GameOptions _gameOptions;
 
+    private readonly IReadOnlyDictionary<string, Action<int, PowerInput>> powers;
     public PowerController(IMapRepositoryService mapRepositoryService,
                             IUserRepositoryService userRepositoryService,
                             IMapUpdaterService mapUpdaterService,
@@ -37,6 +39,10 @@ public sealed class PowerController : ControllerBase
         _powerupRepositoryService = powerupService;
         _jwtServices = jwtService;
         _gameOptions = gameOptions;
+
+        powers = new Dictionary<string, Action<int, PowerInput>>(){
+            {"Titeenikirves", HandleTiteenikirves}
+        };
     }
 
     [HttpPost("Activate")]
@@ -45,18 +51,14 @@ public sealed class PowerController : ControllerBase
         var jwtClaim = HttpContext.GetUser(_jwtServices);
         if (jwtClaim is null) return Unauthorized();
 
-        var powers = _powerupRepositoryService.UserPowers(jwtClaim.Id);
-        var power = powers?.FirstOrDefault(power => power.Id == body.Id);
-        if (power is null) return Unauthorized();
+        var userPowers = _powerupRepositoryService.UserPowers(jwtClaim.Id);
+        var userPower = userPowers?.FirstOrDefault(power => power.Id == body.Id);
+        if (userPower is null) return Unauthorized();
 
-        switch (power.Name)
-        {
-            case "Titeenikirves":
-                HandleTiteenikirves(jwtClaim.Id, body);
-                break;
-            default:
-                break;
-        }
+        powers.TryGetValue(userPower.Name, out var handler);
+        if(handler is null) return Unauthorized(); //What should return?
+
+        handler(jwtClaim.Id, body);
 
         return Ok();
     }
@@ -88,6 +90,14 @@ public sealed class PowerController : ControllerBase
                 _mapUpdaterService.PlacePixel(new() { X = x, Y = realY }, user);
                 _mapUpdaterService.PlacePixel(new() { X = x, Y = realY + 1 }, user);
             }
+        }
+    }
+
+
+    private void AddSupportedPowersToDatabase(){
+        foreach(var name in powers.Keys)
+        {
+            _powerupRepositoryService.Add(new PowerUp(){Name=name});
         }
     }
 }
