@@ -4,5 +4,6 @@ public enum PixelType
 {
     Normal,
     MapBorder,
-    Spawn
+    Spawn,
+    FogOfWar
 }

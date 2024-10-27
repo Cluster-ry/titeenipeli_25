@@ -40,7 +40,7 @@ public class UserController(
 
 
     [HttpGet("current")]
-    [Authorize(Policy = "MustHaveGuild")]
+    [Authorize]
     public IActionResult CurrentUser()
     {
         var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
@@ -50,7 +50,13 @@ public class UserController(
     }
 
     public class UserResult
+    public class UserResult
     {
+        public int Id { get; init; }
+        public string Username { get; init; }
+        public string FirstName { get; init; }
+        public string LastName { get; init; }
+        public int Guild { get; init; }
         public int Id { get; init; }
         public string Username { get; init; }
         public string FirstName { get; init; }
@@ -64,7 +70,7 @@ public class UserController(
             Username = user.Username;
             FirstName = user.FirstName;
             LastName = user.LastName;
-            Guild = user.Guild?.Id ?? -1;
+            Guild = user.Guild.Id;
         }
     }
 

@@ -4,7 +4,7 @@
  * 2) Size of an individual pixel
  */
 export const mapConfig = {
-  MapWidth: 256,
-  MapHeight: 256,
-  PixelSize: 32
-}
+    MapWidth: 256,
+    MapHeight: 256,
+    PixelSize: 32,
+};

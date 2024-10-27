@@ -14,8 +14,8 @@ using Titeenipeli.Services.RepositoryServices.Interfaces;
 namespace Titeenipeli.Controllers;
 
 [ApiController]
-[Route("map/pixels")]
-[Authorize(Policy = "MustHaveGuild")]
+[Route("state/map/pixels")]
+[Authorize]
 public class MapController : ControllerBase
 {
     private const int BorderWidth = 1;
@@ -44,19 +44,7 @@ public class MapController : ControllerBase
     [HttpGet]
     public IActionResult GetPixels()
     {
-        JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
-
-        if (jwtClaim == null)
-        {
-            return BadRequest();
-        }
-
-        User? user = _userRepositoryService.GetById(jwtClaim.Id);
-
-        if (user == null)
-        {
-            return BadRequest();
-        }
+        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
 
         User[] users = _userRepositoryService.GetAll().ToArray();
         Pixel[] pixels = _mapRepositoryService.GetAll().ToArray();
@@ -86,19 +74,7 @@ public class MapController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> PostPixels([FromBody] PostPixelsInput pixelsInput)
     {
-        JwtClaim? jwtClaim = HttpContext.GetUser(_jwtService);
-
-        if (jwtClaim == null)
-        {
-            return BadRequest();
-        }
-
-        User? user = _userRepositoryService.GetById(jwtClaim.Id);
-
-        if (user == null)
-        {
-            return BadRequest();
-        }
+        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
 
         if (user.PixelBucket < 1)
         {
@@ -181,7 +157,7 @@ public class MapController : ControllerBase
             PixelModel mapPixel = new PixelModel
             {
                 Type = PixelType.Normal,
-                Guild = pixel.User?.Guild?.Name,
+                Guild = pixel.User?.Guild.Name,
                 Owner = pixel.User?.Id ?? 0,
             };
 
@@ -200,12 +176,7 @@ public class MapController : ControllerBase
     {
         int width = map.Pixels.GetLength(0);
         int height = map.Pixels.GetLength(1);
-        Map fogOfWarMap = new Map
-        {
-            Pixels = new PixelModel[width, height],
-            Width = width,
-            Height = height
-        };
+        Map fogOfWarMap = CreateEmptyMap(width, height);
 
         for (int x = 0; x < width; x++)
         {
@@ -223,6 +194,29 @@ public class MapController : ControllerBase
         }
 
         return TrimMap(fogOfWarMap);
+    }
+
+    private Map CreateEmptyMap(int width, int height)
+    {
+        Map map = new Map
+        {
+            Pixels = new PixelModel[width, height],
+            Width = width,
+            Height = height
+        };
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                map.Pixels[x, y] = new PixelModel()
+                {
+                    Type = PixelType.FogOfWar
+                };
+            }
+        }
+
+        return map;
     }
 
     private static Map MarkPixelsInFogOfWar(Map fogOfWarMap, Map map, Coordinate pixel,

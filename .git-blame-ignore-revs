@@ -1,0 +1,5 @@
+# To take file into use locally run in repository root:
+# git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# Running prettier
+872764ec4f8b1bbfe763d4785ec0791bdf2840c4
