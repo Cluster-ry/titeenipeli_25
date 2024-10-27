@@ -14,9 +14,8 @@ using Titeenipeli.Common.Models;
 using Titeenipeli.Controllers.Grpc;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
-using Titeenipeli.Grpc.Services;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
+using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Tests.Grpc;
 

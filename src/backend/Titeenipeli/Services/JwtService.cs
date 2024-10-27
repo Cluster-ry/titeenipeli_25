@@ -5,7 +5,6 @@ using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Models;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
 
 namespace Titeenipeli.Services;

@@ -1,6 +1,6 @@
 using Titeenipeli.Common.Enums;
 
-namespace Titeenipeli.Models;
+namespace Titeenipeli.Common.Models;
 
 public class PixelModel
 {

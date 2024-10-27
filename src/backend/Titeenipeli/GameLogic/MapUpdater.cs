@@ -2,7 +2,6 @@
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic.MapCalculationDataTypes;
-using Titeenipeli.Models;
 
 namespace Titeenipeli.GameLogic;
 

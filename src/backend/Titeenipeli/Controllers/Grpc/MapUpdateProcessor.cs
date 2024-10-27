@@ -5,9 +5,8 @@ using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
-using Titeenipeli.Grpc.Services;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
+using Titeenipeli.Services.Grpc;
 using static GrpcGeneratedServices.IncrementalMapUpdateResponse.Types;
 
 namespace Titeenipeli.Controllers.Grpc;

@@ -1,7 +1,8 @@
 using GrpcGeneratedServices;
 using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.Grpc.Services;
 
-namespace Titeenipeli.Grpc.Services;
+namespace Titeenipeli.Services.Grpc;
 
 public interface IIncrementalMapUpdateCoreService : IGrpcService<IncrementalMapUpdateResponse>
 {

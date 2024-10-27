@@ -1,6 +1,6 @@
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
-using Titeenipeli.Models;
+using Titeenipeli.Common.Models;
 using Titeenipeli.Services;
 
 namespace Titeenipeli.Extensions;

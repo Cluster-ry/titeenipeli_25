@@ -1,7 +1,6 @@
 using Titeenipeli.Common.Database.Schema;
-using Titeenipeli.Common.Models;
 
-namespace Titeenipeli.Models;
+namespace Titeenipeli.Common.Models;
 
 public struct MapChange(Coordinate coordinate, User? oldOwner, User? newOwner)
 {

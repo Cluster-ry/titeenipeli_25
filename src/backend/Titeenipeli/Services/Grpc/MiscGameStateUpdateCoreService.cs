@@ -2,8 +2,9 @@ using System.Collections.Concurrent;
 using GrpcGeneratedServices;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
+using Titeenipeli.Grpc.Services;
 
-namespace Titeenipeli.Grpc.Services;
+namespace Titeenipeli.Services.Grpc;
 
 public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) :
     GrpcService<MiscStateUpdateResponse>, IMiscGameStateUpdateCoreService

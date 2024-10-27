@@ -1,7 +1,6 @@
 using Titeenipeli.Common.Enums;
-using Titeenipeli.Common.Models;
 
-namespace Titeenipeli.Models;
+namespace Titeenipeli.Common.Models;
 
 public class JwtClaim
 {

@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Titeenipeli.Models;
+namespace Titeenipeli.Common.Models;
 
 [DataContract]
 public class Map

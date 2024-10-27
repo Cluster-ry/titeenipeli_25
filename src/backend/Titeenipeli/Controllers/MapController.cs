@@ -6,7 +6,6 @@ using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
 using Titeenipeli.Results;
 using Titeenipeli.Results.CustomStatusCodes;

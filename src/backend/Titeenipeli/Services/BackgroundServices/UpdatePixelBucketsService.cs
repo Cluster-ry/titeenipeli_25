@@ -2,8 +2,8 @@ using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Grpc.ChangeEntities;
-using Titeenipeli.Grpc.Services;
 using Titeenipeli.Options;
+using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services.BackgroundServices;
 
