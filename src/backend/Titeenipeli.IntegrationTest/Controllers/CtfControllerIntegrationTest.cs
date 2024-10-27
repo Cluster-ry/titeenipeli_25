@@ -3,6 +3,7 @@ using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services;
 using Titeenipeli.Controllers;
 using Titeenipeli.Inputs;
+using Titeenipeli.Services;
 
 namespace Titeenipeli.IntegrationTest.Controllers;
 
@@ -24,9 +25,13 @@ public class CtfControllerIntegrationTest : BaseFixture
     public void Test1(string token, int statusCode)
     {
         CtfFlagRepositoryService ctfFlagRepositoryService = new CtfFlagRepositoryService(_dbContext);
+        UserRepositoryService userRepositoryService = new UserRepositoryService(_dbContext);
+        GuildRepositoryService guildRepositoryService = new GuildRepositoryService(_dbContext);
+        JwtService jwtService = new JwtService(new());
+
         ctfFlagRepositoryService.Add(new CtfFlag { Token = "#TEST_FLAG" });
 
-        CtfController ctfController = new CtfController(ctfFlagRepositoryService);
+        CtfController ctfController = new CtfController(ctfFlagRepositoryService, userRepositoryService, guildRepositoryService, jwtService);
 
         PostCtfInput input = new PostCtfInput { Token = token };
 
