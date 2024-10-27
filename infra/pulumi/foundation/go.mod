@@ -5,18 +5,17 @@ go 1.22
 require (
 	github.com/pulumi/pulumi-azure-native-sdk/authorization/v2 v2.62.0
 	github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2 v2.55.0
-	github.com/pulumi/pulumi-azure-native-sdk/kubernetesconfiguration/v2 v2.62.0
 	github.com/pulumi/pulumi-azure-native-sdk/managedidentity/v2 v2.62.0
 	github.com/pulumi/pulumi-azure-native-sdk/resources/v2 v2.55.0
 	github.com/pulumi/pulumi-azure/sdk/v5 v5.89.0
 	github.com/pulumi/pulumi-azuread/sdk/v5 v5.53.3
+	github.com/pulumi/pulumi-kubernetes/sdk/v3 v3.30.2
 	github.com/pulumi/pulumi-kubernetes/sdk/v4 v4.17.1
 	github.com/pulumi/pulumi-null/sdk v0.0.6
 	github.com/pulumi/pulumi-random/sdk/v4 v4.16.3
 	github.com/pulumi/pulumi-tls/sdk/v5 v5.0.4
 	github.com/pulumi/pulumi/sdk/v3 v3.133.0
 	github.com/pulumiverse/pulumi-time/sdk v0.1.0
-	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (

@@ -41,6 +41,13 @@ func main() {
 		addDNSZoneContributorRoleToId(ctx, domain, externalDnsIdentity, "dns")
 		addResourceGroupReaderRoleToId(ctx, k8sCluster.ResourceGroup, externalDnsIdentity, "dns")
 
+		k8sProvider, err := buildProvider(ctx, kubeconfig)
+		if err != nil {
+			return err
+		}
+
+		installCSI(ctx, k8sProvider)
+
 		// Exports
 		ctx.Export("domainName", domain.Name)
 		ctx.Export("certManagerIdentityClientId", pulumi.ToSecret(certManagerIdentity.UserAssignedIdentity.ClientId))

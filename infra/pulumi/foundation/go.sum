@@ -154,8 +154,6 @@ github.com/pulumi/pulumi-azure-native-sdk/authorization/v2 v2.62.0 h1:iYnU49fz+O
 github.com/pulumi/pulumi-azure-native-sdk/authorization/v2 v2.62.0/go.mod h1:y2vJhHGZPc7plsID5ddeI0BWVnrCeY1878Nyz02AESA=
 github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2 v2.55.0 h1:4VMrPqFdDL83osCm2DrfqYTLb5i95j/SKXFiUrcq3Vo=
 github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2 v2.55.0/go.mod h1:J8us8T5LVpHIw2HRevrM4mMf1SQ1IOn9bE58J/6en+g=
-github.com/pulumi/pulumi-azure-native-sdk/kubernetesconfiguration/v2 v2.62.0 h1:GWjJ6q+eZrbWfuAMVT/06tUZs+afPYutBl0wNJONBBw=
-github.com/pulumi/pulumi-azure-native-sdk/kubernetesconfiguration/v2 v2.62.0/go.mod h1:9tCFBmHFngdy2+jTLdLUFITt3mjsFEq7gJvQ8vuYcLY=
 github.com/pulumi/pulumi-azure-native-sdk/managedidentity/v2 v2.62.0 h1:fIsvOAcaFxL2b347l6kZnDVXYLzlwtNTbeUggfHXkdg=
 github.com/pulumi/pulumi-azure-native-sdk/managedidentity/v2 v2.62.0/go.mod h1:YSeC417TaHxFe6ORWJmRLMDy1YAH9XOLsAK6+NJX2qA=
 github.com/pulumi/pulumi-azure-native-sdk/resources/v2 v2.55.0 h1:8dstKsn27E64qAMKsBBu0yV2fpoOA9GOowWO4+GoVDY=
@@ -166,6 +164,8 @@ github.com/pulumi/pulumi-azure/sdk/v5 v5.89.0 h1:pFvMC1CxlBMyuGfFjkUQa6IOf7gDLdC
 github.com/pulumi/pulumi-azure/sdk/v5 v5.89.0/go.mod h1:tLdvJc363F0C07LR1BEs24Vh5g/yMno1atVIIjOuZms=
 github.com/pulumi/pulumi-azuread/sdk/v5 v5.53.3 h1:u5Ob2/qXjRkdGssxXu+qawbdWh1V4L+OL3oJJVknYdk=
 github.com/pulumi/pulumi-azuread/sdk/v5 v5.53.3/go.mod h1:iDN3ePu2BFw5UEtZhBR/pKgSSr+K24HD7EntOtBC+Cw=
+github.com/pulumi/pulumi-kubernetes/sdk/v3 v3.30.2 h1:xJu48+RW+BHHnKtBni6Vj5vKqOEgCzdZAysGbh6tVM0=
+github.com/pulumi/pulumi-kubernetes/sdk/v3 v3.30.2/go.mod h1:7yCJFC/jnUwFs566f0FAY2iAzc4G1mQP8H6K+40FK4Y=
 github.com/pulumi/pulumi-kubernetes/sdk/v4 v4.17.1 h1:VDX+hu+qK3fbf2FodgG5kfh2h1bHK0FKirW1YqKWkRc=
 github.com/pulumi/pulumi-kubernetes/sdk/v4 v4.17.1/go.mod h1:e69ohZtUePLLYNLXYgiOWp0FvRGg6ya/3fsq3o00nN0=
 github.com/pulumi/pulumi-null/sdk v0.0.6 h1:GEpweThfKhmQ/FJGWqyZjd/vmWVp8ctsJo3KfH0eK/s=
