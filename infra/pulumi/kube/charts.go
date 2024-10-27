@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/pulumi/pulumi-azure/sdk/v5/go/azure/core"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	v1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
@@ -12,7 +9,6 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"gopkg.in/yaml.v2"
 )
 
 func buildCharts(
@@ -31,11 +27,14 @@ func buildCharts(
 	conf := config.New(ctx, "")
 	email := conf.RequireSecret("email")
 
-	v1.NewNamespace(ctx, "cert-manager", &v1.NamespaceArgs{
+	cmNs, err := v1.NewNamespace(ctx, "cert-manager", &v1.NamespaceArgs{
 		Metadata: &metav1.ObjectMetaArgs{
 			Name: pulumi.String("cert-manager"),
 		}},
 		pulumi.Providers(k8sProvider))
+	if err != nil {
+		return err
+	}
 
 	certManagerChartArgs := helm.ChartArgs{
 		Chart:   pulumi.String("cert-manager"),
@@ -60,7 +59,7 @@ func buildCharts(
 	}
 
 	helm.NewChart(ctx, "cert-manager", certManagerChartArgs,
-		pulumi.Providers(k8sProvider))
+		pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{cmNs}))
 
 	helm.NewChart(ctx, "certmanager-certs", helm.ChartArgs{
 		Path: pulumi.String("./helm/certmanager-certs"),
@@ -73,21 +72,29 @@ func buildCharts(
 		},
 	}, pulumi.Provider(k8sProvider))
 
-	v1.NewNamespace(ctx, "external-dns", &v1.NamespaceArgs{
+	edNS, err := v1.NewNamespace(ctx, "external-dns", &v1.NamespaceArgs{
 		Metadata: &metav1.ObjectMetaArgs{
 			Name: pulumi.String("external-dns"),
 		}},
 		pulumi.Providers(k8sProvider))
+	if err != nil {
+		return err
+	}
+
+	current, err := core.LookupSubscription(ctx, &core.LookupSubscriptionArgs{}, nil)
+	if err != nil {
+		return err
+	}
 
 	helm.NewChart(ctx, "external-dns-secrets", helm.ChartArgs{
 		Path: pulumi.String("./helm/external-dns-secret"),
 		Values: pulumi.Map{
-			"tenantId":       externalDnsClientId,
+			"tenantId":       pulumi.String(current.TenantId),
 			"subscriptionID": pulumi.String(subscription.SubscriptionId),
 			"resourceGroup":  titeenipeliRG,
 		},
 		Namespace: pulumi.String("external-dns"),
-	}, pulumi.Provider(k8sProvider))
+	}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{edNS}))
 
 	externalDnsChartArgs := helm.ChartArgs{
 		Chart:   pulumi.String("external-dns"),
@@ -131,11 +138,12 @@ func buildCharts(
 	}
 
 	helm.NewChart(ctx, "external-dns", externalDnsChartArgs,
-		pulumi.Providers(k8sProvider))
+		pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{edNS}))
 
 	return nil
 }
 
+/* removed as no values are read from yaml
 func mapValues(path string) (pulumi.Map, error) {
 	valuesData, err := os.ReadFile(path)
 	if err != nil {
@@ -178,3 +186,4 @@ func convertValue(v interface{}) interface{} {
 	}
 	return v
 }
+*/
