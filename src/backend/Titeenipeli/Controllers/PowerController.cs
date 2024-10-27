@@ -26,12 +26,15 @@ public sealed class PowerController : ControllerBase
     public PowerController(IMapRepositoryService mapRepositoryService,
                             IUserRepositoryService userRepositoryService,
                             IMapUpdaterService mapUpdaterService,
+                            IPowerupRepositoryService powerupService,
                             JwtService jwtService,
-                            GameOptions gameOptions)
+                            GameOptions gameOptions
+                            )
     {
         _mapRepositoryService = mapRepositoryService;
         _userRepositoryService = userRepositoryService;
         _mapUpdaterService = mapUpdaterService;
+        _powerupRepositoryService = powerupService;
         _jwtServices = jwtService;
         _gameOptions = gameOptions;
     }
@@ -61,6 +64,8 @@ public sealed class PowerController : ControllerBase
     private void HandleTiteenikirves(int userId, PowerInput body)
     {
         var user = _userRepositoryService.GetById(userId);
+        if(user is null) return;
+        
         var realX = user.SpawnX + body.Location.X;
         var realY = user.SpawnY + body.Location.Y;
 
