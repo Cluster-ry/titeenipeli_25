@@ -1,3 +1,4 @@
+using Titeenipeli.Context;
 using Titeenipeli.Enums;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Services;
@@ -9,7 +10,12 @@ namespace Titeenipeli.Services.BackgroundServices;
 
 public interface IUpdatePixelBucketsService : IAsynchronousTimedBackgroundService;
 
-public class UpdatePixelBucketsService(GameOptions gameOptions, IUserRepositoryService userRepositoryService, IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService) : IUpdatePixelBucketsService
+public class UpdatePixelBucketsService(
+        GameOptions gameOptions,
+        IUserRepositoryService userRepositoryService,
+        IGuildRepositoryService guildRepositoryService,
+        IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService
+    ) : IUpdatePixelBucketsService
 {
     public async Task DoWork()
     {
@@ -29,7 +35,11 @@ public class UpdatePixelBucketsService(GameOptions gameOptions, IUserRepositoryS
             return;
         }
 
+        var guild = guildUsers[0].Guild;
         float guildPerPlayerIncrease = gameOptions.PixelsPerMinutePerGuild / guildUsers.Length;
+        guild.CurrentRateLimitIncreasePerMinutePerPlayer = guildPerPlayerIncrease;
+        guildRepositoryService.Update(guild);
+
         foreach (User user in guildUsers)
         {
             float newBucket = user.PixelBucket + guildPerPlayerIncrease;

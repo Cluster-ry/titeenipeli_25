@@ -13,7 +13,7 @@ public class PixelBucket
 {
     public required int Amount { get; init; }
     public required int MaxAmount { get; init; }
-    public required int IncreasePerMinute { get; init; }
+    public required float IncreasePerMinute { get; init; }
 }
 
 public class Score

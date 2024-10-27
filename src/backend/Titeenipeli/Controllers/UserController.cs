@@ -40,7 +40,7 @@ public class UserController(
 
 
     [HttpGet("current")]
-    [Authorize(Policy = "MustHaveGuild")]
+    [Authorize]
     public IActionResult CurrentUser()
     {
         var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
@@ -63,7 +63,7 @@ public class UserController(
             Username = user.Username;
             FirstName = user.FirstName;
             LastName = user.LastName;
-            Guild = user.Guild?.Id ?? -1;
+            Guild = user.Guild.Id;
         }
     }
 

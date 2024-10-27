@@ -60,7 +60,7 @@ public class MapUpdaterTest
         {
             for (var y = 0; y < resultingMap.GetUpperBound(0); y++)
             {
-                var guildName = map[x + 1, y + 1].Owner?.Guild?.Name;
+                var guildName = map[x + 1, y + 1].Owner?.Guild.Name;
                 guildName.Should().Be(resultingMap[y, x].guild,
                     $"Expected pixel in [{x}, {y}] to be owned by {resultingMap[y, x].guild}, " +
                     $"but was owned by {map[x + 1, y + 1].Owner}\n\n" +

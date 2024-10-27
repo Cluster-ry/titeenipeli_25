@@ -10,7 +10,7 @@ namespace Titeenipeli.Controllers;
 
 [ApiController]
 [Route("state")]
-[Authorize(Policy = "MustHaveGuild")]
+[Authorize]
 public class GameStateController(
         GameOptions gameOptions,
         IUserRepositoryService userRepositoryService,
@@ -40,7 +40,7 @@ public class GameStateController(
             {
                 Amount = (int)user.PixelBucket,
                 MaxAmount = gameOptions.MaximumPixelBucket,
-                IncreasePerMinute = gameOptions.PixelsPerMinutePerGuild,
+                IncreasePerMinute = user.Guild.CurrentRateLimitIncreasePerMinutePerPlayer,
             },
             Scores = scores
         };

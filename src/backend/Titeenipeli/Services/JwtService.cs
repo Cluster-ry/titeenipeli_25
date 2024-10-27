@@ -30,7 +30,7 @@ public class JwtService
                 X = user.SpawnX,
                 Y = user.SpawnY
             },
-            GuildId = user.Guild?.Name
+            GuildId = user.Guild.Name
         };
     }
 

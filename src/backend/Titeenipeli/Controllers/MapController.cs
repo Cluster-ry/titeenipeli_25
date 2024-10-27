@@ -15,7 +15,7 @@ namespace Titeenipeli.Controllers;
 
 [ApiController]
 [Route("state/map/pixels")]
-[Authorize(Policy = "MustHaveGuild")]
+[Authorize]
 public class MapController : ControllerBase
 {
     private const int BorderWidth = 1;
@@ -157,7 +157,7 @@ public class MapController : ControllerBase
             PixelModel mapPixel = new PixelModel
             {
                 Type = PixelType.Normal,
-                Guild = pixel.User?.Guild?.Name,
+                Guild = pixel.User?.Guild.Name,
                 Owner = pixel.User?.Id ?? 0,
             };
 
