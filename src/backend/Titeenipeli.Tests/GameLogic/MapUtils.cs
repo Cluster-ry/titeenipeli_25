@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using Titeenipeli.Enums;
+using Titeenipeli.Enumeration;
 using Titeenipeli.Models;
 using Titeenipeli.Schema;
 

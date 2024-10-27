@@ -1,4 +1,4 @@
-﻿using Titeenipeli.Enums;
+﻿using Titeenipeli.Enumeration;
 using Titeenipeli.GameLogic.MapCalculationDataTypes;
 using Titeenipeli.Models;
 using Titeenipeli.Schema;

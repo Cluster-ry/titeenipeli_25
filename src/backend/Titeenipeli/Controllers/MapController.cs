@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Titeenipeli.Enums;
+using Titeenipeli.Enumeration;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
 using Titeenipeli.Models;

@@ -1,5 +1,4 @@
-using Titeenipeli.Context;
-using Titeenipeli.Enums;
+using Titeenipeli.Enumeration;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Services;
 using Titeenipeli.Options;

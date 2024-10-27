@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Context;
-using Titeenipeli.Enums;
+using Titeenipeli.Enumeration;
 using Titeenipeli.Schema;
 using Titeenipeli.Services.RepositoryServices.Interfaces;
 

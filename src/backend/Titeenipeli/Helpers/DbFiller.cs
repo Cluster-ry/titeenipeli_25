@@ -1,5 +1,5 @@
 using Titeenipeli.Context;
-using Titeenipeli.Enums;
+using Titeenipeli.Enumeration;
 using Titeenipeli.Options;
 using Titeenipeli.Schema;
 

@@ -40,4 +40,7 @@
         </Content>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="../Titeenipeli.Enumeration/Titeenipeli.Enumeration.csproj"/>
+    </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using GrpcGeneratedServices;
-using Titeenipeli.Enums;
+using Titeenipeli.Enumeration;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
 using Titeenipeli.Grpc.Services;

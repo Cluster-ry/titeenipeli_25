@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Titeenipeli.Enums;
+using Titeenipeli.Enumeration;
 using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Services;

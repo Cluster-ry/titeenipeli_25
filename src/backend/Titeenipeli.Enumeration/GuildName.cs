@@ -1,4 +1,4 @@
-namespace Titeenipeli.Enums;
+namespace Titeenipeli.Enumeration;
 
 public enum GuildName
 {

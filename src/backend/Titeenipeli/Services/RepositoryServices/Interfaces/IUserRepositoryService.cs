@@ -1,4 +1,4 @@
-using Titeenipeli.Enums;
+using Titeenipeli.Enumeration;
 using Titeenipeli.Schema;
 
 namespace Titeenipeli.Services.RepositoryServices.Interfaces;

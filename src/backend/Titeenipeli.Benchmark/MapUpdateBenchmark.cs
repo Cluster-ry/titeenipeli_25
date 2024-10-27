@@ -1,5 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Titeenipeli.Enums;
+using Titeenipeli.Enumeration;
 using Titeenipeli.GameLogic;
 using Titeenipeli.Models;
 using Titeenipeli.Tests.GameLogic;
