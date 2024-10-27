@@ -161,6 +161,8 @@ public static class Program
 
         builder.Services
                .AddSingleton<IMapUpdaterService, MapUpdaterService>();
+        builder.Services
+               .AddSingleton<IBackgroundGraphicsService, BackgroundGraphicsService>();
 
         builder.Services.AddControllers()
                .AddNewtonsoftJson(options =>

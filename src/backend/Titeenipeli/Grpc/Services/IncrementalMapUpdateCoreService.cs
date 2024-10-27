@@ -5,6 +5,7 @@ using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
 using Titeenipeli.Grpc.Controllers;
 using Titeenipeli.Options;
+using Titeenipeli.Services;
 
 namespace Titeenipeli.Grpc.Services;
 
@@ -18,7 +19,11 @@ public class IncrementalMapUpdateCoreService : GrpcService<IncrementalMapUpdateR
     private readonly Channel<GrpcMapChangesInput> _mapChangeQueue =
         Channel.CreateBounded<GrpcMapChangesInput>(MaxChannelSize);
 
-    public IncrementalMapUpdateCoreService(ILogger<StateUpdateService> logger, GameOptions gameOptions)
+    public IncrementalMapUpdateCoreService(
+            ILogger<StateUpdateService> logger,
+            GameOptions gameOptions,
+            IBackgroundGraphicsService backgroundGraphicsService
+        )
     {
         _logger = logger;
         _gameOptions = gameOptions;
