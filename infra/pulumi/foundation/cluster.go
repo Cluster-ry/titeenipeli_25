@@ -81,6 +81,15 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 					},
 				},
 			},
+			NetworkProfile: cs.ContainerServiceNetworkProfileArgs{
+				LoadBalancerProfile: cs.ManagedClusterLoadBalancerProfileArgs{
+					ManagedOutboundIPs: cs.ManagedClusterLoadBalancerProfileManagedOutboundIPsArgs{
+						Count: pulumi.Int(1),
+					},
+				},
+				LoadBalancerSku: pulumi.String(cs.LoadBalancerSkuStandard),
+				OutboundType:    pulumi.String(cs.OutboundTypeLoadBalancer),
+			},
 			NodeResourceGroup: pulumi.String("node-resource-group"),
 			ServicePrincipalProfile: cs.ManagedClusterServicePrincipalProfileArgs{
 				ClientId: entra.Application.ClientId,

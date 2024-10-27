@@ -18,12 +18,13 @@ func main() {
 		titeenipeliRG := referencedStack.GetOutput(pulumi.String("titeenipeliRG")).AsStringOutput()
 		certManagerIdentityClientId := referencedStack.GetOutput(pulumi.String("certManagerIdentityClientId")).AsStringOutput()
 		externalDnsIdentityClientId := referencedStack.GetOutput(pulumi.String("externalDnsIdentityClientId")).AsStringOutput()
+		traefikIdentityClientId := referencedStack.GetOutput(pulumi.String("traefikIdentityClientId")).AsStringOutput()
 
 		k8sProvider, err := buildProvider(ctx, kubeconfig)
 		if err != nil {
 			return err
 		}
-		buildCharts(ctx, k8sProvider, domainName, certManagerIdentityClientId, externalDnsIdentityClientId, titeenipeliRG)
+		buildCharts(ctx, k8sProvider, domainName, certManagerIdentityClientId, externalDnsIdentityClientId, traefikIdentityClientId, titeenipeliRG)
 
 		return nil
 	})

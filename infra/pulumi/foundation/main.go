@@ -33,12 +33,18 @@ func main() {
 			return err
 		}
 
+		traefikIdentity, err := createNewIdentity(ctx, k8sCluster, "traefik", "traefik")
+		if err != nil {
+			return err
+		}
+
 		domain, err := createSubDomainZone(ctx, entraInfo, cfg, "test")
 		if err != nil {
 			return err
 		}
 		addDNSZoneContributorRoleToId(ctx, domain, certManagerIdentity, "cert")
 		addDNSZoneContributorRoleToId(ctx, domain, externalDnsIdentity, "dns")
+		addDNSZoneContributorRoleToId(ctx, domain, traefikIdentity, "traefik")
 		addResourceGroupReaderRoleToId(ctx, k8sCluster.ResourceGroup, externalDnsIdentity, "dns")
 
 		k8sProvider, err := buildProvider(ctx, kubeconfig)
@@ -52,6 +58,7 @@ func main() {
 		ctx.Export("domainName", domain.Name)
 		ctx.Export("certManagerIdentityClientId", pulumi.ToSecret(certManagerIdentity.UserAssignedIdentity.ClientId))
 		ctx.Export("externalDnsIdentityClientId", pulumi.ToSecret(externalDnsIdentity.UserAssignedIdentity.ClientId))
+		ctx.Export("traefikIdentityClientId", pulumi.ToSecret(traefikIdentity.UserAssignedIdentity.ClientId))
 		ctx.Export("kubeconfig", pulumi.ToSecret(kubeconfig))
 		ctx.Export("clusterName", k8sCluster.ManagedCluster.Name)
 		ctx.Export("titeenipeliRG", k8sCluster.ResourceGroup.Name)
