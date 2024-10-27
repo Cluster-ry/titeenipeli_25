@@ -2,45 +2,47 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using TiteenipeliBot.BackendApiClient;
-using TiteenipeliBot.BackendApiClient.Inputs;
+using Titeenipeli.Bot.BackendApiClient;
+using Titeenipeli.Bot.Options;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Inputs;
 
-namespace TiteenipeliBot;
+namespace Titeenipeli.Bot;
 
 public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
 {
     // Variables
-    private readonly static Dictionary<GuildEnum, string> GuildDict = new Dictionary<GuildEnum, string>
+    private static readonly Dictionary<GuildName, string> GuildDict = new Dictionary<GuildName, string>
     {
         {
-            GuildEnum.Cluster, "Cluster (lappeen Ranta)"
+            GuildName.Cluster, "Cluster (lappeen Ranta)"
         },
         {
-            GuildEnum.OulunTietoteekkarit, "Otit (Oulu)"
+            GuildName.OulunTietoteekkarit, "Otit (Oulu)"
         },
         {
-            GuildEnum.Digit, "Digit (Turku)"
+            GuildName.Digit, "Digit (Turku)"
         },
         {
-            GuildEnum.Date, "Date (Turku)"
+            GuildName.Date, "Date (Turku)"
         },
         {
-            GuildEnum.Tietokilta, "Tik (Otaniemi)"
+            GuildName.Tietokilta, "Tik (Otaniemi)"
         },
         {
-            GuildEnum.Algo, "Algo (Jyväskylä)"
+            GuildName.Algo, "Algo (Jyväskylä)"
         },
         {
-            GuildEnum.Tutti, "Tutti (Vaasa)"
+            GuildName.Tutti, "Tutti (Vaasa)"
         },
         {
-            GuildEnum.Sosa, "Sosa (Lahti)"
+            GuildName.Sosa, "Sosa (Lahti)"
         },
         {
-            GuildEnum.TietoTeekkarikilta, "TiTe (Tampere)"
+            GuildName.TietoTeekkarikilta, "TiTe (Tampere)"
         },
         {
-            GuildEnum.Datateknologerna, "Datateknologerna (Åbo)"
+            GuildName.Datateknologerna, "Datateknologerna (Åbo)"
         }
     };
 
@@ -51,19 +53,19 @@ public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
     private const string AcceptButton = "I Accept";
 
     // pre-assigned Keyboard buttons
-    private readonly static KeyboardButton ClusterButton = new(GuildDict[GuildEnum.Cluster]);
-    private readonly static KeyboardButton OtitButton = new(GuildDict[GuildEnum.OulunTietoteekkarit]);
-    private readonly static KeyboardButton DigitButton = new(GuildDict[GuildEnum.Digit]);
-    private readonly static KeyboardButton DateButton = new(GuildDict[GuildEnum.Date]);
-    private readonly static KeyboardButton TikButton = new(GuildDict[GuildEnum.Tietokilta]);
-    private readonly static KeyboardButton AlgoButton = new(GuildDict[GuildEnum.Algo]);
-    private readonly static KeyboardButton TuttiButton = new(GuildDict[GuildEnum.Tutti]);
-    private readonly static KeyboardButton SosaButton = new(GuildDict[GuildEnum.Sosa]);
-    private readonly static KeyboardButton TiTeButton = new(GuildDict[GuildEnum.TietoTeekkarikilta]);
-    private readonly static KeyboardButton ÅboButton = new(GuildDict[GuildEnum.Datateknologerna]);
+    private static readonly KeyboardButton ClusterButton = new(GuildDict[GuildName.Cluster]);
+    private static readonly KeyboardButton OtitButton = new(GuildDict[GuildName.OulunTietoteekkarit]);
+    private static readonly KeyboardButton DigitButton = new(GuildDict[GuildName.Digit]);
+    private static readonly KeyboardButton DateButton = new(GuildDict[GuildName.Date]);
+    private static readonly KeyboardButton TikButton = new(GuildDict[GuildName.Tietokilta]);
+    private static readonly KeyboardButton AlgoButton = new(GuildDict[GuildName.Algo]);
+    private static readonly KeyboardButton TuttiButton = new(GuildDict[GuildName.Tutti]);
+    private static readonly KeyboardButton SosaButton = new(GuildDict[GuildName.Sosa]);
+    private static readonly KeyboardButton TiTeButton = new(GuildDict[GuildName.TietoTeekkarikilta]);
+    private static readonly KeyboardButton ÅboButton = new(GuildDict[GuildName.Datateknologerna]);
 
     // Build keyboards
-    private readonly static ReplyKeyboardMarkup GuildKeyboard = new ReplyKeyboardMarkup(
+    private static readonly ReplyKeyboardMarkup GuildKeyboard = new ReplyKeyboardMarkup(
     [ // This layout matches with how the keyboard is shown to the user
         [ClusterButton, ÅboButton],
         [OtitButton, DigitButton],
@@ -123,7 +125,7 @@ public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
 
         if (GuildDict.ContainsValue(text))
         {
-            GuildEnum chosenGuild = GuildDict.FirstOrDefault(x => x.Value == text).Key;
+            GuildName chosenGuild = GuildDict.FirstOrDefault(x => x.Value == text).Key;
             await SendGuildData(user, chosenGuild);
             return;
         }
@@ -177,7 +179,14 @@ public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
         {
             BackendClient apiClient = new(backendOptions);
 
-            PostUsersInput userInput = new(user);
+            var userInput = new PostUsersInput
+            {
+                TelegramId = user.Id.ToString(),
+                FirstName = user.FirstName,
+                LastName = user.LastName ?? "",
+                Username = user.Username ?? ""
+            };
+            
             string? token = await apiClient.CreateUserOrLoginRequest(userInput);
 
             // if results is not a 0, a guild must be set
@@ -219,17 +228,23 @@ public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
         );
     }
 
-    private async Task SendGuildData(User user, GuildEnum guild)
+    private async Task SendGuildData(User user, GuildName guild)
     {
         try
         {
             BackendClient apiClient = new(backendOptions);
 
-            PostUsersInput userInput = new(user)
+            var userInput = new PostUsersInput
             {
+                TelegramId = user.Id.ToString(),
+                FirstName = user.FirstName,
+                LastName = user.LastName ?? "",
+                Username = user.Username ?? "",
                 Guild = guild.ToString()
             };
-            string? token = await apiClient.CreateUserOrLoginRequest(userInput) ?? throw new Exception("Token was unexpectedly null.");
+
+            string token = await apiClient.CreateUserOrLoginRequest(userInput) ??
+                           throw new Exception("Token was unexpectedly null.");
             await SendGame(user, token);
         }
         catch (Exception)

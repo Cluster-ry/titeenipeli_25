@@ -1,6 +1,6 @@
 using Titeenipeli.Common.Models;
 
-namespace Titeenipeli.Results;
+namespace Titeenipeli.Common.Results;
 
 public class GetPixelsResult
 {

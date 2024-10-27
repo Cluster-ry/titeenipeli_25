@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Results;
 using Titeenipeli.Inputs;
-using Titeenipeli.Results;
 
 namespace Titeenipeli.Controllers;
 

@@ -2,10 +2,12 @@ using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using TiteenipeliBot.BackendApiClient.Inputs;
-using TiteenipeliBot.BackendApiClient.Results;
+using Titeenipeli.Bot.Options;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Inputs;
+using Titeenipeli.Common.Results;
 
-namespace TiteenipeliBot.BackendApiClient;
+namespace Titeenipeli.Bot.BackendApiClient;
 
 public class BackendClient(BackendOptions backendOptions)
 {
@@ -14,17 +16,16 @@ public class BackendClient(BackendOptions backendOptions)
         ContractResolver = new CamelCasePropertyNamesContractResolver()
     };
     private readonly HttpClient _httpClient = new();
-    private readonly BackendOptions _backendOptions = backendOptions;
 
     public async Task<string?> CreateUserOrLoginRequest(PostUsersInput userInput)
     {
-        string url = $"{_backendOptions.BackendUrl}/api/v1/users";
+        string url = $"{backendOptions.BackendUrl}/api/v1/users";
         string json = JsonConvert.SerializeObject(userInput, _serializerSettings);
 
         try
         {
             StringContent content = new(json, Encoding.UTF8, "application/json");
-            content.Headers.Add(_backendOptions.AuthorizationHeaderName, _backendOptions.Token);
+            content.Headers.Add(backendOptions.AuthorizationHeaderName, backendOptions.Token);
             HttpResponseMessage response = await _httpClient.PostAsync(url, content);
 
             if (response.StatusCode == HttpStatusCode.BadRequest)
@@ -32,7 +33,8 @@ public class BackendClient(BackendOptions backendOptions)
                 string body = await response.Content.ReadAsStringAsync();
                 ErrorResult? errorResult =
                     JsonConvert.DeserializeObject<ErrorResult>(body) ?? throw new Exception("Unable to deserialize error results.");
-                if (errorResult.Code == 1414)
+
+                if (errorResult.Code == ErrorCode.InvalidGuild)
                 {
                     return null;
                 }

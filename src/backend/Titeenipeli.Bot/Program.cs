@@ -1,11 +1,12 @@
-﻿using Telegram.Bot;
+﻿using System.Reflection;
 using Microsoft.Extensions.Configuration;
-using System.Reflection;
-using TiteenipeliBot.Options;
+using Telegram.Bot;
+using Titeenipeli.Bot;
+using Titeenipeli.Bot.Options;
 
 namespace TiteenipeliBot;
 
-internal class TgBot
+internal class Program
 {
     private static void Main(string[] args)
     {
