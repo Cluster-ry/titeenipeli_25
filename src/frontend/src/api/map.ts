@@ -6,16 +6,8 @@ import { ClientApiOk } from "../models/ClientApiOk";
 
 const PIXELS_URL = "api/v1/state/map/pixels";
 
-export async function getPixels(): Promise<AxiosResponse<GetPixelsResult> | ClientApiError> {
-    try {
-        const response = await axios.get<GetPixelsResult>(PIXELS_URL);
-
-        console.log("Success.");
-        return response;
-    } catch (error) {
-        console.error(error);
-        return { msg: "Request unsuccessful." };
-    }
+export async function getPixels() {
+    return await axios.get<GetPixelsResult>(PIXELS_URL);
 }
 
 export async function postPixels(
