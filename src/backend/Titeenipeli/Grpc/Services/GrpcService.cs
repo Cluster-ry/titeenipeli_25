@@ -1,29 +1,28 @@
 using System.Collections.Concurrent;
-using GrpcGeneratedServices;
 using Titeenipeli.Grpc.Common;
 
 namespace Titeenipeli.Grpc.Services;
 
-public class GrpcService : IGrpcService
+public class GrpcService<TResponseStream> : IGrpcService<TResponseStream> where TResponseStream : new()
 {
     protected readonly ConcurrentDictionary<int, ConcurrentDictionary<int, IGrpcConnection<
-            IncrementalMapUpdateResponse>>>
+            TResponseStream>>>
         Connections = new();
 
     public void AddGrpcConnection(
-        IGrpcConnection<IncrementalMapUpdateResponse> connection)
+        IGrpcConnection<TResponseStream> connection)
     {
-        ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> userConnections = Connections.GetOrAdd(
-            connection.User.Id, new ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>());
+        ConcurrentDictionary<int, IGrpcConnection<TResponseStream>> userConnections = Connections.GetOrAdd(
+            connection.User.Id, new ConcurrentDictionary<int, IGrpcConnection<TResponseStream>>());
 
         userConnections.TryAdd(connection.Id, connection);
     }
 
     public void RemoveGrpcConnection(
-        IGrpcConnection<IncrementalMapUpdateResponse> connection)
+        IGrpcConnection<TResponseStream> connection)
     {
         bool retrievalSucceeded = Connections.TryGetValue(connection.User.Id,
-            out ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>>? dictionaryOutput);
+            out ConcurrentDictionary<int, IGrpcConnection<TResponseStream>>? dictionaryOutput);
 
         if (!retrievalSucceeded || dictionaryOutput == null)
         {

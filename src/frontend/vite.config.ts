@@ -9,7 +9,7 @@ export default defineConfig({
         react(),
         mkcert(),
         http2Proxy({
-            "^/Map.MapUpdate/": {
+            "^/Game.StateUpdate/": {
                 target: "https://localhost:7222",
                 secure: false,
             },

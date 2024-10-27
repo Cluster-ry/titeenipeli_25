@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
+import { IncrementalMapUpdateResponse } from "../generated/grpc/services/StateUpdate";
 import { GrpcClient } from "../core/grpc/grpcClient";
 
 const GRPCTest = () => {
