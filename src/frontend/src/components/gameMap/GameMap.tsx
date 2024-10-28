@@ -40,8 +40,6 @@ const GameMap = () => {
    */
   async function conquer(coordinate: Coordinate) {
     const result = await postPixels(coordinate);
-    console.log(result);
-    if (!effectRef.current) console.error("Vittu");
     result ? effectRef.current?.conqueredEffect(coordinate) : effectRef.current?.forbiddenEffect(coordinate);
   }
   /* 

@@ -24,11 +24,9 @@ export const EffectContainer = forwardRef<EffectContainerHandle, Props>(
 
     useImperativeHandle(ref, () => ({
       forbiddenEffect(coordinate: Coordinate) {
-        console.log("Forbidden");
         forbiddenRef.current?.effect(coordinate);
       },
       conqueredEffect(coordinate: Coordinate) {
-        console.log("Conquer");
         conquerRef.current?.effect(coordinate);
       },
     }));
