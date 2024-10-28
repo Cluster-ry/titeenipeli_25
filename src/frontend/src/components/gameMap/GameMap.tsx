@@ -9,7 +9,7 @@ import useGameMapStore from "../../stores/mapStore.tsx";
 import { postPixels } from "../../api/map";
 import PixelType from "../../models/enum/PixelType.ts";
 import { useUserStore } from "../../stores/userStore.ts";
-import { EffectContainer, EffectContainerHandle } from "./EffectContainer.tsx";
+import { EffectContainer, EffectContainerHandle } from "./effects";
 
 /**
  * @component GameMap

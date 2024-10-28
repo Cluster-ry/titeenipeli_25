@@ -1,7 +1,8 @@
-import { Sprite } from "@pixi/react";
-import { mapConfig } from "./gameMap/MapConfig";
 import { FC } from "react";
-import { Coordinate } from "../models/Coordinate";
+import { Sprite } from "@pixi/react";
+import { ColorSource } from "pixi.js";
+import { Coordinate } from "../../../models/Coordinate";
+import { mapConfig } from "../MapConfig";
 
 export type EffectItem = {
     scale: number,
@@ -11,6 +12,8 @@ export type EffectItem = {
     direction: number,
     turningSpeed: number,
     duration: number,
+    tint?: ColorSource,
+    anchor?: [number, number]
 }
 
 export const EffectSprite: FC<EffectItem & { sprite: string }> = (props) => (
@@ -19,8 +22,6 @@ export const EffectSprite: FC<EffectItem & { sprite: string }> = (props) => (
         height={mapConfig.PixelSize}
         cullable={true}
         eventMode="dynamic"
-        anchor={[1, 1]}
         image={props.sprite}
         {...props}
-    />
-)
+    />)

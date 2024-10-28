@@ -1,7 +1,7 @@
 import { forwardRef, useImperativeHandle, useState } from "react";
-import { Coordinate } from "../../models/Coordinate";
 import { ParticleContainer, useTick } from "@pixi/react";
-import { type EffectItem, EffectSprite } from "../EffectSprite";
+import { Coordinate } from "../../../models/Coordinate";
+import { type EffectItem, EffectSprite } from "./EffectSprite";
 
 export type EffectHandle = {
     effect: (coordinate: Coordinate) => void;
@@ -33,7 +33,6 @@ export const EffectBatch = forwardRef<EffectHandle, Props>((props, ref) => {
     useImperativeHandle(ref, () => ({
       effect(coordinate: Coordinate) {
             // TODO: Activate "Action forbidden" effect at chosen coordinates
-            console.log("mroo");
             const temp: EffectItem[] = [];
             for (let i = 0; i < props.count; i++) {
               temp.push(props.startEffect(coordinate));
@@ -43,9 +42,13 @@ export const EffectBatch = forwardRef<EffectHandle, Props>((props, ref) => {
     }), [setEffects])
 
     useTick((delta) => {
-      console.log("moro");
       setEffects(prevItems => {
-        return prevItems.map(item => ({...props.updateEffect(item), duration: item.duration += (delta * 0.1)})).filter(item => item.duration < props.duration);
+        return prevItems.flatMap((item) => {
+          if (item.duration < props.duration) {
+            return {...props.updateEffect(item), duration: item.duration += (delta * 0.1)}
+          }
+          return [];
+        })
       });
     }, effects.length > 0);
 
