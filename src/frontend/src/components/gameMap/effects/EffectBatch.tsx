@@ -25,7 +25,7 @@ const config = {
     }
 }
 
-const getKey = ({x, y}: Coordinate) => `${x}${y}-${Math.random()}`;
+const getKey = ({x, y}: Coordinate) => `${x}${y}-${Date.now()}`;
 
 export const EffectBatch = forwardRef<EffectHandle, Props>((props, ref) => {
     const [ effects, setEffects ] = useState<EffectItem[]>([]);
