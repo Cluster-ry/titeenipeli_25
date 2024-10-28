@@ -32,7 +32,6 @@ export const EffectBatch = forwardRef<EffectHandle, Props>((props, ref) => {
 
     useImperativeHandle(ref, () => ({
       effect(coordinate: Coordinate) {
-            // TODO: Activate "Action forbidden" effect at chosen coordinates
             const temp: EffectItem[] = [];
             for (let i = 0; i < props.count; i++) {
               temp.push(props.startEffect(coordinate));
