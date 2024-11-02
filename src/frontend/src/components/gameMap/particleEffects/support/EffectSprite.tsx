@@ -1,20 +1,20 @@
 import { FC } from "react";
 import { Sprite } from "@pixi/react";
 import { ColorSource } from "pixi.js";
-import { Coordinate } from "../../../models/Coordinate";
-import { mapConfig } from "../MapConfig";
+import { Coordinate } from "../../../../models/Coordinate";
+import { mapConfig } from "../../MapConfig";
 
 export type EffectItem = {
-    scale: number,
-    speed: number,
-    rotation: number,
-    position: Coordinate,
-    direction: number,
-    turningSpeed: number,
-    duration: number,
-    tint?: ColorSource,
-    anchor?: [number, number]
-}
+    scale: number;
+    speed: number;
+    rotation: number;
+    position: Coordinate;
+    direction: number;
+    turningSpeed: number;
+    duration: number;
+    tint?: ColorSource;
+    anchor?: [number, number];
+};
 
 export const EffectSprite: FC<EffectItem & { sprite: string }> = (props) => (
     <Sprite
@@ -24,4 +24,5 @@ export const EffectSprite: FC<EffectItem & { sprite: string }> = (props) => (
         eventMode="dynamic"
         image={props.sprite}
         {...props}
-    />)
+    />
+);

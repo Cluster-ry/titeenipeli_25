@@ -9,7 +9,7 @@ import useGameMapStore from "../../stores/mapStore.tsx";
 import { postPixels } from "../../api/map";
 import PixelType from "../../models/enum/PixelType.ts";
 import { useUserStore } from "../../stores/userStore.ts";
-import { EffectContainer, EffectContainerHandle } from "./effects";
+import { EffectContainer, EffectContainerHandle } from "./particleEffects/index.ts";
 
 /**
  * @component GameMap
@@ -27,29 +27,21 @@ const GameMap = () => {
     const gameMapStore = useGameMapStore((state) => state);
     const { user } = useUserStore();
     const effectRef = useRef<EffectContainerHandle>(null);
-  useMemo(() => {
+    useMemo(() => {
         gameMapStore.initializeMap();
     }, []);
 
-  /**
-   * Executes when the client conquers a pixel for their guild.
-   * Changes the integer value representing a guild to the one
-   * associated with the client's own guild.
-   *
-   * @note Upon change, the map is automatically refreshed.
-   */
-  async function conquer(coordinate: Coordinate) {
-    const result = await postPixels(coordinate);
-    result ? effectRef.current?.conqueredEffect(coordinate) : effectRef.current?.forbiddenEffect(coordinate);
-  }
-  /* 
-  // Handling undesired states. Returning if the client is not connected
-  if (gameMapStore.connectionStatus === ConnectionStatus.Disconnected) {
-    return <span>Disconnected</span>;
-  } else if (gameMapStore.connectionStatus === ConnectionStatus.Connecting) {
-    return <span>Loading...</span>;
-  } */
-
+    /**
+     * Executes when the client conquers a pixel for their guild.
+     * Changes the integer value representing a guild to the one
+     * associated with the client's own guild.
+     *
+     * @note Upon change, the map is automatically refreshed.
+     */
+    async function conquer(coordinate: Coordinate) {
+        const result = await postPixels(coordinate);
+        result ? effectRef.current?.conqueredEffect(coordinate) : effectRef.current?.forbiddenEffect(coordinate);
+    }
 
     const pixelElements = [];
     for (const [serializedCoordinate, pixel] of gameMapStore.pixels) {
@@ -86,7 +78,7 @@ const GameMap = () => {
                     boundingBox={gameMapStore.pixelsBoundingBox}
                 >
                     <Container>{pixelElements}</Container>
-                    <EffectContainer ref={effectRef}/>
+                    <EffectContainer ref={effectRef} />
                 </Viewport>
             </Stage>
         </>

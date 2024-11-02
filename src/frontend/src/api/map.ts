@@ -18,15 +18,13 @@ export async function getPixels(): Promise<AxiosResponse<GetPixelsResult> | Clie
     }
 }
 
-export async function postPixels(
-  postPixelsInput: PostPixelsInput
-): Promise<boolean> {
-  try {
-    await axios.post<ClientApiOk>(PIXELS_URL, postPixelsInput);
-    console.log("Success.");
-    return true;
-  } catch (error) {
-    console.error(error);
-    return false;
-  }
+export async function postPixels(postPixelsInput: PostPixelsInput): Promise<boolean> {
+    try {
+        await axios.post<ClientApiOk>(PIXELS_URL, postPixelsInput);
+        console.log("Success.");
+        return true;
+    } catch (error) {
+        console.error(error);
+        return false;
+    }
 }
