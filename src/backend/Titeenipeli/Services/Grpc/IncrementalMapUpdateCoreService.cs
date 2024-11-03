@@ -16,6 +16,7 @@ public class IncrementalMapUpdateCoreService : GrpcService<IncrementalMapUpdateR
 
     private readonly ILogger<StateUpdateService> _logger;
     private readonly GameOptions _gameOptions;
+    private readonly IBackgroundGraphicsService _backgroundGraphicsService;
 
     private readonly Channel<GrpcMapChangesInput> _mapChangeQueue =
         Channel.CreateBounded<GrpcMapChangesInput>(MaxChannelSize);
@@ -28,6 +29,7 @@ public class IncrementalMapUpdateCoreService : GrpcService<IncrementalMapUpdateR
     {
         _logger = logger;
         _gameOptions = gameOptions;
+        _backgroundGraphicsService = backgroundGraphicsService;
         Task.Run(ProcessMapChangeRequests);
     }
 
@@ -52,7 +54,7 @@ public class IncrementalMapUpdateCoreService : GrpcService<IncrementalMapUpdateR
                      connectionKeyValuePair in Connections)
         {
             MapUpdateProcessor mapUpdateProcessor =
-                new(this, mapChangesInput, connectionKeyValuePair.Value, _gameOptions);
+                new(this, mapChangesInput, connectionKeyValuePair.Value, _gameOptions, _backgroundGraphicsService);
 
             var updateTask = Task.Run(mapUpdateProcessor.Process);
             updateTasks.Add(updateTask);

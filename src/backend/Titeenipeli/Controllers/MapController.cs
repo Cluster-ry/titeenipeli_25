@@ -25,6 +25,7 @@ public class MapController : ControllerBase
     private readonly IMapRepositoryService _mapRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
     private readonly IMapUpdaterService _mapUpdaterService;
+    private readonly IBackgroundGraphicsService _backgroundGraphicsService;
 
     private readonly JwtService _jwtService;
 
@@ -32,13 +33,15 @@ public class MapController : ControllerBase
                          JwtService jwtService,
                          IUserRepositoryService userRepositoryService,
                          IMapRepositoryService mapRepositoryService,
-                         IMapUpdaterService mapUpdaterService)
+                         IMapUpdaterService mapUpdaterService,
+                         IBackgroundGraphicsService backgroundGraphicsService)
     {
         _gameOptions = gameOptions;
         _userRepositoryService = userRepositoryService;
         _mapRepositoryService = mapRepositoryService;
         _jwtService = jwtService;
         _mapUpdaterService = mapUpdaterService;
+        _backgroundGraphicsService = backgroundGraphicsService;
     }
 
     [HttpGet]
@@ -56,6 +59,7 @@ public class MapController : ControllerBase
         Map map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
         map = CalculateFogOfWar(map, user.Id);
+        InjectBackgroundGraphics(map);
         Map inversedMap = InverseMap(map);
 
         GetPixelsResult result = new GetPixelsResult
@@ -279,6 +283,22 @@ public class MapController : ControllerBase
         }
 
         return trimmedMap;
+    }
+
+    private void InjectBackgroundGraphics(Map map)
+    {
+        for (int x = 0; x < map.Width; x++)
+        {
+            for (int y = 0; y < map.Height; y++)
+            {
+                var backgroundGraphic = _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(x - 1, y - 1));
+                if (backgroundGraphic != null)
+                {
+                    var backgroundGraphicWire = Convert.ToBase64String(backgroundGraphic);
+                    map.Pixels[y, x].BackgroundGraphic = backgroundGraphicWire;
+                }
+            }
+        }
     }
 
     private static Map InverseMap(Map map)

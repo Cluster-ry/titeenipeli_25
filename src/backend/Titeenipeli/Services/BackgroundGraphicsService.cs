@@ -1,4 +1,5 @@
 using SkiaSharp;
+using Titeenipeli.Common.Models;
 
 namespace Titeenipeli.Services;
 
@@ -10,7 +11,8 @@ public class BackgroundGraphicsService : IBackgroundGraphicsService
     private readonly int _splitBitmapHeight;
     private readonly byte[,][] _splitBitmaps;
 
-    public BackgroundGraphicsService() {
+    public BackgroundGraphicsService()
+    {
         var image = SKImage.FromEncodedData(@"Resources/Images/Background.jpg");
         var bitmap = SKBitmap.FromImage(image);
         var allBytes = bitmap.Bytes;
@@ -18,24 +20,35 @@ public class BackgroundGraphicsService : IBackgroundGraphicsService
         _splitBitmapWidth = bitmap.Width / 32;
         _splitBitmapHeight = bitmap.Width / 32;
         _splitBitmaps = new byte[_splitBitmapWidth, _splitBitmapHeight][];
-        var pixelChunk = _imageChunkSize * _imageChunkSize * bitmap.BytesPerPixel;
+        var bytesPerPixel = bitmap.BytesPerPixel;
+        var rowSize = bitmap.Width * bytesPerPixel;
+        var sliceSize = _imageChunkSize * bytesPerPixel;
+        var chunkSize = _imageChunkSize * _imageChunkSize * bytesPerPixel;
 
-        for (int y = 0; y < _splitBitmapHeight; y =+ _imageChunkSize)
+        for (int y = 0; y < _splitBitmapHeight; y++)
         {
-            for (int x = 0; x < _splitBitmapWidth; x =+ _imageChunkSize)
+            for (int x = 0; x < _splitBitmapWidth; x++)
             {
-                var beginIndex = x + y * bitmap.Width * bitmap.BytesPerPixel;
-                var splitBytes = allBytes.Skip(beginIndex).Take(pixelChunk).ToArray();
-                _splitBitmaps[x, y] = splitBytes;
+                var chunk = new byte[chunkSize];
+                for (int sliceIndex = 0; sliceIndex < _imageChunkSize; sliceIndex++)
+                {
+                    var beginIndex = x * _imageChunkSize * bytesPerPixel + y * rowSize * _imageChunkSize + sliceIndex * rowSize;
+                    var chunkSlice = allBytes.Skip(beginIndex).Take(sliceSize).ToArray();
+                    var chunkIndex = sliceIndex * sliceSize;
+                    chunkSlice.CopyTo(chunk, chunkIndex);
+                }
+                _splitBitmaps[x, y] = chunk;
             }
         }
     }
 
-    public byte[] GetBackgroundGraphic(int x, int y) {
-        if (x > _splitBitmapWidth || y > _splitBitmapHeight) {
-            return _splitBitmaps[0, 0];
+    public byte[]? GetBackgroundGraphic(Coordinate coordinate)
+    {
+        if (coordinate.X < 0 || coordinate.X > _splitBitmapWidth || coordinate.Y < 0 || coordinate.Y > _splitBitmapHeight)
+        {
+            return null;
         }
 
-        return _splitBitmaps[x, y];
+        return _splitBitmaps[coordinate.X, coordinate.Y];
     }
 }
