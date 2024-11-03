@@ -1,5 +1,5 @@
-using Titeenipeli.Models;
-using Titeenipeli.Schema;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Models;
 
 namespace Titeenipeli.Services;
 

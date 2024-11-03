@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json;
-using Titeenipeli.Models;
+using Titeenipeli.Common.Models;
 using Titeenipeli.Options;
 
 namespace Titeenipeli.Middleware;
