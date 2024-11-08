@@ -1,12 +1,12 @@
 using System.Text.Json;
-using Titeenipeli.Enums;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
-using Titeenipeli.Grpc.Services;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
-using Titeenipeli.Schema;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
+using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services;
 

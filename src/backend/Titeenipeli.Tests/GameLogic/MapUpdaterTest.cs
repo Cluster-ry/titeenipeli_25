@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections;
-using NUnit.Framework;
-using Titeenipeli.Enums;
-using Titeenipeli.GameLogic;
 using FluentAssertions;
-using Titeenipeli.Models;
+using NUnit.Framework;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
+using Titeenipeli.GameLogic;
 
 namespace Titeenipeli.Tests.GameLogic;
 

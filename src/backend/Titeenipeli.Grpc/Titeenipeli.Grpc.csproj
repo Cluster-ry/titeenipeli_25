@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Grpc.AspNetCore" Version="2.63.0"/>
+        <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.63.0"/>
+        <PackageReference Include="Grpc.AspNetCore.Web" Version="2.63.0"/>
+        <PackageReference Include="Grpc.Tools" Version="2.64.0">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="../../protobuf/**/*.proto" ProtoRoot="../../protobuf"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Titeenipeli.Common\Titeenipeli.Common.csproj"/>
+    </ItemGroup>
+
+</Project>

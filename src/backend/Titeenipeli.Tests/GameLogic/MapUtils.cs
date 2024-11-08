@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using Titeenipeli.Enums;
-using Titeenipeli.Models;
-using Titeenipeli.Schema;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 
 namespace Titeenipeli.Tests.GameLogic;
 

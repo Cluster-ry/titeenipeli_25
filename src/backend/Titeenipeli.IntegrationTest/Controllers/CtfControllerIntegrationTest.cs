@@ -1,8 +1,8 @@
-using Titeenipeli.Context;
+using Titeenipeli.Common.Database;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services;
 using Titeenipeli.Controllers;
 using Titeenipeli.Inputs;
-using Titeenipeli.Schema;
-using Titeenipeli.Services.RepositoryServices;
 
 namespace Titeenipeli.IntegrationTest.Controllers;
 

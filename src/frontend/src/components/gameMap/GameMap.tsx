@@ -1,3 +1,4 @@
+import { useMemo, useRef } from "react";
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
@@ -9,6 +10,7 @@ import PixelType from "../../models/enum/PixelType.ts";
 import { useNewMapStore } from "../../stores/newMapStore.ts";
 import { useMapUpdating } from "../../hooks/useMapUpdating.ts";
 import { useUser } from "../../hooks/useUser.ts";
+import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 
 /**
  * @component GameMap
@@ -24,6 +26,7 @@ import { useUser } from "../../hooks/useUser.ts";
  */
 const GameMap = () => {
     const { map, pixelsBoundingBox } = useNewMapStore();
+    const effectRef = useRef<EffectContainerHandle>(null);
     useMapUpdating();
     const user = useUser();
 
@@ -35,20 +38,14 @@ const GameMap = () => {
      * @note Upon change, the map is automatically refreshed.
      */
     async function conquer(coordinate: Coordinate) {
-        await postPixels(coordinate);
+        const result = await postPixels(coordinate);
+        result ? effectRef.current?.conqueredEffect(coordinate) : effectRef.current?.forbiddenEffect(coordinate);
     }
 
-    // Handling undesired states. Returning if the client is not connected
-    // if (gameMapStore.connectionStatus === ConnectionStatus.Disconnected) {
-    //     return <span>Disconnected</span>;
-    // } else if (gameMapStore.connectionStatus === ConnectionStatus.Connecting) {
-    //     return <span>Loading...</span>;
-    // }
-
-    if (map === null) {
+    /* if (map === null) {
         return <span>Loading...</span>;
     }
-
+ */
     const pixelElements = [];
     for (const [coordinate, pixel] of map) {
         const rectangleX = coordinate.x * mapConfig.PixelSize;
@@ -86,6 +83,7 @@ const GameMap = () => {
             >
                 <Viewport width={window.innerWidth} height={window.innerHeight} boundingBox={mappedBoundingBox}>
                     <Container>{pixelElements}</Container>
+                    <EffectContainer ref={effectRef} />
                 </Viewport>
             </Stage>
         </>
