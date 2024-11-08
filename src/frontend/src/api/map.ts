@@ -1,7 +1,6 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { PostPixelsInput } from "../models/Post/PostPixelsInput";
 import { GetPixelsResult } from "../models/Get/GetPixelsResult";
-import { ClientApiError } from "../models/ClientApiError";
 import { ClientApiOk } from "../models/ClientApiOk";
 
 const PIXELS_URL = "api/v1/state/map/pixels";

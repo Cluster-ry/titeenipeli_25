@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { FC, useRef } from "react";
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
@@ -24,8 +24,9 @@ import { EffectContainer, EffectContainerHandle } from "./particleEffects";
  * The map is rendered only if the client has a valid connection. Otherwise,
  * a span element indicates the current status.
  */
-const GameMap = () => {
-    const { map, pixelsBoundingBox } = useNewMapStore();
+const GameMap: FC = () => {
+    const pixelsBoundingBox = useNewMapStore(state => state.pixelsBoundingBox);
+    const map = useNewMapStore(state => state.map);
     const effectRef = useRef<EffectContainerHandle>(null);
     useMapUpdating();
     const user = useUser();
@@ -42,10 +43,17 @@ const GameMap = () => {
         result ? effectRef.current?.conqueredEffect(coordinate) : effectRef.current?.forbiddenEffect(coordinate);
     }
 
-    /* if (map === null) {
+    if (map === null) {
         return <span>Loading...</span>;
     }
- */
+
+    const mappedBoundingBox = {
+        minY: pixelsBoundingBox.min.y,
+        minX: pixelsBoundingBox.min.x,
+        maxY: pixelsBoundingBox.max.y,
+        maxX: pixelsBoundingBox.max.x,
+    };
+
     const pixelElements = [];
     for (const [coordinate, pixel] of map) {
         const rectangleX = coordinate.x * mapConfig.PixelSize;
@@ -66,14 +74,6 @@ const GameMap = () => {
             />,
         );
     }
-
-    const mappedBoundingBox = {
-        minY: pixelsBoundingBox.min.y,
-        minX: pixelsBoundingBox.min.x,
-        maxY: pixelsBoundingBox.max.y,
-        maxX: pixelsBoundingBox.max.x,
-    };
-
     return (
         <>
             <Stage

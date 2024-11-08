@@ -1,18 +1,24 @@
 import { Coordinate, useNewMapStore } from "../stores/newMapStore.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPixels } from "../api/map.ts";
-import { useCallback, useEffect, useMemo } from "react";
-import { IncrementalMapUpdateResponse } from "../generated/grpc/services/StateUpdate.ts";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import PixelType from "../models/enum/PixelType.ts";
 import { GetPixelsResult } from "../models/Get/GetPixelsResult.ts";
 import { Pixel } from "../models/Pixel.ts";
 import GrpcClient from "../core/grpc/grpcClient.ts";
+import { IncrementalMapUpdateResponse } from "../generated/grpc/services/StateUpdate.ts";
+
+const mapQueryKey = "map";
 
 export const useMapUpdating = () => {
-    const mapQueryKey = "map";
-    const incrementalUpdateBuffer: IncrementalMapUpdateResponse[] = [];
+    const incrementalUpdateBuffer = useRef<IncrementalMapUpdateResponse[]>([]);
     const queryClient = useQueryClient();
-    const { map, setMap, setPixel, setPixelsBoundingBox } = useNewMapStore();
+
+    const map = useNewMapStore(state => state.map);
+    const setMap = useNewMapStore(state => state.setMap);
+    const setPixel = useNewMapStore(state => state.setPixel);
+    const setPixelsBoundingBox = useNewMapStore(state => state.setPixelsBoundingBox);
+
     const consumeUpdate = useCallback((update: IncrementalMapUpdateResponse) => {
         for (const updatedPixel of update.updates) {
             const pixelType = updatedPixel.type as unknown as PixelType;
@@ -31,11 +37,11 @@ export const useMapUpdating = () => {
                 setPixel(pixelCoordinates, null);
             }
         }
-    }, []);
+    }, [setPixel]);
     const consumeUpdates = useCallback(() => {
-        while (incrementalUpdateBuffer.length > 0) {
+        while (incrementalUpdateBuffer.current.length > 0) {
             // We can use a bang to simplify type checker's work because of the length condition for the while loop
-            const oldestUpdate = incrementalUpdateBuffer.shift()!;
+            const oldestUpdate = incrementalUpdateBuffer.current.shift()!;
             consumeUpdate(oldestUpdate);
         }
     }, []);
@@ -84,23 +90,23 @@ export const useMapUpdating = () => {
 
     const onIncrementalUpdate = useCallback(
         (incrementalUpdateResponse: IncrementalMapUpdateResponse) => {
-            if (!isSuccess || incrementalUpdateBuffer.length > 0) {
+            if (!isSuccess || incrementalUpdateBuffer.current.length > 0) {
                 console.log("Storing update, success:", isSuccess, status);
                 console.log("Update buffer:", incrementalUpdateBuffer);
-                incrementalUpdateBuffer.push(incrementalUpdateResponse);
+                incrementalUpdateBuffer.current.push(incrementalUpdateResponse);
                 // Technically this else-branch is not fully parallel-safe. Return here if race conditions occur!
             } else {
                 console.log("Consuming separate update:", incrementalUpdateResponse);
                 consumeUpdate(incrementalUpdateResponse);
             }
         },
-        [incrementalUpdateBuffer, isSuccess, data, status],
+        [isSuccess, data, status],
     );
 
     const ensureMap = useCallback(async () => {
         setMap(null);
         await queryClient.resetQueries({ queryKey: [mapQueryKey] });
-    }, []);
+    }, [setMap]);
 
     useEffect(() => {
         console.log("Rendering useMapUpdating hook. Success:", isSuccess);
@@ -114,7 +120,7 @@ export const useMapUpdating = () => {
             console.log("Consuming updates as part of the rendering process");
             consumeUpdates();
         }
-    }, [isSuccess]);
+    }, [map, isSuccess, setMap, setPixelsBoundingBox]);
 
     const grpcClient = GrpcClient.getGrpcClient();
     useMemo(() => {

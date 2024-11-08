@@ -14,17 +14,19 @@ export interface NewMapStore {
     setPixelsBoundingBox: ({ min, max }: { min: Coordinate; max: Coordinate }) => void;
 }
 
-export const useNewMapStore = create<NewMapStore>((set, get) => ({
+export const useNewMapStore = create<NewMapStore>((set) => ({
     map: null,
     setPixel: (coordinate: Coordinate, pixel: Pixel | null) => {
-        const oldMap = get().map;
-        if (oldMap === null) {
-            throw new Error("Tried to set pixel in a null map!");
-        }
-        // To keep updates immutable we need to do this copy operation with spread
-        // If we run into performance problems on map update, this should be replaced with a mutation operation.
-        // That requires careful consideration about concurrency, however.
-        set({ map: new Map([...oldMap, [coordinate, pixel]]) });
+        set((state) => {
+            // To keep updates immutable we need to do this copy operation with spread
+            // If we run into performance problems on map update, this should be replaced with a mutation operation.
+            // That requires careful consideration about concurrency, however.
+            const oldMap = state.map;
+            if (oldMap === null) {
+                throw new Error("Tried to set pixel in a null map!");
+            }
+            return { map: new Map([...oldMap, [coordinate, pixel]]) };
+        })
     },
     setMap: (map: Map<Coordinate, Pixel> | null) => {
         set({ map });
