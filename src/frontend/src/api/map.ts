@@ -6,7 +6,7 @@ import { ClientApiOk } from "../models/ClientApiOk";
 const PIXELS_URL = "api/v1/state/map/pixels";
 
 export async function getPixels() {
-    return await axios.get<GetPixelsResult>(PIXELS_URL);
+    return axios.get<GetPixelsResult>(PIXELS_URL);
 }
 
 export async function postPixels(postPixelsInput: PostPixelsInput): Promise<boolean> {
