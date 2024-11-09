@@ -20,7 +20,7 @@ export const useMapUpdating = () => {
     const setPixel = useNewMapStore(state => state.setPixel);
     const setPixelsBoundingBox = useNewMapStore(state => state.setPixelsBoundingBox);
 
-    const query = useQuery({
+    const { data, isSuccess, status } = useQuery({
         queryKey: [mapQueryKey],
         queryFn: getPixels,
         refetchOnReconnect: "always",
@@ -92,8 +92,8 @@ export const useMapUpdating = () => {
 
     const onIncrementalUpdate = useCallback(
         (incrementalUpdateResponse: IncrementalMapUpdateResponse) => {
-            if (query.isLoading || query.isError || incrementalUpdateBuffer.current.length > 0) {
-                console.log("Storing update, success:", query.isSuccess, query.isLoading, query.isError, query.status);
+            if (!isSuccess || incrementalUpdateBuffer.current.length > 0) {
+                console.log("Storing update, success:", isSuccess, status);
                 console.log("Update buffer:", incrementalUpdateBuffer);
                 incrementalUpdateBuffer.current.push(incrementalUpdateResponse);
                 // Technically this else-branch is not fully parallel-safe. Return here if race conditions occur!
@@ -102,7 +102,7 @@ export const useMapUpdating = () => {
                 consumeUpdate(incrementalUpdateResponse);
             }
         },
-        [query.isSuccess, query.isLoading, query.isError, query.data, status],
+        [isSuccess, data, status],
     );
 
     const ensureMap = useCallback(async () => {
@@ -111,10 +111,10 @@ export const useMapUpdating = () => {
     }, [setMap]);
 
     useEffect(() => {
-        console.log("Rendering useMapUpdating hook. Success:", query.isSuccess);
-        if (query.isSuccess) {
+        console.log("Rendering useMapUpdating hook. Success:", isSuccess);
+        if (isSuccess) {
             if (map === null) {
-                const mappedPixels = mapMatrixToMapDictionary(query.data.data);
+                const mappedPixels = mapMatrixToMapDictionary(data.data);
                 console.log("Fetched map:", mappedPixels);
                 setMap(mappedPixels);
                 setPixelsBoundingBox(computeBoundingBox(mappedPixels));
@@ -122,7 +122,7 @@ export const useMapUpdating = () => {
             console.log("Consuming updates as part of the rendering process");
             consumeUpdates();
         }
-    }, [map, query.isSuccess, setMap, setPixelsBoundingBox]);
+    }, [map, isSuccess, setMap, setPixelsBoundingBox]);
 
     useEffect(() => {
         console.log("Registering GRPC client");
@@ -130,7 +130,7 @@ export const useMapUpdating = () => {
         return () => {
             grpcClient.current.incrementalMapUpdateClient?.unRegisterOnResponseListener(onIncrementalUpdate);
         }
-    }, []);
+    }, [onIncrementalUpdate]);
 
     return { ensureMap };
 };

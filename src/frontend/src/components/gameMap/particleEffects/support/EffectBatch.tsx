@@ -25,7 +25,7 @@ const config = {
     },
 };
 
-const getKey = ({ x, y }: Coordinate, index: number) => `${x}-${y}-${index}-${new Date().getTime()}`;
+const getKey = ({ x, y }: Coordinate, index: number) => `${x}-${y}-${index}-${Date.now()}`;
 
 export const EffectBatch = forwardRef<EffectHandle, Props>((props, ref) => {
     const [effects, setEffects] = useState<EffectItem[]>([]);

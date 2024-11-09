@@ -62,7 +62,7 @@ const GameMap: FC = () => {
 
         pixelElements.push(
             <Rectangle
-                key={`x:${coordinate.x} y:${coordinate.y}-${new Date().getTime()}`}
+                key={`x:${coordinate.x} y:${coordinate.y}-${pixelElements.length}-${Date.now()}`}
                 x={rectangleX}
                 y={rectangleY}
                 isOwn={pixel?.owner === user?.id}
