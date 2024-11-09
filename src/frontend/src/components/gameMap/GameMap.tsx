@@ -25,8 +25,8 @@ import { EffectContainer, EffectContainerHandle } from "./particleEffects";
  * a span element indicates the current status.
  */
 const GameMap: FC = () => {
-    const pixelsBoundingBox = useNewMapStore(state => state.pixelsBoundingBox);
-    const map = useNewMapStore(state => state.map);
+    const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
+    const map = useNewMapStore((state) => state.map);
     const effectRef = useRef<EffectContainerHandle>(null);
     useMapUpdating();
     const user = useUser();

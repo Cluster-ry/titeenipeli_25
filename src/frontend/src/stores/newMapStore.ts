@@ -26,7 +26,7 @@ export const useNewMapStore = create<NewMapStore>((set) => ({
                 throw new Error("Tried to set pixel in a null map!");
             }
             return { map: new Map([...oldMap, [coordinate, pixel]]) };
-        })
+        });
     },
     setMap: (map: Map<Coordinate, Pixel> | null) => {
         set({ map });

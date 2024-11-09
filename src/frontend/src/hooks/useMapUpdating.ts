@@ -1,3 +1,4 @@
+import { IncrementalMapUpdateResponse } from "./../generated/grpc/services/StateUpdate";
 import { Coordinate, useNewMapStore } from "../stores/newMapStore.ts";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPixels } from "../api/map.ts";
@@ -6,7 +7,6 @@ import PixelType from "../models/enum/PixelType.ts";
 import { GetPixelsResult } from "../models/Get/GetPixelsResult.ts";
 import { Pixel } from "../models/Pixel.ts";
 import GrpcClient from "../core/grpc/grpcClient.ts";
-import { IncrementalMapUpdateResponse } from "../generated/grpc/services/StateUpdate.ts";
 
 const mapQueryKey = "map";
 
@@ -15,10 +15,10 @@ export const useMapUpdating = () => {
     const queryClient = useQueryClient();
     const grpcClient = useRef<GrpcClient>(GrpcClient.getGrpcClient());
 
-    const map = useNewMapStore(state => state.map);
-    const setMap = useNewMapStore(state => state.setMap);
-    const setPixel = useNewMapStore(state => state.setPixel);
-    const setPixelsBoundingBox = useNewMapStore(state => state.setPixelsBoundingBox);
+    const map = useNewMapStore((state) => state.map);
+    const setMap = useNewMapStore((state) => state.setMap);
+    const setPixel = useNewMapStore((state) => state.setPixel);
+    const setPixelsBoundingBox = useNewMapStore((state) => state.setPixelsBoundingBox);
 
     const { data, isSuccess, status } = useQuery({
         queryKey: [mapQueryKey],
@@ -27,25 +27,28 @@ export const useMapUpdating = () => {
         refetchOnMount: "always",
     });
 
-    const consumeUpdate = useCallback((update: IncrementalMapUpdateResponse) => {
-        for (const updatedPixel of update.updates) {
-            const pixelType = updatedPixel.type as unknown as PixelType;
-            const pixelCoordinates = {
-                x: updatedPixel.spawnRelativeCoordinate?.x ?? 0,
-                y: updatedPixel.spawnRelativeCoordinate?.y ?? 0,
-            };
-            if (pixelType !== PixelType.FogOfWar) {
-                setPixel(pixelCoordinates, {
-                    type: pixelType,
-                    guild: updatedPixel.guild ? Number(updatedPixel.guild) - 1 : undefined,
-                    owner: updatedPixel.owner?.id,
-                    ...pixelCoordinates,
-                });
-            } else {
-                setPixel(pixelCoordinates, null);
+    const consumeUpdate = useCallback(
+        (update: IncrementalMapUpdateResponse) => {
+            for (const updatedPixel of update.updates) {
+                const pixelType = updatedPixel.type as unknown as PixelType;
+                const pixelCoordinates = {
+                    x: updatedPixel.spawnRelativeCoordinate?.x ?? 0,
+                    y: updatedPixel.spawnRelativeCoordinate?.y ?? 0,
+                };
+                if (pixelType !== PixelType.FogOfWar) {
+                    setPixel(pixelCoordinates, {
+                        type: pixelType,
+                        guild: updatedPixel.guild ? Number(updatedPixel.guild) - 1 : undefined,
+                        owner: updatedPixel.owner?.id,
+                        ...pixelCoordinates,
+                    });
+                } else {
+                    setPixel(pixelCoordinates, null);
+                }
             }
-        }
-    }, [setPixel]);
+        },
+        [setPixel],
+    );
     const consumeUpdates = useCallback(() => {
         while (incrementalUpdateBuffer.current.length > 0) {
             // We can use a bang to simplify type checker's work because of the length condition for the while loop
@@ -129,7 +132,7 @@ export const useMapUpdating = () => {
         grpcClient.current.incrementalMapUpdateClient?.registerOnResponseListener(onIncrementalUpdate);
         return () => {
             grpcClient.current.incrementalMapUpdateClient?.unRegisterOnResponseListener(onIncrementalUpdate);
-        }
+        };
     }, [onIncrementalUpdate]);
 
     return { ensureMap };
