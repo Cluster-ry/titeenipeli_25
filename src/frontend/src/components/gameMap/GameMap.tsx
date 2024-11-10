@@ -1,15 +1,16 @@
-import { useMemo, useRef } from "react";
+import { FC, useRef } from "react";
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
 import { pixelColor } from "./guild/Guild";
 import { mapConfig } from "./MapConfig";
 import { Coordinate } from "../../models/Coordinate";
-import useGameMapStore from "../../stores/mapStore.tsx";
 import { postPixels } from "../../api/map";
 import PixelType from "../../models/enum/PixelType.ts";
-import { useUserStore } from "../../stores/userStore.ts";
-import { EffectContainer, EffectContainerHandle } from "./particleEffects/index.ts";
+import { useNewMapStore } from "../../stores/newMapStore.ts";
+import { useMapUpdating } from "../../hooks/useMapUpdating.ts";
+import { useUser } from "../../hooks/useUser.ts";
+import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 
 /**
  * @component GameMap
@@ -23,13 +24,12 @@ import { EffectContainer, EffectContainerHandle } from "./particleEffects/index.
  * The map is rendered only if the client has a valid connection. Otherwise,
  * a span element indicates the current status.
  */
-const GameMap = () => {
-    const gameMapStore = useGameMapStore((state) => state);
-    const { user } = useUserStore();
+const GameMap: FC = () => {
+    const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
+    const map = useNewMapStore((state) => state.map);
     const effectRef = useRef<EffectContainerHandle>(null);
-    useMemo(() => {
-        gameMapStore.initializeMap();
-    }, []);
+    useMapUpdating();
+    const user = useUser();
 
     /**
      * Executes when the client conquers a pixel for their guild.
@@ -43,16 +43,26 @@ const GameMap = () => {
         result ? effectRef.current?.conqueredEffect(coordinate) : effectRef.current?.forbiddenEffect(coordinate);
     }
 
+    if (map === null) {
+        return <span>Loading...</span>;
+    }
+
+    const mappedBoundingBox = {
+        minY: pixelsBoundingBox.min.y,
+        minX: pixelsBoundingBox.min.x,
+        maxY: pixelsBoundingBox.max.y,
+        maxX: pixelsBoundingBox.max.x,
+    };
+
     const pixelElements = [];
-    for (const [serializedCoordinate, pixel] of gameMapStore.pixels) {
-        const coordinate = JSON.parse(serializedCoordinate);
+    for (const [coordinate, pixel] of map) {
         const rectangleX = coordinate.x * mapConfig.PixelSize;
         const rectangleY = coordinate.y * mapConfig.PixelSize;
         const color = pixelColor(pixel);
 
         pixelElements.push(
             <Rectangle
-                key={`x:${coordinate.x} y:${coordinate.y}`}
+                key={`x:${coordinate.x} y:${coordinate.y}-${pixelElements.length}-${Date.now()}`}
                 x={rectangleX}
                 y={rectangleY}
                 isOwn={pixel?.owner === user?.id}
@@ -64,7 +74,6 @@ const GameMap = () => {
             />,
         );
     }
-
     return (
         <>
             <Stage
@@ -72,11 +81,7 @@ const GameMap = () => {
                 height={window.innerHeight}
                 options={{ background: 0xffffff, resizeTo: window }}
             >
-                <Viewport
-                    width={window.innerWidth}
-                    height={window.innerHeight}
-                    boundingBox={gameMapStore.pixelsBoundingBox}
-                >
+                <Viewport width={window.innerWidth} height={window.innerHeight} boundingBox={mappedBoundingBox}>
                     <Container>{pixelElements}</Container>
                     <EffectContainer ref={effectRef} />
                 </Viewport>
