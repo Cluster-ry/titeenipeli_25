@@ -9,7 +9,7 @@ using Titeenipeli.Options;
 
 namespace Titeenipeli.Services;
 
-public class JwtService
+public sealed class JwtService: IJwtService
 {
     private readonly JwtOptions _jwtOptions;
 

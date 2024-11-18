@@ -17,9 +17,9 @@ public class CtfController : ControllerBase
     private readonly ICtfFlagRepositoryService _ctfFlagRepositoryService;
     private readonly IGuildRepositoryService _guildRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
-    private readonly JwtService _jwtService;
+    private readonly IJwtService _jwtService;
 
-    public CtfController(ICtfFlagRepositoryService ctfFlagRepositoryService, IUserRepositoryService userRepositoryService, IGuildRepositoryService guildRepositoryService, JwtService jwtService)
+    public CtfController(ICtfFlagRepositoryService ctfFlagRepositoryService, IUserRepositoryService userRepositoryService, IGuildRepositoryService guildRepositoryService, IJwtService jwtService)
     {
         _ctfFlagRepositoryService = ctfFlagRepositoryService;
         _userRepositoryService = userRepositoryService;

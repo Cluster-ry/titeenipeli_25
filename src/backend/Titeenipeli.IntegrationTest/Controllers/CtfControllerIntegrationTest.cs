@@ -9,10 +9,10 @@ using Titeenipeli.Services;
 
 namespace Titeenipeli.IntegrationTest.Controllers;
 
-//[TestFixture]
+[TestFixture]
 public class CtfControllerIntegrationTest : BaseFixture
 {
-    //[SetUp]
+    [SetUp]
     public async Task BeforeEach()
     {
         await _dbContext.Database.EnsureCreatedAsync();
@@ -21,9 +21,9 @@ public class CtfControllerIntegrationTest : BaseFixture
     private readonly ApiDbContext _dbContext =
         new ApiDbContext(new DbContextOptionsBuilder().UseNpgsql(Postgres.GetConnectionString()).Options);
 
-    //[TestCase("#TEST_FLAG", 200, TestName = "Should return success code for valid flag")]
-    //[TestCase("#INVALID_FLAG", 400, TestName = "Should return failure code for invalid flag")]
-    //[TestCase(null, 400, TestName = "Should return failure code for null flag")]
+    [TestCase("#TEST_FLAG", 200, TestName = "Should return success code for valid flag")]
+    [TestCase("#INVALID_FLAG", 400, TestName = "Should return failure code for invalid flag")]
+    [TestCase(null, 400, TestName = "Should return failure code for null flag")]
     public void Test1(string token, int statusCode)
     {
         CtfFlagRepositoryService ctfFlagRepositoryService = new CtfFlagRepositoryService(_dbContext);
@@ -38,13 +38,19 @@ public class CtfControllerIntegrationTest : BaseFixture
         userRepositoryService.Add(user);
         jwtService.CreateJwtClaim(user);
 
-
         ctfFlagRepositoryService.Add(new CtfFlag { Token = "#TEST_FLAG" });
 
+        var jwtClaim = jwtService.CreateJwtClaim(user);
+        var httpcontext = new DefaultHttpContext();
+        httpcontext.Items[jwtService.GetJwtClaimName()] = jwtClaim;
+
         CtfController ctfController = new CtfController(ctfFlagRepositoryService, userRepositoryService, guildRepositoryService, jwtService);
+        ctfController.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext{
+            HttpContext = httpcontext 
+        };
 
         PostCtfInput input = new PostCtfInput { Token = token };
-        //TODO HOW TO INJECT jwt to httpcontext for testing.
+    
 
         IStatusCodeActionResult? result = ctfController.PostCtf(input) as IStatusCodeActionResult;
         result?.StatusCode.Should().Be(statusCode);
