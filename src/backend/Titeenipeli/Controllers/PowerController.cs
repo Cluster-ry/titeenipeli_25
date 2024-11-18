@@ -44,6 +44,7 @@ public sealed class PowerController : ControllerBase
     }
 
     [HttpPost("Activate")]
+    [Authorize(Policy = "MustHaveGuild")]
     public IActionResult ActivatePower([FromBody] PowerInput body)
     {
         var user = HttpContext.GetUser(_jwtServices, _userRepositoryService);
