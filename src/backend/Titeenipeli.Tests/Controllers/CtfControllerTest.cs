@@ -41,9 +41,9 @@ public class CtfControllerTest
 
     private static readonly JwtClaim CurrentClaim = new()
     {
-        Id=0,
+        Id = 0,
         GuildId = OwnGuild.Name,
-        CoordinateOffset = new(0,0),
+        CoordinateOffset = new(0, 0),
     };
 
 
@@ -78,8 +78,9 @@ public class CtfControllerTest
         httpcontext.Items[jwtClaimName] = CurrentClaim;
 
         CtfController controller = new CtfController(mockCtfFlagRepositoryService.Object, mockUserRepositoryService.Object, mockGuildRepositoryService.Object, mockJwtService.Object);
-        controller.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext{
-            HttpContext = httpcontext 
+        controller.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext
+        {
+            HttpContext = httpcontext
         };
 
         PostCtfInput input = new PostCtfInput

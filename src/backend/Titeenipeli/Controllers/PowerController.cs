@@ -47,7 +47,7 @@ public sealed class PowerController : ControllerBase
         var userPower = user.Powerups.FirstOrDefault(power => power.Id == body.Id);
         if (userPower is null) return Unauthorized();
 
-        Enum.TryParse<Powerups>(userPower.Name, out var powerupEnum); 
+        Enum.TryParse<Powerups>(userPower.Name, out var powerupEnum);
         var handler = SelectPowerHandler(powerupEnum);
         if (handler is null) return BadRequest();
 
@@ -91,7 +91,8 @@ public sealed class PowerController : ControllerBase
     }
 
     private Func<User, PowerInput, IActionResult>? SelectPowerHandler(Powerups? powerup)
-    => powerup switch{
+    => powerup switch
+    {
         Powerups.Titeenikirves => HandleTiteenikirves,
         _ => null,
     };

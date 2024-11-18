@@ -68,11 +68,11 @@ public static class DbFiller
         }
 
 
-        if(!dbContext.PowerUps.Any())
+        if (!dbContext.PowerUps.Any())
         {
-            foreach(var powerupName in Enum.GetNames<Powerups>())
+            foreach (var powerupName in Enum.GetNames<Powerups>())
             {
-                dbContext.PowerUps.Add(new PowerUp(){ Name = powerupName });
+                dbContext.PowerUps.Add(new PowerUp() { Name = powerupName });
             }
         }
 

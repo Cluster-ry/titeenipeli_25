@@ -45,12 +45,13 @@ public class CtfControllerIntegrationTest : BaseFixture
         httpcontext.Items[jwtService.GetJwtClaimName()] = jwtClaim;
 
         CtfController ctfController = new CtfController(ctfFlagRepositoryService, userRepositoryService, guildRepositoryService, jwtService);
-        ctfController.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext{
-            HttpContext = httpcontext 
+        ctfController.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext
+        {
+            HttpContext = httpcontext
         };
 
         PostCtfInput input = new PostCtfInput { Token = token };
-    
+
 
         IStatusCodeActionResult? result = ctfController.PostCtf(input) as IStatusCodeActionResult;
         result?.StatusCode.Should().Be(statusCode);
