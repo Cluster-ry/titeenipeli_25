@@ -20,7 +20,7 @@ public sealed class PowerController : ControllerBase
     private readonly JwtService _jwtServices;
     private readonly GameOptions _gameOptions;
 
-    private readonly IReadOnlyDictionary<string, Func<User, PowerInput, IActionResult>> powers;
+    //private readonly IReadOnlyDictionary<string, Func<User, PowerInput, IActionResult>> powers;
     public PowerController(IMapRepositoryService mapRepositoryService,
                             IUserRepositoryService userRepositoryService,
                             IMapUpdaterService mapUpdaterService,
@@ -35,12 +35,6 @@ public sealed class PowerController : ControllerBase
         _powerupRepositoryService = powerupService;
         _jwtServices = jwtService;
         _gameOptions = gameOptions;
-
-        powers = new Dictionary<string, Func<User, PowerInput, IActionResult>>(){
-            {"Titeenikirves", HandleTiteenikirves}
-        };
-
-        AddSupportedPowersToDatabase();
     }
 
     [HttpPost("Activate")]
@@ -53,7 +47,8 @@ public sealed class PowerController : ControllerBase
         var userPower = user.Powerups.FirstOrDefault(power => power.Id == body.Id);
         if (userPower is null) return Unauthorized();
 
-        powers.TryGetValue(userPower.Name, out var handler);
+        Enum.TryParse<Powerups>(userPower.Name, out var powerupEnum); 
+        var handler = SelectPowerHandler(powerupEnum);
         if (handler is null) return BadRequest();
 
         var result = handler(user, body);
@@ -95,12 +90,14 @@ public sealed class PowerController : ControllerBase
         return Ok();
     }
 
+    private Func<User, PowerInput, IActionResult>? SelectPowerHandler(Powerups? powerup)
+    => powerup switch{
+        Powerups.Titeenikirves => HandleTiteenikirves,
+        _ => null,
+    };
+}
 
-    private void AddSupportedPowersToDatabase()
-    {
-        foreach (var name in powers.Keys)
-        {
-            _powerupRepositoryService.Add(new PowerUp() { Name = name });
-        }
-    }
+public enum Powerups
+{
+    Titeenikirves,
 }

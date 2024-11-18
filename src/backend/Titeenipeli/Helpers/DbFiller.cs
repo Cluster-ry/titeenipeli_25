@@ -1,6 +1,7 @@
 using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Enums;
+using Titeenipeli.Controllers;
 using Titeenipeli.Options;
 
 namespace Titeenipeli.Helpers;
@@ -64,6 +65,15 @@ public static class DbFiller
             dbContext.Users.Add(testOpponent);
 
             dbContext.SaveChanges();
+        }
+
+
+        if(!dbContext.PowerUps.Any())
+        {
+            foreach(var powerupName in Enum.GetNames<Powerups>())
+            {
+                dbContext.PowerUps.Add(new PowerUp(){ Name = powerupName });
+            }
         }
 
         if (!dbContext.Map.Any())
