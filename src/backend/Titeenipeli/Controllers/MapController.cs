@@ -292,11 +292,12 @@ public class MapController : ControllerBase
             for (int y = 0; y < map.Height; y++)
             {
                 var backgroundGraphic = _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(x - 1, y - 1));
-                if (backgroundGraphic != null)
+                if (backgroundGraphic == null)
                 {
-                    var backgroundGraphicWire = Convert.ToBase64String(backgroundGraphic);
-                    map.Pixels[y, x].BackgroundGraphic = backgroundGraphicWire;
+                    continue
                 }
+                var backgroundGraphicWire = Convert.ToBase64String(backgroundGraphic);
+                map.Pixels[y, x].BackgroundGraphic = backgroundGraphicWire;
             }
         }
     }
