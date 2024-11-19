@@ -15,6 +15,7 @@ using Titeenipeli.Controllers.Grpc;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
 using Titeenipeli.Options;
+using Titeenipeli.Services;
 using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Tests.Grpc;
@@ -41,6 +42,7 @@ public class MapUpdateProcessorTest
     private ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _connections;
     private IIncrementalMapUpdateCoreService _incrementalMapUpdateCoreService;
     private GameOptions _gameOptions;
+    private IBackgroundGraphicsService _backgroundGraphicsService = new Mock<IBackgroundGraphicsService>().Object;
 
     private static readonly Guild OwnGuild = new()
     {
@@ -109,7 +111,7 @@ public class MapUpdateProcessorTest
     {
         Dictionary<Coordinate, GrpcChangePixel> newPixels = MapUtils.MatrixOfUsersToPixels(inputMap, _users);
         GrpcMapChangesInput input = new(newPixels, changes);
-        MapUpdateProcessor mapUpdateProcessor = new(_incrementalMapUpdateCoreService, input, _connections, _gameOptions);
+        MapUpdateProcessor mapUpdateProcessor = new(_incrementalMapUpdateCoreService, input, _connections, _gameOptions, _backgroundGraphicsService);
 
         await mapUpdateProcessor.Process();
 
