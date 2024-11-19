@@ -42,7 +42,7 @@ public static class Program
         builder.Configuration.GetSection("Game").Bind(gameOptions);
         builder.Services.AddSingleton(gameOptions);
 
-        builder.Services.AddScoped<JwtService>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<SpawnGeneratorService>();
 
         // Adding OpenTelemetry tracing and metrics
@@ -266,9 +266,6 @@ public static class Program
         services
             .AddScoped<ICtfFlagRepositoryService,
                 CtfFlagRepositoryService>();
-
-        services.AddScoped<IPowerupRepositoryService,
-                PowerupRepositoryService>();
     }
 
     private static TService GetNonNullService<TService>(IServiceProvider serviceProvider)

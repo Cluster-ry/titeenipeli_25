@@ -40,6 +40,8 @@ paths:
     $ref: "./paths/state/map/pixels.yaml"
   /state/game:
     $ref: "./paths/state/gameState.yaml"
+  /state/powerups/activate:
+    $ref: "./paths/state/powerups.yaml"
   /users:
     $ref: "./paths/users/users.yaml"
   /users/authenticate:

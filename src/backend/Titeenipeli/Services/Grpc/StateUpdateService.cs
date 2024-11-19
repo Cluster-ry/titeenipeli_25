@@ -8,7 +8,7 @@ using Titeenipeli.Grpc.Common;
 namespace Titeenipeli.Services.Grpc;
 
 public class StateUpdateService(
-    JwtService jwtService,
+    IJwtService jwtService,
     IUserRepositoryService userRepositoryService,
     IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
     IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService

@@ -1,0 +1,8 @@
+type: object
+properties:
+  id:
+    type: int
+  location:
+    $ref: "./relativeCoordinate.yaml"
+  direction:
+    $ref: "../enums/powerupDirection.yaml"

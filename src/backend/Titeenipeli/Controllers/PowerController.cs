@@ -5,39 +5,26 @@ using Titeenipeli.Extensions;
 using Titeenipeli.Options;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Inputs;
 
 namespace Titeenipeli.Controllers;
 
 [ApiController]
-[Route("powers")]
+[Route("state/powerups")]
 [Authorize(Policy = "MustHaveGuild")]
-public sealed class PowerController : ControllerBase
+public sealed class PowerController(
+                        IUserRepositoryService userRepositoryService,
+                        IMapUpdaterService mapUpdaterService,
+                        IJwtService jwtService,
+                        GameOptions gameOptions
+                            ) : ControllerBase
 {
-    private readonly IMapRepositoryService _mapRepositoryService;
-    private readonly IUserRepositoryService _userRepositoryService;
-    private readonly IMapUpdaterService _mapUpdaterService;
-    private readonly IPowerupRepositoryService _powerupRepositoryService;
-    private readonly JwtService _jwtServices;
-    private readonly GameOptions _gameOptions;
+    private readonly IUserRepositoryService _userRepositoryService = userRepositoryService;
+    private readonly IMapUpdaterService _mapUpdaterService = mapUpdaterService;
+    private readonly IJwtService _jwtServices = jwtService;
+    private readonly GameOptions _gameOptions = gameOptions;
 
-    //private readonly IReadOnlyDictionary<string, Func<User, PowerInput, IActionResult>> powers;
-    public PowerController(IMapRepositoryService mapRepositoryService,
-                            IUserRepositoryService userRepositoryService,
-                            IMapUpdaterService mapUpdaterService,
-                            IPowerupRepositoryService powerupService,
-                            JwtService jwtService,
-                            GameOptions gameOptions
-                            )
-    {
-        _mapRepositoryService = mapRepositoryService;
-        _userRepositoryService = userRepositoryService;
-        _mapUpdaterService = mapUpdaterService;
-        _powerupRepositoryService = powerupService;
-        _jwtServices = jwtService;
-        _gameOptions = gameOptions;
-    }
-
-    [HttpPost("Activate")]
+    [HttpPost("activate")]
     [Authorize(Policy = "MustHaveGuild")]
     public IActionResult ActivatePower([FromBody] PowerInput body)
     {
@@ -65,8 +52,8 @@ public sealed class PowerController : ControllerBase
         var realX = user.SpawnX + body.Location.X;
         var realY = user.SpawnY + body.Location.Y;
 
-        if (body.direction is Direction.Undefined) return BadRequest();
-        else if (body.direction is Direction.North or Direction.South)
+        if (body.Direction is DirectionEnum.Undefined) return BadRequest();
+        else if (body.Direction is DirectionEnum.North or DirectionEnum.South)
         {
             for (var y = 0; y < _gameOptions.Height; y++)
             {
@@ -76,7 +63,7 @@ public sealed class PowerController : ControllerBase
                 _mapUpdaterService.PlacePixel(new() { X = realX + 1, Y = y }, user);
             }
         }
-        else if (body.direction is Direction.West or Direction.East)
+        else if (body.Direction is DirectionEnum.West or DirectionEnum.East)
         {
             for (var x = 0; x < _gameOptions.Width; x++)
             {

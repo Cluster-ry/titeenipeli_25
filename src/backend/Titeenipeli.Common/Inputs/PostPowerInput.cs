@@ -1,15 +1,15 @@
-using Titeenipeli.Inputs;
+namespace Titeenipeli.Inputs;
 
 public sealed class PowerInput
 {
     public required int Id { get; init; }
     public required PostPixelsInput Location { get; init; }
-    public required Direction direction { get; init; }
+    public required DirectionEnum Direction { get; init; }
 
 }
 
 
-public enum Direction
+public enum DirectionEnum
 {
     Undefined = 0,
     North = 1,

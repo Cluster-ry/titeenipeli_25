@@ -27,10 +27,10 @@ public class MapController : ControllerBase
     private readonly IMapUpdaterService _mapUpdaterService;
     private readonly IBackgroundGraphicsService _backgroundGraphicsService;
 
-    private readonly JwtService _jwtService;
+    private readonly IJwtService _jwtService;
 
     public MapController(GameOptions gameOptions,
-                         JwtService jwtService,
+                         IJwtService jwtService,
                          IUserRepositoryService userRepositoryService,
                          IMapRepositoryService mapRepositoryService,
                          IMapUpdaterService mapUpdaterService,
@@ -297,7 +297,7 @@ public class MapController : ControllerBase
                     continue;
                 }
                 var backgroundGraphicWire = Convert.ToBase64String(backgroundGraphic);
-                map.Pixels[y, x].BackgroundGraphic = backgroundGraphicWire;
+                map.Pixels[x, y].BackgroundGraphic = backgroundGraphicWire;
             }
         }
     }
