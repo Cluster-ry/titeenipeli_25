@@ -20,6 +20,7 @@ message IncrementalMapUpdateResponse {
     PixelTypes type = 2;
     PixelGuild guild = 3;
     PixelUser owner = 4;
+    bytes backgroundGraphic = 5;
   }  
 }
 

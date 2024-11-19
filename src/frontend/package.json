@@ -11,7 +11,7 @@
         "generate-grpc": "rimraf src/generated/grpc && mkdirp -p src/generated/grpc && pnpm compile-grpc-components && pnpm compile-grpc-services",
         "compile-grpc-components": "npx protoc --proto_path=../protobuf --ts_out=src/generated/grpc --ts_opt=ts_nocheck ../protobuf/components/*/*.proto",
         "compile-grpc-services": "npx protoc --proto_path=../protobuf --ts_out=src/generated/grpc --ts_opt=ts_nocheck ../protobuf/*/*.proto",
-        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+        "lint": "eslint './**/*.{ts,tsx}' --report-unused-disable-directives --max-warnings 0 --ignore-pattern 'src/generated/*'",
         "preview": "vite preview"
     },
     "dependencies": {

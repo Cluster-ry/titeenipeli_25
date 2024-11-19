@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Google.Protobuf;
 using GrpcGeneratedServices;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Enums;
@@ -6,6 +7,7 @@ using Titeenipeli.Common.Models;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
 using Titeenipeli.Options;
+using Titeenipeli.Services;
 using Titeenipeli.Services.Grpc;
 using static GrpcGeneratedServices.IncrementalMapUpdateResponse.Types;
 
@@ -19,6 +21,7 @@ public class MapUpdateProcessor
     private readonly User? _user;
     private readonly ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _grpcConnections;
     private readonly GameOptions _gameOptions;
+    private readonly IBackgroundGraphicsService _backgroundGraphicsService;
 
     private readonly Dictionary<Coordinate, IncrementalMapUpdate> _pixelWireChanges = [];
 
@@ -28,12 +31,14 @@ public class MapUpdateProcessor
             IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
             GrpcMapChangesInput mapChangesInput,
             ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> connections,
-            GameOptions gameOptions
+            GameOptions gameOptions,
+            IBackgroundGraphicsService backgroundGraphicsService
         )
     {
         _incrementalMapUpdateCoreService = incrementalMapUpdateCoreService;
         _mapChangesInput = mapChangesInput;
         _gameOptions = gameOptions;
+        _backgroundGraphicsService = backgroundGraphicsService;
         _grpcConnections = connections;
         _visibilityMap = new VisibilityMap(gameOptions.Width, gameOptions.Height, gameOptions.FogOfWarDistance);
 
@@ -119,7 +124,7 @@ public class MapUpdateProcessor
         foreach (MapChange change in winChanges)
         {
             LoopNearbyPixelsInsideFogOfWar(
-                AddStandardChange,
+                AddWinChange,
                 change.Coordinate
             );
         }
@@ -160,12 +165,26 @@ public class MapUpdateProcessor
         }
     }
 
-    private void AddStandardChange(Coordinate coordinate)
+    private void AddWinChange(Coordinate coordinate)
+    {
+        var mapUpdate = AddStandardChange(coordinate);
+        if (mapUpdate == null)
+            return;
+
+        var backgroundGraphic = _backgroundGraphicsService.GetBackgroundGraphic(coordinate);
+        if (backgroundGraphic == null)
+            return;
+
+        var backgroundGraphicWire = ByteString.CopyFrom(backgroundGraphic);
+        mapUpdate.BackgroundGraphic = backgroundGraphicWire;
+    }
+
+    private IncrementalMapUpdate? AddStandardChange(Coordinate coordinate)
     {
         if (!IsInsideMap(coordinate))
         {
             AddNotOwnedChange(coordinate, PixelTypes.MapBorder);
-            return;
+            return null;
         }
 
         var spawnRelativeCoordinate = ToSpawnRelativeCoordinate(coordinate, _user);
@@ -194,6 +213,7 @@ public class MapUpdateProcessor
             Owner = owner,
         };
         _pixelWireChanges[coordinate] = mapUpdate;
+        return mapUpdate;
     }
 
     private void AddNotOwnedChange(Coordinate coordinate, PixelTypes pixelType)

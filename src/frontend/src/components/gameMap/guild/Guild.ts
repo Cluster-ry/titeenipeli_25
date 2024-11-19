@@ -20,7 +20,7 @@ const guildColorMapping: Record<Guild, HslaColour> = {
     [Guild.Sosa]: { hue: 188, saturation: 100, lightness: 42 },
 };
 
-export function pixelColor(pixel?: Pixel): HslaColour {
+export function pixelColor(pixel?: Pixel | null): HslaColour {
     const black = { hue: 0, saturation: 0, lightness: 0 };
 
     if (!pixel) {
