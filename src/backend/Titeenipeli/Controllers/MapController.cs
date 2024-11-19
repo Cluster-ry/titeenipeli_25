@@ -294,7 +294,7 @@ public class MapController : ControllerBase
                 var backgroundGraphic = _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(x - 1, y - 1));
                 if (backgroundGraphic == null)
                 {
-                    continue
+                    continue;
                 }
                 var backgroundGraphicWire = Convert.ToBase64String(backgroundGraphic);
                 map.Pixels[y, x].BackgroundGraphic = backgroundGraphicWire;
