@@ -5,7 +5,7 @@ namespace Titeenipeli.Extensions;
 
 public static class ResponseCookiesExtensions
 {
-    public static void AppendJwtCookie(this IResponseCookies cookies, JwtService jwtService, User user)
+    public static void AppendJwtCookie(this IResponseCookies cookies, IJwtService jwtService, User user)
     {
         cookies.Append(jwtService.GetAuthorizationCookieName(), jwtService.GetJwtToken(user),
             jwtService.GetAuthorizationCookieOptions());

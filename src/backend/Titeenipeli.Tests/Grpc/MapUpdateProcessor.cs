@@ -46,11 +46,13 @@ public class MapUpdateProcessorTest
 
     private static readonly Guild OwnGuild = new()
     {
-        Name = GuildName.Cluster
+        Name = GuildName.Cluster,
+        ActiveCtfFlags = new(),
     };
     private static readonly Guild OtherGuild = new()
     {
-        Name = GuildName.Tietokilta
+        Name = GuildName.Tietokilta,
+        ActiveCtfFlags = new(),
     };
     private static readonly User CurrentUser = new()
     {
@@ -59,6 +61,7 @@ public class MapUpdateProcessorTest
         Code = "",
         SpawnX = 0,
         SpawnY = 0,
+        Powerups = new(),
         TelegramId = "",
         FirstName = "Own user",
         LastName = "",
@@ -71,6 +74,7 @@ public class MapUpdateProcessorTest
         Code = "",
         SpawnX = 0,
         SpawnY = 0,
+        Powerups = new(),
         TelegramId = "",
         FirstName = "Other user",
         LastName = "",

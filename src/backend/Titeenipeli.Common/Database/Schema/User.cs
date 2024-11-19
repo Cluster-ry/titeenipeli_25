@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Titeenipeli.Common.Database.Schema;
 
@@ -18,6 +19,7 @@ public class User : Entity
     public string? AuthenticationToken { get; set; }
     public DateTime? AuthenticationTokenExpiryTime { get; set; }
 
+    public List<PowerUp> Powerups { get; init; } = new();
 
     #region Telegram
     [StringLength(64)]

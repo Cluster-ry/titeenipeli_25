@@ -18,6 +18,7 @@ public class ApiDbContext : DbContext
     public DbSet<GuildPowerUp> GuildPowerUps { get; init; } = null!;
     public DbSet<GameEvent> GameEvents { get; init; } = null!;
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
     }

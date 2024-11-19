@@ -23,7 +23,7 @@ public class UserController(
                       SpawnGeneratorService spawnGeneratorService,
                       IUserRepositoryService userRepositoryService,
                       IGuildRepositoryService guildRepositoryService,
-                      JwtService jwtService,
+                      IJwtService jwtService,
                       IMapRepositoryService mapRepositoryService) : ControllerBase
 {
     private const int _loginTokenLength = 32;
@@ -36,6 +36,7 @@ public class UserController(
     public IActionResult CurrentUser()
     {
         var user = HttpContext.GetUser(jwtService, userRepositoryService);
+        if (user is null) return Unauthorized();
 
         return Ok(new UserResult(user));
     }
@@ -171,6 +172,8 @@ public class UserController(
 
             SpawnX = spawnPoint.X,
             SpawnY = spawnPoint.Y,
+
+            Powerups = new(),
 
             TelegramId = usersInput.TelegramId,
             FirstName = usersInput.FirstName,

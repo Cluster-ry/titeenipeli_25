@@ -7,7 +7,8 @@ namespace Titeenipeli.Extensions;
 
 public static class HttpContextExtensions
 {
-    public static User GetUser(this HttpContext context, JwtService jwtService, IUserRepositoryService userRepositoryService)
+
+    public static User GetUser(this HttpContext context, IJwtService jwtService, IUserRepositoryService userRepositoryService)
     {
         var jwtClaim = context.Items[jwtService.GetJwtClaimName()] as JwtClaim;
         if (jwtClaim == null)

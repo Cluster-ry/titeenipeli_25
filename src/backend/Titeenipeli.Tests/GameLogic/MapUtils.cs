@@ -92,11 +92,11 @@ public static class MapUtils
 
     public static User GuildNameToUser(GuildName? guildName)
     {
-        Guild guild = guildName != null ? new() { Name = (GuildName)guildName } : null;
+        Guild guild = guildName != null ? new() { Name = (GuildName)guildName, ActiveCtfFlags = new() } : null;
         return new()
         {
             Guild = guild,
-
+            Powerups = new(),
             Code = "",
             SpawnX = 0,
             SpawnY = 0,

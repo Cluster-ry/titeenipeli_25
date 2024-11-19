@@ -1,0 +1,18 @@
+codeGen: namedEnum
+type: string
+oneOf:
+  - const: Undefined
+    title: Undefined
+    description: Powerup direction is not defined.
+  - const: North
+    title: North
+    description: Powerup direction is North.
+  - const: West
+    title: West
+    description: Powerup direction is West.
+  - const: South
+    title: South
+    description: Powerup direction is South.
+  - const: East
+    title: East
+    description: Powerup direction is East.

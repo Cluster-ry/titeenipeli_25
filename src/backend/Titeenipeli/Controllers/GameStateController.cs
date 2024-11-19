@@ -15,7 +15,7 @@ public class GameStateController(
         GameOptions gameOptions,
         IUserRepositoryService userRepositoryService,
         IGuildRepositoryService guildRepositoryService,
-        JwtService jwtService
+        IJwtService jwtService
     ) : ControllerBase
 {
     [HttpGet("game")]

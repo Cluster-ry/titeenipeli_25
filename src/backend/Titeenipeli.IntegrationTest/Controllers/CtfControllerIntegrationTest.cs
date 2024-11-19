@@ -1,8 +1,11 @@
+using ICSharpCode.SharpZipLib.Core;
+using Microsoft.AspNetCore.Http;
 using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services;
 using Titeenipeli.Controllers;
 using Titeenipeli.Inputs;
+using Titeenipeli.Services;
 
 namespace Titeenipeli.IntegrationTest.Controllers;
 
@@ -24,13 +27,57 @@ public class CtfControllerIntegrationTest : BaseFixture
     public void Test1(string token, int statusCode)
     {
         CtfFlagRepositoryService ctfFlagRepositoryService = new CtfFlagRepositoryService(_dbContext);
+        UserRepositoryService userRepositoryService = new UserRepositoryService(_dbContext);
+        GuildRepositoryService guildRepositoryService = new GuildRepositoryService(_dbContext);
+        JwtService jwtService = new JwtService(new());
+
+        var guild = GenerateGuild();
+        var user = GenerateUser(guild);
+
+        guildRepositoryService.Add(guild);
+        userRepositoryService.Add(user);
+        jwtService.CreateJwtClaim(user);
+
         ctfFlagRepositoryService.Add(new CtfFlag { Token = "#TEST_FLAG" });
 
-        CtfController ctfController = new CtfController(ctfFlagRepositoryService);
+        var jwtClaim = jwtService.CreateJwtClaim(user);
+        var httpcontext = new DefaultHttpContext();
+        httpcontext.Items[jwtService.GetJwtClaimName()] = jwtClaim;
+
+        CtfController ctfController = new CtfController(ctfFlagRepositoryService, userRepositoryService, guildRepositoryService, jwtService);
+        ctfController.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext
+        {
+            HttpContext = httpcontext
+        };
 
         PostCtfInput input = new PostCtfInput { Token = token };
 
+
         IStatusCodeActionResult? result = ctfController.PostCtf(input) as IStatusCodeActionResult;
         result?.StatusCode.Should().Be(statusCode);
+    }
+
+
+    private Guild GenerateGuild()
+    {
+        return new Guild
+        {
+            Name = Common.Enums.GuildName.Cluster,
+        };
+    }
+
+    private User GenerateUser(Guild guild)
+    {
+        return new User
+        {
+            Guild = guild,
+            Code = "user",
+            SpawnX = 0,
+            SpawnY = 0,
+            TelegramId = "0",
+            FirstName = "",
+            LastName = "",
+            Username = "",
+        };
     }
 }

@@ -8,4 +8,5 @@ public class Guild : Entity
     public int CumulativeScore { get; set; }
     public int CurrentScore { get; set; }
     public float CurrentRateLimitIncreasePerMinutePerPlayer { get; set; }
+    public List<CtfFlag> ActiveCtfFlags { get; init; } = new();
 }

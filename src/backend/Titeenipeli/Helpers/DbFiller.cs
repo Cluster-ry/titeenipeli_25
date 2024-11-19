@@ -1,6 +1,7 @@
 using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Enums;
+using Titeenipeli.Controllers;
 using Titeenipeli.Options;
 
 namespace Titeenipeli.Helpers;
@@ -23,7 +24,7 @@ public static class DbFiller
         if (!dbContext.Guilds.Any())
         {
             List<Guild> guilds = [];
-            guilds.AddRange(from GuildName name in Enum.GetValues(typeof(GuildName)) select new Guild { Name = name });
+            guilds.AddRange(from GuildName name in Enum.GetValues(typeof(GuildName)) select new Guild { Name = name, ActiveCtfFlags = new() });
 
             dbContext.Guilds.AddRange(guilds);
 
@@ -36,10 +37,11 @@ public static class DbFiller
             Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
             SpawnX = 5,
             SpawnY = 5,
+            Powerups = new(),
             TelegramId = "0",
             FirstName = "",
             LastName = "",
-            Username = ""
+            Username = "",
         };
 
         User testOpponent = new User
@@ -49,6 +51,7 @@ public static class DbFiller
                     throw new InvalidOperationException(),
             SpawnX = 3,
             SpawnY = 2,
+            Powerups = new(),
             TelegramId = "1",
             FirstName = "",
             LastName = "",
@@ -62,6 +65,15 @@ public static class DbFiller
             dbContext.Users.Add(testOpponent);
 
             dbContext.SaveChanges();
+        }
+
+
+        if (!dbContext.PowerUps.Any())
+        {
+            foreach (var powerupName in Enum.GetNames<Powerups>())
+            {
+                dbContext.PowerUps.Add(new PowerUp() { Name = powerupName });
+            }
         }
 
         if (!dbContext.Map.Any())
