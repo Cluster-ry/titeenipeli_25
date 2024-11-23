@@ -11,6 +11,7 @@ import { useNewMapStore } from "../../stores/newMapStore.ts";
 import { useMapUpdating } from "../../hooks/useMapUpdating.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
+import { useGameStateStore } from "../../stores/gameStateStore.ts";
 
 /**
  * @component GameMap
@@ -27,6 +28,8 @@ import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 const GameMap: FC = () => {
     const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
     const map = useNewMapStore((state) => state.map);
+    const bucket = useGameStateStore((state) => state.pixelBucket);
+    const decreaseBucket = useGameStateStore((state) => state.decreaseBucket);
     const effectRef = useRef<EffectContainerHandle>(null);
     useMapUpdating();
     const user = useUser();
@@ -39,8 +42,18 @@ const GameMap: FC = () => {
      * @note Upon change, the map is automatically refreshed.
      */
     async function conquer(coordinate: Coordinate) {
-        const result = await postPixels(coordinate);
-        result ? effectRef.current?.conqueredEffect(coordinate) : effectRef.current?.forbiddenEffect(coordinate);
+        if (bucket.amount <= 0) {
+            effectRef.current?.forbiddenEffect(coordinate);
+            return;
+        }
+
+        const success = await postPixels(coordinate);
+        if (success) {
+            effectRef.current?.conqueredEffect(coordinate);
+            decreaseBucket();
+        } else {
+            effectRef.current?.forbiddenEffect(coordinate);
+        }
     }
 
     if (map === null) {

@@ -54,7 +54,8 @@ public class UpdatePixelBucketsService(
 
             GrpcMiscGameStateUpdateInput stateUpdate = new()
             {
-                User = user
+                User = user,
+                MaximumPixelBucket = gameOptions.MaximumPixelBucket
             };
             miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
         }

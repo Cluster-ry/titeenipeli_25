@@ -1,5 +1,7 @@
 using System.Collections.Concurrent;
 using GrpcGeneratedServices;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Enums;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
 using Titeenipeli.Grpc.Services;
@@ -32,8 +34,20 @@ public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) 
                 var responseStream = userConnection.Value.ResponseStreamQueue.Writer;
                 MiscStateUpdateResponse incrementalResponse = new()
                 {
-                    PixelBucket = (uint)gameStateUpdateInput.User.PixelBucket
+                    PixelBucket = new()
+                    {
+                        Amount = (uint)gameStateUpdateInput.User.PixelBucket,
+                        MaxAmount = (uint)gameStateUpdateInput.MaximumPixelBucket,
+                        IncreasePerMinute = gameStateUpdateInput.User.Guild.CurrentRateLimitIncreasePerMinutePerPlayer
+                    }
                 };
+
+                if (gameStateUpdateInput.Guilds != null)
+                {
+                    var scores = GuildsToScores(gameStateUpdateInput.Guilds);
+                    incrementalResponse.Scores.Add(scores);
+                }
+
                 await responseStream.WriteAsync(incrementalResponse);
             }
         }
@@ -41,5 +55,26 @@ public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) 
         {
             logger.LogError("Error while processing gRPC state updates: {error}", exception);
         }
+    }
+
+    private static List<MiscStateUpdateResponse.Types.Scores> GuildsToScores(List<Guild> guilds)
+    {
+        List<MiscStateUpdateResponse.Types.Scores> scores = [];
+        foreach (var guild in guilds)
+        {
+            MiscStateUpdateResponse.Types.Scores score = new()
+            {
+                Guild = ConvertGuildToPixelGuild(guild.Name),
+                Amount = (uint)guild.CurrentScore
+            };
+            scores.Add(score);
+        }
+        return scores;
+    }
+
+    private static PixelGuild ConvertGuildToPixelGuild(GuildName? guildName)
+    {
+        bool success = Enum.TryParse(guildName.ToString(), false, out PixelGuild result);
+        return success ? result : PixelGuild.Nobody;
     }
 }

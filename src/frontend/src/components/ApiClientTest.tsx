@@ -5,10 +5,10 @@
  */
 import { AxiosResponse } from "axios";
 import { api } from "../api/index";
-import { GetPixelsResult } from "../models/Get/GetPixelsResult";
 
 import { PostCtfInput } from "../models/Post/PostCtfInput";
 import { PostPixelsInput } from "../models/Post/PostPixelsInput";
+import { GetGameState } from "../models/Get/GetGameState";
 
 export function ApiTestClient() {
     const getMapTest = async (event: { preventDefault: () => void }) => {
@@ -35,7 +35,7 @@ export function ApiTestClient() {
 
     const getGameState = async (event: { preventDefault: () => void }) => {
         event.preventDefault();
-        const results = (await api.gameState.getGameState()) as AxiosResponse<GetPixelsResult>;
+        const results = (await api.gameState.getGameState()) as AxiosResponse<GetGameState>;
         console.log(results.data);
     };
 

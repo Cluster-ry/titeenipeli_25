@@ -21,9 +21,9 @@ import { instanceOfClientApiError, type ClientApiError } from "../models/ClientA
 import GameMap from "../models/GameMap";
 import { getPixels } from "../api/map";
 import ViewportBoundingBox from "../models/ViewportBoundingBox.ts";
-import { GrpcClient } from "../core/grpc/grpcClient";
 import { IncrementalMapUpdateResponse } from "../generated/grpc/services/StateUpdate";
 import withRetry from "../utils/retryUtils";
+import GrpcClients from "../core/grpc/grpcClients.ts";
 
 export const useGameMapStore = create<GameMap>((set, get) => ({
     playerSpawn: { x: 0, y: 0 }, // Subject to change
@@ -52,9 +52,11 @@ export const useGameMapStore = create<GameMap>((set, get) => ({
 
         // Calling the GRPC client
 
-        const grpcClient = GrpcClient.getGrpcClient();
-        grpcClient.incrementalMapUpdateClient?.registerOnResponseListener(get().doIncrementalUpdate);
-        grpcClient.registerOnConnectionStatusChangedListener(get().handleGrpcConnectionStatusChanges);
+        const grpcClients = GrpcClients.getGrpcClients();
+        grpcClients.incrementalMapUpdateClient.registerOnResponseListener(get().doIncrementalUpdate);
+        grpcClients.incrementalMapUpdateClient.registerOnConnectionStatusChangedListener(
+            get().handleGrpcConnectionStatusChanges,
+        );
     },
 
     /**
