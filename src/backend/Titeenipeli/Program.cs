@@ -184,9 +184,15 @@ public static class Program
             IServiceProvider services = scope.ServiceProvider;
             var dbContext = services.GetRequiredService<ApiDbContext>();
 
-            DbFiller.Clear(dbContext);
-            dbContext.Database.EnsureCreated();
-            DbFiller.Initialize(dbContext, gameOptions);
+
+            if (app.Environment.IsDevelopment()) {
+                DbFiller.Clear(dbContext);
+            }
+
+            var newDatabase = dbContext.Database.EnsureCreated();
+            if (newDatabase) {
+                DbFiller.Initialize(dbContext, gameOptions);
+            }
         }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
