@@ -24,8 +24,8 @@ export default defineConfig({
             targets: [
                 {
                     src: path.resolve(__dirname, "./src/assets"),
-                    dest: "./"
-                }
+                    dest: "./",
+                },
             ],
         }),
     ],
