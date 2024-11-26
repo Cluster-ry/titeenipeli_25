@@ -1,8 +1,9 @@
+import { FC, PropsWithChildren } from "react";
 import "./overlay.css";
 import { RatelimitMeter } from "./RatelimitMeter";
 import { Scores } from "./Scores";
 
-const TopOverlay = () => {
+const TopOverlay: FC<PropsWithChildren> = () => {
     return (
         <div className="top-overlay top-gradient">
             <Scores />
