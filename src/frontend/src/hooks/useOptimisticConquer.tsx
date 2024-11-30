@@ -9,6 +9,16 @@ import { User } from "../models/User";
 import { useMapUpdating } from "./useMapUpdating";
 import { EffectContainerHandle } from "../components/gameMap/particleEffects";
 
+/**
+ * @summary
+ * Conquer a pixel with client-side optimistic handling
+ * @param user 
+ * Current user
+ * @param effectHandle
+ * Reference to the effect handler 
+ * @returns 
+ * A function to commence a pixel conquest action
+ */
 export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<EffectContainerHandle>) => {
     const { increaseBucket, decreaseBucket } = useGameStateStore();
     const { map, setPixel } = useNewMapStore();
