@@ -15,6 +15,7 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
 
     /**
      * @summary
+     * Is to be run when receiving a response from the server.
      * onMutate return value is included in the "context" parameter,
      * allowing for easy rerolling of optimistic changes
      */
@@ -29,7 +30,12 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
         [increaseBucket, setPixel, effectHandle],
     );
 
-    // Optimistic conquer effect
+    /**
+     * @summary
+     * Is to be run before sending a request to the server.
+     * Displays the visual of the users' actions before receiving
+     * a definitive response from the server.
+     */
     const optimisticConquer = useCallback(
         (coordinate: PostPixelsInput) => {
             const oldPixel = map?.get(JSON.stringify(coordinate));
@@ -47,10 +53,20 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
     const { conquerPixel } = useMapUpdating({ optimisticConquer, onConquerSettled });
 
     /**
-     * Executes when the client conquers a pixel for their guild.
-     * Changes the integer value representing a guild to the one
-     * associated with the client's own guild.
-     *
+     * @summary
+     * Executes when the client attempts to conquer a pixel for their guild.
+     * Changes the integer value representing a guild to the one associated
+     * with the client's own guild.
+     * 
+     * Do basic condition checks before sending the update. In case the basic
+     * pixel placement rules are not met, display error effect and forfeit from
+     * making the request.
+     * 
+     * Rules:
+     * - At least one of the adjacent pixels must be owned by the guild
+     * - The targeted pixel must be a conquerable type (Normal)
+     * - There must be enough buffer left in the pixelBucket to make the action
+     * 
      * @note Upon change, the map is automatically refreshed.
      */
     const conquer = useCallback(
