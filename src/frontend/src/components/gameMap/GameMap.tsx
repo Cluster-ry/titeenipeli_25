@@ -27,7 +27,7 @@ const GameMap: FC = () => {
     const map = useNewMapStore((state) => state.map);
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
-    const conquer = useOptimisticConquer({ user, effectHandle: effectRef });
+    const conquer = useOptimisticConquer(user, effectRef);
 
     const mappedBoundingBox = {
         minY: pixelsBoundingBox.min.y,

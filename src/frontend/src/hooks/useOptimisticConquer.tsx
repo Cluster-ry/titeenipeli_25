@@ -9,18 +9,9 @@ import { User } from "../models/User";
 import { useMapUpdating } from "./useMapUpdating";
 import { EffectContainerHandle } from "../components/gameMap/particleEffects";
 
-type Props = {
-    user: User | null;
-    effectHandle: RefObject<EffectContainerHandle>;
-};
-
-export const useOptimisticConquer = ({ user, effectHandle }: Props) => {
-    const decreaseBucket = useGameStateStore((state) => state.decreaseBucket);
-    const increaseBucket = useGameStateStore((state) => state.increaseBucket);
-    const setPixel = useNewMapStore((state) => state.setPixel);
-
-    const bucket = useGameStateStore((state) => state.pixelBucket);
-    const map = useNewMapStore((state) => state.map);
+export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<EffectContainerHandle>) => {
+    const { increaseBucket, decreaseBucket } = useGameStateStore();
+    const { map, setPixel } = useNewMapStore();
 
     /**
      * @summary
@@ -28,14 +19,14 @@ export const useOptimisticConquer = ({ user, effectHandle }: Props) => {
      * allowing for easy rerolling of optimistic changes
      */
     const onConquerSettled = useCallback(
-        async (success?: boolean, error?: Error | null, variables?: PostPixelsInput, context?: Pixel) => {
+        (success?: boolean, error?: Error | null, variables?: PostPixelsInput, context?: Pixel) => {
             if ((!success || error) && variables && context) {
+                increaseBucket();
                 setPixel({ x: variables.x, y: variables.y }, context);
                 effectHandle.current?.forbiddenEffect(variables);
-                increaseBucket();
             }
         },
-        [increaseBucket],
+        [increaseBucket, setPixel, effectHandle],
     );
 
     // Optimistic conquer effect
@@ -50,7 +41,7 @@ export const useOptimisticConquer = ({ user, effectHandle }: Props) => {
             );
             return oldPixel;
         },
-        [decreaseBucket, setPixel, user?.guild, user?.id],
+        [decreaseBucket, setPixel, effectHandle, user, map],
     );
 
     const { conquerPixel } = useMapUpdating({ optimisticConquer, onConquerSettled });
@@ -63,9 +54,15 @@ export const useOptimisticConquer = ({ user, effectHandle }: Props) => {
      * @note Upon change, the map is automatically refreshed.
      */
     const conquer = useCallback(
-        async (coordinate: Coordinate) => {
+        (coordinate: Coordinate) => {
             const pixel = map?.get(JSON.stringify(coordinate));
-            if (bucket.amount <= 0 || !pixel || pixel.guild == user?.guild || pixel.type != PixelType.Normal) {
+            // For some god knows what reason, pixelBucket won't trigger a rerender if we don't get the state manually when receiving an update through grpc
+            if (
+                useGameStateStore.getState().pixelBucket.amount <= 0 ||
+                !pixel ||
+                pixel.guild == user?.guild ||
+                pixel.type != PixelType.Normal
+            ) {
                 effectHandle.current?.forbiddenEffect(coordinate);
                 return;
             }
@@ -80,14 +77,13 @@ export const useOptimisticConquer = ({ user, effectHandle }: Props) => {
             for (const value of adjacent) {
                 const adjacentCoordinate = { x: x + value[0], y: y + value[1] };
                 const adjacentPixel = map?.get(JSON.stringify(adjacentCoordinate));
-                console.log(adjacentPixel);
                 if (adjacentPixel && adjacentPixel.guild == user?.guild) {
                     conquerPixel(coordinate);
                     return;
                 }
             }
         },
-        [bucket.amount, map, user?.guild, conquerPixel],
+        [map, user, effectHandle, conquerPixel],
     );
 
     return conquer;
