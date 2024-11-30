@@ -13,6 +13,7 @@ export interface GameStateStore {
     setScores: (newScores: Score[]) => void;
     setMiscGameState: (newState: GetGameState) => void;
     decreaseBucket: () => void;
+    increaseBucket: () => void;
 }
 
 export const useGameStateStore = create<GameStateStore>((set) => ({
@@ -40,6 +41,15 @@ export const useGameStateStore = create<GameStateStore>((set) => ({
             state.pixelBucket = {
                 ...state.pixelBucket,
                 amount: state.pixelBucket.amount - 1,
+            };
+            return { pixelBucket: state.pixelBucket, scores: state.scores };
+        });
+    },
+    increaseBucket: () => {
+        set((state) => {
+            state.pixelBucket = {
+                ...state.pixelBucket,
+                amount: state.pixelBucket.amount + 1,
             };
             return { pixelBucket: state.pixelBucket, scores: state.scores };
         });
