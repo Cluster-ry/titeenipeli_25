@@ -35,4 +35,10 @@
         <ProjectReference Include="..\Titeenipeli.Common\Titeenipeli.Common.csproj"/>
         <ProjectReference Include="../Titeenipeli.Grpc/Titeenipeli.Grpc.csproj"/>
     </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Resources\Images\Background.jpg">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>
