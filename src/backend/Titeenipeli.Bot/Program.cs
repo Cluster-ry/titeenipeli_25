@@ -37,7 +37,7 @@ public static class Program
             Console.WriteLine("Unable to get backend token, exiting...");
             return;
         }
-        
+
         Console.CancelKeyPress += (sender, eArgs) => {
             _quitEvent.Set();
             eArgs.Cancel = true;
