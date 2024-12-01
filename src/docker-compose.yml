@@ -55,7 +55,7 @@
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       Backend__BackendUrl: http://proxy
-      Backend__FrontendUrl: http://proxy
+      Backend__FrontendUrl: http://localhost:8080
       Backend__AuthorizationHeaderName: X-BOT-KEY
       Backend__Token: ${BOT_TOKEN}
       Telegram__Token: ${TELEGRAM_TOKEN}
