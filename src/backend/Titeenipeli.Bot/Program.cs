@@ -8,6 +8,7 @@ namespace Titeenipeli.Bot;
 public static class Program
 {
     static ManualResetEvent _quitEvent = new ManualResetEvent(false);
+
     private static void Main(string[] args)
     {
         var telegramOptions = new TelegramOptions();
@@ -17,6 +18,7 @@ public static class Program
                                 .AddJsonFile("appsettings.json")
                                 .AddEnvironmentVariables()
                                 .Build();
+
         configurationRoot.GetSection("Telegram").Bind(telegramOptions);
         configurationRoot.GetSection("Backend").Bind(backendOptions);
 
@@ -38,9 +40,10 @@ public static class Program
             return;
         }
 
-        Console.CancelKeyPress += (sender, eArgs) => {
+        Console.CancelKeyPress += (_, eventArguments) =>
+        {
             _quitEvent.Set();
-            eArgs.Cancel = true;
+            eventArguments.Cancel = true;
         };
 
         TelegramBotClient bot = new TelegramBotClient(telegramOptions.Token);
