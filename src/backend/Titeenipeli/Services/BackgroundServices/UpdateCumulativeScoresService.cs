@@ -11,7 +11,6 @@ public interface IUpdateCumulativeScoresService : IAsynchronousTimedBackgroundSe
 
 public class UpdateCumulativeScoresService(
     GameOptions gameOptions,
-    ApiDbContext dbContext,
     IUserRepositoryService userRepositoryService,
     IGuildRepositoryService guildRepositoryService,
     IMapRepositoryService mapRepositoryService,
@@ -34,7 +33,7 @@ public class UpdateCumulativeScoresService(
                 pixel.User.Guild.CumulativeScore++;
             }
 
-        await dbContext.SaveChangesAsync();
+        await guildRepositoryService.SaveChangesAsync();
 
         UpdateRealtimeScores(guilds);
     }
