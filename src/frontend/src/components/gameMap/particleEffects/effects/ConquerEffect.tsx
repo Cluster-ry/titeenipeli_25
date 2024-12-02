@@ -3,7 +3,7 @@ import { Coordinate } from "../../../../models/Coordinate";
 import { EffectBatch, EffectHandle } from "../support/EffectBatch";
 import { EffectItem } from "../support/EffectSprite";
 import { getPixelCenterCoordinate } from "./common";
-import bucket from "../../../../assets/bucket.png"
+import bucket from "../../../../assets/bucket.png";
 
 const sprite = bucket;
 const duration = 3;

@@ -3,7 +3,7 @@ import { Coordinate } from "../../../../models/Coordinate";
 import { EffectBatch, EffectHandle } from "../support/EffectBatch";
 import { EffectItem } from "../support/EffectSprite";
 import { getPixelCenterCoordinate } from "./common";
-import forbidden from "../../../../assets/forbidden.png"
+import forbidden from "../../../../assets/forbidden.png";
 
 const sprite = forbidden;
 const duration = 3;
