@@ -7,7 +7,7 @@ const CTF_URL: string = "api/v1/ctf";
 
 export async function postCtf(postCtfInput: PostCtfInput): Promise<AxiosResponse<ClientApiOk> | ClientApiError> {
     try {
-        console.log(postCtfInput)
+        console.log(postCtfInput);
         const response = await axios.post<ClientApiOk>(CTF_URL, postCtfInput);
         console.log("Success");
         return response as AxiosResponse<ClientApiOk>;

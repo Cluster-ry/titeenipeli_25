@@ -139,14 +139,14 @@
 
 /* CTF */
 .ctf-icon {
-  justify-content: left;
-  pointer-events: all;
+    justify-content: left;
+    pointer-events: all;
 }
 
 .ctf-icon:hover {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .ctf-container {
-  display: grid;
+    display: grid;
 }
