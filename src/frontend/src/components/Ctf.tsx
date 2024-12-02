@@ -4,8 +4,9 @@ import { PostCtfInput } from "../models/Post/PostCtfInput";
 import "../pages/Game/Overlay/overlay.css";
 
 const Ctf = () => {
-  const [disclaimer, setDisclaimer] = useState("[TEST] CTF");
   const [token, setToken] = useState("");
+
+  const CTF_DISCLAIMER = "[TEST] CTF";
 
   const handleTokenChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setToken(event.target.value);
@@ -25,10 +26,10 @@ const Ctf = () => {
         placeholder="Enter Token"
         value={token}
         onChange={handleTokenChange}
-        style={{pointerEvents: "all", bottom: "0"}}
+        style={{pointerEvents: "all"}}
       />
       <div className="ctf-icon" onClick={handleSubmit}>
-        {disclaimer}
+        {CTF_DISCLAIMER}
       </div>
     </div>
   );
