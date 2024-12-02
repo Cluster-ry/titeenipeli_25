@@ -28,7 +28,6 @@ public class CtfController : ControllerBase
     }
 
     [HttpPost("ctf")]
-    [Authorize(Policy = "MustHaveGuild")]
     public IActionResult PostCtf([FromBody] PostCtfInput ctfInput)
     {
         var ctfFlag = _ctfFlagRepositoryService.GetByToken(ctfInput.Token);

@@ -7,8 +7,8 @@ const Ctf = () => {
  
   // NOTE! IMPLEMENTATION COULD BE WORTH CHANGING IN THE FUTURE!
   const ctfToken: PostCtfInput = {
-    token: "FGSTLBGXM3YB7USWS28KE2JV9Z267L48"
-  }
+    token: "#TEST_FLAG"
+  } 
   
   return (
     <div className="ctf-icon" onClick={() => postCtf(ctfToken)}>
