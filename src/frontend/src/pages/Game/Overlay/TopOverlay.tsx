@@ -27,9 +27,7 @@ const TopOverlay = ({ children: scores, cooldown, bucketPoints }: TopOverlayProp
       </div>
       <div className="top-overlay__right">
         <img className="top-overlay__right__help" src="./src/assets/help.png" onClick={() => alterVisibility()}/>
-        <div>
-          {showHelp && <Ctf />}
-        </div>        
+        {showHelp && <Ctf />}
       </div>
     </div>
   );

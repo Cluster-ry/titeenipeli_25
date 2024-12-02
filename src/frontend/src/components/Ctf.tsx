@@ -1,5 +1,6 @@
 import { postCtf } from "../api/ctf";
 import { PostCtfInput } from "../models/Post/PostCtfInput";
+import "../pages/Game/Overlay/overlay.css"; 
 
 const Ctf = () => {
   const TEST_DISCLAIMER = "[TEST] CTF";
@@ -10,7 +11,7 @@ const Ctf = () => {
   }
   
   return (
-    <div onClick={() => postCtf(ctfToken)} style={{width: "200px", height: "100px"}}>
+    <div className="ctf-icon" onClick={() => postCtf(ctfToken)}>
       {TEST_DISCLAIMER}
     </div>
   );

@@ -136,3 +136,15 @@
     z-index: 1;
     pointer-events: none;
 }
+
+/* CTF */
+.ctf-icon {
+  position: absolute;
+  bottom: 0;
+  justify-content: left;
+  pointer-events: all;
+}
+
+.ctf-icon:hover {
+  cursor: pointer;
+}

@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 export interface OverlayStore {
   showHelp: boolean;
@@ -7,19 +6,14 @@ export interface OverlayStore {
 }
 
 export const useOverlayStore = create<OverlayStore>()(
-  persist(
-    (set) => ({
-      showHelp: false,
+  (set) => ({
+    showHelp: false,
 
-      updateShowHelp: (newShowHelp: boolean) => 
-        set((state: OverlayStore) => ({
-          ...state,
-          showHelp: newShowHelp,
-        })),
-    }),
-    {
-      name: "overlay-store"
-    }
-  )
+    updateShowHelp: (newShowHelp: boolean) => 
+      set((state: OverlayStore) => ({
+        ...state,
+        showHelp: newShowHelp,
+      })),
+  }),
 );
 
