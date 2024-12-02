@@ -37,7 +37,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="Resources\Images\Background.jpg">
+        <None Update="Resources\**\*">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
