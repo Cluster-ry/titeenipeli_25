@@ -74,8 +74,8 @@
 }
 
 .top-overlay__right {
-    flex: 1;
     display: flex;
+    flex-wrap: wrap;
     justify-content: right;
     height: 80%;
 }
