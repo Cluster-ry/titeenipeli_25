@@ -5,13 +5,13 @@ export interface GetGameState {
     scores: Score[];
 }
 
-interface PixelBucket {
+export interface PixelBucket {
     amount: number;
     maxAmount: number;
     increasePerMinute: number;
 }
 
-interface Score {
+export interface Score {
     guild: Guild;
     amount: number;
 }

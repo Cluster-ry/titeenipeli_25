@@ -10,4 +10,6 @@ enum PixelGuild {
   Digit = 6;
   Datateknologerna = 7;
   Sosa = 8;
+  Date = 9;
+  Tutti = 10;
 }

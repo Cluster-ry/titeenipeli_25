@@ -1,4 +1,5 @@
 enum Guild {
+    Nobody,
     Tietokilta,
     Algo,
     Cluster,
@@ -7,6 +8,8 @@ enum Guild {
     Digit,
     Datateknologerna,
     Sosa,
+    Date,
+    Tutti,
 }
 
 export default Guild;

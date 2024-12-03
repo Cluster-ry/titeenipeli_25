@@ -1,33 +1,21 @@
 import { GrpcWebFetchTransport } from "@protobuf-ts/grpcweb-transport";
-import IncrementalMapUpdateClient from "./incrementalMapUpdateClient";
 
-export class GrpcClient {
-    static instance: GrpcClient | null = null;
-
-    transport: GrpcWebFetchTransport;
-
-    incrementalMapUpdateClient: IncrementalMapUpdateClient | undefined;
+export abstract class CommonGrpcClient {
+    protected connected = false;
 
     private onConnectionStatusChangedCallbacks: Array<(connected: boolean) => Promise<void> | void> = [];
     private onErrorCallbacks: Array<(error: unknown) => Promise<void> | void> = [];
 
     private previousOverallConnectionStatus = false;
 
-    private constructor() {
-        this.transport = new GrpcWebFetchTransport({
-            baseUrl: window.location.origin,
-        });
-
-        this.initializeGrpcStreams();
+    constructor(protected transport: GrpcWebFetchTransport) {
+        this.connect();
     }
 
-    private async initializeGrpcStreams() {
-        this.incrementalMapUpdateClient = new IncrementalMapUpdateClient(this);
-        this.incrementalMapUpdateClient.connect();
-    }
+    protected abstract connect(): Promise<void>;
 
     async handleOnConnectionStatusChangedCallbacks() {
-        const newConnectionStatus = this.incrementalMapUpdateClient?.connected ?? false;
+        const newConnectionStatus = this.connected ?? false;
 
         if (newConnectionStatus !== this.previousOverallConnectionStatus) {
             this.previousOverallConnectionStatus = newConnectionStatus;
@@ -39,7 +27,7 @@ export class GrpcClient {
 
     registerOnConnectionStatusChangedListener(callback: (connected: boolean) => Promise<void> | void) {
         this.onConnectionStatusChangedCallbacks.push(callback);
-        callback(this.incrementalMapUpdateClient?.connected ?? false);
+        callback(this.connected ?? false);
     }
 
     unRegisterOnConnectionStatusChangedListener(callback: (connected: boolean) => Promise<void> | void) {
@@ -62,13 +50,6 @@ export class GrpcClient {
         const index = this.onErrorCallbacks.indexOf(callback);
         this.onErrorCallbacks.splice(index, 1);
     }
-
-    public static getGrpcClient() {
-        if (GrpcClient.instance === null) {
-            GrpcClient.instance = new GrpcClient();
-        }
-        return GrpcClient.instance;
-    }
 }
 
-export default GrpcClient;
+export default CommonGrpcClient;

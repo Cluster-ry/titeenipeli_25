@@ -1,12 +1,12 @@
 import axios, { AxiosResponse } from "axios";
-import { GetPixelsResult } from "../models/Get/GetPixelsResult";
 import { ClientApiError } from "../models/ClientApiError";
+import { GetGameState } from "../models/Get/GetGameState";
 
 const PIXELS_URL = "api/v1/state/game";
 
-export async function getGameState(): Promise<AxiosResponse<GetPixelsResult> | ClientApiError> {
+export async function getGameState(): Promise<AxiosResponse<GetGameState> | ClientApiError> {
     try {
-        const response = await axios.get<GetPixelsResult>(PIXELS_URL);
+        const response = await axios.get<GetGameState>(PIXELS_URL);
 
         console.log("Success.");
         return response;

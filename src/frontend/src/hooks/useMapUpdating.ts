@@ -6,14 +6,14 @@ import { useCallback, useEffect, useRef } from "react";
 import PixelType from "../models/enum/PixelType.ts";
 import { GetPixelsResult } from "../models/Get/GetPixelsResult.ts";
 import { Pixel } from "../models/Pixel.ts";
-import GrpcClient from "../core/grpc/grpcClient.ts";
+import GrpcClients from "../core/grpc/grpcClients.ts";
 
 const mapQueryKey = "map";
 
 export const useMapUpdating = () => {
     const incrementalUpdateBuffer = useRef<IncrementalMapUpdateResponse[]>([]);
     const queryClient = useQueryClient();
-    const grpcClient = useRef<GrpcClient>(GrpcClient.getGrpcClient());
+    const grpcClient = useRef<GrpcClients>(GrpcClients.getGrpcClients());
 
     const map = useNewMapStore((state) => state.map);
     const setMap = useNewMapStore((state) => state.setMap);
@@ -38,7 +38,7 @@ export const useMapUpdating = () => {
                 if (pixelType !== PixelType.FogOfWar) {
                     setPixel(pixelCoordinates, {
                         type: pixelType,
-                        guild: updatedPixel.guild ? Number(updatedPixel.guild) - 1 : undefined,
+                        guild: updatedPixel.guild ? Number(updatedPixel.guild) : undefined,
                         owner: updatedPixel.owner?.id,
                         ...pixelCoordinates,
                     });
@@ -129,9 +129,9 @@ export const useMapUpdating = () => {
 
     useEffect(() => {
         console.log("Registering GRPC client");
-        grpcClient.current.incrementalMapUpdateClient?.registerOnResponseListener(onIncrementalUpdate);
+        grpcClient.current.incrementalMapUpdateClient.registerOnResponseListener(onIncrementalUpdate);
         return () => {
-            grpcClient.current.incrementalMapUpdateClient?.unRegisterOnResponseListener(onIncrementalUpdate);
+            grpcClient.current.incrementalMapUpdateClient.unRegisterOnResponseListener(onIncrementalUpdate);
         };
     }, [onIncrementalUpdate]);
 

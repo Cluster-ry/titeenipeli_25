@@ -1,13 +1,20 @@
-using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.Options;
+using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services.BackgroundServices;
 
 public interface IUpdateCumulativeScoresService : IAsynchronousTimedBackgroundService;
 
-public class UpdateCumulativeScoresService(ApiDbContext dbContext, IGuildRepositoryService guildRepositoryService) : IUpdateCumulativeScoresService
+public class UpdateCumulativeScoresService(
+    GameOptions gameOptions,
+    IUserRepositoryService userRepositoryService,
+    IGuildRepositoryService guildRepositoryService,
+    IMapRepositoryService mapRepositoryService,
+    IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService) : IUpdateCumulativeScoresService
 {
     public async Task DoWork()
     {
@@ -17,9 +24,7 @@ public class UpdateCumulativeScoresService(ApiDbContext dbContext, IGuildReposit
             guild.CurrentScore = 0;
         }
 
-        Pixel[] pixels = await dbContext.Map
-                                        .Include(pixel => pixel.User)
-                                        .ThenInclude(user => user!.Guild).ToArrayAsync();
+        Pixel[] pixels = [.. mapRepositoryService.GetAll()];
 
         foreach (Pixel pixel in pixels)
             if (pixel.User is { Guild: not null })
@@ -28,6 +33,26 @@ public class UpdateCumulativeScoresService(ApiDbContext dbContext, IGuildReposit
                 pixel.User.Guild.CumulativeScore++;
             }
 
-        await dbContext.SaveChangesAsync();
+        await guildRepositoryService.SaveChangesAsync();
+
+        UpdateRealtimeScores(guilds);
+    }
+
+    private void UpdateRealtimeScores(List<Guild> guilds)
+    {
+        foreach (var guild in guilds)
+        {
+            User[] guildUsers = userRepositoryService.GetByGuild(guild.Name);
+            foreach (User user in guildUsers)
+            {
+                GrpcMiscGameStateUpdateInput stateUpdate = new()
+                {
+                    User = user,
+                    MaximumPixelBucket = gameOptions.MaximumPixelBucket,
+                    Guilds = guilds
+                };
+                miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
+            }
+        }
     }
 }
