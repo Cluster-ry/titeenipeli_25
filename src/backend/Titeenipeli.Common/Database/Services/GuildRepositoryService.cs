@@ -4,15 +4,8 @@ using Titeenipeli.Common.Enums;
 
 namespace Titeenipeli.Common.Database.Services;
 
-public class GuildRepositoryService : IGuildRepositoryService
+public class GuildRepositoryService(ApiDbContext dbContext) : RepositoryService(dbContext), IGuildRepositoryService
 {
-    private readonly ApiDbContext _dbContext;
-
-    public GuildRepositoryService(ApiDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public Guild? GetById(int id)
     {
         return _dbContext.Guilds.FirstOrDefault(guild => guild.Id == id);

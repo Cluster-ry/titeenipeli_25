@@ -29,7 +29,19 @@ message MiscStateUpdateRequest {
 }
 
 message MiscStateUpdateResponse {
-  uint32 pixelBucket = 1;
+  PixelBucket pixelBucket = 1;
+  repeated Scores scores = 2;
+
+  message PixelBucket {
+    uint32 amount = 1;
+    uint32 maxAmount = 2;
+    float increasePerMinute = 3;
+  }
+
+  message Scores {
+    PixelGuild guild = 1;
+    uint32 amount = 2;
+  }
 }
 
 service StateUpdate {

@@ -44,7 +44,7 @@ public class BackgroundGraphicsService : IBackgroundGraphicsService
 
     public byte[]? GetBackgroundGraphic(Coordinate coordinate)
     {
-        if (coordinate.X < 0 || coordinate.X > _splitBitmapWidth || coordinate.Y < 0 || coordinate.Y > _splitBitmapHeight)
+        if (coordinate.X < 0 || coordinate.X >= _splitBitmapWidth || coordinate.Y < 0 || coordinate.Y >= _splitBitmapHeight)
         {
             return null;
         }

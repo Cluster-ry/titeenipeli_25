@@ -10,14 +10,17 @@ import { HslaColour } from "../../../models/HslaColour.ts";
  * on the game map in the conquered pixels.
  */
 const guildColorMapping: Record<Guild, HslaColour> = {
-    [Guild.Tietokilta]: { hue: 0, saturation: 100, lightness: 42 },
-    [Guild.Algo]: { hue: 333, saturation: 84, lightness: 42 },
-    [Guild.Cluster]: { hue: 280, saturation: 100, lightness: 50 },
-    [Guild.OulunTietoteekkarit]: { hue: 265, saturation: 100, lightness: 46 },
-    [Guild.TietoTeekkarikilta]: { hue: 231, saturation: 99, lightness: 59 },
-    [Guild.Digit]: { hue: 0, saturation: 100, lightness: 50 },
-    [Guild.Datateknologerna]: { hue: 203, saturation: 100, lightness: 46 },
-    [Guild.Sosa]: { hue: 188, saturation: 100, lightness: 42 },
+    [Guild.Nobody]: { hue: 0, saturation: 0, lightness: 0 },
+    [Guild.Tietokilta]: { hue: 23, saturation: 100, lightness: 50 },
+    [Guild.Algo]: { hue: 75, saturation: 100, lightness: 50 },
+    [Guild.Cluster]: { hue: 0, saturation: 100, lightness: 50 },
+    [Guild.OulunTietoteekkarit]: { hue: 94, saturation: 100, lightness: 50 },
+    [Guild.TietoTeekkarikilta]: { hue: 155, saturation: 100, lightness: 50 },
+    [Guild.Digit]: { hue: 178, saturation: 100, lightness: 50 },
+    [Guild.Datateknologerna]: { hue: 212, saturation: 100, lightness: 50 },
+    [Guild.Sosa]: { hue: 240, saturation: 100, lightness: 50 },
+    [Guild.Date]: { hue: 280, saturation: 100, lightness: 50 },
+    [Guild.Tutti]: { hue: 312, saturation: 100, lightness: 50 },
 };
 
 export function pixelColor(pixel?: Pixel | null): HslaColour {

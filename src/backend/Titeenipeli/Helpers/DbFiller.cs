@@ -24,7 +24,10 @@ public static class DbFiller
         if (!dbContext.Guilds.Any())
         {
             List<Guild> guilds = [];
-            guilds.AddRange(from GuildName name in Enum.GetValues(typeof(GuildName)) select new Guild { Name = name, ActiveCtfFlags = new() });
+            var guildNames = Enum.GetValues(typeof(GuildName)).Cast<GuildName>().ToList();
+            // Skip Nobody.
+            guildNames = guildNames.Skip(1).ToList();
+            guilds.AddRange(from GuildName name in guildNames select new Guild { Name = name, ActiveCtfFlags = new() });
 
             dbContext.Guilds.AddRange(guilds);
 

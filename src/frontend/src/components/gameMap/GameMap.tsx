@@ -1,4 +1,4 @@
-import { FC, useRef } from "react";
+import { FC, useCallback, useMemo, useRef } from "react";
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
@@ -11,6 +11,7 @@ import { useNewMapStore } from "../../stores/newMapStore.ts";
 import { useMapUpdating } from "../../hooks/useMapUpdating.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
+import { useGameStateStore } from "../../stores/gameStateStore.ts";
 
 /**
  * @component GameMap
@@ -27,6 +28,8 @@ import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 const GameMap: FC = () => {
     const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
     const map = useNewMapStore((state) => state.map);
+    const bucket = useGameStateStore((state) => state.pixelBucket);
+    const decreaseBucket = useGameStateStore((state) => state.decreaseBucket);
     const effectRef = useRef<EffectContainerHandle>(null);
     useMapUpdating();
     const user = useUser();
@@ -38,14 +41,20 @@ const GameMap: FC = () => {
      *
      * @note Upon change, the map is automatically refreshed.
      */
-    async function conquer(coordinate: Coordinate) {
-        const result = await postPixels(coordinate);
-        result ? effectRef.current?.conqueredEffect(coordinate) : effectRef.current?.forbiddenEffect(coordinate);
-    }
+    const conquer = useCallback(async (coordinate: Coordinate) => {
+        if (bucket.amount <= 0) {
+            effectRef.current?.forbiddenEffect(coordinate);
+            return;
+        }
 
-    if (map === null) {
-        return <span>Loading...</span>;
-    }
+        const success = await postPixels(coordinate);
+        if (success) {
+            effectRef.current?.conqueredEffect(coordinate);
+            decreaseBucket();
+        } else {
+            effectRef.current?.forbiddenEffect(coordinate);
+        }
+    }, [bucket.amount, decreaseBucket])
 
     const mappedBoundingBox = {
         minY: pixelsBoundingBox.min.y,
@@ -54,26 +63,34 @@ const GameMap: FC = () => {
         maxX: pixelsBoundingBox.max.x,
     };
 
-    const pixelElements = [];
-    for (const [coordinate, pixel] of map) {
-        const rectangleX = coordinate.x * mapConfig.PixelSize;
-        const rectangleY = coordinate.y * mapConfig.PixelSize;
-        const color = pixelColor(pixel);
+    const pixelElements = useMemo(() => {
+        const result: JSX.Element[] = [];
+        if (map == null) return result;
+        for (const [coordinate, pixel] of map) {
+            const rectangleX = coordinate.x * mapConfig.PixelSize;
+            const rectangleY = coordinate.y * mapConfig.PixelSize;
+            const color = pixelColor(pixel);
+            result.push(
+                <Rectangle
+                    key={`x:${coordinate.x} y:${coordinate.y}-${result.length}-${Date.now()}`}
+                    x={rectangleX}
+                    y={rectangleY}
+                    isOwn={pixel?.owner === user?.id}
+                    isSpawn={pixel?.type === PixelType.Spawn}
+                    width={mapConfig.PixelSize}
+                    height={mapConfig.PixelSize}
+                    color={color}
+                    onClick={() => conquer(coordinate)}
+                />,
+            );
+        }
+        return result;
+    }, [map]);
 
-        pixelElements.push(
-            <Rectangle
-                key={`x:${coordinate.x} y:${coordinate.y}-${pixelElements.length}-${Date.now()}`}
-                x={rectangleX}
-                y={rectangleY}
-                isOwn={pixel?.owner === user?.id}
-                isSpawn={pixel?.type === PixelType.Spawn}
-                width={mapConfig.PixelSize}
-                height={mapConfig.PixelSize}
-                color={color}
-                onClick={() => conquer(coordinate)}
-            />,
-        );
+    if (map === null) {
+        return <span>Loading...</span>;
     }
+    
     return (
         <>
             <Stage

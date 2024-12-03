@@ -33,6 +33,8 @@ public class GrpcConnection<TResponseStream> : IGrpcConnection<TResponseStream> 
         Task queueCompletion = ResponseStreamQueue.Reader.Completion;
         while (!queueCompletion.IsCompleted)
         {
+            await Task.Delay(KeepAliveCheckFrequencyInSeconds * 1000);
+
             if (_lastMessageSent > DateTime.Now - TimeSpan.FromSeconds(KeepAliveFrequencyInSeconds))
             {
                 continue;
@@ -48,8 +50,6 @@ public class GrpcConnection<TResponseStream> : IGrpcConnection<TResponseStream> 
                 Dispose();
                 break;
             }
-
-            await Task.Delay(KeepAliveCheckFrequencyInSeconds * 1000);
         }
     }
 
