@@ -1,4 +1,7 @@
-import { PropsWithChildren } from "react";
+import { FC, PropsWithChildren } from "react";
+import { RatelimitMeter } from "./RatelimitMeter";
+import { Scores } from "./Scores";
+import help from "../../../assets/help.png";
 import "./overlay.css";
 import { useOverlayStore } from "../../../stores/overlayStore";
 import HamburgerMenu from "../../../components/Ctf/HamburgerMenu";
@@ -13,16 +16,11 @@ const TopOverlay = ({ children: scores, cooldown, bucketPoints }: TopOverlayProp
         updateShowHelp(!showHelp);
     };
 
+const TopOverlay: FC<PropsWithChildren> = () => {
     return (
         <div className="top-overlay top-gradient">
-            <div className="top-overlay__left">{scores}</div>
-            <div className="top-overlay__middle">
-                <div className="top-overlay__middle__bucket-points-container">
-                    <img className="top-overlay__middle__bucket" src="./src/assets/bucket.png" />
-                    <span className="top-overlay__middle__bucket-points">{bucketPoints}</span>
-                </div>
-                <span className="top-overlay__middle__cooldown">{cooldown}s</span>
-            </div>
+            <Scores />
+            <RatelimitMeter />
             <div className="top-overlay__right">
                 <img
                     className="top-overlay__right__help"

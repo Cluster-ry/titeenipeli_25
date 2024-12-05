@@ -9,7 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Tests", "Titeen
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FD3271D3-DCD9-4EC8-AB8B-9BAB6F87BAAF}"
 	ProjectSection(SolutionItems) = preProject
-		docker-compose.yml = docker-compose.yml
 		.env = .env
 		.env.example = .env.example
 	EndProjectSection

@@ -5,15 +5,8 @@ using Titeenipeli.Common.Models;
 
 namespace Titeenipeli.Common.Database.Services;
 
-public class MapRepositoryService : IMapRepositoryService
+public class MapRepositoryService(ApiDbContext dbContext) : RepositoryService(dbContext), IMapRepositoryService
 {
-    private readonly ApiDbContext _dbContext;
-
-    public MapRepositoryService(ApiDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public Pixel? GetByCoordinate(Coordinate pixelCoordinate)
     {
         return _dbContext.Map.Include(pixel => pixel.User)

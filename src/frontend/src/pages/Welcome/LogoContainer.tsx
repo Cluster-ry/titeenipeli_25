@@ -1,4 +1,6 @@
 import { PropsWithChildren } from "react";
+import background_logo from "../../assets/logo_background.png";
+import logo from "../../assets/logo.png";
 
 export const LogoContainer = () => {
     return (
@@ -27,7 +29,7 @@ export const LogoContainer = () => {
                         minWidth: "100%",
                         maxHeight: "100%",
                     }}
-                    src="src/assets/logo_background.png"
+                    src={background_logo}
                 />
                 <img
                     style={{
@@ -39,7 +41,7 @@ export const LogoContainer = () => {
                         margin: "auto",
                         maxHeight: "100%",
                     }}
-                    src="src/assets/logo.png"
+                    src={logo}
                 />
             </ImageContainer>
             <Overlay />

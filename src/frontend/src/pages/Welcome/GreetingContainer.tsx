@@ -1,3 +1,5 @@
+import die from "../../assets/die.png";
+
 type GreetingContainerProps = { login: () => void };
 
 export const GreetingContainer = ({ login }: GreetingContainerProps) => {
@@ -44,7 +46,7 @@ const DieButton = ({ onClick }: DieButtonProps) => {
                 maxWidth: "100%",
                 maxHeight: "100%",
             }}
-            src="./src/assets/die.png"
+            src={die}
         />
     );
 };

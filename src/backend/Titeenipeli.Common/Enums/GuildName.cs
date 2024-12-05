@@ -2,14 +2,15 @@ namespace Titeenipeli.Common.Enums;
 
 public enum GuildName
 {
-    Tietokilta = 0,
-    Algo = 1,
-    Cluster = 2,
-    OulunTietoteekkarit = 3,
-    TietoTeekkarikilta = 4,
-    Digit = 5,
-    Datateknologerna = 6,
-    Sosa = 7,
-    Date = 8,
-    Tutti = 9
+    Nobody = 0,
+    Tietokilta = 1,
+    Algo = 2,
+    Cluster = 3,
+    OulunTietoteekkarit = 4,
+    TietoTeekkarikilta = 5,
+    Digit = 6,
+    Datateknologerna = 7,
+    Sosa = 8,
+    Date = 9,
+    Tutti = 10
 }

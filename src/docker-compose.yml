@@ -1,19 +1,42 @@
 ﻿services:
-  titeenipeli:
+  backend:
     image: titeenipeli:latest
     build:
       context: .
       dockerfile: backend/Titeenipeli/Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_HTTP_PORTS=8080
-      - JWT__Secret=${JWT_SECRET}
-      - JWT__Encryption=${JWT_ENCRYPTION}
-      - SQLCONNSTR_Database=Server=db;Port=5432;Userid=${POSTGRES_USER};Timeout=15;Database=${POSTGRES_DB};Password=${POSTGRES_PASSWORD};
-    ports:
-      - 8080:8080
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 80
+      ASPNETCORE_HTTPS_PORTS: 443
+      JWT__Secret: ${JWT_SECRET}
+      JWT__Encryption: ${JWT_ENCRYPTION}
+      Bot__Token: ${BOT_TOKEN}
+      SQLCONNSTR_Database: Server=db;Port=5432;Userid=${POSTGRES_USER};Timeout=15;Database=${POSTGRES_DB};Password=${POSTGRES_PASSWORD};
+      ASPNETCORE_Kestrel__Certificates__Default__Password: ${CERTIFICATE_PASSWORD}
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetapp.pfx
+    volumes:
+      # Make sure that owner of the .pfx file is 1654:1654
+      - ~/.aspnet/https:/https:ro
     depends_on:
       - db
+
+  frontend:
+    image: frontend:latest
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+
+  proxy:
+    image: proxy:latest
+    build:
+      context: proxy
+      dockerfile: Dockerfile
+    ports:
+      - 8080:80
+      - 8443:443
+    depends_on: 
+      - backend
+      - frontend
 
   db:
     image: postgres:16
@@ -23,3 +46,18 @@
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - 5432:5432
+      
+  bot:
+    image: titeenipeli.bot:latest
+    build:
+      context: backend
+      dockerfile: Titeenipeli.Bot/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Backend__BackendUrl: http://proxy
+      Backend__FrontendUrl: http://localhost:8080
+      Backend__AuthorizationHeaderName: X-BOT-KEY
+      Backend__Token: ${BOT_TOKEN}
+      Telegram__Token: ${TELEGRAM_TOKEN}
+    depends_on: 
+      - proxy

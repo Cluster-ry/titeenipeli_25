@@ -5,15 +5,8 @@ using Titeenipeli.Common.Enums;
 
 namespace Titeenipeli.Common.Database.Services;
 
-public class UserRepositoryService : IUserRepositoryService
+public class UserRepositoryService(ApiDbContext dbContext) : RepositoryService(dbContext), IUserRepositoryService
 {
-    private readonly ApiDbContext _dbContext;
-
-    public UserRepositoryService(ApiDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public User? GetById(int id)
     {
         return _dbContext.Users.Include(user => user.Guild).FirstOrDefault(user => user.Id == id);

@@ -1,13 +1,13 @@
 import { StateUpdateClient } from "../../generated/grpc/services/StateUpdate.client";
-import { IncrementalMapUpdateRequest, IncrementalMapUpdateResponse } from "../../generated/grpc/services/StateUpdate";
+import { IncrementalMapUpdateRequest, MiscStateUpdateResponse } from "../../generated/grpc/services/StateUpdate";
 import ServerStreamingServiceClient from "./serverStreamingServiceClient";
 
-export default class IncrementalMapUpdateClient extends ServerStreamingServiceClient<IncrementalMapUpdateResponse> {
+export default class MiscStateUpdateClient extends ServerStreamingServiceClient<MiscStateUpdateResponse> {
     protected async connectService() {
-        const mapUpdateClient = new StateUpdateClient(this.transport);
+        const miscStateUpdateClient = new StateUpdateClient(this.transport);
 
         const incrementalMapUpdateRequest: IncrementalMapUpdateRequest = {};
-        const serverStreaming = mapUpdateClient.getIncrementalMapUpdate(incrementalMapUpdateRequest);
+        const serverStreaming = miscStateUpdateClient.getMiscGameStateUpdate(incrementalMapUpdateRequest);
 
         for await (const response of serverStreaming.responses) {
             await this.callCallbacks(response);

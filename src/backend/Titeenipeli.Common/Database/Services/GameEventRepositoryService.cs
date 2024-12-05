@@ -3,15 +3,8 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 
 namespace Titeenipeli.Common.Database.Services;
 
-public class GameEventRepositoryService : IGameEventRepositoryService
+public class GameEventRepositoryService(ApiDbContext dbContext) : RepositoryService(dbContext), IGameEventRepositoryService
 {
-    private readonly ApiDbContext _dbContext;
-
-    public GameEventRepositoryService(ApiDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public GameEvent? GetById(int id)
     {
         return _dbContext.GameEvents.FirstOrDefault(gameEvent => gameEvent.Id == id);
