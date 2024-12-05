@@ -1,8 +1,7 @@
 import { PropsWithChildren } from "react";
 import "./overlay.css";
-import Ctf from "../../../components/Ctf";
 import { useOverlayStore } from "../../../stores/overlayStore";
-
+import HamburgerMenu from "../../../components/Ctf/HamburgerMenu";
 type TopOverlayProps = PropsWithChildren<{
     cooldown: number;
     bucketPoints: number;
@@ -10,7 +9,6 @@ type TopOverlayProps = PropsWithChildren<{
 
 const TopOverlay = ({ children: scores, cooldown, bucketPoints }: TopOverlayProps) => {
     const { showHelp, updateShowHelp } = useOverlayStore();
-
     const alterVisibility = () => {
         updateShowHelp(!showHelp);
     };
@@ -31,7 +29,7 @@ const TopOverlay = ({ children: scores, cooldown, bucketPoints }: TopOverlayProp
                     src="./src/assets/help.png"
                     onClick={() => alterVisibility()}
                 />
-                {showHelp && <Ctf />}
+                {showHelp && <HamburgerMenu />}
             </div>
         </div>
     );
