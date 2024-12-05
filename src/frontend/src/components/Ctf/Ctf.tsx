@@ -2,7 +2,6 @@ import { useState } from "react";
 import { postCtf } from "../../api/ctf";
 import { PostCtfInput } from "../../models/Post/PostCtfInput";
 import "../../pages/Game/Overlay/overlay.css";
-import { showErrorNotification } from "../../utils/showErrorNotification";
 import { useErrorStore } from "../../stores/errorStore";
 import ErrorNotification from "../ErrorNotification";
 
