@@ -5,28 +5,19 @@ import help from "../../../assets/help.png";
 import "./overlay.css";
 import { useOverlayStore } from "../../../stores/overlayStore";
 import HamburgerMenu from "../../../components/Ctf/HamburgerMenu";
-type TopOverlayProps = PropsWithChildren<{
-    cooldown: number;
-    bucketPoints: number;
-}>;
 
-const TopOverlay = ({ children: scores, cooldown, bucketPoints }: TopOverlayProps) => {
+const TopOverlay: FC<PropsWithChildren> = () => {
     const { showHelp, updateShowHelp } = useOverlayStore();
     const alterVisibility = () => {
         updateShowHelp(!showHelp);
     };
 
-const TopOverlay: FC<PropsWithChildren> = () => {
     return (
         <div className="top-overlay top-gradient">
             <Scores />
             <RatelimitMeter />
             <div className="top-overlay__right">
-                <img
-                    className="top-overlay__right__help"
-                    src="./src/assets/help.png"
-                    onClick={() => alterVisibility()}
-                />
+              <img className="top-overlay__right__help" src={help} onClick={() => alterVisibility()}/>        
                 {showHelp && <HamburgerMenu />}
             </div>
         </div>
