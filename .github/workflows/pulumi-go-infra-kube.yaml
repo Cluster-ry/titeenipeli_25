@@ -56,6 +56,6 @@ jobs:
           work-dir: ${{ env.working-dir }}
           comment-on-pr: true
           comment-on-summary: true
-          diff: true
+          diff: false
         env:
           ARM_USE_MSI: true
