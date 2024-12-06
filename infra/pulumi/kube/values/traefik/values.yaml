@@ -40,6 +40,12 @@ service:
     service.beta.kubernetes.io/azure-dns-label-name: "{{ azure_resource_group }}"
     service.beta.kubernetes.io/azure-allowed-ip-ranges: "{{ ip_range | join(',') }}"
 
+ports:
+  web:
+    redirectTo:
+      port: websecure
+      priority: 10
+
 # Create an IngressRoute for the dashboard
 ingressRoute:
   dashboard:

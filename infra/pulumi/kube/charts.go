@@ -29,7 +29,7 @@ func buildCharts(
 	conf := config.New(ctx, "")
 	email := conf.RequireSecret("email")
 
-	helm.NewChart(ctx, "certmanager-certs", helm.ChartArgs{
+	certs, err := helm.NewChart(ctx, "certmanager-certs", helm.ChartArgs{
 		Path: pulumi.String("./helm/certmanager-certs"),
 		Values: pulumi.Map{
 			"hostedZoneName": domainName,
@@ -39,6 +39,9 @@ func buildCharts(
 			"email":          email,
 		},
 	}, pulumi.Provider(k8sProvider))
+	if err != nil {
+		return err
+	}
 
 	edNS, err := v1.NewNamespace(ctx, "external-dns", &v1.NamespaceArgs{
 		Metadata: &metav1.ObjectMetaArgs{
@@ -132,40 +135,40 @@ func buildCharts(
 			"serviceAccountAnnotations": pulumi.Map{
 				"azure.workload.identity/tenant-id": pulumi.String(current.TenantId),
 				"azure.workload.identity/client-id": traefikIdentityClientId,
-			},
-			"certificatesResolvers": pulumi.Map{
-				"letsencrypt": pulumi.Map{
-					"acme": pulumi.Map{
-						"email":    email,
-						"caServer": pulumi.String("https://acme-staging-v02.api.letsencrypt.org/directory"),
-						"dnsChallenge": pulumi.Map{
-							"provider": pulumi.String("azuredns"),
+			}, /*
+				"certificatesResolvers": pulumi.Map{
+					"letsencrypt": pulumi.Map{
+						"acme": pulumi.Map{
+							"email":    email,
+							"caServer": pulumi.String("https://acme-staging-v02.api.letsencrypt.org/directory"),
+							"dnsChallenge": pulumi.Map{
+								"provider": pulumi.String("azuredns"),
+							},
+							"storage": pulumi.String("/data/acme.json"),
 						},
-						"storage": pulumi.String("/data/acme.json"),
 					},
-				},
-			},
+				},*/
 			"deployment": pulumi.Map{
 				"annotations": pulumi.Map{
 					"azure.workload.identity/use": pulumi.String("true"),
-				},
-				"initContainers": pulumi.Array{
-					pulumi.Map{
-						"name":  pulumi.String("volume-permissions"),
-						"image": pulumi.String("busybox:latest"),
-						"command": pulumi.Array{
-							pulumi.String("sh"),
-							pulumi.String("-c"),
-							pulumi.String("ls -la /; touch /data/acme.json; chmod -v 600 /data/acme.json"),
-						},
-						"volumeMounts": pulumi.Array{
-							pulumi.Map{
-								"mountPath": pulumi.String("/data"),
-								"name":      pulumi.String("data"),
+				}, /*
+					"initContainers": pulumi.Array{
+						pulumi.Map{
+							"name":  pulumi.String("volume-permissions"),
+							"image": pulumi.String("busybox:latest"),
+							"command": pulumi.Array{
+								pulumi.String("sh"),
+								pulumi.String("-c"),
+								pulumi.String("ls -la /; touch /data/acme.json; chmod -v 600 /data/acme.json"),
+							},
+							"volumeMounts": pulumi.Array{
+								pulumi.Map{
+									"mountPath": pulumi.String("/data"),
+									"name":      pulumi.String("data"),
+								},
 							},
 						},
-					},
-				},
+					},*/
 			},
 			"podSecurityContext": pulumi.Map{
 				"fsGroup":             pulumi.Int(65532),
@@ -180,6 +183,21 @@ func buildCharts(
 					"external-dns.alpha.kubernetes.io/hostname": pulumi.String("traefik.test.cluster2017.fi"), // dynamic domain
 				},
 			},
+			"ports": pulumi.Map{
+				"web": pulumi.Map{
+					"redirectTo": pulumi.Map{
+						"port":     pulumi.String("websecure"),
+						"priority": pulumi.Int(10),
+					},
+				},
+			},
+			"tlsStore": pulumi.Map{
+				"default": pulumi.Map{
+					"defaultCertificate": pulumi.Map{
+						"secretName": pulumi.String("wildcard-tls"),
+					},
+				},
+			},
 			"ingressRoute": pulumi.Map{
 				"dashboard": pulumi.Map{
 					"enabled":   pulumi.Bool(true),
@@ -190,7 +208,10 @@ func buildCharts(
 					"middlewares": pulumi.Array{
 						pulumi.Map{
 							"name": pulumi.String("traefik-dashboard-auth"),
-						},
+						}, /*
+							pulumi.Map{
+								"name": pulumi.String("https-redirect"),
+							},*/
 					},
 				},
 			},
@@ -218,13 +239,28 @@ func buildCharts(
 							"secret": pulumi.String("traefik-dashboard-auth-secret"),
 						},
 					},
-				},
+				}, /*
+					pulumi.Map{
+						"apiVersion": pulumi.String("traefik.io/v1alpha1"),
+						"kind":       pulumi.String("Middleware"),
+						"metadata": pulumi.Map{
+							"name": pulumi.String("https-redirect"),
+						},
+						"spec": pulumi.Map{
+							"redirectScheme": pulumi.Map{
+								"scheme": pulumi.String("https"),
+							},
+							"permanent": pulumi.Map{
+								"scheme": pulumi.Bool(true),
+							},
+						},
+					},*/
 			},
 		},
 	}
 
 	helm.NewChart(ctx, "traefik", traefikChartArgs,
-		pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{traefikNS}))
+		pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{traefikNS, certs}))
 
 	return nil
 }
