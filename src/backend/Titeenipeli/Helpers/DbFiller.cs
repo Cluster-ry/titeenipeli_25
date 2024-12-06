@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
-using Titeenipeli.Context;
+using Titeenipeli.Common.Database;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Controllers;
 using Titeenipeli.Options;
-using Titeenipeli.Schema;
 
 namespace Titeenipeli.Helpers;
 
@@ -10,9 +10,6 @@ public static class DbFiller
 {
     public static void Initialize(ApiDbContext dbContext, GameOptions gameOptions)
     {
-        RelationalDatabaseCreator databaseCreator =
-            (RelationalDatabaseCreator)dbContext.Database.GetService<IDatabaseCreator>();
-
         if (!dbContext.CtfFlags.Any())
         {
             dbContext.CtfFlags.Add(new CtfFlag
@@ -26,41 +23,11 @@ public static class DbFiller
 
         if (!dbContext.Guilds.Any())
         {
-            Guild[] guilds =
-            [
-                new Guild
-                {
-                    Color = 0
-                },
-                new Guild
-                {
-                    Color = 1
-                },
-                new Guild
-                {
-                    Color = 2
-                },
-                new Guild
-                {
-                    Color = 3
-                },
-                new Guild
-                {
-                    Color = 4
-                },
-                new Guild
-                {
-                    Color = 5
-                },
-                new Guild
-                {
-                    Color = 6
-                },
-                new Guild
-                {
-                    Color = 7
-                }
-            ];
+            List<Guild> guilds = [];
+            var guildNames = Enum.GetValues(typeof(GuildName)).Cast<GuildName>().ToList();
+            // Skip Nobody.
+            guildNames = guildNames.Skip(1).ToList();
+            guilds.AddRange(from GuildName name in guildNames select new Guild { Name = name, ActiveCtfFlags = new() });
 
             dbContext.Guilds.AddRange(guilds);
 
@@ -73,28 +40,25 @@ public static class DbFiller
             Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
             SpawnX = 5,
             SpawnY = 5,
-            TelegramId = "test",
+            Powerups = new(),
+            TelegramId = "0",
             FirstName = "",
             LastName = "",
             Username = "",
-            PhotoUrl = "",
-            AuthDate = "",
-            Hash = ""
         };
 
         User testOpponent = new User
         {
             Code = "opponent",
-            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Color == 4) ?? throw new InvalidOperationException(),
+            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ??
+                    throw new InvalidOperationException(),
             SpawnX = 3,
             SpawnY = 2,
-            TelegramId = "opponent",
+            Powerups = new(),
+            TelegramId = "1",
             FirstName = "",
             LastName = "",
-            Username = "",
-            PhotoUrl = "",
-            AuthDate = "",
-            Hash = ""
+            Username = ""
         };
 
 
@@ -106,9 +70,17 @@ public static class DbFiller
             dbContext.SaveChanges();
         }
 
+
+        if (!dbContext.PowerUps.Any())
+        {
+            foreach (var powerupName in Enum.GetNames<Powerups>())
+            {
+                dbContext.PowerUps.Add(new PowerUp() { Name = powerupName });
+            }
+        }
+
         if (!dbContext.Map.Any())
         {
-            Random random = new Random(1);
             for (int x = 0; x < gameOptions.Width; x++)
             {
                 for (int y = 0; y < gameOptions.Height; y++)
@@ -117,7 +89,7 @@ public static class DbFiller
                     {
                         X = x,
                         Y = y,
-                        User = random.Next(10) < 1 && x > 3 && y > 3 && x < 17 && y < 17 ? testUser : testOpponent
+                        User = null
                     });
                 }
             }

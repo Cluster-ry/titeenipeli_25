@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message PixelUser {
+    int32 id = 1;
+}

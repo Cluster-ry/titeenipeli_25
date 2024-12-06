@@ -1,0 +1,6 @@
+type: object
+properties:
+  token:
+    type: string
+    minLength: 32
+    maxLength: 32

@@ -3,13 +3,13 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
-using Titeenipeli.Models;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Models;
 using Titeenipeli.Options;
-using Titeenipeli.Schema;
 
 namespace Titeenipeli.Services;
 
-public class JwtService
+public sealed class JwtService : IJwtService
 {
     private readonly JwtOptions _jwtOptions;
 
@@ -30,7 +30,7 @@ public class JwtService
                 X = user.SpawnX,
                 Y = user.SpawnY
             },
-            GuildId = user.Guild?.Color
+            GuildId = user.Guild.Name
         };
     }
 

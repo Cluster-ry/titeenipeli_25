@@ -1,0 +1,12 @@
+post:
+  tags:
+    - users
+  summary: "Gets information about the current logged in user."
+  operationId: "currentUser"
+  responses:
+    "200":
+      $ref: "../../components/responses/200CurrentUser.yaml"
+    "403":
+      $ref: "../../components/responses/403AuthorizationError.yaml"
+  security:
+    -botAuth: []

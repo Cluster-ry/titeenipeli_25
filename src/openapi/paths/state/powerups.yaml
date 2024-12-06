@@ -1,0 +1,19 @@
+get:
+  tags:
+    - "state"
+  summary: "Activate powerup."
+  operationId: "postPowerupActivate"
+  requestBody:
+    description: "Powerup activation details."
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/powerupActivation.yaml"
+  responses:
+    "200":
+      description: Activation was successfull.
+    "401":
+      $ref: "../../components/responses/401Unauthorized.yaml"
+  security:
+    - bearerAuth: []

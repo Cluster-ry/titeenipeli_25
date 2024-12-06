@@ -1,15 +1,12 @@
 type: object
 properties:
-  id: integer
+  telegramId:
+    type: integer
   firstName:
     type: string
   lastName:
     type: string
   username:
     type: string
-  photoUrl:
-    type: string
-  authDate:
-    type: string
-  hash:
-    type: string
+  guild:
+    $ref: "../enums/guilds.yaml"

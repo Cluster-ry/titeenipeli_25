@@ -1,7 +1,8 @@
 syntax = "proto3";
 
 enum PixelTypes {
-    Normal = 0;
-    MapBorder = 1;
-    Spawn = 2;
+  Normal = 0;
+  MapBorder = 1;
+  Spawn = 2;
+  FogOfWar = 3;
 }

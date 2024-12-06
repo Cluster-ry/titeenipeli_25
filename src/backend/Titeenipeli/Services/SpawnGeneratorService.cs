@@ -1,8 +1,8 @@
-using Titeenipeli.Enums;
+using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Services;
 
@@ -21,22 +21,13 @@ public class SpawnGeneratorService
 
     public Coordinate GetSpawnPoint(GuildName guildName)
     {
-        Coordinate spawnCoordinate = AddOffset(_spawnGenerator.GetSpawnPoint(guildName));
+        Coordinate spawnCoordinate;
 
-        while (_mapRepositoryService.IsSpawn(spawnCoordinate))
+        do
         {
-            spawnCoordinate = AddOffset(_spawnGenerator.GetSpawnPoint(guildName));
-        }
+            spawnCoordinate = _mapCenter + _spawnGenerator.GetSpawnPoint(guildName);
+        } while (!_mapRepositoryService.IsValid(spawnCoordinate) || _mapRepositoryService.IsSpawn(spawnCoordinate));
 
         return spawnCoordinate;
-    }
-
-    private Coordinate AddOffset(Coordinate coordinate)
-    {
-        return new Coordinate
-        {
-            X = _mapCenter.X + coordinate.X,
-            Y = _mapCenter.Y + coordinate.Y
-        };
     }
 }

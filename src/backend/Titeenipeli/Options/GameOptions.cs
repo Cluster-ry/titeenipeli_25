@@ -9,4 +9,7 @@ public class GameOptions
     public int SpawnAreasPerGuild { get; init; }
     public int SpawnAreaDistanceFromCenter { get; init; }
     public int SpawnAreaRadius { get; init; }
+    public int PixelsPerMinutePerGuild { get; init; }
+    public int InitialPixelBucket { get; init; }
+    public int MaximumPixelBucket { get; init; }
 }

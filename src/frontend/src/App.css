@@ -1,12 +1,22 @@
 @font-face {
-  font-family: "Press Start 2P";
-  src: local("Press Start 2P"), url("./assets/PressStart2P-Regular.ttf");
+    font-family: "Press Start 2P";
+    src: local("Press Start 2P"), url("./assets/PressStart2P-Regular.ttf");
 }
 
 body {
-  font-family: "Press Start 2P", sans-serif;
-  background-color: #d9d9d9;
-  color: black;
-  text-align: center;
-  box-sizing: border-box;
+    font-family: "Press Start 2P", sans-serif;
+    background-color: #d9d9d9;
+    color: black;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    /* dvh to account for mobile browser navigation bar */
+    /* https://stackoverflow.com/a/72245072 */
+    height: 100dvh;
+    width: 100vw;
+    box-sizing: border-box;
 }

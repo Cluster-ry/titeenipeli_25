@@ -1,0 +1,138 @@
+/* Top Overlay */
+
+.top-gradient {
+    background: linear-gradient(0, rgba(0, 0, 0, 0) 0%, rgba(183, 183, 183, 0.874667) 74.83%, #d9d9d9 100%);
+}
+
+.top-overlay {
+    display: flex;
+    align-items: center;
+    max-height: 15%;
+    padding-bottom: 10%;
+    padding-inline: 16px;
+    padding-top: 8px;
+}
+
+.top-overlay__left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    font-size: x-small;
+}
+
+.top-overlay__score-container {
+    display: flex;
+    gap: 4px;
+}
+
+.top-overlay__middle {
+    flex: 1;
+    display: flex;
+    justify-content: start;
+    gap: 8px;
+    flex-direction: column;
+    position: relative;
+    height: 100%;
+    font-size: x-large;
+}
+
+.top-overlay__middle__bucket {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 8px;
+    bottom: 0;
+    margin: auto;
+    max-height: 115%;
+    max-width: 100%;
+}
+
+.top-overlay__middle__bucket-points {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    padding-top: 30px;
+    color: #00fff0;
+    text-shadow:
+        -2px 2px #000000,
+        2px 2px #000000,
+        2px -2px #000000,
+        -2px -2px #000000;
+}
+
+.top-overlay__middle__cooldown {
+    flex: 1;
+    color: #00fff0;
+}
+
+.top-overlay__middle__bucket-points-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+}
+
+.top-overlay__right {
+    flex: 1;
+    display: flex;
+    justify-content: right;
+    height: 80%;
+}
+
+.top-overlay__right__help {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    pointer-events: all;
+}
+
+/* Bottom Overlay */
+
+.bottom-gradient {
+    background: radial-gradient(50% 50% at 50% 25%, #ffffff 0%, rgba(255, 255, 255, 0) 65.5%);
+}
+
+.bottom-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-height: 10%;
+    padding-bottom: 32px;
+    font-size: small;
+}
+
+.bottom-overlay__button {
+    aspect-ratio: 1;
+    padding: 8px;
+    height: 100%;
+    max-height: 100%;
+    max-width: 100%;
+    background: #75757580;
+    border: 5px solid #757575;
+    border-radius: 8px;
+    pointer-events: all;
+}
+
+.bottom-overlay__button__icon {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.bottom-overlay__button__text {
+    width: 100%;
+}
+
+/* Overlay */
+
+.overlay {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}

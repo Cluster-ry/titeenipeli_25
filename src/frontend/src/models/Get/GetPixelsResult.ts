@@ -3,5 +3,5 @@ import { PlayerCoordinates } from "../PlayerCoordinates";
 
 export interface GetPixelsResult {
     playerSpawn: PlayerCoordinates;
-    pixels: Pixel[];
+    pixels: Pixel[][];
 }

@@ -1,0 +1,6 @@
+description: "Information of current active user."
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/user.yaml"
+

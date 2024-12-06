@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Titeenipeli.Enums;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
-using Titeenipeli.Models;
 using Titeenipeli.Tests.GameLogic;
 
 namespace Titeenipeli.Benchmark;
@@ -11,7 +11,7 @@ using PixelPlacement = (int x, int y, GuildName owner);
 [SimpleJob]
 public class MapUpdateBenchmark
 {
-    private readonly Map _map;
+    private readonly PixelWithType[,] _map;
     private readonly PixelPlacement[] _moveSequence;
     private readonly MapUpdater _mapUpdater;
 
@@ -159,7 +159,7 @@ public class MapUpdateBenchmark
     {
         foreach (var (x, y, owner) in _moveSequence)
         {
-            _mapUpdater.PlacePixel(_map, (x, y), owner);
+            _mapUpdater.PlacePixel(_map, new(x, y), MapUtils.GuildNameToUser(owner));
         }
     }
 }
