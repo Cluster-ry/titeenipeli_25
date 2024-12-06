@@ -1,0 +1,20 @@
+name: Try building docker compose file
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/build-docker.yaml"
+    branches:
+      - main
+
+jobs:
+  run-build:
+    name: Run build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Run build
+        working-directory: ./src
+        run: docker compose build
