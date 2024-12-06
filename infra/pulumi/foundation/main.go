@@ -53,6 +53,7 @@ func main() {
 		}
 
 		installCSI(ctx, k8sProvider)
+		installCertManager(ctx, k8sProvider)
 
 		// Exports
 		ctx.Export("domainName", domain.Name)
@@ -62,6 +63,7 @@ func main() {
 		ctx.Export("kubeconfig", pulumi.ToSecret(kubeconfig))
 		ctx.Export("clusterName", k8sCluster.ManagedCluster.Name)
 		ctx.Export("titeenipeliRG", k8sCluster.ResourceGroup.Name)
+		ctx.Export("publicIpName", k8sCluster.PublicIpName)
 
 		return nil
 	})

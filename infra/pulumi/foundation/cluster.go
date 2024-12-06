@@ -6,6 +6,7 @@ import (
 
 	cs "github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2"
 	managedidentity "github.com/pulumi/pulumi-azure-native-sdk/managedidentity/v2"
+	"github.com/pulumi/pulumi-azure-native-sdk/network/v2"
 	"github.com/pulumi/pulumi-azure-native-sdk/resources/v2"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes"
 	"github.com/pulumi/pulumi-null/sdk/go/null"
@@ -17,6 +18,7 @@ import (
 type ClusterInfo struct {
 	ManagedCluster *cs.ManagedCluster
 	ResourceGroup  *resources.ResourceGroup
+	PublicIpName   pulumi.StringOutput
 }
 
 type workloadIdentities struct {
@@ -70,6 +72,13 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 					Enabled: pulumi.Bool(true),
 				},
 			},
+			Sku: &cs.ManagedClusterSKUArgs{
+				Name: pulumi.String("Base"),
+				Tier: pulumi.String(cs.ManagedClusterSKUTierFree),
+			},
+			Identity: &cs.ManagedClusterIdentityArgs{
+				Type: cs.ResourceIdentityTypeSystemAssigned,
+			},
 			KubernetesVersion: pulumi.String(cfg.K8sVersion),
 			LinuxProfile: cs.ContainerServiceLinuxProfileArgs{
 				AdminUsername: pulumi.String(cfg.AdminUserName),
@@ -90,7 +99,9 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 				LoadBalancerSku: pulumi.String(cs.LoadBalancerSkuStandard),
 				OutboundType:    pulumi.String(cs.OutboundTypeLoadBalancer),
 			},
-			NodeResourceGroup: pulumi.String("node-resource-group"),
+			NodeResourceGroup: entra.ResourceGroup.Name.ApplyT(func(name string) string {
+				return name + "-nodepool"
+			}).(pulumi.StringOutput),
 			ServicePrincipalProfile: cs.ManagedClusterServicePrincipalProfileArgs{
 				ClientId: entra.Application.ClientId,
 				Secret:   entra.ServicerPrincipalPassword.Value,
@@ -100,9 +111,24 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 			sleep,
 		}))
 
+	// Create a Public IP
+	publicIP, err := network.NewPublicIPAddress(ctx, "aks-pip", &network.PublicIPAddressArgs{
+		ResourceGroupName: entra.ResourceGroup.Name.ApplyT(func(name string) string {
+			return name + "-nodepool"
+		}).(pulumi.StringOutput),
+		PublicIPAllocationMethod: pulumi.String("Static"),
+		Sku: &network.PublicIPAddressSkuArgs{
+			Name: pulumi.String("Standard"),
+		},
+	}, pulumi.DependsOn([]pulumi.Resource{k8sCluster}))
+	if err != nil {
+		return nil, err
+	}
+
 	return &ClusterInfo{
 		ManagedCluster: k8sCluster,
 		ResourceGroup:  entra.ResourceGroup,
+		PublicIpName:   publicIP.Name,
 	}, nil
 }
 

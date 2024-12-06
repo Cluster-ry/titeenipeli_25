@@ -18,7 +18,8 @@ func buildCharts(
 	certManagerClientId pulumi.StringOutput,
 	externalDnsClientId pulumi.StringOutput,
 	traefikIdentityClientId pulumi.StringOutput,
-	titeenipeliRG pulumi.StringOutput) error {
+	titeenipeliRG pulumi.StringOutput,
+	publicIpName pulumi.StringOutput) error {
 
 	subscription, err := core.LookupSubscription(ctx, nil)
 	if err != nil {
@@ -27,40 +28,6 @@ func buildCharts(
 
 	conf := config.New(ctx, "")
 	email := conf.RequireSecret("email")
-
-	cmNs, err := v1.NewNamespace(ctx, "cert-manager", &v1.NamespaceArgs{
-		Metadata: &metav1.ObjectMetaArgs{
-			Name: pulumi.String("cert-manager"),
-		}},
-		pulumi.Providers(k8sProvider))
-	if err != nil {
-		return err
-	}
-
-	certManagerChartArgs := helm.ChartArgs{
-		Chart:   pulumi.String("cert-manager"),
-		Version: pulumi.String("v1.15.3"),
-		FetchArgs: helm.FetchArgs{
-			Repo: pulumi.String("https://charts.jetstack.io"),
-		},
-		Namespace: pulumi.String("cert-manager"),
-		Values: pulumi.Map{
-			"podLabels": pulumi.Map{
-				"azure.workload.identity/use": pulumi.String("true"),
-			},
-			"serviceAccount": pulumi.Map{
-				"labels": pulumi.Map{
-					"azure.workload.identity/use": pulumi.String("true"),
-				},
-			},
-			"crds": pulumi.Map{
-				"enabled": pulumi.String("true"),
-			},
-		},
-	}
-
-	helm.NewChart(ctx, "cert-manager", certManagerChartArgs,
-		pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{cmNs}))
 
 	helm.NewChart(ctx, "certmanager-certs", helm.ChartArgs{
 		Path: pulumi.String("./helm/certmanager-certs"),
@@ -209,40 +176,25 @@ func buildCharts(
 					"type": pulumi.String("LoadBalancer"),
 				},
 				"annotations": pulumi.Map{
-					"service.beta.kubernetes.io/azure-pip-name": titeenipeliRG,
+					"service.beta.kubernetes.io/azure-pip-name": publicIpName,
+					"external-dns.alpha.kubernetes.io/hostname": pulumi.String("traefik.test.cluster2017.fi"), // dynamic domain
 				},
 			},
 			"ingressRoute": pulumi.Map{
 				"dashboard": pulumi.Map{
-					"enabled": pulumi.Bool(false),
+					"enabled":   pulumi.Bool(true),
+					"matchRule": pulumi.String("Host(`traefik.test.cluster2017.fi`)"),
+					"entryPoints": pulumi.StringArray{
+						pulumi.String("websecure"),
+					},
+					"middlewares": pulumi.Array{
+						pulumi.Map{
+							"name": pulumi.String("traefik-dashboard-auth"),
+						},
+					},
 				},
-			},
-			"additionalArguments": pulumi.Array{
-				pulumi.String("--api.insecure=true"),
 			},
 			"extraObjects": pulumi.Array{
-				pulumi.Map{
-					"apiVersion": pulumi.String("v1"),
-					"kind":       pulumi.String("Service"),
-					"metadata": pulumi.Map{
-						"name": pulumi.String("traefik-api"),
-					},
-					"spec": pulumi.Map{
-						"type": pulumi.String("ClusterIP"),
-						"selector": pulumi.Map{
-							"app.kubernetes.io/name":     pulumi.String("traefik"),
-							"app.kubernetes.io/instance": pulumi.String("traefik-default"),
-						},
-						"ports": pulumi.Array{
-							pulumi.Map{
-								"port":       pulumi.Int(8080),
-								"name":       pulumi.String("traefik"),
-								"targetPort": pulumi.Int(9000),
-								"protocol":   pulumi.String("TCP"),
-							},
-						},
-					},
-				},
 				pulumi.Map{
 					"apiVersion": pulumi.String("v1"),
 					"kind":       pulumi.String("Secret"),
@@ -264,41 +216,6 @@ func buildCharts(
 					"spec": pulumi.Map{
 						"basicAuth": pulumi.Map{
 							"secret": pulumi.String("traefik-dashboard-auth-secret"),
-						},
-					},
-				},
-				pulumi.Map{
-					"apiVersion": pulumi.String("networking.k8s.io/v1"),
-					"kind":       pulumi.String("Ingress"),
-					"metadata": pulumi.Map{
-						"name": pulumi.String("traefik-dashboard"),
-						"annotations": pulumi.Map{
-							"traefik.ingress.kubernetes.io/router.entrypoints": pulumi.String("websecure"),
-							"traefik.ingress.kubernetes.io/router.middlewares": pulumi.String("default-traefik-dashboard-auth@kubernetescrd"),
-							"external-dns.alpha.kubernetes.io/hostname":        pulumi.String("traefik.test.cluster2017.fi"), // dynamic domain
-						},
-					},
-					"spec": pulumi.Map{
-						"rules": pulumi.Array{
-							pulumi.Map{
-								"host": pulumi.String("traefik.test.cluster2017.fi"), // dynamic domain
-								"http": pulumi.Map{
-									"paths": pulumi.Array{
-										pulumi.Map{
-											"path":     pulumi.String("/"),
-											"pathType": pulumi.String("Prefix"),
-											"backend": pulumi.Map{
-												"service": pulumi.Map{
-													"name": pulumi.String("traefik-api"),
-													"port": pulumi.Map{
-														"name": pulumi.String("traefik"),
-													},
-												},
-											},
-										},
-									},
-								},
-							},
 						},
 					},
 				},

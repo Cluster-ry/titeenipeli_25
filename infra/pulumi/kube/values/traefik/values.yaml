@@ -19,10 +19,15 @@ deployment:
   initContainers:
     - name: volume-permissions
       image: busybox:latest
-      command: ["sh", "-c", "ls -la /; touch /data/acme.json; chmod -v 600 /data/acme.json"]
+      command:
+        [
+          "sh",
+          "-c",
+          "ls -la /; touch /data/acme.json; chmod -v 600 /data/acme.json",
+        ]
       volumeMounts:
-      - mountPath: /data
-        name: data
+        - mountPath: /data
+          name: data
 podSecurityContext:
   fsGroup: 65532
   fsGroupChangePolicy: "OnRootMismatch"
@@ -35,27 +40,18 @@ service:
     service.beta.kubernetes.io/azure-dns-label-name: "{{ azure_resource_group }}"
     service.beta.kubernetes.io/azure-allowed-ip-ranges: "{{ ip_range | join(',') }}"
 
+# Create an IngressRoute for the dashboard
 ingressRoute:
   dashboard:
-    enabled: false
-additionalArguments:
-- "--api.insecure=true"
-extraObjects:
-  - apiVersion: v1
-    kind: Service
-    metadata:
-      name: traefik-api
-    spec:
-      type: ClusterIP
-      selector:
-        app.kubernetes.io/name: traefik
-        app.kubernetes.io/instance: traefik-default
-      ports:
-      - port: 8080
-        name: traefik
-        targetPort: 9000
-        protocol: TCP
+    enabled: true
+    # Custom match rule with host domain
+    matchRule: Host(`traefik.test.cluster2017.fi`)
+    entryPoints: ["websecure"]
+    # Add custom middlewares : authentication and redirection
+    middlewares:
+      - name: traefik-dashboard-auth
 
+extraObjects:
   - apiVersion: v1
     kind: Secret
     metadata:
@@ -72,24 +68,3 @@ extraObjects:
     spec:
       basicAuth:
         secret: traefik-dashboard-auth-secret
-
-  - apiVersion: networking.k8s.io/v1
-    kind: Ingress
-    metadata:
-      name: traefik-dashboard
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: websecure
-        traefik.ingress.kubernetes.io/router.middlewares: default-traefik-dashboard-auth@kubernetescrd
-        external-dns.alpha.kubernetes.io/hostname: traefik.test.cluster2017.fi
-    spec:
-      rules:
-      - host: traefik-dashboard.example.com
-        http:
-          paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: traefik-api
-                port:
-                  name: traefik
