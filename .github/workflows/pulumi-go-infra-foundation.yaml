@@ -48,7 +48,7 @@ jobs:
         run: go mod download
 
       - name: Preview infrastructure 🚀
-        uses: pulumi/actions@v5
+        uses: pulumi/actions@v6
         with:
           command: preview
           stack-name: ${{ env.stack-name }}
