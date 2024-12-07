@@ -90,10 +90,10 @@ jobs:
           push: true
           tags: ${{ env.acr_name }}/bot:latest
 
-      - name: Purge old images only keep 3 newest
-        if: github.ref == 'refs/heads/main'
+      - name: Purge old images only keep 2 newest
+        if: github.ref != 'refs/heads/main'
         run: |
           acr purge \
               --registry ${{env.acr_name }} \
               --filter ".*:.*" \
-              --keep 3
+              --keep 2
