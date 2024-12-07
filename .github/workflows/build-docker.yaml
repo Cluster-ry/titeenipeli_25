@@ -51,11 +51,11 @@ jobs:
           push: false
           tags: frontend:latest
 
-      - name: Test build frontend
+      - name: Test build titeenipeli bot
         if: github.ref != 'refs/heads/main'
         uses: docker/build-push-action@v6
         with:
           context: ./src/backend
-          file: ./src/Titeenipeli.Bot/Dockerfile
+          file: ./src/backend/Titeenipeli.Bot/Dockerfile
           push: false
           tags: titeenipeli.bot:latest
