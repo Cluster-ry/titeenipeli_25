@@ -3,9 +3,13 @@ module essentials
 go 1.22
 
 require (
+	github.com/pulumi/pulumi-azure-native-sdk/authorization/v2 v2.76.0
 	github.com/pulumi/pulumi-azure-native-sdk/containerregistry/v2 v2.76.0
 	github.com/pulumi/pulumi-azure-native-sdk/resources/v2 v2.42.1
+	github.com/pulumi/pulumi-azure/sdk/v5 v5.89.0
+	github.com/pulumi/pulumi-azuread/sdk/v5 v5.53.5
 	github.com/pulumi/pulumi/sdk/v3 v3.142.0
+	github.com/pulumiverse/pulumi-time/sdk v0.1.0
 )
 
 require github.com/BurntSushi/toml v1.2.1 // indirect
