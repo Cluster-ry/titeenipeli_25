@@ -5,6 +5,10 @@ param key string
 param key2 string
 param key3 string
 param uid string
+param githubOrg string
+param githubRepo string
+param managedIdentityPreviewName string = 'pulumiPreview'
+param managedIdentityApplyName string = 'pulumiApply'
 
 var storageBlobDataContributorID = subscriptionResourceId(
   'Microsoft.Authorization/roleDefinitions',
@@ -123,3 +127,40 @@ resource roleAssingmentKeyVaultSecrets 'Microsoft.Authorization/roleAssignments@
     principalId: uid
   }
 }
+
+resource managedIdentityApply 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: managedIdentityApplyName
+  location: resourceGroup().location
+}
+
+resource federatedCredentialApply 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31' = {
+  name: 'GitHub-${githubOrg}-${githubRepo}'
+  parent: managedIdentityApply
+  properties: {
+    issuer: 'https://token.actions.githubusercontent.com'
+    subject: 'repo:${githubOrg}/${githubRepo}:environment:apply'
+    audiences: [
+      'api://AzureADTokenExchange'
+    ]
+  }
+}
+
+resource managedIdentityPreview 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: managedIdentityPreviewName
+  location: resourceGroup().location
+}
+
+resource federatedCredentialPreview 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31' = {
+  name: 'GitHub-${githubOrg}-${githubRepo}'
+  parent: managedIdentityPreview
+  properties: {
+    issuer: 'https://token.actions.githubusercontent.com'
+    subject: 'repo:${githubOrg}/${githubRepo}:environment:plan'
+    audiences: [
+      'api://AzureADTokenExchange'
+    ]
+  }
+}
+
+output roleAssignmentPreviewPrincipalId string = managedIdentityPreview.properties.principalId
+output roleAssignmentApplyPrincipalID string = managedIdentityApply.properties.principalId
