@@ -42,7 +42,7 @@ jobs:
         with:
           context: ./src/
           file: ./src/frontend/Dockerfile
-          push: true
+          push: false
           tags: ${{ env.acr_name }}/frontend:latest
 
       - name: Test build backend
@@ -51,7 +51,7 @@ jobs:
         with:
           context: ./src/
           file: ./src/backend/Titeenipeli/Dockerfile
-          push: true
+          push: false
           tags: ${{ env.acr_name }}/backend:latest
 
       - name: Test build titeenipeli bot
@@ -60,7 +60,7 @@ jobs:
         with:
           context: ./src/backend
           file: ./src/backend/Titeenipeli.Bot/Dockerfile
-          push: true
+          push: false
           tags: ${{ env.acr_name }}/bot:latest
 
       - name: Build and push backend
