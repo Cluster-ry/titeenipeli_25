@@ -34,7 +34,7 @@
     ports:
       - 8080:80
       - 8443:443
-    depends_on: 
+    depends_on:
       - backend
       - frontend
 
@@ -46,7 +46,7 @@
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - 5432:5432
-      
+
   bot:
     image: titeenipeli.bot:latest
     build:
@@ -59,5 +59,5 @@
       Backend__AuthorizationHeaderName: X-BOT-KEY
       Backend__Token: ${BOT_TOKEN}
       Telegram__Token: ${TELEGRAM_TOKEN}
-    depends_on: 
+    depends_on:
       - proxy
