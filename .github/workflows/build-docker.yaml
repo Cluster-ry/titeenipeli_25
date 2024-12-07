@@ -37,8 +37,8 @@ jobs:
         if: github.ref != 'refs/heads/main'
         uses: docker/build-push-action@v6
         with:
-          context: src/
-          file: backend/Titeenipeli/Dockerfile
+          context: ./src/
+          file: ./src/backend/Titeenipeli/Dockerfile
           push: false
           tags: titeenipeli:latest
 
@@ -46,8 +46,8 @@ jobs:
         if: github.ref != 'refs/heads/main'
         uses: docker/build-push-action@v6
         with:
-          context: src/
-          file: frontend/Dockerfile
+          context: ./src/
+          file: ./src/frontend/Dockerfile
           push: false
           tags: frontend:latest
 
@@ -55,7 +55,7 @@ jobs:
         if: github.ref != 'refs/heads/main'
         uses: docker/build-push-action@v6
         with:
-          context: src/backend
-          file: Titeenipeli.Bot/Dockerfile
+          context: ./src/backend
+          file: ./src/Titeenipeli.Bot/Dockerfile
           push: false
           tags: titeenipeli.bot:latest
