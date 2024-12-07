@@ -43,3 +43,28 @@ az deployment sub create `
   --template-file .\roleAssignment.bicep `
   -p roleAssignmentPreviewId=$roleAssignmentPreviewId roleAssignmentApplyID=$roleAssignmentApplyID
 Write-Host "Role Assignment, Done."
+
+Write-Host "Adding Graph API roles..."
+
+$graphResourceId = az ad sp list --display-name "Microsoft Graph" --query [0].id --out tsv
+$uri = "https://graph.microsoft.com/v1.0/servicePrincipals/$roleAssignmentPreviewId/appRoleAssignments"
+
+$appRoleId = az ad sp list --display-name "Microsoft Graph" --query "[0].appRoles[?value=='Application.Read.All' && contains(allowedMemberTypes, 'Application')].id" --output tsv
+$body = "{'principalId':'$roleAssignmentPreviewId','resourceId':'$graphResourceId','appRoleId':'$appRoleId'}"
+az rest --method post --uri $uri --body $body --headers "Content-Type=application/json"
+
+$appRoleId = az ad sp list --display-name "Microsoft Graph" --query "[0].appRoles[?value=='User.Read.All' && contains(allowedMemberTypes, 'Application')].id" --output tsv
+$body = "{'principalId':'$roleAssignmentPreviewId','resourceId':'$graphResourceId','appRoleId':'$appRoleId'}"
+az rest --method post --uri $uri --body $body --headers "Content-Type=application/json"
+
+$uri = "https://graph.microsoft.com/v1.0/servicePrincipals/$roleAssignmentApplyID/appRoleAssignments"
+
+$appRoleId = az ad sp list --display-name "Microsoft Graph" --query "[0].appRoles[?value=='User.Read.All' && contains(allowedMemberTypes, 'Application')].id" --output tsv
+$body = "{'principalId':'$roleAssignmentApplyID','resourceId':'$graphResourceId','appRoleId':'$appRoleId'}"
+az rest --method post --uri $uri --body $body --headers "Content-Type=application/json"
+
+$appRoleId = az ad sp list --display-name "Microsoft Graph" --query "[0].appRoles[?value=='Application.ReadWrite.All' && contains(allowedMemberTypes, 'Application')].id" --output tsv
+$body = "{'principalId':'$roleAssignmentApplyID','resourceId':'$graphResourceId','appRoleId':'$appRoleId'}"
+az rest --method post --uri $uri --body $body --headers "Content-Type=application/json"
+
+Write-Host "Added Graph API roles."
