@@ -3,11 +3,21 @@ param storageAccountName string
 param tenantId string
 param key string
 param key2 string
+param key3 string
 param uid string
 
-var storageBlobDataContributorID = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
-var keyVaultCryptoUserID = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '12338af0-0e69-4776-bea7-57ae8d297424')
-var keyVaultSecretsUserID = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
+var storageBlobDataContributorID = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+)
+var keyVaultCryptoUserID = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  '12338af0-0e69-4776-bea7-57ae8d297424'
+)
+var keyVaultSecretsUserID = subscriptionResourceId(
+  'Microsoft.Authorization/roleDefinitions',
+  '4633458b-17de-408a-b874-0445c86b69e6'
+)
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' = {
   name: storageAccountName
@@ -72,6 +82,18 @@ resource keyvaultKey 'Microsoft.KeyVault/vaults/keys@2023-07-01' = {
 
 resource keyvaultKey2 'Microsoft.KeyVault/vaults/keys@2023-07-01' = {
   name: key2
+  parent: keyvault
+  properties: {
+    attributes: {
+      enabled: true
+      exportable: false
+    }
+    kty: 'RSA'
+  }
+}
+
+resource keyvaultKey3 'Microsoft.KeyVault/vaults/keys@2023-07-01' = {
+  name: key3
   parent: keyvault
   properties: {
     attributes: {
