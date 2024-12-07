@@ -59,3 +59,30 @@ jobs:
           file: ./src/backend/Titeenipeli.Bot/Dockerfile
           push: false
           tags: titeenipeli.bot:latest
+
+      - name: Build and push backend
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/
+          file: ./src/backend/Titeenipeli/Dockerfile
+          push: false
+          tags: titeenipeli:latest
+
+      - name: Build and push frontend
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/
+          file: ./src/frontend/Dockerfile
+          push: false
+          tags: frontend:latest
+
+      - name: Build and push titeenipeli bot
+        if: github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/backend
+          file: ./src/backend/Titeenipeli.Bot/Dockerfile
+          push: false
+          tags: titeenipeli.bot:latest
