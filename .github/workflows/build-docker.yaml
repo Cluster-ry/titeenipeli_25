@@ -43,7 +43,7 @@ jobs:
           context: ./src/
           file: ./src/frontend/Dockerfile
           push: true
-          tags: frontend:latest
+          tags: titeenipeli/frontend:latest
 
       - name: Test build backend
         if: github.ref != 'refs/heads/main'
@@ -52,7 +52,7 @@ jobs:
           context: ./src/
           file: ./src/backend/Titeenipeli/Dockerfile
           push: true
-          tags: titeenipeli:latest
+          tags: titeenipeli/backend:latest
 
       - name: Test build titeenipeli bot
         if: github.ref != 'refs/heads/main'
@@ -61,7 +61,7 @@ jobs:
           context: ./src/backend
           file: ./src/backend/Titeenipeli.Bot/Dockerfile
           push: true
-          tags: titeenipeli.bot:latest
+          tags: titeenipeli/bot:latest
 
       - name: Build and push backend
         if: github.ref == 'refs/heads/main'
@@ -70,7 +70,7 @@ jobs:
           context: ./src/
           file: ./src/backend/Titeenipeli/Dockerfile
           push: true
-          tags: titeenipeli:latest
+          tags: titeenipeli/backend:latest
 
       - name: Build and push frontend
         if: github.ref == 'refs/heads/main'
@@ -79,7 +79,7 @@ jobs:
           context: ./src/
           file: ./src/frontend/Dockerfile
           push: true
-          tags: frontend:latest
+          tags: titeenipeli/frontend:latest
 
       - name: Build and push titeenipeli bot
         if: github.ref == 'refs/heads/main'
@@ -88,7 +88,7 @@ jobs:
           context: ./src/backend
           file: ./src/backend/Titeenipeli.Bot/Dockerfile
           push: true
-          tags: titeenipeli.bot:latest
+          tags: titeenipeli/bot:latest
 
       - name: Purge old images only keep 3 newest
         if: github.ref == 'refs/heads/main'
