@@ -133,6 +133,33 @@ resource managedIdentityApply 'Microsoft.ManagedIdentity/userAssignedIdentities@
   location: resourceGroup().location
 }
 
+resource roleAssingmentKeyVaultCryptoApply 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: keyvault
+  name: guid(managedIdentityApply.id, uid, keyVaultCryptoUserID)
+  properties: {
+    roleDefinitionId: keyVaultCryptoUserID
+    principalId: managedIdentityApply.properties.principalId
+  }
+}
+
+resource roleAssingmentKeyVaultSecretsApply 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: keyvault
+  name: guid(managedIdentityApply.id, uid, keyVaultSecretsUserID)
+  properties: {
+    roleDefinitionId: keyVaultSecretsUserID
+    principalId: managedIdentityApply.properties.principalId
+  }
+}
+
+resource roleAssingmentStorageAccountApply 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: storageAccount
+  name: guid(managedIdentityApply.id, uid, storageBlobDataContributorID)
+  properties: {
+    roleDefinitionId: storageBlobDataContributorID
+    principalId: managedIdentityApply.properties.principalId
+  }
+}
+
 resource federatedCredentialApply 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31' = {
   name: 'GitHub-${githubOrg}-${githubRepo}'
   parent: managedIdentityApply
@@ -150,6 +177,33 @@ resource managedIdentityPreview 'Microsoft.ManagedIdentity/userAssignedIdentitie
   location: resourceGroup().location
 }
 
+resource roleAssingmentKeyVaultCryptoPreview 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: keyvault
+  name: guid(managedIdentityPreview.id, uid, keyVaultCryptoUserID)
+  properties: {
+    roleDefinitionId: keyVaultCryptoUserID
+    principalId: managedIdentityPreview.properties.principalId
+  }
+}
+
+resource roleAssingmentKeyVaultSecretsPreview 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: keyvault
+  name: guid(managedIdentityPreview.id, uid, keyVaultSecretsUserID)
+  properties: {
+    roleDefinitionId: keyVaultSecretsUserID
+    principalId: managedIdentityPreview.properties.principalId
+  }
+}
+
+resource roleAssingmentStorageAccountPreview 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: storageAccount
+  name: guid(managedIdentityPreview.id, uid, storageBlobDataContributorID)
+  properties: {
+    roleDefinitionId: storageBlobDataContributorID
+    principalId: managedIdentityPreview.properties.principalId
+  }
+}
+
 resource federatedCredentialPreview 'Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31' = {
   name: 'GitHub-${githubOrg}-${githubRepo}'
   parent: managedIdentityPreview
@@ -164,3 +218,7 @@ resource federatedCredentialPreview 'Microsoft.ManagedIdentity/userAssignedIdent
 
 output roleAssignmentPreviewPrincipalId string = managedIdentityPreview.properties.principalId
 output roleAssignmentApplyPrincipalID string = managedIdentityApply.properties.principalId
+output previewCliendID string = managedIdentityPreview.properties.clientId
+output previewTenantID string = managedIdentityPreview.properties.tenantId
+output applyCliendID string = managedIdentityApply.properties.clientId
+output applyTenantID string = managedIdentityApply.properties.tenantId
