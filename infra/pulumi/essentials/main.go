@@ -6,16 +6,18 @@ import (
 	authorization "github.com/pulumi/pulumi-azure-native-sdk/authorization/v2"
 	"github.com/pulumi/pulumi-azure-native-sdk/containerregistry/v2"
 	"github.com/pulumi/pulumi-azure-native-sdk/resources/v2"
+	"github.com/pulumi/pulumi-azure/sdk/v5/go/azure/core"
 	"github.com/pulumi/pulumi-azuread/sdk/v5/go/azuread"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
 	"github.com/pulumiverse/pulumi-time/sdk/go/time"
 )
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		conf := config.New(ctx, "")
-		subscriptionID := conf.RequireSecret("subscriptionID")
+		primary, err := core.LookupSubscription(ctx, nil, nil)
+		if err != nil {
+			return err
+		}
 
 		resourceGroupName := "essentials"
 		resourceGroup, err := resources.NewResourceGroup(ctx, resourceGroupName, &resources.ResourceGroupArgs{
@@ -73,9 +75,7 @@ func main() {
 		}
 
 		// Role for AcrPush
-		roleDefinitionId := subscriptionID.ApplyT(func(s string) string {
-			return "/subscriptions/" + s + "/providers/Microsoft.Authorization/roleDefinitions/8311e382-0749-4cb8-b61a-304f252e45ec"
-		}).(pulumi.StringOutput)
+		roleDefinitionId := pulumi.String(fmt.Sprintf("%s/providers/Microsoft.Authorization/roleDefinitions/8311e382-0749-4cb8-b61a-304f252e45ec", primary.Id))
 
 		_, err = authorization.NewRoleAssignment(ctx, fmt.Sprintf("resourceGroupReaderAssignment_%s", "acrpush"), &authorization.RoleAssignmentArgs{
 			PrincipalId:      servicePrincipal.ID(),
