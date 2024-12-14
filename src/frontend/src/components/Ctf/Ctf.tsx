@@ -3,6 +3,7 @@ import { postCtf } from "../../api/ctf";
 import { PostCtfInput } from "../../models/Post/PostCtfInput";
 import "../../pages/Game/Overlay/overlay.css";
 import { useNotificationStore } from "../../stores/notificationStore";
+import "./ctf.css"
 
 const Ctf = () => {
   const [token, setToken] = useState("");
@@ -37,17 +38,19 @@ const Ctf = () => {
   };
 
   return (
-    <div className="ctf-container">
-      <input
-        type="text"
-        placeholder="Enter Token"
-        value={token}
-        onChange={handleTokenChange}
-        style={{ pointerEvents: "all" }}
-      />
-      <button className="ctf-icon" onClick={handleSubmit}>
-        {CTF_DISCLAIMER}
-      </button>
+    <div className="ctf-wrapper">
+      <div className="ctf-container">
+        <input
+          type="text"
+          placeholder="Enter Token"
+          value={token}
+          onChange={handleTokenChange}
+          style={{ pointerEvents: "all" }}
+        />
+        <button className="ctf-icon" onClick={handleSubmit}>
+          {CTF_DISCLAIMER}
+        </button>
+      </div>
     </div>
   );
 };
