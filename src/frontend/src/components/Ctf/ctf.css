@@ -2,3 +2,12 @@
   display: grid;
   margin-top: 5%;
 }
+
+.ctf-input {
+  height: 35px;
+  text-align: center;
+  color: white;
+  font-family: "Press Start 2p";
+  border-radius: 8px;
+  background-color: #000000;
+}

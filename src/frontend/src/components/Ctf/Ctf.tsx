@@ -41,6 +41,7 @@ const Ctf = () => {
     <div className="ctf-wrapper">
       <div className="ctf-container">
         <input
+          className="ctf-input"
           type="text"
           placeholder="Enter Token"
           value={token}
