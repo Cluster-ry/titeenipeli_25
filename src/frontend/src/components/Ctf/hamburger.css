@@ -7,6 +7,10 @@
   pointer-events: all;
   cursor: pointer;
   margin-top: 15%;
+  background-color: darkgray;
+
+  padding: 12px;
+  border-radius: 10px;
 }
 
 .hamburger-bar {
@@ -17,5 +21,4 @@
 
 .hamburger-wrapper {
   display: grid;
-  object-fit: contain;
 }
