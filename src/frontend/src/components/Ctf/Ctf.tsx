@@ -2,12 +2,11 @@ import { useState } from "react";
 import { postCtf } from "../../api/ctf";
 import { PostCtfInput } from "../../models/Post/PostCtfInput";
 import "../../pages/Game/Overlay/overlay.css";
-import { useErrorStore } from "../../stores/errorStore";
-import Notification from "../Notification";
+import { useNotificationStore } from "../../stores/notificationStore";
+
 const Ctf = () => {
-  const [notificationMessage, setNotificationMessage] = useState("");
   const [token, setToken] = useState("");
-  const { showError, updateShowError, startErrorTimer } = useErrorStore();
+  const { triggerNotification } = useNotificationStore();
 
   const CTF_DISCLAIMER: string = "Activate CTF";
   const NOTIFICATION_SUCCESS: string = "CTF activated successfully!";
@@ -24,21 +23,15 @@ const Ctf = () => {
     try { 
       const result = await postCtf(ctfToken); 
       if (result.msg === "Request unsuccessful.") {
-        setNotificationMessage(NOTIFICATION_FAIL);
-        updateShowError(true);
-        startErrorTimer();
+        triggerNotification(NOTIFICATION_FAIL, "error");
         console.log("Request unsuccessful.");
         return;
       } else { 
-        setNotificationMessage(NOTIFICATION_SUCCESS);
-        updateShowError(true);
-        startErrorTimer();
+        triggerNotification(NOTIFICATION_SUCCESS, "success");
       }
     } 
     catch (error) {
-      setNotificationMessage(NOTIFICATION_FAIL);
-      updateShowError(true);
-      startErrorTimer();
+      triggerNotification(NOTIFICATION_FAIL, "error");
       console.error(error); 
     }
   };
@@ -55,7 +48,6 @@ const Ctf = () => {
       <button className="ctf-icon" onClick={handleSubmit}>
         {CTF_DISCLAIMER}
       </button>
-      {showError && <Notification type="fail" text={notificationMessage}/>}
     </div>
   );
 };
