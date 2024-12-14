@@ -3,8 +3,7 @@ import { postCtf } from "../../api/ctf";
 import { PostCtfInput } from "../../models/Post/PostCtfInput";
 import "../../pages/Game/Overlay/overlay.css";
 import { useErrorStore } from "../../stores/errorStore";
-import ErrorNotification from "../ErrorNotification";
-
+import Notification from "../Notification";
 const Ctf = () => {
   const [notificationMessage, setNotificationMessage] = useState("");
   const [token, setToken] = useState("");
@@ -56,7 +55,7 @@ const Ctf = () => {
       <button className="ctf-icon" onClick={handleSubmit}>
         {CTF_DISCLAIMER}
       </button>
-      {showError && <ErrorNotification notificationText={notificationMessage}/>}
+      {showError && <Notification type="fail" text={notificationMessage}/>}
     </div>
   );
 };

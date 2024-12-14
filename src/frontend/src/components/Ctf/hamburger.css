@@ -17,4 +17,5 @@
 
 .hamburger-wrapper {
   display: grid;
+  object-fit: contain;
 }
