@@ -33,3 +33,10 @@
   box-shadow: limegreen 0 2px 4px,
     limegreen 0 7px 13px -3px, lightgreen 0 -3px 0 inset;
 }
+
+.neutral {
+  
+  background-color: yellow;
+  box-shadow: darkcyan 0 2px 4px,
+    lightyellow  7px 13px -3px, yellowgreen -3px 0 inset;
+}
