@@ -1,7 +1,6 @@
 import "./hamburger.css"
 import Ctf from "./Ctf";
 import { useState } from "react";
-
 const HamburgerMenu = () => {
   const [showMenu, setShowMenu] = useState(false);
 
