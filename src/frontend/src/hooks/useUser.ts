@@ -7,6 +7,5 @@ export const useUser = (): User | null => {
     if (isSuccess) {
         return data.data;
     }
-
     return null;
 };
