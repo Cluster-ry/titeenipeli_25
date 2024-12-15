@@ -1,7 +1,7 @@
 .hamburger {
   width: 30px;
   height: 20px;
-  display: flex;
+  display:  flex;
   flex-direction: column;
   justify-content: space-between;
   pointer-events: all;
@@ -9,8 +9,13 @@
   margin-top: 15%;
   background-color: darkgray;
 
+  margin-top: -1%;
+  justify-self: right;
+
   padding: 12px;
   border-radius: 10px;
+  top: 0;
+  right: 0;
 }
 
 .hamburger-bar {
