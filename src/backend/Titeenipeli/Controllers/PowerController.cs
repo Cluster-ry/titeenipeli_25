@@ -62,7 +62,6 @@ public sealed class PowerController(
             case DirectionEnum.Undefined:
                 return BadRequest();
             case DirectionEnum.North or DirectionEnum.South:
-            {
                 for (int y = 0; y < gameOptions.Height; y++)
                 {
                     //Axe cut is 3 pixel wide
@@ -83,9 +82,7 @@ public sealed class PowerController(
                 }
 
                 break;
-            }
             case DirectionEnum.West or DirectionEnum.East:
-            {
                 for (int x = 0; x < gameOptions.Width; x++)
                 {
                     //Axe cut is 3 pixel wide
@@ -106,7 +103,6 @@ public sealed class PowerController(
                 }
 
                 break;
-            }
         }
 
         return Ok();

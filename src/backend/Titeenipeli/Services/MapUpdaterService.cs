@@ -45,7 +45,7 @@ public class MapUpdaterService(
     {
         var users = userRepositoryService.GetAll().ToArray();
         var pixels = mapRepositoryService.GetAll().ToArray();
-        
+
         int width = gameOptions.Width + 2 * BorderWidth;
         int height = gameOptions.Height + 2 * BorderWidth;
 
