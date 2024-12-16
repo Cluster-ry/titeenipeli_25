@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Enums;
@@ -92,11 +93,17 @@ public static class MapUtils
 
     public static User GuildNameToUser(GuildName? guildName)
     {
-        Guild guild = guildName != null ? new() { Name = (GuildName)guildName, ActiveCtfFlags = new() } : null;
-        return new()
+        var guild = guildName != null ? new Guild { Name = (GuildName)guildName, ActiveCtfFlags = [] } : null;
+
+        if (guild == null)
+        {
+            throw new Exception("Guild cannot be null.");
+        }
+
+        return new User
         {
             Guild = guild,
-            Powerups = new(),
+            PowerUps = [],
             Code = "",
             SpawnX = 0,
             SpawnY = 0,

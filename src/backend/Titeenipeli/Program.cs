@@ -25,7 +25,7 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddDbContext<ApiDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
@@ -158,10 +158,8 @@ public static class Program
             };
         });
 
-        builder.Services
-               .AddSingleton<IMapUpdaterService, MapUpdaterService>();
-        builder.Services
-               .AddSingleton<IBackgroundGraphicsService, BackgroundGraphicsService>();
+        builder.Services.AddSingleton<IMapUpdaterService, MapUpdaterService>();
+        builder.Services.AddSingleton<IBackgroundGraphicsService, BackgroundGraphicsService>();
 
         builder.Services.AddControllers()
                .AddNewtonsoftJson(options =>
@@ -177,11 +175,11 @@ public static class Program
         AddBackgroundServices(builder.Services);
         AddRepositoryServices(builder.Services);
 
-        WebApplication app = builder.Build();
+        var app = builder.Build();
 
-        using (IServiceScope scope = app.Services.CreateScope())
+        using (var scope = app.Services.CreateScope())
         {
-            IServiceProvider services = scope.ServiceProvider;
+            var services = scope.ServiceProvider;
             var dbContext = services.GetRequiredService<ApiDbContext>();
 
             DbFiller.Clear(dbContext);
@@ -215,25 +213,21 @@ public static class Program
 
     private static void AddBackgroundServices(IServiceCollection services)
     {
-        TimeSpan updateCumulativeScoresServicePeriod = TimeSpan.FromMinutes(1);
-        TimeSpan updatePixelBucketsServicePeriod = TimeSpan.FromMinutes(1);
+        var updateCumulativeScoresServicePeriod = TimeSpan.FromMinutes(1);
+        var updatePixelBucketsServicePeriod = TimeSpan.FromMinutes(1);
 
-        services
-            .AddScoped<IUpdateCumulativeScoresService,
-                UpdateCumulativeScoresService>();
+        services.AddScoped<IUpdateCumulativeScoresService, UpdateCumulativeScoresService>();
+
         services.AddHostedService(
             serviceProvider =>
-                new AsynchronousTimedBackgroundService<
-                    IUpdateCumulativeScoresService,
-                    UpdateCumulativeScoresService>(
+                new AsynchronousTimedBackgroundService<IUpdateCumulativeScoresService, UpdateCumulativeScoresService>(
                     serviceProvider,
                     GetNonNullService<ILogger<UpdateCumulativeScoresService>>(
                         serviceProvider),
                     updateCumulativeScoresServicePeriod));
 
-        services
-            .AddScoped<IUpdatePixelBucketsService,
-                UpdatePixelBucketsService>();
+        services.AddScoped<IUpdatePixelBucketsService, UpdatePixelBucketsService>();
+
         services.AddHostedService(
             serviceProvider =>
                 new AsynchronousTimedBackgroundService<
@@ -247,25 +241,11 @@ public static class Program
 
     private static void AddRepositoryServices(IServiceCollection services)
     {
-        services
-            .AddScoped<IUserRepositoryService,
-                UserRepositoryService>();
-
-        services
-            .AddScoped<IGuildRepositoryService,
-                GuildRepositoryService>();
-
-        services
-            .AddScoped<IMapRepositoryService,
-                MapRepositoryService>();
-
-        services
-            .AddScoped<IGameEventRepositoryService,
-                GameEventRepositoryService>();
-
-        services
-            .AddScoped<ICtfFlagRepositoryService,
-                CtfFlagRepositoryService>();
+        services.AddScoped<IUserRepositoryService, UserRepositoryService>();
+        services.AddScoped<IGuildRepositoryService, GuildRepositoryService>();
+        services.AddScoped<IMapRepositoryService, MapRepositoryService>();
+        services.AddScoped<IGameEventRepositoryService, GameEventRepositoryService>();
+        services.AddScoped<ICtfFlagRepositoryService, CtfFlagRepositoryService>();
     }
 
     private static TService GetNonNullService<TService>(IServiceProvider serviceProvider)

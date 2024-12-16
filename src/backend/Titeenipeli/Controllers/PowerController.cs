@@ -1,11 +1,12 @@
-using Titeenipeli.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Titeenipeli.Extensions;
-using Titeenipeli.Options;
-using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Models;
+using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
+using Titeenipeli.Options;
+using Titeenipeli.Services;
 
 namespace Titeenipeli.Controllers;
 
@@ -13,79 +14,115 @@ namespace Titeenipeli.Controllers;
 [Route("state/powerups")]
 [Authorize(Policy = "MustHaveGuild")]
 public sealed class PowerController(
-                        IUserRepositoryService userRepositoryService,
-                        IMapUpdaterService mapUpdaterService,
-                        IJwtService jwtService,
-                        GameOptions gameOptions
-                            ) : ControllerBase
+    IUserRepositoryService userRepositoryService,
+    IMapRepositoryService mapRepositoryService,
+    IMapUpdaterService mapUpdaterService,
+    IJwtService jwtService,
+    GameOptions gameOptions
+) : ControllerBase
 {
-    private readonly IUserRepositoryService _userRepositoryService = userRepositoryService;
-    private readonly IMapUpdaterService _mapUpdaterService = mapUpdaterService;
-    private readonly IJwtService _jwtServices = jwtService;
-    private readonly GameOptions _gameOptions = gameOptions;
-
     [HttpPost("activate")]
     [Authorize(Policy = "MustHaveGuild")]
     public IActionResult ActivatePower([FromBody] PowerInput body)
     {
-        var user = HttpContext.GetUser(_jwtServices, _userRepositoryService);
-        if (user is null) return Unauthorized();
+        var user = HttpContext.GetUser(jwtService, userRepositoryService);
 
-        var userPower = user.Powerups.FirstOrDefault(power => power.Id == body.Id);
-        if (userPower is null) return Unauthorized();
+        var userPower = user.PowerUps.FirstOrDefault(power => power.Id == body.Id);
+        if (userPower is null)
+        {
+            return BadRequest();
+        }
 
-        Enum.TryParse<Powerups>(userPower.Name, out var powerupEnum);
-        var handler = SelectPowerHandler(powerupEnum);
-        if (handler is null) return BadRequest();
+        Enum.TryParse<PowerUps>(userPower.Name, out var powerUp);
+        var handler = SelectPowerHandler(powerUp);
+        if (handler is null)
+        {
+            return BadRequest();
+        }
 
         var result = handler(user, body);
-        if (result is OkObjectResult)
+
+        if (result is not OkObjectResult)
         {
-            user.Powerups.Remove(userPower);
-            _userRepositoryService.Update(user);
+            return result;
         }
+
+        user.PowerUps.Remove(userPower);
+        userRepositoryService.Update(user);
         return result;
     }
 
     private IActionResult HandleTiteenikirves(User user, PowerInput body)
     {
-        var realX = user.SpawnX + body.Location.X;
-        var realY = user.SpawnY + body.Location.Y;
+        int realX = user.SpawnX + body.Location.X;
+        int realY = user.SpawnY + body.Location.Y;
 
-        if (body.Direction is DirectionEnum.Undefined) return BadRequest();
-        else if (body.Direction is DirectionEnum.North or DirectionEnum.South)
+        switch (body.Direction)
         {
-            for (var y = 0; y < _gameOptions.Height; y++)
+            case DirectionEnum.Undefined:
+                return BadRequest();
+            case DirectionEnum.North or DirectionEnum.South:
             {
-                //Axe cut is 3 pixel wide
-                _mapUpdaterService.PlacePixel(new() { X = realX - 1, Y = y }, user);
-                _mapUpdaterService.PlacePixel(new() { X = realX, Y = y }, user);
-                _mapUpdaterService.PlacePixel(new() { X = realX + 1, Y = y }, user);
+                for (int y = 0; y < gameOptions.Height; y++)
+                {
+                    //Axe cut is 3 pixel wide
+                    mapUpdaterService.PlacePixel(
+                        mapRepositoryService,
+                        userRepositoryService,
+                        new Coordinate { X = realX - 1, Y = y }, user);
+
+                    mapUpdaterService.PlacePixel(
+                        mapRepositoryService,
+                        userRepositoryService,
+                        new Coordinate { X = realX, Y = y }, user);
+
+                    mapUpdaterService.PlacePixel(
+                        mapRepositoryService,
+                        userRepositoryService,
+                        new Coordinate { X = realX + 1, Y = y }, user);
+                }
+
+                break;
             }
-        }
-        else if (body.Direction is DirectionEnum.West or DirectionEnum.East)
-        {
-            for (var x = 0; x < _gameOptions.Width; x++)
+            case DirectionEnum.West or DirectionEnum.East:
             {
-                //Axe cut is 3 pixel wide
-                _mapUpdaterService.PlacePixel(new() { X = x, Y = realY - 1 }, user);
-                _mapUpdaterService.PlacePixel(new() { X = x, Y = realY }, user);
-                _mapUpdaterService.PlacePixel(new() { X = x, Y = realY + 1 }, user);
+                for (int x = 0; x < gameOptions.Width; x++)
+                {
+                    //Axe cut is 3 pixel wide
+                    mapUpdaterService.PlacePixel(
+                        mapRepositoryService,
+                        userRepositoryService,
+                        new Coordinate { X = x, Y = realY - 1 }, user);
+
+                    mapUpdaterService.PlacePixel(
+                        mapRepositoryService,
+                        userRepositoryService,
+                        new Coordinate { X = x, Y = realY }, user);
+
+                    mapUpdaterService.PlacePixel(
+                        mapRepositoryService,
+                        userRepositoryService,
+                        new Coordinate { X = x, Y = realY + 1 }, user);
+                }
+
+                break;
             }
         }
 
         return Ok();
     }
 
-    private Func<User, PowerInput, IActionResult>? SelectPowerHandler(Powerups? powerup)
-    => powerup switch
+    private Func<User, PowerInput, IActionResult>? SelectPowerHandler(PowerUps? powerUp)
     {
-        Powerups.Titeenikirves => HandleTiteenikirves,
-        _ => null,
-    };
+        return powerUp switch
+        {
+            PowerUps.Titeenikirves => HandleTiteenikirves,
+            _ => null
+        };
+    }
 }
 
-public enum Powerups
+public enum PowerUps
 {
-    Titeenikirves,
+    Titeenikirves
 }

@@ -34,27 +34,27 @@ public static class DbFiller
             dbContext.SaveChanges();
         }
 
-        User testUser = new User
+        var testUser = new User
         {
             Code = "test",
             Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
             SpawnX = 5,
             SpawnY = 5,
-            Powerups = new(),
+            PowerUps = [],
             TelegramId = "0",
             FirstName = "",
             LastName = "",
             Username = "",
         };
 
-        User testOpponent = new User
+        var testOpponent = new User
         {
             Code = "opponent",
             Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ??
                     throw new InvalidOperationException(),
             SpawnX = 3,
             SpawnY = 2,
-            Powerups = new(),
+            PowerUps = [],
             TelegramId = "1",
             FirstName = "",
             LastName = "",
@@ -73,9 +73,9 @@ public static class DbFiller
 
         if (!dbContext.PowerUps.Any())
         {
-            foreach (var powerupName in Enum.GetNames<Powerups>())
+            foreach (string powerUpName in Enum.GetNames<PowerUps>())
             {
-                dbContext.PowerUps.Add(new PowerUp() { Name = powerupName });
+                dbContext.PowerUps.Add(new PowerUp { Name = powerUpName });
             }
         }
 
