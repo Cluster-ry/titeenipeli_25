@@ -1,6 +1,7 @@
 .ctf-wrapper {
   display: grid;
   margin-top: 5%;
+  animation: slide-in 0.5s ease-out forwards;
 }
 
 .ctf-input {
