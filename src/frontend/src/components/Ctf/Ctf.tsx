@@ -23,7 +23,7 @@ const Ctf = () => {
     };
     try { 
       const result = await postCtf(ctfToken); 
-      if (result.msg === "Request unsuccessful.") {
+      if ("msg" in result && result.msg === "Request unsuccessful.") {
         triggerNotification(NOTIFICATION_FAIL, "error");
         console.log("Request unsuccessful.");
         return;

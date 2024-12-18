@@ -173,7 +173,7 @@ public class UserController(
             SpawnX = spawnPoint.X,
             SpawnY = spawnPoint.Y,
 
-            Powerups = new(),
+            PowerUps = [],
 
             TelegramId = usersInput.TelegramId,
             FirstName = usersInput.FirstName,

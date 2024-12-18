@@ -1,6 +1,6 @@
 namespace Titeenipeli.Common.Database.Services;
 
-abstract public class RepositoryService(ApiDbContext dbContext)
+public abstract class RepositoryService(ApiDbContext dbContext)
 {
     protected readonly ApiDbContext _dbContext = dbContext;
 
