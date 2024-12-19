@@ -149,7 +149,7 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
             for (const value of adjacent) {
                 const adjacentCoordinate = { x: x + value[0], y: y + value[1] };
                 const adjacentPixel = map?.get(JSON.stringify(adjacentCoordinate));
-                if (adjacentPixel && adjacentPixel.guild == user?.guild) {
+                if (adjacentPixel && adjacentPixel.owner == user?.id) {
                     conquerPixel(coordinate);
                     return;
                 }

@@ -8,7 +8,7 @@ import PixelType from "../../models/enum/PixelType.ts";
 import { useNewMapStore } from "../../stores/newMapStore.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
-import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.tsx";
+import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.ts";
 
 /**
  * @component GameMap
