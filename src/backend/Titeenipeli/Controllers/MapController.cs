@@ -125,7 +125,7 @@ public class MapController : ControllerBase
         }
 
 
-        await _mapUpdaterService.PlacePixel(globalCoordinate, user);
+        await _mapUpdaterService.PlacePixel(_mapRepositoryService, _userRepositoryService, globalCoordinate, user);
 
         user.PixelBucket--;
         _userRepositoryService.Update(user);

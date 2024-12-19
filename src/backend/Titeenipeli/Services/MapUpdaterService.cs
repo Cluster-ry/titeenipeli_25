@@ -20,7 +20,10 @@ public class MapUpdaterService(
 
     private readonly MapUpdater _mapUpdater = new();
 
-    public Task PlacePixel(Coordinate pixelCoordinates, User newOwner)
+    public Task PlacePixel(IMapRepositoryService mapRepositoryService,
+                           IUserRepositoryService userRepositoryService,
+                           Coordinate pixelCoordinates,
+                           User newOwner)
     {
         var borderfiedCoordinate = pixelCoordinates + new Coordinate(1, 1);
 
@@ -28,36 +31,25 @@ public class MapUpdaterService(
         {
             lock (_mapUpdater)
             {
-                PixelWithType[,] map = GetMap();
-                List<MapChange> changedPixels =
-                    _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
+                var map = GetMap(mapRepositoryService, userRepositoryService);
+                var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
 
                 DoGrpcUpdate(map, changedPixels);
-                DoDatabaseUpdate(changedPixels, newOwner);
+                DoDatabaseUpdate(mapRepositoryService, changedPixels, newOwner);
             }
         });
     }
 
-    private PixelWithType[,] GetMap()
+    private PixelWithType[,] GetMap(IMapRepositoryService mapRepositoryService,
+                                    IUserRepositoryService userRepositoryService)
     {
-        User[] users;
-        Pixel[] pixels;
-        using (var scope = scopeFactory.CreateScope())
-        {
-            var userRepositoryService = scope.ServiceProvider
-                                             .GetRequiredService<IUserRepositoryService>();
-
-            users = userRepositoryService.GetAll().ToArray();
-            var mapRepositoryService = scope.ServiceProvider
-                                            .GetRequiredService<IMapRepositoryService>();
-
-            pixels = mapRepositoryService.GetAll().ToArray();
-        }
+        var users = userRepositoryService.GetAll().ToArray();
+        var pixels = mapRepositoryService.GetAll().ToArray();
 
         int width = gameOptions.Width + 2 * BorderWidth;
         int height = gameOptions.Height + 2 * BorderWidth;
 
-        PixelWithType[,] map = new PixelWithType[width, height];
+        var map = new PixelWithType[width, height];
 
         for (int x = 0; x < width; x++)
         {
@@ -95,8 +87,7 @@ public class MapUpdaterService(
         foreach (var user in users) map[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
     }
 
-    private void DoGrpcUpdate(PixelWithType[,] pixels,
-                              List<MapChange> changedPixels)
+    private void DoGrpcUpdate(PixelWithType[,] pixels, List<MapChange> changedPixels)
     {
         Dictionary<Coordinate, GrpcChangePixel> nearbyPixels = [];
         List<MapChange> changes = [];
@@ -108,7 +99,7 @@ public class MapUpdaterService(
                 nearbyPixels[coordinate] = new GrpcChangePixel
                 {
                     Coordinate = coordinate,
-                    User = pixel?.Owner
+                    User = pixel.Owner
                 };
             }, changedPixel.Coordinate);
 
@@ -119,7 +110,9 @@ public class MapUpdaterService(
         incrementalMapUpdateCoreService.UpdateUsersMapState(mapChanges);
     }
 
-    private void DoDatabaseUpdate(List<MapChange> changedPixels, User newOwner)
+    private void DoDatabaseUpdate(IMapRepositoryService mapRepositoryService,
+                                  List<MapChange> changedPixels,
+                                  User newOwner)
     {
         List<object> gameEvents = [];
         foreach (var changedPixel in changedPixels)
@@ -149,20 +142,14 @@ public class MapUpdaterService(
                 }
             });
 
-            using (var scope = scopeFactory.CreateScope())
+            Pixel newPixel = new()
             {
-                var mapRepositoryService = scope.ServiceProvider
-                                                .GetRequiredService<IMapRepositoryService>();
+                X = changedPixel.Coordinate.X,
+                Y = changedPixel.Coordinate.Y,
+                User = changedPixel.NewOwner
+            };
 
-                Pixel newPixel = new()
-                {
-                    X = changedPixel.Coordinate.X,
-                    Y = changedPixel.Coordinate.Y,
-                    User = changedPixel.NewOwner
-                };
-
-                mapRepositoryService.Update(newPixel);
-            }
+            mapRepositoryService.Update(newPixel);
         }
 
         var gameEvent = new GameEvent
@@ -172,8 +159,7 @@ public class MapUpdaterService(
 
         using (var scope = scopeFactory.CreateScope())
         {
-            var gameEventRepositoryService = scope.ServiceProvider
-                                                  .GetRequiredService<IGameEventRepositoryService>();
+            var gameEventRepositoryService = scope.ServiceProvider.GetRequiredService<IGameEventRepositoryService>();
             gameEventRepositoryService.Add(gameEvent);
         }
     }
