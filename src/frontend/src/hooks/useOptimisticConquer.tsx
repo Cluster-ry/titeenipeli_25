@@ -1,4 +1,4 @@
-import { RefObject, useCallback } from "react";
+import { RefObject, useCallback, useRef } from "react";
 import { useGameStateStore } from "../stores/gameStateStore";
 import { PostPixelsInput } from "../models/Post/PostPixelsInput";
 import { Pixel } from "../models/Pixel";
@@ -11,29 +11,62 @@ import { EffectContainerHandle } from "../components/gameMap/particleEffects";
 
 /**
  * @summary
+ * Actions contain optimistically set next- and previous
+ * values, making reverting bad changes possible
+ */
+type Action = {
+    next: Pixel;
+    previous: Pixel;
+};
+
+/**
+ * @summary
  * Conquer a pixel with client-side optimistic handling
- * @param user 
+ * @param user
  * Current user
  * @param effectHandle
- * Reference to the effect handler 
- * @returns 
+ * Reference to the effect handler
+ * @returns
  * A function to commence a pixel conquest action
  */
 export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<EffectContainerHandle>) => {
     const { increaseBucket, decreaseBucket } = useGameStateStore();
     const { map, setPixel } = useNewMapStore();
+    const pendingActions = useRef<{ [key: string]: Action[] }>({});
+
+    const pushToActions = (key: string, next: Pixel, previous: Pixel) => {
+        const actions = pendingActions.current[key] ?? [];
+        actions.push({ next, previous });
+        pendingActions.current[key] = actions;
+    };
+
+    const shiftActions = (key: string): Action | undefined => {
+        const actions = pendingActions.current[key];
+        if (!actions) return;
+        const action = actions.shift();
+        pendingActions.current[key] = actions;
+        return action;
+    };
+
+    const clearActions = (key: string) => {
+        const actions = pendingActions.current[key];
+        if (!actions) return;
+        pendingActions.current[key] = [];
+    };
 
     /**
      * @summary
      * Is to be run when receiving a response from the server.
-     * onMutate return value is included in the "context" parameter,
-     * allowing for easy rerolling of optimistic changes
+     * In case of an invalid optimistic placement, we roll back
+     * the change with our cached previous value
      */
     const onConquerSettled = useCallback(
-        (success?: boolean, error?: Error | null, variables?: PostPixelsInput, context?: Pixel) => {
-            if ((!success || error) && variables && context) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        (success?: boolean, error?: Error | null, variables?: PostPixelsInput, _context?: Pixel) => {
+            const action = variables ? shiftActions(JSON.stringify(variables)) : null;
+            if ((!success || error) && variables) {
                 increaseBucket();
-                setPixel({ x: variables.x, y: variables.y }, context);
+                action?.previous && setPixel(variables, action.previous);
                 effectHandle.current?.forbiddenEffect(variables);
             }
         },
@@ -48,35 +81,48 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
      */
     const optimisticConquer = useCallback(
         (coordinate: PostPixelsInput) => {
-            const oldPixel = map?.get(JSON.stringify(coordinate));
+            const key = JSON.stringify(coordinate);
+            const oldPixel = map?.get(key);
             effectHandle.current?.conqueredEffect(coordinate);
             decreaseBucket();
-            setPixel(
-                { x: coordinate.x, y: coordinate.y },
-                { guild: user?.guild, type: PixelType.Normal, owner: user?.id },
-            );
+            const pixel = { guild: user?.guild, type: PixelType.Normal, owner: user?.id };
+            setPixel(coordinate, pixel);
+            pushToActions(key, pixel, oldPixel ?? pixel);
             return oldPixel;
         },
         [decreaseBucket, setPixel, effectHandle, user, map],
     );
+    /**
+     * @summary
+     * Ran when map is updated via gRPC.
+     * Overrides optimistic pixel placements and clears the cache
+     * regarding these, since gRPC always returns the most current
+     * map state. In case an optimistic placement is being processed
+     * on the backend, it will still be sent by the gRPC.
+     */
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const onPixelUpdated = useCallback((coordinate: Coordinate, _pixel: Pixel) => {
+        const key = JSON.stringify(coordinate);
+        clearActions(key);
+    }, []);
 
-    const { conquerPixel } = useMapUpdating({ optimisticConquer, onConquerSettled });
+    const { conquerPixel } = useMapUpdating({ optimisticConquer, onConquerSettled, events: { onPixelUpdated } });
 
     /**
      * @summary
      * Executes when the client attempts to conquer a pixel for their guild.
      * Changes the integer value representing a guild to the one associated
      * with the client's own guild.
-     * 
+     *
      * Do basic condition checks before sending the update. In case the basic
      * pixel placement rules are not met, display error effect and forfeit from
      * making the request.
-     * 
+     *
      * Rules:
      * - At least one of the adjacent pixels must be owned by the guild
      * - The targeted pixel must be a conquerable type (Normal)
      * - There must be enough buffer left in the pixelBucket to make the action
-     * 
+     *
      * @note Upon change, the map is automatically refreshed.
      */
     const conquer = useCallback(
@@ -108,6 +154,7 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
                     return;
                 }
             }
+            effectHandle.current?.forbiddenEffect(coordinate);
         },
         [map, user, effectHandle, conquerPixel],
     );

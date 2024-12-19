@@ -8,16 +8,22 @@ import { GetPixelsResult } from "../models/Get/GetPixelsResult.ts";
 import { Pixel } from "../models/Pixel.ts";
 import GrpcClients from "../core/grpc/grpcClients.ts";
 import { PostPixelsInput } from "../models/Post/PostPixelsInput.ts";
+import { Coordinate } from "../models/Coordinate.ts";
+
+type Events = {
+    onPixelUpdated?: (coordinates: Coordinate, value: Pixel) => void;
+}
 
 type Props = {
     optimisticConquer: (data: PostPixelsInput) => void;
     onConquerSettled: (data?: boolean, error?: Error | null, variables?: PostPixelsInput) => void;
+    events?: Events;
 };
 
 const mapQueryKey = "map";
 const postPixelKey = "pixel";
 
-export const useMapUpdating = ({ optimisticConquer, onConquerSettled }: Props) => {
+export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {} }: Props) => {
     const incrementalUpdateBuffer = useRef<IncrementalMapUpdateResponse[]>([]);
     const queryClient = useQueryClient();
     const grpcClient = useRef<GrpcClients>(GrpcClients.getGrpcClients());
@@ -50,12 +56,14 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled }: Props) =
                     y: updatedPixel.spawnRelativeCoordinate?.y ?? 0,
                 };
                 if (pixelType !== PixelType.FogOfWar) {
-                    setPixel(pixelCoordinates, {
+                    const pixel = {
                         type: pixelType,
                         guild: updatedPixel.guild ? Number(updatedPixel.guild) : undefined,
                         owner: updatedPixel.owner?.id,
                         ...pixelCoordinates,
-                    });
+                    };
+                    events.onPixelUpdated && events.onPixelUpdated(pixelCoordinates, pixel);
+                    setPixel(pixelCoordinates, pixel);
                 } else {
                     setPixel(pixelCoordinates, null);
                 }
