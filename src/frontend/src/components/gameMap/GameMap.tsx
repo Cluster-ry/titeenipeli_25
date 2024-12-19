@@ -12,6 +12,8 @@ import { useMapUpdating } from "../../hooks/useMapUpdating.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 import { useGameStateStore } from "../../stores/gameStateStore.ts";
+import { User } from "../../models/User.ts";
+import checkUserOwnedPixels from "../../utils/checkUserOwnedPixels.ts";
 
 /**
  * @component GameMap
@@ -32,7 +34,7 @@ const GameMap: FC = () => {
     const decreaseBucket = useGameStateStore((state) => state.decreaseBucket);
     const effectRef = useRef<EffectContainerHandle>(null);
     useMapUpdating();
-    const user = useUser();
+    const user: User | null = useUser();
 
     /**
      * Executes when the client conquers a pixel for their guild.
@@ -69,7 +71,8 @@ const GameMap: FC = () => {
         for (const [coordinate, pixel] of map) {
             const rectangleX = coordinate.x * mapConfig.PixelSize;
             const rectangleY = coordinate.y * mapConfig.PixelSize;
-            const color = pixelColor(pixel);
+            let color = pixelColor(pixel);
+            color = checkUserOwnedPixels(user, pixel, color);
             result.push(
                 <Rectangle
                     key={`x:${coordinate.x} y:${coordinate.y}-${result.length}-${Date.now()}`}
