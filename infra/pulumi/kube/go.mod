@@ -6,6 +6,7 @@ require (
 	github.com/pulumi/pulumi-azure/sdk/v5 v5.89.0
 	github.com/pulumi/pulumi-kubernetes/sdk/v4 v4.18.2
 	github.com/pulumi/pulumi/sdk/v3 v3.137.0
+	github.com/sethvargo/go-password v0.3.1
 )
 
 require (

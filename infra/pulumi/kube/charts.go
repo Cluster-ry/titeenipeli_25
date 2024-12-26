@@ -7,6 +7,7 @@ import (
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/helm/v3"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
+	"github.com/sethvargo/go-password/password"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -120,6 +121,12 @@ func buildCharts(
 		return err
 	}
 
+	pw, err := password.Generate(20, 5, 5, false, false)
+	if err != nil {
+		return err
+	}
+	ctx.Export("traefikPass", pulumi.ToSecret(pw))
+
 	traefikChartArgs := helm.ChartArgs{
 		Chart:   pulumi.String("traefik"),
 		Version: pulumi.String("32.1.1"),
@@ -225,7 +232,7 @@ func buildCharts(
 					"type": pulumi.String("kubernetes.io/basic-auth"),
 					"stringData": pulumi.Map{
 						"username": pulumi.String("admin"),
-						"password": pulumi.String("changeme"), // change
+						"password": pulumi.String(pw),
 					},
 				},
 				pulumi.Map{

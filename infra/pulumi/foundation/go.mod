@@ -5,6 +5,7 @@ go 1.22
 require (
 	github.com/pulumi/pulumi-azure-native-sdk/authorization/v2 v2.62.0
 	github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2 v2.55.0
+	github.com/pulumi/pulumi-azure-native-sdk/dbforpostgresql/v2 v2.79.0
 	github.com/pulumi/pulumi-azure-native-sdk/managedidentity/v2 v2.62.0
 	github.com/pulumi/pulumi-azure-native-sdk/network/v2 v2.75.0
 	github.com/pulumi/pulumi-azure-native-sdk/resources/v2 v2.55.0
@@ -15,8 +16,9 @@ require (
 	github.com/pulumi/pulumi-null/sdk v0.0.6
 	github.com/pulumi/pulumi-random/sdk/v4 v4.16.3
 	github.com/pulumi/pulumi-tls/sdk/v5 v5.0.4
-	github.com/pulumi/pulumi/sdk/v3 v3.142.0
+	github.com/pulumi/pulumi/sdk/v3 v3.144.1
 	github.com/pulumiverse/pulumi-time/sdk v0.1.0
+	github.com/sethvargo/go-password v0.3.1
 )
 
 require (
@@ -71,7 +73,7 @@ require (
 	github.com/pkg/term v1.1.0 // indirect
 	github.com/pulumi/appdash v0.0.0-20231130102222-75f619a67231 // indirect
 	github.com/pulumi/esc v0.9.1 // indirect
-	github.com/pulumi/pulumi-azure-native-sdk/v2 v2.75.0 // indirect
+	github.com/pulumi/pulumi-azure-native-sdk/v2 v2.79.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
@@ -87,14 +89,14 @@ require (
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/zclconf/go-cty v1.13.2 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/crypto v0.24.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/exp v0.0.0-20240604190554-fc45aab8b7f8 // indirect
 	golang.org/x/mod v0.18.0 // indirect
-	golang.org/x/net v0.26.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.21.0 // indirect
-	golang.org/x/term v0.21.0 // indirect
-	golang.org/x/text v0.16.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/term v0.27.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240311173647-c811ad7063a7 // indirect
 	google.golang.org/grpc v1.63.2 // indirect

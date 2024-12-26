@@ -6,6 +6,7 @@ import (
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
+
 		cfg, err := configure(ctx)
 		if err != nil {
 			return err
@@ -20,6 +21,8 @@ func main() {
 		if err != nil {
 			return err
 		}
+
+		createCosmosDB(ctx, k8sCluster)
 
 		kubeconfig := getKubeconfig(ctx, k8sCluster)
 

@@ -19,6 +19,7 @@ type ClusterInfo struct {
 	ManagedCluster *cs.ManagedCluster
 	ResourceGroup  *resources.ResourceGroup
 	PublicIpName   pulumi.StringOutput
+	NodeSubnetID   pulumi.IDOutput
 }
 
 type workloadIdentities struct {
@@ -46,6 +47,39 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 		return nil, err
 	}
 
+	vnet, err := network.NewVirtualNetwork(ctx, "aks-vnet", &network.VirtualNetworkArgs{
+		ResourceGroupName: entra.ResourceGroup.Name,
+		AddressSpace: &network.AddressSpaceArgs{
+			AddressPrefixes: pulumi.StringArray{
+				pulumi.String("10.0.0.0/16"),
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	nodeSubnet, err := network.NewSubnet(ctx, "aks-node-subnet", &network.SubnetArgs{
+		ResourceGroupName:                 entra.ResourceGroup.Name,
+		VirtualNetworkName:                vnet.Name,
+		AddressPrefix:                     pulumi.String("10.0.1.0/24"),
+		PrivateEndpointNetworkPolicies:    pulumi.String("Disabled"),
+		PrivateLinkServiceNetworkPolicies: pulumi.String("Disabled"),
+	})
+	if err != nil {
+		return nil, err
+	}
+	podSubnet, err := network.NewSubnet(ctx, "aks-pod-subnet", &network.SubnetArgs{
+		ResourceGroupName:                 entra.ResourceGroup.Name,
+		VirtualNetworkName:                vnet.Name,
+		AddressPrefix:                     pulumi.String("10.0.2.0/24"),
+		PrivateEndpointNetworkPolicies:    pulumi.String("Disabled"),
+		PrivateLinkServiceNetworkPolicies: pulumi.String("Disabled"),
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	k8sCluster, _ := cs.NewManagedCluster(ctx, "cluster",
 		&cs.ManagedClusterArgs{
 			ResourceGroupName: entra.ResourceGroup.Name,
@@ -60,6 +94,8 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 					OsDiskSizeGB: pulumi.Int(30),
 					OsType:       pulumi.String("Linux"),
 					Type:         pulumi.String("VirtualMachineScaleSets"),
+					VnetSubnetID: nodeSubnet.ID(),
+					PodSubnetID:  podSubnet.ID(),
 				},
 			},
 			DnsPrefix:  entra.ResourceGroup.Name,
@@ -98,6 +134,8 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 				},
 				LoadBalancerSku: pulumi.String(cs.LoadBalancerSkuStandard),
 				OutboundType:    pulumi.String(cs.OutboundTypeLoadBalancer),
+				NetworkPlugin:   pulumi.String("azure"),
+				ServiceCidr:     pulumi.String("10.0.0.0/24"),
 			},
 			NodeResourceGroup: entra.ResourceGroup.Name.ApplyT(func(name string) string {
 				return name + "-nodepool"
@@ -129,6 +167,7 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 		ManagedCluster: k8sCluster,
 		ResourceGroup:  entra.ResourceGroup,
 		PublicIpName:   publicIP.Name,
+		NodeSubnetID:   nodeSubnet.ID(),
 	}, nil
 }
 
