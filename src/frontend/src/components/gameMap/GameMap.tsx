@@ -10,6 +10,7 @@ import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.ts";
 import BackgroundRectangle from "./BackgroundRectangle.tsx";
+import { useInputEventStore } from "../../stores/inputEventStore.ts";
 
 /**
  * @component GameMap
@@ -26,6 +27,7 @@ import BackgroundRectangle from "./BackgroundRectangle.tsx";
 const GameMap: FC = () => {
     const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
     const map = useNewMapStore((state) => state.map);
+    const inputEventStore = useInputEventStore();
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
@@ -84,8 +86,15 @@ const GameMap: FC = () => {
                 width={window.innerWidth}
                 height={window.innerHeight}
                 options={{ background: 0xffffff, resizeTo: window }}
+                onContextMenu={(e) => e.preventDefault()}
             >
-                <Viewport width={window.innerWidth} height={window.innerHeight} boundingBox={mappedBoundingBox}>
+                <Viewport
+                    width={window.innerWidth}
+                    height={window.innerHeight}
+                    boundingBox={mappedBoundingBox}
+                    onMoveStart={() => inputEventStore.setMoving(true)}
+                    onMoveEnd={() => inputEventStore.setMoving(false)}
+                >
                     <Container>{pixelElements}</Container>
                     <EffectContainer ref={effectRef} />
                 </Viewport>

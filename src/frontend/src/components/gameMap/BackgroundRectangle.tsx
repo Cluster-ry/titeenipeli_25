@@ -1,12 +1,23 @@
 import { Sprite } from "@pixi/react";
-import { Texture } from "pixi.js";
+import { FederatedPointerEvent, Texture } from "pixi.js";
 import BackgroundRectangleProps from "../../models/BackgroundRectangleProps";
+import { useInputEventStore } from "../../stores/inputEventStore";
 
 const backgroundGraphicSize = 32;
 
 const BackgroundRectangle = ({ x, y, width, height, backgroundGraphic, onClick }: BackgroundRectangleProps) => {
+    const inputEventStore = useInputEventStore();
+
     // When a client clicks a pixel
-    const handleClick = () => {
+    const handleEvent = (event: FederatedPointerEvent) => {
+        if (event.pointerType === "mouse" && event.button !== 0) {
+            return;
+        }
+
+        if (inputEventStore.moving || inputEventStore.moveEnded.getTime() > new Date().getTime() - 300) {
+            return;
+        }
+
         onClick({ x: x, y: y });
     };
 
@@ -21,7 +32,8 @@ const BackgroundRectangle = ({ x, y, width, height, backgroundGraphic, onClick }
             cullable={true}
             texture={texture}
             eventMode="static"
-            pointertap={handleClick}
+            mousedown={handleEvent}
+            tap={handleEvent}
         />
     );
 };
