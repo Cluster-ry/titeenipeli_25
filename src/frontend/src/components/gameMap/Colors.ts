@@ -1,8 +1,8 @@
-import { Pixel } from "../../../models/Pixel";
-import Guild from "../../../models/enum/Guild";
-import PixelType from "../../../models/enum/PixelType";
-import { HslaColour } from "../../../models/HslaColour.ts";
-import { User } from "../../../models/User.ts";
+import { Pixel } from "../../models/Pixel.ts";
+import Guild from "../../models/enum/Guild.ts";
+import PixelType from "../../models/enum/PixelType.ts";
+import { HslaColour } from "../../models/HslaColour.ts";
+import { User } from "../../models/User.ts";
 
 /**
  * The color mapping for each of the Software Engineering guilds
@@ -29,6 +29,7 @@ const black = { hue: 0, saturation: 0, lightness: 0 };
 export function pixelColor(pixel: Pixel | null, user: User | null): HslaColour {
     let color = pixelBaseColor(pixel);
     color = pixelOwnerModifier(pixel, user, color);
+    color = spawnModifier(pixel, color);
     return color;
 }
 
@@ -46,6 +47,20 @@ const pixelBaseColor = (pixel?: Pixel | null) => {
     }
 
     return guildColorMapping[pixel.guild as unknown as Guild] ?? black;
+};
+
+const spawnModifier = (pixel: Pixel | null, color: HslaColour): HslaColour => {
+    if (pixel?.type !== PixelType.Spawn) {
+        return color;
+    }
+
+    const alteredColor: HslaColour = {
+        hue: color.hue,
+        saturation: color.saturation,
+        lightness: color.lightness - 20,
+    };
+
+    return alteredColor;
 };
 
 /**
