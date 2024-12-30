@@ -1,18 +1,14 @@
-import { FC, useCallback, useMemo, useRef } from "react";
+import { FC, useMemo, useRef } from "react";
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import Rectangle from "./Rectangle";
 import { pixelColor } from "./guild/Guild";
 import { mapConfig } from "./MapConfig";
-import { Coordinate } from "../../models/Coordinate";
-import { postPixels } from "../../api/map";
 import PixelType from "../../models/enum/PixelType.ts";
 import { useNewMapStore } from "../../stores/newMapStore.ts";
-import { useMapUpdating } from "../../hooks/useMapUpdating.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
-import { useGameStateStore } from "../../stores/gameStateStore.ts";
-import { User } from "../../models/User.ts";
+import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.ts";
 
 /**
  * @component GameMap
@@ -29,36 +25,9 @@ import { User } from "../../models/User.ts";
 const GameMap: FC = () => {
     const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
     const map = useNewMapStore((state) => state.map);
-    const bucket = useGameStateStore((state) => state.pixelBucket);
-    const decreaseBucket = useGameStateStore((state) => state.decreaseBucket);
     const effectRef = useRef<EffectContainerHandle>(null);
-    useMapUpdating();
-    const user: User | null = useUser();
-
-    /**
-     * Executes when the client conquers a pixel for their guild.
-     * Changes the integer value representing a guild to the one
-     * associated with the client's own guild.
-     *
-     * @note Upon change, the map is automatically refreshed.
-     */
-    const conquer = useCallback(
-        async (coordinate: Coordinate) => {
-            if (bucket.amount <= 0) {
-                effectRef.current?.forbiddenEffect(coordinate);
-                return;
-            }
-
-            const success = await postPixels(coordinate);
-            if (success) {
-                effectRef.current?.conqueredEffect(coordinate);
-                decreaseBucket();
-            } else {
-                effectRef.current?.forbiddenEffect(coordinate);
-            }
-        },
-        [bucket.amount, decreaseBucket],
-    );
+    const user = useUser();
+    const conquer = useOptimisticConquer(user, effectRef);
 
     const mappedBoundingBox = {
         minY: pixelsBoundingBox.min.y,
@@ -71,12 +40,13 @@ const GameMap: FC = () => {
         const result: JSX.Element[] = [];
         if (map == null) return result;
         for (const [coordinate, pixel] of map) {
-            const rectangleX = coordinate.x * mapConfig.PixelSize;
-            const rectangleY = coordinate.y * mapConfig.PixelSize;
+            const parsedCoordinate = JSON.parse(coordinate);
+            const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
+            const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
             result.push(
                 <Rectangle
-                    key={`x:${coordinate.x} y:${coordinate.y}-${result.length}-${Date.now()}`}
+                    key={`${coordinate}-${result.length}-${Date.now()}`}
                     x={rectangleX}
                     y={rectangleY}
                     isOwn={pixel?.owner === user?.id}
@@ -84,7 +54,7 @@ const GameMap: FC = () => {
                     width={mapConfig.PixelSize}
                     height={mapConfig.PixelSize}
                     color={color}
-                    onClick={() => conquer(coordinate)}
+                    onClick={() => conquer(parsedCoordinate)}
                 />,
             );
         }

@@ -1,6 +1,11 @@
 .ctf-wrapper {
     display: grid;
     margin-top: 5%;
+    animation: slide-in 0.3s ease-out forwards;
+
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 12px;
+    height: 75vh;
 }
 
 .ctf-input {

@@ -1,16 +1,29 @@
 import { IncrementalMapUpdateResponse } from "./../generated/grpc/services/StateUpdate";
-import { Coordinate, useNewMapStore } from "../stores/newMapStore.ts";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getPixels } from "../api/map.ts";
+import { useNewMapStore } from "../stores/newMapStore.ts";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getPixels, postPixels } from "../api/map.ts";
 import { useCallback, useEffect, useRef } from "react";
 import PixelType from "../models/enum/PixelType.ts";
 import { GetPixelsResult } from "../models/Get/GetPixelsResult.ts";
 import { Pixel } from "../models/Pixel.ts";
 import GrpcClients from "../core/grpc/grpcClients.ts";
+import { PostPixelsInput } from "../models/Post/PostPixelsInput.ts";
+import { Coordinate } from "../models/Coordinate.ts";
+
+type Events = {
+    onPixelUpdated?: (coordinates: Coordinate, value: Pixel) => void;
+};
+
+type Props = {
+    optimisticConquer: (data: PostPixelsInput) => void;
+    onConquerSettled: (data?: boolean, error?: Error | null, variables?: PostPixelsInput) => void;
+    events?: Events;
+};
 
 const mapQueryKey = "map";
+const postPixelKey = "pixel";
 
-export const useMapUpdating = () => {
+export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {} }: Props) => {
     const incrementalUpdateBuffer = useRef<IncrementalMapUpdateResponse[]>([]);
     const queryClient = useQueryClient();
     const grpcClient = useRef<GrpcClients>(GrpcClients.getGrpcClients());
@@ -27,6 +40,13 @@ export const useMapUpdating = () => {
         refetchOnMount: "always",
     });
 
+    const { mutate: conquerPixel } = useMutation({
+        mutationKey: [postPixelKey],
+        mutationFn: postPixels,
+        onMutate: optimisticConquer,
+        onSettled: onConquerSettled,
+    });
+
     const consumeUpdate = useCallback(
         (update: IncrementalMapUpdateResponse) => {
             for (const updatedPixel of update.updates) {
@@ -36,12 +56,14 @@ export const useMapUpdating = () => {
                     y: updatedPixel.spawnRelativeCoordinate?.y ?? 0,
                 };
                 if (pixelType !== PixelType.FogOfWar) {
-                    setPixel(pixelCoordinates, {
+                    const pixel = {
                         type: pixelType,
                         guild: updatedPixel.guild ? Number(updatedPixel.guild) : undefined,
                         owner: updatedPixel.owner?.id,
                         ...pixelCoordinates,
-                    });
+                    };
+                    events.onPixelUpdated && events.onPixelUpdated(pixelCoordinates, pixel);
+                    setPixel(pixelCoordinates, pixel);
                 } else {
                     setPixel(pixelCoordinates, null);
                 }
@@ -58,28 +80,30 @@ export const useMapUpdating = () => {
     }, []);
 
     const mapMatrixToMapDictionary = useCallback((results: GetPixelsResult) => {
-        const pixels: Map<Coordinate, Pixel> = new Map();
+        const pixels: Map<string, Pixel> = new Map();
         const playerX = results.playerSpawn.x;
         const playerY = results.playerSpawn.y;
 
         results.pixels.map((layer, y) => {
             layer.map((pixel, x) => {
-                if (pixel.type !== PixelType.FogOfWar) pixels.set({ x: x - playerX, y: y - playerY }, pixel);
+                if (pixel.type !== PixelType.FogOfWar)
+                    pixels.set(JSON.stringify({ x: x - playerX, y: y - playerY }), pixel);
             });
         });
         return pixels;
     }, []);
 
-    const computeBoundingBox = useCallback((pixels: Map<Coordinate, Pixel>) => {
+    const computeBoundingBox = useCallback((pixels: Map<string, Pixel>) => {
         let minX = Number.MAX_SAFE_INTEGER;
         let minY = Number.MAX_SAFE_INTEGER;
         let maxX = Number.MIN_SAFE_INTEGER;
         let maxY = Number.MIN_SAFE_INTEGER;
         for (const [pixel] of pixels) {
-            if (pixel.x < minX) minX = pixel.x;
-            if (pixel.y < minY) minY = pixel.y;
-            if (pixel.x > maxX) maxX = pixel.x;
-            if (pixel.y > maxY) maxY = pixel.y;
+            const parsedPixel = JSON.parse(pixel);
+            if (parsedPixel.x < minX) minX = parsedPixel.x;
+            if (parsedPixel.y < minY) minY = parsedPixel.y;
+            if (parsedPixel.x > maxX) maxX = parsedPixel.x;
+            if (parsedPixel.y > maxY) maxY = parsedPixel.y;
         }
         return {
             min: {
@@ -135,5 +159,5 @@ export const useMapUpdating = () => {
         };
     }, [onIncrementalUpdate]);
 
-    return { ensureMap };
+    return { ensureMap, conquerPixel };
 };
