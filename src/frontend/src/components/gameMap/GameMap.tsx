@@ -1,14 +1,15 @@
 import { FC, useMemo, useRef } from "react";
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
-import Rectangle from "./Rectangle";
-import { pixelColor } from "./guild/Guild";
+import ForegroundRectangle from "./ForegroundRectangle.tsx";
+import { pixelColor } from "./Colors.ts";
 import { mapConfig } from "./MapConfig";
 import PixelType from "../../models/enum/PixelType.ts";
 import { useNewMapStore } from "../../stores/newMapStore.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.ts";
+import BackgroundRectangle from "./BackgroundRectangle.tsx";
 
 /**
  * @component GameMap
@@ -44,19 +45,31 @@ const GameMap: FC = () => {
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
-            result.push(
-                <Rectangle
-                    key={`${coordinate}-${result.length}-${Date.now()}`}
-                    x={rectangleX}
-                    y={rectangleY}
-                    isOwn={pixel?.owner === user?.id}
-                    isSpawn={pixel?.type === PixelType.Spawn}
-                    width={mapConfig.PixelSize}
-                    height={mapConfig.PixelSize}
-                    color={color}
-                    onClick={() => conquer(parsedCoordinate)}
-                />,
-            );
+            if (pixel && pixel.backgroundGraphic) {
+                result.push(
+                    <BackgroundRectangle
+                        key={`background-${coordinate}-${result.length}-${Date.now()}`}
+                        x={rectangleX}
+                        y={rectangleY}
+                        width={mapConfig.PixelSize}
+                        height={mapConfig.PixelSize}
+                        backgroundGraphic={pixel?.backgroundGraphic}
+                        onClick={() => conquer(parsedCoordinate)}
+                    />,
+                );
+            }
+            if (pixel?.owner || pixel?.guild || pixel?.type == PixelType.MapBorder) {
+                result.push(
+                    <ForegroundRectangle
+                        key={`foreground-${coordinate}-${result.length}-${Date.now()}`}
+                        x={rectangleX}
+                        y={rectangleY}
+                        width={mapConfig.PixelSize}
+                        height={mapConfig.PixelSize}
+                        color={color}
+                    />,
+                );
+            }
         }
         return result;
     }, [map]);

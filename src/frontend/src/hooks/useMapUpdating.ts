@@ -5,7 +5,7 @@ import { getPixels, postPixels } from "../api/map.ts";
 import { useCallback, useEffect, useRef } from "react";
 import PixelType from "../models/enum/PixelType.ts";
 import { GetPixelsResult } from "../models/Get/GetPixelsResult.ts";
-import { Pixel } from "../models/Pixel.ts";
+import { EncodedPixel, Pixel } from "../models/Pixel.ts";
 import GrpcClients from "../core/grpc/grpcClients.ts";
 import { PostPixelsInput } from "../models/Post/PostPixelsInput.ts";
 import { Coordinate } from "../models/Coordinate.ts";
@@ -31,6 +31,7 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
     const map = useNewMapStore((state) => state.map);
     const setMap = useNewMapStore((state) => state.setMap);
     const setPixel = useNewMapStore((state) => state.setPixel);
+    const getPixel = useNewMapStore((state) => state.getPixel);
     const setPixelsBoundingBox = useNewMapStore((state) => state.setPixelsBoundingBox);
 
     const { data, isSuccess, status } = useQuery({
@@ -56,10 +57,17 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
                     y: updatedPixel.spawnRelativeCoordinate?.y ?? 0,
                 };
                 if (pixelType !== PixelType.FogOfWar) {
+                    // Background graphic is provided only ones.
+                    // Use old background graphic during owner updates.
+                    const oldBackgroundGraphic = getPixel(pixelCoordinates)?.backgroundGraphic;
                     const pixel = {
                         type: pixelType,
                         guild: updatedPixel.guild ? Number(updatedPixel.guild) : undefined,
                         owner: updatedPixel.owner?.id,
+                        backgroundGraphic:
+                            updatedPixel.backgroundGraphic.length !== 0
+                                ? updatedPixel.backgroundGraphic
+                                : oldBackgroundGraphic,
                         ...pixelCoordinates,
                     };
                     events.onPixelUpdated && events.onPixelUpdated(pixelCoordinates, pixel);
@@ -69,7 +77,7 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
                 }
             }
         },
-        [setPixel],
+        [setPixel, getPixel],
     );
     const consumeUpdates = useCallback(() => {
         while (incrementalUpdateBuffer.current.length > 0) {
@@ -86,12 +94,27 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
 
         results.pixels.map((layer, y) => {
             layer.map((pixel, x) => {
-                if (pixel.type !== PixelType.FogOfWar)
-                    pixels.set(JSON.stringify({ x: x - playerX, y: y - playerY }), pixel);
+                if (pixel.type !== PixelType.FogOfWar) {
+                    const decodedPixel = decodePixel(pixel);
+                    pixels.set(JSON.stringify({ x: x - playerX, y: y - playerY }), decodedPixel);
+                }
             });
         });
         return pixels;
     }, []);
+
+    const decodePixel = (encodedPixel: EncodedPixel) => {
+        const decodedGraphics = encodedPixel.backgroundGraphic
+            ? Uint8Array.from(atob(encodedPixel.backgroundGraphic), (c) => c.charCodeAt(0))
+            : undefined;
+        const decodePixel: Pixel = {
+            type: encodedPixel.type,
+            guild: encodedPixel.guild,
+            owner: encodedPixel.owner,
+            backgroundGraphic: decodedGraphics,
+        };
+        return decodePixel;
+    };
 
     const computeBoundingBox = useCallback((pixels: Map<string, Pixel>) => {
         let minX = Number.MAX_SAFE_INTEGER;
