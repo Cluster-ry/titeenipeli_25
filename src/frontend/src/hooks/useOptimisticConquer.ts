@@ -132,7 +132,7 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
             if (
                 useGameStateStore.getState().pixelBucket.amount <= 0 ||
                 !pixel ||
-                pixel.guild == user?.guild ||
+                pixel.owner == user?.id ||
                 pixel.type != PixelType.Normal
             ) {
                 effectHandle.current?.forbiddenEffect(coordinate);
