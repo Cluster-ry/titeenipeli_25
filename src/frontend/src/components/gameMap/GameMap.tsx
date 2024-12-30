@@ -13,7 +13,6 @@ import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 import { useGameStateStore } from "../../stores/gameStateStore.ts";
 import { User } from "../../models/User.ts";
-import checkUserOwnedPixels from "../../utils/checkUserOwnedPixels.ts";
 
 /**
  * @component GameMap
@@ -43,20 +42,23 @@ const GameMap: FC = () => {
      *
      * @note Upon change, the map is automatically refreshed.
      */
-    const conquer = useCallback(async (coordinate: Coordinate) => {
-        if (bucket.amount <= 0) {
-            effectRef.current?.forbiddenEffect(coordinate);
-            return;
-        }
+    const conquer = useCallback(
+        async (coordinate: Coordinate) => {
+            if (bucket.amount <= 0) {
+                effectRef.current?.forbiddenEffect(coordinate);
+                return;
+            }
 
-        const success = await postPixels(coordinate);
-        if (success) {
-            effectRef.current?.conqueredEffect(coordinate);
-            decreaseBucket();
-        } else {
-            effectRef.current?.forbiddenEffect(coordinate);
-        }
-    }, [bucket.amount, decreaseBucket])
+            const success = await postPixels(coordinate);
+            if (success) {
+                effectRef.current?.conqueredEffect(coordinate);
+                decreaseBucket();
+            } else {
+                effectRef.current?.forbiddenEffect(coordinate);
+            }
+        },
+        [bucket.amount, decreaseBucket],
+    );
 
     const mappedBoundingBox = {
         minY: pixelsBoundingBox.min.y,
@@ -71,8 +73,7 @@ const GameMap: FC = () => {
         for (const [coordinate, pixel] of map) {
             const rectangleX = coordinate.x * mapConfig.PixelSize;
             const rectangleY = coordinate.y * mapConfig.PixelSize;
-            let color = pixelColor(pixel);
-            color = checkUserOwnedPixels(user, pixel, color);
+            const color = pixelColor(pixel, user);
             result.push(
                 <Rectangle
                     key={`x:${coordinate.x} y:${coordinate.y}-${result.length}-${Date.now()}`}
@@ -93,7 +94,7 @@ const GameMap: FC = () => {
     if (map === null) {
         return <span>Loading...</span>;
     }
-    
+
     return (
         <>
             <Stage
