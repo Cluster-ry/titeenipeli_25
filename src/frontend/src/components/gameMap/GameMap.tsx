@@ -43,7 +43,7 @@ const GameMap: FC = () => {
             const parsedCoordinate = JSON.parse(coordinate);
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
-            const color = pixelColor(pixel);
+            const color = pixelColor(pixel, user);
             result.push(
                 <Rectangle
                     key={`${coordinate}-${result.length}-${Date.now()}`}

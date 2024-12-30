@@ -12,7 +12,7 @@ import { Coordinate } from "../models/Coordinate.ts";
 
 type Events = {
     onPixelUpdated?: (coordinates: Coordinate, value: Pixel) => void;
-}
+};
 
 type Props = {
     optimisticConquer: (data: PostPixelsInput) => void;
@@ -86,7 +86,8 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
 
         results.pixels.map((layer, y) => {
             layer.map((pixel, x) => {
-                if (pixel.type !== PixelType.FogOfWar) pixels.set(JSON.stringify({ x: x - playerX, y: y - playerY }), pixel);
+                if (pixel.type !== PixelType.FogOfWar)
+                    pixels.set(JSON.stringify({ x: x - playerX, y: y - playerY }), pixel);
             });
         });
         return pixels;

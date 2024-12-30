@@ -1,42 +1,44 @@
 .notification {
-  justify-self: center;
-  min-width: 25vw;
-  border-width: 0;
-  border-radius: 15px;
+    justify-self: center;
+    min-width: 25vw;
+    border-width: 0;
+    border-radius: 15px;
 
+    max-height: 7vh;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    animation: flash 1500ms ease infinite alternate;
 
+    position: absolute;
+    right: 0;
+    bottom: 0;
 
-
-  max-height: 7vh;
-  display: grid;
-  align-items: center;
-  justify-content: center;
-  animation: flash 1500ms ease infinite alternate;
-
-  position: absolute;
-  right: 0;
-  bottom: 0;
-
-  padding: 15px;
-  margin-right: 15px;
-  margin-bottom: 15px;
+    padding: 15px;
+    margin-right: 15px;
+    margin-bottom: 15px;
 }
 
 .error {
-  background-color: rgb(221, 114, 114);
-  box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px,
-    rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #925d67 0 -3px 0 inset;
+    background-color: rgb(221, 114, 114);
+    box-shadow:
+        rgba(45, 35, 66, 0.4) 0 2px 4px,
+        rgba(45, 35, 66, 0.3) 0 7px 13px -3px,
+        #925d67 0 -3px 0 inset;
 }
 
 .success {
-  background-color: green;
-  box-shadow: limegreen 0 2px 4px,
-    limegreen 0 7px 13px -3px, lightgreen 0 -3px 0 inset;
+    background-color: green;
+    box-shadow:
+        limegreen 0 2px 4px,
+        limegreen 0 7px 13px -3px,
+        lightgreen 0 -3px 0 inset;
 }
 
 .neutral {
-  
-  background-color: yellow;
-  box-shadow: darkcyan 0 2px 4px,
-    lightyellow  7px 13px -3px, yellowgreen -3px 0 inset;
+    background-color: yellow;
+    box-shadow:
+        darkcyan 0 2px 4px,
+        lightyellow 7px 13px -3px,
+        yellowgreen -3px 0 inset;
 }

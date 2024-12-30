@@ -1,18 +1,18 @@
 .ctf-wrapper {
-  display: grid;
-  margin-top: 5%;
-  animation: slide-in 0.3s ease-out forwards;
+    display: grid;
+    margin-top: 5%;
+    animation: slide-in 0.3s ease-out forwards;
 
-  background-color: rgba(0, 0, 0, 0.8);
-  border-radius: 12px;
-  height: 75vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 12px;
+    height: 75vh;
 }
 
 .ctf-input {
-  height: 35px;
-  text-align: center;
-  color: white;
-  font-family: "Press Start 2p";
-  border-radius: 8px;
-  background-color: #000000;
+    height: 35px;
+    text-align: center;
+    color: white;
+    font-family: "Press Start 2p";
+    border-radius: 8px;
+    background-color: #000000;
 }
