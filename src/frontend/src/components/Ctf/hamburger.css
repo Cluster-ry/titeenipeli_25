@@ -1,29 +1,29 @@
 .hamburger {
-  width: 30px;
-  height: 20px;
-  display:  flex;
-  flex-direction: column;
-  justify-content: space-between;
-  pointer-events: all;
-  cursor: pointer;
-  margin-top: 15%;
-  background-color: darkgray;
+    width: 30px;
+    height: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: all;
+    cursor: pointer;
+    margin-top: 15%;
+    background-color: darkgray;
 
-  margin-top: -1%;
-  justify-self: right;
+    margin-top: -1%;
+    justify-self: right;
 
-  padding: 12px;
-  border-radius: 10px;
-  top: 0;
-  right: 0;
+    padding: 12px;
+    border-radius: 10px;
+    top: 0;
+    right: 0;
 }
 
 .hamburger-bar {
-  width: 100%;
-  height: 4px;
-  background-color: #000;
+    width: 100%;
+    height: 4px;
+    background-color: #000;
 }
 
 .hamburger-wrapper {
-  display: grid;
+    display: grid;
 }
