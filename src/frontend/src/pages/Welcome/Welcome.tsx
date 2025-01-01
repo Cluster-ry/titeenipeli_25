@@ -13,25 +13,41 @@ export const Welcome = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
+        handleAuthenticationRedirections();
+    }, []);
+
+    const handleAuthenticationRedirections = async () => {
+        const handled = await handleTokenParameter();
+        if (!handled) {
+            handleAuthenticationCookie();
+        }
+    };
+
+    const handleTokenParameter = async (): Promise<boolean> => {
         const token = searchParams.get("token");
         if (token === null) {
-            return;
+            return false;
         }
-        handleToken(token);
 
-        async function handleToken(token: string) {
-            const authenticationInput = { token: token };
-            try {
-                const response = await postUsersAuthenticate(authenticationInput);
-                if (response.status === 200) {
-                    navigate("/game");
-                }
-            } catch (error) {
-                setSearchParams({});
-                console.log(error);
+        const authenticationInput = { token: token };
+        try {
+            const response = await postUsersAuthenticate(authenticationInput);
+            if (response.status === 200) {
+                navigate("/game");
+                return true;
             }
+        } catch (error) {
+            setSearchParams({});
+            console.log(error);
         }
-    }, []);
+        return false;
+    };
+
+    const handleAuthenticationCookie = async () => {
+        if (document.cookie.indexOf("X-Authorization=") !== -1) {
+            navigate("/game");
+        }
+    };
 
     return (
         <>

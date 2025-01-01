@@ -76,7 +76,7 @@ public sealed class JwtService : IJwtService
     {
         return new CookieOptions
         {
-            HttpOnly = true,
+            HttpOnly = false,
             SameSite = SameSiteMode.Strict,
             MaxAge = TimeSpan.FromDays(_jwtOptions.ExpirationDays)
         };
