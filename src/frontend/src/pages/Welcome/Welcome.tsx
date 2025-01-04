@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect } from "react";
+import { PropsWithChildren, useCallback, useEffect } from "react";
 import { LogoContainer } from "./LogoContainer";
 import { GreetingContainer } from "./GreetingContainer";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -16,14 +16,7 @@ export const Welcome = () => {
         handleAuthenticationRedirections();
     }, []);
 
-    const handleAuthenticationRedirections = async () => {
-        const handled = await handleTokenParameter();
-        if (!handled) {
-            handleAuthenticationCookie();
-        }
-    };
-
-    const handleTokenParameter = async (): Promise<boolean> => {
+    const handleTokenParameter = useCallback(async (): Promise<boolean> => {
         const token = searchParams.get("token");
         if (token === null) {
             return false;
@@ -41,13 +34,20 @@ export const Welcome = () => {
             console.log(error);
         }
         return false;
-    };
+    }, [navigate]);
 
-    const handleAuthenticationCookie = async () => {
+    const handleAuthenticationCookie = useCallback(async () => {
         if (document.cookie.indexOf("X-Authorization=") !== -1) {
             navigate("/game");
         }
-    };
+    }, [navigate]);
+
+    const handleAuthenticationRedirections = useCallback(async () => {
+        const handled = await handleTokenParameter();
+        if (!handled) {
+            handleAuthenticationCookie();
+        }
+    }, [handleTokenParameter, handleAuthenticationCookie]);
 
     return (
         <>

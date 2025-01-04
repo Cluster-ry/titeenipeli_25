@@ -3,11 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getCurrentUser } from "../api/users.ts";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
+import { useCallback } from "react";
 
 export const useUser = (): User | null => {
     const navigate = useNavigate();
 
-    const getUserWithRedirect = async () => {
+    const getUserWithRedirect = useCallback(async () => {
         try {
             return await getCurrentUser();
         } catch (error) {
@@ -17,7 +18,7 @@ export const useUser = (): User | null => {
                 navigate("/");
             }
         }
-    };
+    }, [navigate]);
 
     const { data, isSuccess } = useQuery({ queryKey: ["current_user"], queryFn: getUserWithRedirect });
     if (isSuccess) {
