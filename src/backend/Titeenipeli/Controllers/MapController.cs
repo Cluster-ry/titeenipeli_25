@@ -291,7 +291,7 @@ public class MapController : ControllerBase
         {
             for (int y = 0; y < map.Height; y++)
             {
-                var backgroundGraphic = _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(x - 1, y - 1));
+                var backgroundGraphic = _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(map.MinViewableX + x, map.MinViewableY + y));
                 if (backgroundGraphic == null)
                 {
                     continue;

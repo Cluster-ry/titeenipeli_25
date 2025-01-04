@@ -9,6 +9,7 @@ export interface Coordinate {
 export interface NewMapStore {
     map: Map<string, Pixel | null> | null;
     setPixel: (coordinate: Coordinate, pixel: Pixel | null) => void;
+    getPixel: (coordinate: Coordinate) => Pixel | undefined | null;
     setMap: (map: Map<string, Pixel> | null) => void;
     pixelsBoundingBox: { min: Coordinate; max: Coordinate };
     setPixelsBoundingBox: ({ min, max }: { min: Coordinate; max: Coordinate }) => void;
@@ -27,6 +28,14 @@ export const useNewMapStore = create<NewMapStore>((set) => ({
             }
             return { map: new Map([...oldMap, [JSON.stringify(coordinate), pixel]]) };
         });
+    },
+    getPixel: (coordinate: Coordinate) => {
+        let pixel: Pixel | undefined | null;
+        set((state) => {
+            pixel = state.map?.get(JSON.stringify(coordinate));
+            return state;
+        });
+        return pixel;
     },
     setMap: (map: Map<string, Pixel> | null) => {
         set({ map });
