@@ -89,7 +89,7 @@ public class CtfControllerTest
             Token = token
         };
 
-        IStatusCodeActionResult result = controller.PostCtf(input) as IStatusCodeActionResult;
+        var result = controller.PostCtf(input) as IStatusCodeActionResult;
 
         result?.StatusCode.Should().Be(statusCode);
     }

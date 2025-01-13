@@ -1,12 +1,10 @@
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Inputs;
-using Titeenipeli.Common.Models;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
@@ -18,15 +16,15 @@ namespace Titeenipeli.Controllers;
 [ApiController]
 [Route("users")]
 public class UserController(
-                      IWebHostEnvironment webHostEnvironment,
-                      BotOptions botOptions,
-                      SpawnGeneratorService spawnGeneratorService,
-                      IUserRepositoryService userRepositoryService,
-                      IGuildRepositoryService guildRepositoryService,
-                      IJwtService jwtService,
-                      IMapRepositoryService mapRepositoryService) : ControllerBase
+    IHostEnvironment webHostEnvironment,
+    BotOptions botOptions,
+    SpawnGeneratorService spawnGeneratorService,
+    IUserRepositoryService userRepositoryService,
+    IGuildRepositoryService guildRepositoryService,
+    IJwtService jwtService,
+    IMapRepositoryService mapRepositoryService) : ControllerBase
 {
-    private const int _loginTokenLength = 32;
+    private const int LoginTokenLength = 32;
 
     private readonly TimeSpan _loginTokenExpiryTime = TimeSpan.FromMinutes(botOptions.LoginTokenExpirationInMinutes);
 
@@ -36,7 +34,6 @@ public class UserController(
     public IActionResult CurrentUser()
     {
         var user = HttpContext.GetUser(jwtService, userRepositoryService);
-        if (user is null) return Unauthorized();
 
         return Ok(new UserResult(user));
     }
@@ -61,19 +58,19 @@ public class UserController(
     }
 
     [HttpPost]
-    public IActionResult PostUsers([FromBody] PostUsersInput usersInput)
+    public async Task<IActionResult> PostUsers([FromBody] PostUsersInput usersInput)
     {
-        BadRequestObjectResult? botTokenError = IsBotTokenValid(Request.Headers);
+        var botTokenError = IsBotTokenValid(Request.Headers);
         if (botTokenError != null)
         {
             return botTokenError;
         }
 
-        User? user = userRepositoryService.GetByTelegramId(usersInput.TelegramId);
+        var user = userRepositoryService.GetByTelegramId(usersInput.TelegramId);
 
         if (user == null)
         {
-            user = CreateNewUser(usersInput);
+            user = await CreateNewUser(usersInput);
             if (user == null)
             {
                 return BadRequest(new ErrorResult
@@ -85,16 +82,17 @@ public class UserController(
             }
         }
 
-        string token = CreateNewLoginTokenForUser(user);
+        string token = await CreateNewLoginTokenForUser(user);
         PostUsersResult postUsersResult = new()
         {
             Token = token
         };
+
         return Ok(postUsersResult);
     }
 
     [HttpPost("authenticate")]
-    public IActionResult PostAuthenticate([FromBody] PostAuthenticateInput loginInput)
+    public async Task<IActionResult> PostAuthenticate([FromBody] PostAuthenticateInput loginInput)
     {
         // TODO: Should be removed before production!
         if (webHostEnvironment.IsDevelopment() && loginInput.Token.Length < 32)
@@ -103,11 +101,12 @@ public class UserController(
         }
         // ------------------------------------------
 
-        User? user = userRepositoryService.GetByAuthenticationToken(loginInput.Token);
+        var user = userRepositoryService.GetByAuthenticationToken(loginInput.Token);
         if (user == null)
         {
             return Unauthorized();
         }
+
         if (user.AuthenticationTokenExpiryTime < DateTime.UtcNow)
         {
             return Unauthorized();
@@ -116,6 +115,7 @@ public class UserController(
         user.AuthenticationToken = null;
         user.AuthenticationTokenExpiryTime = null;
         userRepositoryService.Update(user);
+        await userRepositoryService.SaveChangesAsync();
 
         Response.Cookies.AppendJwtCookie(jwtService, user);
         return Ok();
@@ -123,7 +123,7 @@ public class UserController(
 
     private IActionResult DebugLogin(string telegramId)
     {
-        User? user = userRepositoryService.GetByTelegramId(telegramId);
+        var user = userRepositoryService.GetByTelegramId(telegramId);
         if (user == null)
         {
             return Unauthorized();
@@ -135,35 +135,33 @@ public class UserController(
 
     private BadRequestObjectResult? IsBotTokenValid(IHeaderDictionary headers)
     {
-        StringValues botToken;
-        bool botTokenRetrieved = headers.TryGetValue(botOptions.AuthorizationHeaderName, out botToken);
+        bool botTokenRetrieved = headers.TryGetValue(botOptions.AuthorizationHeaderName, out var botToken);
         if (botTokenRetrieved && botToken == botOptions.Token)
         {
             return null;
         }
-        else
-        {
-            ErrorResult error = new ErrorResult
-            {
-                Title = "Invalid bot token",
-                Code = ErrorCode.InvalidBotToken,
-                Description = "Bot token is invalid, is client bot at all?"
-            };
 
-            return BadRequest(error);
-        }
+        var error = new ErrorResult
+        {
+            Title = "Invalid bot token",
+            Code = ErrorCode.InvalidBotToken,
+            Description = "Bot token is invalid, is client bot at all?"
+        };
+
+        return BadRequest(error);
     }
 
-    private User? CreateNewUser(PostUsersInput usersInput)
+    private async Task<User?> CreateNewUser(PostUsersInput usersInput)
     {
         bool validGuild = Enum.TryParse(usersInput.Guild, out GuildName guildName);
-        Guild? guild = guildRepositoryService.GetByName(guildName);
+        var guild = guildRepositoryService.GetByName(guildName);
+
         if (!validGuild || guild == null)
         {
             return null;
         }
 
-        Coordinate spawnPoint = spawnGeneratorService.GetSpawnPoint(guildName);
+        var spawnPoint = spawnGeneratorService.GetSpawnPoint(guildName);
 
         User user = new()
         {
@@ -178,10 +176,11 @@ public class UserController(
             TelegramId = usersInput.TelegramId,
             FirstName = usersInput.FirstName,
             LastName = usersInput.LastName,
-            Username = usersInput.Username,
+            Username = usersInput.Username
         };
 
         userRepositoryService.Add(user);
+        await userRepositoryService.SaveChangesAsync();
 
         Pixel pixel = new()
         {
@@ -191,18 +190,20 @@ public class UserController(
         };
 
         mapRepositoryService.Update(pixel);
+        await mapRepositoryService.SaveChangesAsync();
 
         return user;
     }
 
-    private string CreateNewLoginTokenForUser(User user)
+    private async Task<string> CreateNewLoginTokenForUser(User user)
     {
-        ReadOnlySpan<char> characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        string token = RandomNumberGenerator.GetString(characters, _loginTokenLength);
+        const string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        string token = RandomNumberGenerator.GetString(characters, LoginTokenLength);
 
         user.AuthenticationToken = token;
         user.AuthenticationTokenExpiryTime = DateTime.UtcNow + _loginTokenExpiryTime;
         userRepositoryService.Update(user);
+        await userRepositoryService.SaveChangesAsync();
 
         return token;
     }
