@@ -7,6 +7,7 @@ using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
 using Titeenipeli.Services;
+using PowerUp = Titeenipeli.Common.Database.Schema.PowerUp;
 
 namespace Titeenipeli.Controllers;
 
