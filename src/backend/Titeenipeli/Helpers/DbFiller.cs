@@ -15,9 +15,7 @@ public static class DbFiller
             dbContext.CtfFlags.Add(new CtfFlag
             {
                 Token = "#TEST_FLAG",
-                Id = 0
             });
-            
             
             dbContext.CtfFlags.Add(new CtfFlag
             {
@@ -28,7 +26,6 @@ public static class DbFiller
                     Name = Powerups.Titeenikirves.ToString(), 
                     Description = PowerController.GetDescription(Powerups.Titeenikirves)
                 },
-                Id = 1,
             });
 
 
