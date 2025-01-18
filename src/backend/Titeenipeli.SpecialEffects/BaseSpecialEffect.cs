@@ -1,3 +1,4 @@
+using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 
 namespace Titeenipeli.SpecialEffects;
@@ -8,7 +9,7 @@ public abstract class BaseSpecialEffect : ISpecialEffect
     public abstract Coordinate Origin { get; }
 
 
-    public virtual List<Coordinate> HandleSpecialEffect(Coordinate location)
+    public virtual List<Coordinate> HandleSpecialEffect(Coordinate location, Direction direction)
     {
         List<Coordinate> pixelsToPlace = [];
 
