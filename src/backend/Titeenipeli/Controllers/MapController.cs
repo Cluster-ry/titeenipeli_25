@@ -266,10 +266,15 @@ public class MapController : ControllerBase
 
     private void InjectBackgroundGraphics(Map map)
     {
-        for (int x = 0; x < map.Width - 1; x++)
+        for (int x = 0; x < map.Width; x++)
         {
-            for (int y = 0; y < map.Height - 1; y++)
+            for (int y = 0; y < map.Height; y++)
             {
+                if (map.Pixels[x, y].Type == PixelType.MapBorder)
+                {
+                    continue;
+                }
+
                 byte[]? backgroundGraphic =
                     _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(map.MinViewableX + x,
                         map.MinViewableY + y));
