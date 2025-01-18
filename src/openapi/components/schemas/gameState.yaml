@@ -18,3 +18,17 @@ properties:
           $ref: "../enums/pixelGuild.yaml"
         amount:
           type: int
+  powerups:
+    type: array
+    items:
+      type: object
+      properties:
+        powerUpId: 
+          description: "Unique identifier for the powerup"
+          type: string
+        name:
+          description: "Name of the powerup"
+          type: string
+        description:
+          description: "Description of the powerup"
+          type: string

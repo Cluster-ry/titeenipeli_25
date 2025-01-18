@@ -18,11 +18,10 @@ namespace Titeenipeli.Controllers;
 public class UserController(
     IHostEnvironment webHostEnvironment,
     BotOptions botOptions,
-    SpawnGeneratorService spawnGeneratorService,
     IUserRepositoryService userRepositoryService,
     IGuildRepositoryService guildRepositoryService,
     IJwtService jwtService,
-    IMapRepositoryService mapRepositoryService) : ControllerBase
+    IMapUpdaterService mapUpdaterService) : ControllerBase
 {
     private const int LoginTokenLength = 32;
 
@@ -35,26 +34,7 @@ public class UserController(
     {
         var user = HttpContext.GetUser(jwtService, userRepositoryService);
 
-        return Ok(new UserResult(user));
-    }
-
-    public class UserResult
-    {
-        public int Id { get; init; }
-        public string Username { get; init; }
-        public string FirstName { get; init; }
-        public string LastName { get; init; }
-        public int Guild { get; init; }
-
-
-        public UserResult(User user)
-        {
-            Id = user.Id;
-            Username = user.Username;
-            FirstName = user.FirstName;
-            LastName = user.LastName;
-            Guild = user.Guild.Id;
-        }
+        return Ok(new GetCurrentUserResult(user));
     }
 
     [HttpPost]
@@ -161,15 +141,13 @@ public class UserController(
             return null;
         }
 
-        var spawnPoint = spawnGeneratorService.GetSpawnPoint(guildName);
-
         User user = new()
         {
             Guild = guild,
             Code = "",
 
-            SpawnX = spawnPoint.X,
-            SpawnY = spawnPoint.Y,
+            SpawnX = -1,
+            SpawnY = -1,
 
             PowerUps = [],
 
@@ -179,18 +157,10 @@ public class UserController(
             Username = usersInput.Username
         };
 
+        user = await mapUpdaterService.PlaceSpawn(userRepositoryService, user);
+
         userRepositoryService.Add(user);
         await userRepositoryService.SaveChangesAsync();
-
-        Pixel pixel = new()
-        {
-            X = spawnPoint.X,
-            Y = spawnPoint.Y,
-            User = user
-        };
-
-        mapRepositoryService.Update(pixel);
-        await mapRepositoryService.SaveChangesAsync();
 
         return user;
     }
