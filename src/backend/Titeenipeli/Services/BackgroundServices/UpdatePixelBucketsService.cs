@@ -34,8 +34,8 @@ public class UpdatePixelBucketsService(
         }
 
         var guild = guildUsers[0].Guild;
-        float guildPerPlayerIncrease = (float)gameOptions.PixelsPerMinutePerGuild / guildUsers.Length;
-        guild.CurrentRateLimitIncreasePerMinutePerPlayer = guildPerPlayerIncrease;
+        float guildPerPlayerIncrease = guild.BaseRateLimit / guildUsers.Length;
+        guild.RateLimitPerPlayer = guildPerPlayerIncrease;
         guildRepositoryService.Update(guild);
         await guildRepositoryService.SaveChangesAsync();
 

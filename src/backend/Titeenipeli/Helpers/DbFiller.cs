@@ -38,7 +38,13 @@ public static class DbFiller
             var guildNames = Enum.GetValues(typeof(GuildName)).Cast<GuildName>().ToList();
             // Skip Nobody.
             guildNames = guildNames.Skip(1).ToList();
-            guilds.AddRange(from GuildName name in guildNames select new Guild { Name = name, ActiveCtfFlags = new() });
+            guilds.AddRange(from GuildName name in guildNames
+                            select new Guild
+                            {
+                                Name = name,
+                                ActiveCtfFlags = [],
+                                BaseRateLimit = gameOptions.PixelsPerMinutePerGuild
+                            });
 
             dbContext.Guilds.AddRange(guilds);
 

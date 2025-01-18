@@ -40,7 +40,7 @@ public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) 
                     {
                         Amount = (uint)gameStateUpdateInput.User.PixelBucket,
                         MaxAmount = (uint)gameStateUpdateInput.MaximumPixelBucket,
-                        IncreasePerMinute = gameStateUpdateInput.User.Guild.CurrentRateLimitIncreasePerMinutePerPlayer
+                        IncreasePerMinute = gameStateUpdateInput.User.Guild.RateLimitPerPlayer
                     };
                 }
 
