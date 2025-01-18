@@ -30,7 +30,7 @@ public class CtfController : ControllerBase
         _guildRepositoryService = guildRepositoryService;
         _jwtService = jwtService;
         _miscGameStateUpdateCoreService = miscGameStateUpdateCoreService;
-        
+
     }
 
     [HttpPost("ctf")]
@@ -84,13 +84,13 @@ public class CtfController : ControllerBase
         user.PowerUps.Add(powerUp);
         _userRepositoryService.Update(user);
         await _userRepositoryService.SaveChangesAsync();
-        
+
         GrpcMiscGameStateUpdateInput stateUpdate = new()
         {
             User = user,
             PowerUps = user.PowerUps.ToList()
         };
-        
+
         _miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
     }
 }

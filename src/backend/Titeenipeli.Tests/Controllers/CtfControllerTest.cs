@@ -76,7 +76,7 @@ public class CtfControllerTest
         mockUserRepositoryService
         .Setup(repo => repo.GetById(It.IsAny<int>()))
         .Returns(CurrentUser);
-        
+
         var httpcontext = new DefaultHttpContext();
         httpcontext.Items[jwtClaimName] = CurrentClaim;
 
