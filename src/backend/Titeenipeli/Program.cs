@@ -186,9 +186,17 @@ public static class Program
             var dbContext = services.GetRequiredService<ApiDbContext>();
             var mapProvider = services.GetRequiredService<IMapProvider>();
 
-            DbFiller.Clear(dbContext);
-            dbContext.Database.EnsureCreated();
-            DbFiller.Initialize(dbContext, gameOptions);
+
+            if (app.Environment.IsDevelopment())
+            {
+                DbFiller.Clear(dbContext);
+            }
+
+            var newDatabase = dbContext.Database.EnsureCreated();
+            if (newDatabase)
+            {
+                DbFiller.Initialize(dbContext, gameOptions);
+            }
 
             mapProvider.Initialize(dbContext.Map.Select(pixel => pixel)
                                             .Include(pixel => pixel.User)
