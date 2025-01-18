@@ -34,6 +34,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Titeenipeli.Common\Titeenipeli.Common.csproj"/>
         <ProjectReference Include="../Titeenipeli.Grpc/Titeenipeli.Grpc.csproj"/>
+        <ProjectReference Include="..\Titeenipeli.InMemoryMapProvider\Titeenipeli.InMemoryMapProvider.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

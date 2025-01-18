@@ -15,7 +15,6 @@ namespace Titeenipeli.Controllers;
 [Authorize(Policy = "MustHaveGuild")]
 public sealed class PowerController(
     IUserRepositoryService userRepositoryService,
-    IMapRepositoryService mapRepositoryService,
     IMapUpdaterService mapUpdaterService,
     IJwtService jwtService,
     GameOptions gameOptions
@@ -67,17 +66,14 @@ public sealed class PowerController(
                 {
                     //Axe cut is 3 pixel wide
                     mapUpdaterService.PlacePixel(
-                        mapRepositoryService,
                         userRepositoryService,
                         new Coordinate { X = realX - 1, Y = y }, user);
 
                     mapUpdaterService.PlacePixel(
-                        mapRepositoryService,
                         userRepositoryService,
                         new Coordinate { X = realX, Y = y }, user);
 
                     mapUpdaterService.PlacePixel(
-                        mapRepositoryService,
                         userRepositoryService,
                         new Coordinate { X = realX + 1, Y = y }, user);
                 }
@@ -88,17 +84,14 @@ public sealed class PowerController(
                 {
                     //Axe cut is 3 pixel wide
                     mapUpdaterService.PlacePixel(
-                        mapRepositoryService,
                         userRepositoryService,
                         new Coordinate { X = x, Y = realY - 1 }, user);
 
                     mapUpdaterService.PlacePixel(
-                        mapRepositoryService,
                         userRepositoryService,
                         new Coordinate { X = x, Y = realY }, user);
 
                     mapUpdaterService.PlacePixel(
-                        mapRepositoryService,
                         userRepositoryService,
                         new Coordinate { X = x, Y = realY + 1 }, user);
                 }

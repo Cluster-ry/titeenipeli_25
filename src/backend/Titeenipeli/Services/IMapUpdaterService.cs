@@ -6,7 +6,5 @@ namespace Titeenipeli.Services;
 
 public interface IMapUpdaterService
 {
-    public Task PlacePixel(IMapRepositoryService mapRepositoryService,
-                           IUserRepositoryService userRepositoryService,
-                           Coordinate pixelCoordinates, User newOwner);
+    public Task PlacePixel(IUserRepositoryService userRepositoryService, Coordinate pixelCoordinates, User newOwner);
 }
