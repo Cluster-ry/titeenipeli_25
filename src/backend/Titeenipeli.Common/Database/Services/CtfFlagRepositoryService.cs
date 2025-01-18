@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 
@@ -23,6 +24,6 @@ public class CtfFlagRepositoryService(ApiDbContext dbContext)
 
     public CtfFlag? GetByToken(string token)
     {
-        return DbContext.CtfFlags.FirstOrDefault(flag => flag.Token == token);
+        return DbContext.CtfFlags.Include(flag => flag.Powerup).FirstOrDefault(flag => flag.Token == token);
     }
 }
