@@ -15,3 +15,9 @@ export interface Score {
     guild: Guild;
     amount: number;
 }
+
+export interface PowerUp {
+    id: number;
+    name: string;
+    description: string;
+}

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { GetGameState, PixelBucket, Score } from "../models/Get/GetGameState";
+import { GetGameState, PixelBucket, Score, PowerUp } from "../models/Get/GetGameState";
 
 export interface Coordinate {
     x: number;
@@ -9,8 +9,10 @@ export interface Coordinate {
 export interface GameStateStore {
     pixelBucket: PixelBucket;
     scores: Score[];
+    powerUps: PowerUp[];
     setPixelBucket: (newPixelBucket: PixelBucket) => void;
     setScores: (newScores: Score[]) => void;
+    setPowerups: (newPowerups: PowerUp[]) => void;
     setMiscGameState: (newState: GetGameState) => void;
     decreaseBucket: () => void;
     increaseBucket: () => void;
@@ -23,11 +25,15 @@ export const useGameStateStore = create<GameStateStore>((set) => ({
         increasePerMinute: 0,
     },
     scores: [],
+    powerUps: [],
     setPixelBucket: (newPixelBucket: PixelBucket) => {
         set({ pixelBucket: newPixelBucket });
     },
     setScores: (newScores: Score[]) => {
         set({ scores: newScores });
+    },
+    setPowerups: (newPowerups: PowerUp[]) => {
+        set({ powerUps: newPowerups });
     },
     setMiscGameState: (newState: GetGameState) => {
         const state = {
