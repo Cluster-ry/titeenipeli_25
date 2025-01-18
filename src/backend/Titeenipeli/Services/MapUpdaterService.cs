@@ -129,7 +129,7 @@ public class MapUpdaterService(
                 var map = GetMap(userRepositoryService);
                 var changedPixels = _mapUpdater.PlacePixel(map, pixelCoordinateWithBorder, newOwner);
 
-                grpcBatch = [..grpcBatch, ..changedPixels];
+                grpcBatch = [.. grpcBatch, .. changedPixels];
 
                 DoDatabaseUpdate(changedPixels, newOwner);
             }
