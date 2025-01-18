@@ -1,6 +1,7 @@
 namespace Titeenipeli.Common.Enums;
 
-public enum Powerups
+public enum PowerUps
 {
+    TestEffect = -1,
     Titeenikirves = 0,
 }
