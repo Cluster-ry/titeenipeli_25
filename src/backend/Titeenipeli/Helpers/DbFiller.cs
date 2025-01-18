@@ -16,14 +16,14 @@ public static class DbFiller
             {
                 Token = "#TEST_FLAG",
             });
-            
+
             dbContext.CtfFlags.Add(new CtfFlag
             {
                 Token = "#TITEENIKIRVES",
                 Powerup = new PowerUp
                 {
-                    PowerId = (int)Powerups.Titeenikirves, 
-                    Name = Powerups.Titeenikirves.ToString(), 
+                    PowerId = (int)Powerups.Titeenikirves,
+                    Name = Powerups.Titeenikirves.ToString(),
                     Description = PowerController.GetDescription(Powerups.Titeenikirves)
                 },
             });
