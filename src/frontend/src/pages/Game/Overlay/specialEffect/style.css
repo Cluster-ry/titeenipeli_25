@@ -2,6 +2,7 @@
     margin: 0 1em;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
 }
 .special-effect .button {
@@ -23,8 +24,8 @@
 }
 
 .special-effect .label {
+    flex: 1 1 4em;
     width: 10em;
-    height: 2em;
     text-align: center;
 }
 
