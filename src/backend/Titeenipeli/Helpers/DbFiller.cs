@@ -17,6 +17,20 @@ public static class DbFiller
                 Token = "#TEST_FLAG",
                 Id = 0
             });
+            
+            
+            dbContext.CtfFlags.Add(new CtfFlag
+            {
+                Token = "#TITEENIKIRVES",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)Powerups.Titeenikirves, 
+                    Name = Powerups.Titeenikirves.ToString(), 
+                    Description = PowerController.GetDescription(Powerups.Titeenikirves)
+                },
+                Id = 1,
+            });
+
 
             dbContext.SaveChanges();
         }
