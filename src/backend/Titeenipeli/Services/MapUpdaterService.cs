@@ -48,6 +48,22 @@ public class MapUpdaterService(
         });
     }
 
+    public Task<bool> PlacePixels(IUserRepositoryService userRepositoryService,
+                                  List<Coordinate> pixelCoordinates,
+                                  User newOwner)
+    {
+        return Task.Run(() =>
+        {
+            lock (_mapUpdater)
+            {
+                var grpcBatch = PlacePixelsWithRetry(userRepositoryService, pixelCoordinates, newOwner);
+                DoGrpcUpdate(GetMap(userRepositoryService), grpcBatch);
+            }
+
+            return true;
+        });
+    }
+
     public Task<User> PlaceSpawn(IUserRepositoryService userRepositoryService, User user)
     {
         return Task.Run(() =>
@@ -81,6 +97,47 @@ public class MapUpdaterService(
 
             return user;
         });
+    }
+
+    private List<MapChange> PlacePixelsWithRetry(IUserRepositoryService userRepositoryService,
+                                                 List<Coordinate> pixelCoordinates,
+                                                 User newOwner)
+    {
+        int lastFailedCount;
+        List<Coordinate> failedPlacements = [];
+        List<MapChange> grpcBatch = [];
+
+        do
+        {
+            lastFailedCount = failedPlacements.Count;
+            failedPlacements = [];
+
+            foreach (var pixelCoordinate in pixelCoordinates)
+            {
+                if (!IsValidPlacement(pixelCoordinate, newOwner))
+                {
+                    failedPlacements.Add(pixelCoordinate);
+                    continue;
+                }
+
+                if (mapProvider.IsSpawn(pixelCoordinate))
+                {
+                    continue;
+                }
+
+                var pixelCoordinateWithBorder = pixelCoordinate + new Coordinate(1, 1);
+                var map = GetMap(userRepositoryService);
+                var changedPixels = _mapUpdater.PlacePixel(map, pixelCoordinateWithBorder, newOwner);
+
+                grpcBatch = [.. grpcBatch, .. changedPixels];
+
+                DoDatabaseUpdate(changedPixels, newOwner);
+            }
+
+            pixelCoordinates = failedPlacements;
+        } while (failedPlacements.Count > 0 && failedPlacements.Count != lastFailedCount);
+
+        return grpcBatch;
     }
 
     private PixelWithType[,] GetMap(IUserRepositoryService userRepositoryService)
