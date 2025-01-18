@@ -32,20 +32,28 @@ public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) 
             foreach (KeyValuePair<int, IGrpcConnection<MiscStateUpdateResponse>> userConnection in userConnections)
             {
                 var responseStream = userConnection.Value.ResponseStreamQueue.Writer;
-                MiscStateUpdateResponse incrementalResponse = new()
+                MiscStateUpdateResponse incrementalResponse = new();
+
+                if (gameStateUpdateInput.MaximumPixelBucket != 0)
                 {
-                    PixelBucket = new()
+                    incrementalResponse.PixelBucket = new()
                     {
                         Amount = (uint)gameStateUpdateInput.User.PixelBucket,
                         MaxAmount = (uint)gameStateUpdateInput.MaximumPixelBucket,
                         IncreasePerMinute = gameStateUpdateInput.User.Guild.CurrentRateLimitIncreasePerMinutePerPlayer
-                    }
-                };
+                    };
+                }
 
                 if (gameStateUpdateInput.Guilds != null)
                 {
                     var scores = GuildsToScores(gameStateUpdateInput.Guilds);
                     incrementalResponse.Scores.Add(scores);
+                }
+
+                if (gameStateUpdateInput.PowerUps != null)
+                {
+                    var grpcPowerUps = ConvertPowerupsToGrpc(gameStateUpdateInput.PowerUps);
+                    incrementalResponse.PowerUps.Add(grpcPowerUps);
                 }
 
                 await responseStream.WriteAsync(incrementalResponse);
@@ -76,5 +84,21 @@ public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) 
     {
         bool success = Enum.TryParse(guildName.ToString(), false, out PixelGuild result);
         return success ? result : PixelGuild.Nobody;
+    }
+
+    private static List<MiscStateUpdateResponse.Types.PowerUps> ConvertPowerupsToGrpc(List<PowerUp> powerUps)
+    {
+        List<MiscStateUpdateResponse.Types.PowerUps> grpcPowerUps = [];
+        foreach (var powerUp in powerUps)
+        {
+            MiscStateUpdateResponse.Types.PowerUps grpcPowerUp = new()
+            {
+                PowerUpId = (uint)powerUp.PowerId,
+                Name = powerUp.Name,
+                Description = powerUp.Description
+            };
+            grpcPowerUps.Add(grpcPowerUp);
+        }
+        return grpcPowerUps;
     }
 }

@@ -49,7 +49,7 @@ public class UpdateCumulativeScoresService(
                 {
                     User = user,
                     MaximumPixelBucket = gameOptions.MaximumPixelBucket,
-                    Guilds = guilds
+                    Guilds = guilds,
                 };
                 miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
             }
