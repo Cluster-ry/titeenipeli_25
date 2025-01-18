@@ -10,7 +10,7 @@ const TopOverlay: FC<PropsWithChildren> = () => {
             <Scores />
             <RatelimitMeter />
             <div className="top-overlay__right">
-              <HamburgerMenu />
+                <HamburgerMenu />
             </div>
         </div>
     );

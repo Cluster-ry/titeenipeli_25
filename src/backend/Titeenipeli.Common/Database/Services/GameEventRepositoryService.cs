@@ -3,21 +3,21 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 
 namespace Titeenipeli.Common.Database.Services;
 
-public class GameEventRepositoryService(ApiDbContext dbContext) : RepositoryService(dbContext), IGameEventRepositoryService
+public class GameEventRepositoryService(ApiDbContext dbContext)
+    : EntityRepositoryService(dbContext), IGameEventRepositoryService
 {
     public GameEvent? GetById(int id)
     {
-        return _dbContext.GameEvents.FirstOrDefault(gameEvent => gameEvent.Id == id);
+        return DbContext.GameEvents.FirstOrDefault(gameEvent => gameEvent.Id == id);
     }
 
     public List<GameEvent> GetAll()
     {
-        return _dbContext.GameEvents.ToList();
+        return DbContext.GameEvents.ToList();
     }
 
     public void Add(GameEvent gameEvent)
     {
-        _dbContext.GameEvents.Add(gameEvent);
-        _dbContext.SaveChanges();
+        DbContext.GameEvents.Add(gameEvent);
     }
 }

@@ -8,7 +8,7 @@ const GameOverlay: FC = () => {
 
     return (
         <div className="overlay">
-            <TopOverlay/>
+            <TopOverlay />
             <BottomOverlay />
             <Notification />
         </div>

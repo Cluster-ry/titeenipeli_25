@@ -7,6 +7,7 @@ using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
 using Titeenipeli.Services;
+using PowerUp = Titeenipeli.Common.Database.Schema.PowerUp;
 
 namespace Titeenipeli.Controllers;
 
@@ -29,7 +30,7 @@ public class CtfController : ControllerBase
 
     [HttpPost("ctf")]
     [Authorize]
-    public IActionResult PostCtf([FromBody] PostCtfInput ctfInput)
+    public async Task<IActionResult> PostCtf([FromBody] PostCtfInput ctfInput)
     {
         var ctfFlag = _ctfFlagRepositoryService.GetByToken(ctfInput.Token);
 
@@ -53,6 +54,7 @@ public class CtfController : ControllerBase
 
         guild.ActiveCtfFlags.Add(ctfFlag);
         _guildRepositoryService.Update(guild);
+        await _guildRepositoryService.SaveChangesAsync();
 
         if (ctfFlag.Powerup is null)
         {
@@ -60,7 +62,7 @@ public class CtfController : ControllerBase
         }
         else
         {
-            HandleUserPowerUp(user, ctfFlag.Powerup);
+            await HandleUserPowerUp(user, ctfFlag.Powerup);
         }
 
         return Ok();
@@ -72,9 +74,10 @@ public class CtfController : ControllerBase
         //TODO run powerup code
     }
 
-    private void HandleUserPowerUp(User user, PowerUp powerUp)
+    private async Task HandleUserPowerUp(User user, PowerUp powerUp)
     {
         user.PowerUps.Add(powerUp);
         _userRepositoryService.Update(user);
+        await _userRepositoryService.SaveChangesAsync();
     }
 }

@@ -199,7 +199,7 @@ public class MapUpdateProcessor
         bool isNewSpawn = coordinate.X == newPixel.User?.SpawnX && coordinate.Y == newPixel.User?.SpawnY;
         PixelTypes type = isNewSpawn ? PixelTypes.Spawn : PixelTypes.Normal;
         PixelGuild guild = ConvertGuildToPixelGuild(newPixel.User?.Guild?.Name);
-        PixelUser owner = new PixelUser() { Id = _user?.Id ?? 0 };
+        PixelUser owner = new() { Id = newPixel.User?.Id ?? 0 };
 
         IncrementalMapUpdate mapUpdate = new()
         {

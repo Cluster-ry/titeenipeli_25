@@ -1,13 +1,22 @@
+import { useCallback, useState } from "react";
+import PowerUp from "../../../models/PowerUp";
 import "./overlay.css";
-import special_effect from "../../../assets/special_effect.png";
+import { SpecialEffect } from "./specialEffect";
 
 const BottomOverlay = () => {
+    const [selected, setSelected] = useState<number|null>(null);
+    // Placeholders
+    const specialEffects: PowerUp[] = [
+        {Id: 1, Name: "Titeenikirves", Description: "Jeejee"},
+        {Id: 2, Name: "Pyssy saatana", Description: "Juujuu"},
+        {Id: 3, Name: "Taktinen anustappi", Description: "Jiijee"},
+    ];
+    const onClick = useCallback((id: number) => {
+        setSelected(prev => prev !== id ? id : null);
+    }, [setSelected])
     return (
         <div className="bottom-overlay bottom-gradient">
-            <div className="bottom-overlay__button">
-                <img className="bottom-overlay__button__icon" src={special_effect} />
-            </div>
-            <span className="bottom-overlay__button__text">Special Effect</span>
+            {specialEffects.map(effect => <SpecialEffect key={effect.Id} {...effect} selected={selected} onClick={onClick} />)}
         </div>
     );
 };

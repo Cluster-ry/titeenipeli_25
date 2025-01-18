@@ -7,6 +7,7 @@ using Titeenipeli.Common.Models;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Common.Results.CustomStatusCodes;
 using Titeenipeli.Extensions;
+using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
@@ -22,23 +23,24 @@ public class MapController : ControllerBase
 
     private readonly GameOptions _gameOptions;
 
-    private readonly IMapRepositoryService _mapRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
-    private readonly IMapUpdaterService _mapUpdaterService;
     private readonly IBackgroundGraphicsService _backgroundGraphicsService;
+
+    private readonly IMapUpdaterService _mapUpdaterService;
+    private readonly IMapProvider _mapProvider;
 
     private readonly IJwtService _jwtService;
 
     public MapController(GameOptions gameOptions,
                          IJwtService jwtService,
                          IUserRepositoryService userRepositoryService,
-                         IMapRepositoryService mapRepositoryService,
+                         IMapProvider mapProvider,
                          IMapUpdaterService mapUpdaterService,
                          IBackgroundGraphicsService backgroundGraphicsService)
     {
         _gameOptions = gameOptions;
         _userRepositoryService = userRepositoryService;
-        _mapRepositoryService = mapRepositoryService;
+        _mapProvider = mapProvider;
         _jwtService = jwtService;
         _mapUpdaterService = mapUpdaterService;
         _backgroundGraphicsService = backgroundGraphicsService;
@@ -49,20 +51,20 @@ public class MapController : ControllerBase
     {
         var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
 
-        User[] users = _userRepositoryService.GetAll().ToArray();
-        Pixel[] pixels = _mapRepositoryService.GetAll().ToArray();
+        var users = _userRepositoryService.GetAll().ToArray();
+        var pixels = _mapProvider.GetAll().ToArray();
 
         // +2 to account for the borders
         int width = _gameOptions.Width + 2 * BorderWidth;
         int height = _gameOptions.Height + 2 * BorderWidth;
 
-        Map map = ConstructMap(pixels, width, height, user);
+        var map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
         map = CalculateFogOfWar(map, user.Id);
         InjectBackgroundGraphics(map);
-        Map inversedMap = InverseMap(map);
+        var inversedMap = InverseMap(map);
 
-        GetPixelsResult result = new GetPixelsResult
+        var result = new GetPixelsResult
         {
             PlayerSpawn = new Coordinate
             {
@@ -85,15 +87,15 @@ public class MapController : ControllerBase
             return new TooManyRequestsResult("Try again later", TimeSpan.FromMinutes(1));
         }
 
-        Coordinate globalCoordinate = new Coordinate
+        var globalCoordinate = new Coordinate
         {
             X = user.SpawnX + pixelsInput.X,
             Y = user.SpawnY + pixelsInput.Y
         };
 
-        if (!IsValidPlacement(globalCoordinate, user))
+        if (!await _mapUpdaterService.PlacePixel(_userRepositoryService, globalCoordinate, user))
         {
-            ErrorResult error = new ErrorResult
+            var error = new ErrorResult
             {
                 Title = "Invalid pixel placement",
                 Code = ErrorCode.InvalidPixelPlacement,
@@ -103,32 +105,9 @@ public class MapController : ControllerBase
             return BadRequest(error);
         }
 
-        Pixel? pixelToUpdate = _mapRepositoryService.GetByCoordinate(globalCoordinate);
-
-        if (pixelToUpdate == null)
-        {
-            return BadRequest();
-        }
-
-        if (pixelToUpdate.User != null &&
-            pixelToUpdate.User.SpawnX == globalCoordinate.X &&
-            pixelToUpdate.User.SpawnY == globalCoordinate.Y)
-        {
-            ErrorResult error = new ErrorResult
-            {
-                Title = "Pixel is a spawn point",
-                Code = ErrorCode.PixelIsSpawnPoint,
-                Description = "Spawn pixels cannot be captured"
-            };
-
-            return BadRequest(error);
-        }
-
-
-        await _mapUpdaterService.PlacePixel(_mapRepositoryService, _userRepositoryService, globalCoordinate, user);
-
         user.PixelBucket--;
         _userRepositoryService.Update(user);
+        await _userRepositoryService.SaveChangesAsync();
 
         return Ok();
     }
@@ -291,7 +270,7 @@ public class MapController : ControllerBase
         {
             for (int y = 0; y < map.Height; y++)
             {
-                var backgroundGraphic = _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(x - 1, y - 1));
+                var backgroundGraphic = _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(map.MinViewableX + x, map.MinViewableY + y));
                 if (backgroundGraphic == null)
                 {
                     continue;
@@ -318,18 +297,5 @@ public class MapController : ControllerBase
             }
         }
         return inversedMap;
-    }
-
-    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
-    {
-        // Take neighboring pixels for the pixel the user is trying to set,
-        // but remove cornering pixels and only return pixels belonging to
-        // the user
-        return (from pixel in _mapRepositoryService.GetAll()
-                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
-                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      pixel.User == user
-                select pixel).Any();
     }
 }

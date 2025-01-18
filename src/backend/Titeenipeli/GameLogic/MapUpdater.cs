@@ -44,15 +44,19 @@ public class MapUpdater
         // Construct a set of all nodes reachable from outside node (index 0)
         var nonHangingNodeIndexes = _GetNonSurroundedNodes(nodes, justAddedNode);
 
-        foreach (var nodeIndex in nodes.Keys.Where(nodeIndex => !nonHangingNodeIndexes.Contains(nodeIndex)))
+        List<MapChange> changedPixels = _CutNodesWithoutSpawn(map, nodes);
+        allChangedPixels = [.. allChangedPixels, .. changedPixels];
+
+        // Fill is applied only for nodes owned by nobody.
+        foreach (var nodeIndex in nodes.Keys.Where(
+            nodeIndex => !nonHangingNodeIndexes.Contains(nodeIndex) &&
+            (nodes[nodeIndex].Guild == null || nodes[nodeIndex].Guild == GuildName.Nobody)))
         {
             List<MapChange> changedFillPixels = _FillNode(map, nodes[nodeIndex], placingUser);
             allChangedPixels = [.. allChangedPixels, .. changedFillPixels];
             nodes.Remove(nodeIndex);
         }
 
-        List<MapChange> changedPixels = _CutNodesWithoutSpawn(map, nodes);
-        allChangedPixels = [.. allChangedPixels, .. changedPixels];
         _cachedNodes = nodes;
 
         return allChangedPixels;
@@ -259,6 +263,7 @@ public class MapUpdater
         List<MapChange> allChangedPixels = [];
         foreach (var node in nodes.Values.Where(node => node is { HasSpawn: false, Guild: not null }))
         {
+            node.Guild = null;
             List<MapChange> changedPixels = _FillNode(map, node, null);
             allChangedPixels = [.. allChangedPixels, .. changedPixels];
         }

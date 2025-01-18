@@ -14,6 +14,7 @@ using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Services;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Helpers;
+using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
@@ -158,9 +159,6 @@ public static class Program
             };
         });
 
-        builder.Services.AddSingleton<IMapUpdaterService, MapUpdaterService>();
-        builder.Services.AddSingleton<IBackgroundGraphicsService, BackgroundGraphicsService>();
-
         builder.Services.AddControllers()
                .AddNewtonsoftJson(options =>
                {
@@ -175,12 +173,18 @@ public static class Program
         AddBackgroundServices(builder.Services);
         AddRepositoryServices(builder.Services);
 
+        builder.Services.AddSingleton<DatabaseWriterService>();
+        builder.Services.AddSingleton<IMapProvider, MapProvider>();
+        builder.Services.AddSingleton<IMapUpdaterService, MapUpdaterService>();
+        builder.Services.AddSingleton<IBackgroundGraphicsService, BackgroundGraphicsService>();
+
         var app = builder.Build();
 
         using (var scope = app.Services.CreateScope())
         {
             var services = scope.ServiceProvider;
             var dbContext = services.GetRequiredService<ApiDbContext>();
+            var mapProvider = services.GetRequiredService<IMapProvider>();
 
 
             if (app.Environment.IsDevelopment())
@@ -193,6 +197,11 @@ public static class Program
             {
                 DbFiller.Initialize(dbContext, gameOptions);
             }
+
+            mapProvider.Initialize(dbContext.Map.Select(pixel => pixel)
+                                            .Include(pixel => pixel.User)
+                                            .ThenInclude(user => user!.Guild)
+                                            .ToList());
         }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
