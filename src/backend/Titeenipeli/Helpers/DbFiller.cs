@@ -75,10 +75,11 @@ public static class DbFiller
         {
             foreach (var powerUp in Enum.GetValues<Powerups>())
             {
-                dbContext.PowerUps.Add(new PowerUp { 
+                dbContext.PowerUps.Add(new PowerUp
+                {
                     PowerId = (int)powerUp,
                     Name = powerUp.ToString(),
-                    Description = PowerController.GetDescription(powerUp) 
+                    Description = PowerController.GetDescription(powerUp)
                 });
             }
         }
