@@ -27,4 +27,5 @@ public sealed class Score
 public sealed class PowerUp
 {
     public required string Name { get; init; }
+    public required string Description { get; init; }
 }
