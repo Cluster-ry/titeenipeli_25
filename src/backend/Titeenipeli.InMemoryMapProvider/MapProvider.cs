@@ -5,7 +5,7 @@ namespace Titeenipeli.InMemoryMapProvider;
 
 public class MapProvider : IMapProvider
 {
-    private List<Pixel>? _map;
+    private List<Pixel> _map = [];
     private readonly DatabaseWriterService _databaseWriterService;
 
     public MapProvider(DatabaseWriterService databaseWriterService)
@@ -13,18 +13,13 @@ public class MapProvider : IMapProvider
         _databaseWriterService = databaseWriterService;
     }
 
-    public void Initialize(List<Pixel>? pixels)
+    public void Initialize(List<Pixel> pixels)
     {
         _map = pixels;
     }
 
     public Pixel? GetByCoordinate(Coordinate pixelCoordinate)
     {
-        if (_map == null)
-        {
-            throw new InvalidOperationException("Map is not initialized");
-        }
-
         lock (_map)
         {
             return _map.FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
@@ -33,11 +28,6 @@ public class MapProvider : IMapProvider
 
     public List<Pixel> GetAll()
     {
-        if (_map == null)
-        {
-            throw new InvalidOperationException("Map is not initialized");
-        }
-
         lock (_map)
         {
             return _map.ToList();
@@ -46,11 +36,6 @@ public class MapProvider : IMapProvider
 
     public void Update(Pixel pixel)
     {
-        if (_map == null)
-        {
-            throw new InvalidOperationException("Map is not initialized");
-        }
-
         Pixel? pixelToUpdate;
 
         lock (_map)

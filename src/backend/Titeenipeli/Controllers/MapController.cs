@@ -332,7 +332,7 @@ public class MapController : ControllerBase
                 where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
                       Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
                       Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      pixel.User != user
+                      pixel.User?.Id == user.Id
                 select pixel).Any();
     }
 }
