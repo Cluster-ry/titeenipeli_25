@@ -150,6 +150,7 @@ public class MapUpdaterService(
             };
 
             mapRepositoryService.Update(newPixel);
+            mapRepositoryService.SaveChanges();
         }
 
         var gameEvent = new GameEvent
@@ -161,6 +162,7 @@ public class MapUpdaterService(
         {
             var gameEventRepositoryService = scope.ServiceProvider.GetRequiredService<IGameEventRepositoryService>();
             gameEventRepositoryService.Add(gameEvent);
+            gameEventRepositoryService.SaveChanges();
         }
     }
 

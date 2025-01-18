@@ -5,37 +5,36 @@ using Titeenipeli.Common.Models;
 
 namespace Titeenipeli.Common.Database.Services;
 
-public class MapRepositoryService(ApiDbContext dbContext) : RepositoryService(dbContext), IMapRepositoryService
+public class MapRepositoryService(ApiDbContext dbContext) : EntityRepositoryService(dbContext), IMapRepositoryService
 {
     public Pixel? GetByCoordinate(Coordinate pixelCoordinate)
     {
-        return _dbContext.Map.Include(pixel => pixel.User)
-                         .ThenInclude(pixelOwner => pixelOwner!.Guild)
-                         .FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
+        return DbContext.Map.Include(pixel => pixel.User)
+                        .ThenInclude(pixelOwner => pixelOwner!.Guild)
+                        .FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
     }
 
     public Pixel? GetById(int id)
     {
-        return _dbContext.Map.FirstOrDefault(pixel => pixel.Id == id);
+        return DbContext.Map.FirstOrDefault(pixel => pixel.Id == id);
     }
 
     public List<Pixel> GetAll()
     {
-        return _dbContext.Map
-                         .Include(pixel => pixel.User)
-                         .ThenInclude(pixelOwner => pixelOwner!.Guild)
-                         .OrderBy(pixel => pixel.Y).ToList();
+        return DbContext.Map
+                        .Include(pixel => pixel.User)
+                        .ThenInclude(pixelOwner => pixelOwner!.Guild)
+                        .OrderBy(pixel => pixel.Y).ToList();
     }
 
     public void Add(Pixel pixel)
     {
-        _dbContext.Map.Add(pixel);
-        _dbContext.SaveChanges();
+        DbContext.Map.Add(pixel);
     }
 
     public void Update(Pixel pixel)
     {
-        Pixel? existingPixel = GetByCoordinate(new Coordinate
+        var existingPixel = GetByCoordinate(new Coordinate
         {
             X = pixel.X,
             Y = pixel.Y
@@ -47,19 +46,18 @@ public class MapRepositoryService(ApiDbContext dbContext) : RepositoryService(db
         }
 
         existingPixel.User = pixel.User;
-        _dbContext.Update(existingPixel);
-        _dbContext.SaveChanges();
+        DbContext.Update(existingPixel);
     }
 
     public bool IsValid(Coordinate pixelCoordinate)
     {
-        Pixel? pixel = GetByCoordinate(pixelCoordinate);
+        var pixel = GetByCoordinate(pixelCoordinate);
         return pixel != null;
     }
 
     public bool IsSpawn(Coordinate pixelCoordinate)
     {
-        Pixel? pixel = GetByCoordinate(pixelCoordinate);
+        var pixel = GetByCoordinate(pixelCoordinate);
         return !(pixel?.User == null || (pixel.User.SpawnX != pixel.X && pixel.User.SpawnY != pixel.Y));
     }
 }

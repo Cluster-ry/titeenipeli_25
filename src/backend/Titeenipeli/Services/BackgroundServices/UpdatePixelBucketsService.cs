@@ -1,4 +1,3 @@
-using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Grpc.ChangeEntities;
@@ -26,20 +25,21 @@ public class UpdatePixelBucketsService(
         await Task.CompletedTask;
     }
 
-    private void UpdateGuildBuckets(GuildName guildName)
+    private async Task UpdateGuildBuckets(GuildName guildName)
     {
-        User[] guildUsers = userRepositoryService.GetByGuild(guildName);
+        var guildUsers = userRepositoryService.GetByGuild(guildName);
         if (guildUsers.Length == 0)
         {
             return;
         }
 
         var guild = guildUsers[0].Guild;
-        float guildPerPlayerIncrease = gameOptions.PixelsPerMinutePerGuild / guildUsers.Length;
+        float guildPerPlayerIncrease = (float)gameOptions.PixelsPerMinutePerGuild / guildUsers.Length;
         guild.CurrentRateLimitIncreasePerMinutePerPlayer = guildPerPlayerIncrease;
         guildRepositoryService.Update(guild);
+        await guildRepositoryService.SaveChangesAsync();
 
-        foreach (User user in guildUsers)
+        foreach (var user in guildUsers)
         {
             float newBucket = user.PixelBucket + guildPerPlayerIncrease;
             if (newBucket < gameOptions.MaximumPixelBucket)
@@ -51,6 +51,7 @@ public class UpdatePixelBucketsService(
                 user.PixelBucket = gameOptions.MaximumPixelBucket;
             }
             userRepositoryService.Update(user);
+            await userRepositoryService.SaveChangesAsync();
 
             GrpcMiscGameStateUpdateInput stateUpdate = new()
             {

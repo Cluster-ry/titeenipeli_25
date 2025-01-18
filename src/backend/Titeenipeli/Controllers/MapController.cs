@@ -49,20 +49,20 @@ public class MapController : ControllerBase
     {
         var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
 
-        User[] users = _userRepositoryService.GetAll().ToArray();
-        Pixel[] pixels = _mapRepositoryService.GetAll().ToArray();
+        var users = _userRepositoryService.GetAll().ToArray();
+        var pixels = _mapRepositoryService.GetAll().ToArray();
 
         // +2 to account for the borders
         int width = _gameOptions.Width + 2 * BorderWidth;
         int height = _gameOptions.Height + 2 * BorderWidth;
 
-        Map map = ConstructMap(pixels, width, height, user);
+        var map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
         map = CalculateFogOfWar(map, user.Id);
         InjectBackgroundGraphics(map);
-        Map inversedMap = InverseMap(map);
+        var inversedMap = InverseMap(map);
 
-        GetPixelsResult result = new GetPixelsResult
+        var result = new GetPixelsResult
         {
             PlayerSpawn = new Coordinate
             {
@@ -85,7 +85,7 @@ public class MapController : ControllerBase
             return new TooManyRequestsResult("Try again later", TimeSpan.FromMinutes(1));
         }
 
-        Coordinate globalCoordinate = new Coordinate
+        var globalCoordinate = new Coordinate
         {
             X = user.SpawnX + pixelsInput.X,
             Y = user.SpawnY + pixelsInput.Y
@@ -93,7 +93,7 @@ public class MapController : ControllerBase
 
         if (!IsValidPlacement(globalCoordinate, user))
         {
-            ErrorResult error = new ErrorResult
+            var error = new ErrorResult
             {
                 Title = "Invalid pixel placement",
                 Code = ErrorCode.InvalidPixelPlacement,
@@ -103,7 +103,7 @@ public class MapController : ControllerBase
             return BadRequest(error);
         }
 
-        Pixel? pixelToUpdate = _mapRepositoryService.GetByCoordinate(globalCoordinate);
+        var pixelToUpdate = _mapRepositoryService.GetByCoordinate(globalCoordinate);
 
         if (pixelToUpdate == null)
         {
@@ -114,7 +114,7 @@ public class MapController : ControllerBase
             pixelToUpdate.User.SpawnX == globalCoordinate.X &&
             pixelToUpdate.User.SpawnY == globalCoordinate.Y)
         {
-            ErrorResult error = new ErrorResult
+            var error = new ErrorResult
             {
                 Title = "Pixel is a spawn point",
                 Code = ErrorCode.PixelIsSpawnPoint,
@@ -129,6 +129,7 @@ public class MapController : ControllerBase
 
         user.PixelBucket--;
         _userRepositoryService.Update(user);
+        await _userRepositoryService.SaveChangesAsync();
 
         return Ok();
     }

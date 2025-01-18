@@ -22,8 +22,8 @@ public sealed class PowerController(
 ) : ControllerBase
 {
     [HttpPost("activate")]
-    [Authorize(Policy = "MustHaveGuild")]
-    public IActionResult ActivatePower([FromBody] PowerInput body)
+    [Authorize]
+    public async Task<IActionResult> ActivatePower([FromBody] PowerInput body)
     {
         var user = HttpContext.GetUser(jwtService, userRepositoryService);
 
@@ -49,6 +49,7 @@ public sealed class PowerController(
 
         user.PowerUps.Remove(userPower);
         userRepositoryService.Update(user);
+        await userRepositoryService.SaveChangesAsync();
         return result;
     }
 

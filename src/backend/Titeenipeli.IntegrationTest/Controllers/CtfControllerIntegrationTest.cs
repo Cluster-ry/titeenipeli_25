@@ -1,10 +1,12 @@
-using ICSharpCode.SharpZipLib.Core;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services;
+using Titeenipeli.Common.Enums;
 using Titeenipeli.Controllers;
 using Titeenipeli.Inputs;
+using Titeenipeli.Options;
 using Titeenipeli.Services;
 
 namespace Titeenipeli.IntegrationTest.Controllers;
@@ -26,26 +28,29 @@ public class CtfControllerIntegrationTest : BaseFixture
     [TestCase(null, 400, TestName = "Should return failure code for null flag")]
     public void Test1(string token, int statusCode)
     {
-        CtfFlagRepositoryService ctfFlagRepositoryService = new CtfFlagRepositoryService(_dbContext);
-        UserRepositoryService userRepositoryService = new UserRepositoryService(_dbContext);
-        GuildRepositoryService guildRepositoryService = new GuildRepositoryService(_dbContext);
-        JwtService jwtService = new JwtService(new());
+        var ctfFlagRepositoryService = new CtfFlagRepositoryService(_dbContext);
+        var userRepositoryService = new UserRepositoryService(_dbContext);
+        var guildRepositoryService = new GuildRepositoryService(_dbContext);
+        var jwtService = new JwtService(new JwtOptions());
 
         var guild = GenerateGuild();
         var user = GenerateUser(guild);
 
         guildRepositoryService.Add(guild);
+        guildRepositoryService.SaveChanges();
         userRepositoryService.Add(user);
+        userRepositoryService.SaveChanges();
         jwtService.CreateJwtClaim(user);
 
         ctfFlagRepositoryService.Add(new CtfFlag { Token = "#TEST_FLAG" });
+        ctfFlagRepositoryService.SaveChanges();
 
         var jwtClaim = jwtService.CreateJwtClaim(user);
         var httpcontext = new DefaultHttpContext();
         httpcontext.Items[jwtService.GetJwtClaimName()] = jwtClaim;
 
         CtfController ctfController = new CtfController(ctfFlagRepositoryService, userRepositoryService, guildRepositoryService, jwtService);
-        ctfController.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext
+        ctfController.ControllerContext = new ControllerContext
         {
             HttpContext = httpcontext
         };
@@ -62,7 +67,7 @@ public class CtfControllerIntegrationTest : BaseFixture
     {
         return new Guild
         {
-            Name = Common.Enums.GuildName.Cluster,
+            Name = GuildName.Cluster,
         };
     }
 
