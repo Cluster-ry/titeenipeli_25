@@ -7,6 +7,7 @@ using Titeenipeli.Common.Models;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Common.Results.CustomStatusCodes;
 using Titeenipeli.Extensions;
+using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
@@ -22,23 +23,24 @@ public class MapController : ControllerBase
 
     private readonly GameOptions _gameOptions;
 
-    private readonly IMapRepositoryService _mapRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
-    private readonly IMapUpdaterService _mapUpdaterService;
     private readonly IBackgroundGraphicsService _backgroundGraphicsService;
+
+    private readonly IMapUpdaterService _mapUpdaterService;
+    private readonly IMapProvider _mapProvider;
 
     private readonly IJwtService _jwtService;
 
     public MapController(GameOptions gameOptions,
                          IJwtService jwtService,
                          IUserRepositoryService userRepositoryService,
-                         IMapRepositoryService mapRepositoryService,
+                         IMapProvider mapProvider,
                          IMapUpdaterService mapUpdaterService,
                          IBackgroundGraphicsService backgroundGraphicsService)
     {
         _gameOptions = gameOptions;
         _userRepositoryService = userRepositoryService;
-        _mapRepositoryService = mapRepositoryService;
+        _mapProvider = mapProvider;
         _jwtService = jwtService;
         _mapUpdaterService = mapUpdaterService;
         _backgroundGraphicsService = backgroundGraphicsService;
@@ -50,7 +52,7 @@ public class MapController : ControllerBase
         var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
 
         var users = _userRepositoryService.GetAll().ToArray();
-        var pixels = _mapRepositoryService.GetAll().ToArray();
+        var pixels = _mapProvider.GetAll().ToArray();
 
         // +2 to account for the borders
         int width = _gameOptions.Width + 2 * BorderWidth;
@@ -103,7 +105,7 @@ public class MapController : ControllerBase
             return BadRequest(error);
         }
 
-        var pixelToUpdate = _mapRepositoryService.GetByCoordinate(globalCoordinate);
+        var pixelToUpdate = _mapProvider.GetByCoordinate(globalCoordinate);
 
         if (pixelToUpdate == null)
         {
@@ -125,7 +127,7 @@ public class MapController : ControllerBase
         }
 
 
-        await _mapUpdaterService.PlacePixel(_mapRepositoryService, _userRepositoryService, globalCoordinate, user);
+        await _mapUpdaterService.PlacePixel(_userRepositoryService, globalCoordinate, user);
 
         user.PixelBucket--;
         _userRepositoryService.Update(user);
@@ -326,11 +328,11 @@ public class MapController : ControllerBase
         // Take neighboring pixels for the pixel the user is trying to set,
         // but remove cornering pixels and only return pixels belonging to
         // the user
-        return (from pixel in _mapRepositoryService.GetAll()
+        return (from pixel in _mapProvider.GetAll()
                 where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
                       Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
                       Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      pixel.User == user
+                      pixel.User?.Id == user.Id
                 select pixel).Any();
     }
 }
