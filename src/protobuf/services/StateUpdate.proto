@@ -32,6 +32,7 @@ message MiscStateUpdateResponse {
   PixelBucket pixelBucket = 1;
   repeated Scores scores = 2;
   repeated PowerUps powerUps = 3;
+  Notification notification = 4;
 
   message PixelBucket {
     uint32 amount = 1;
@@ -48,6 +49,10 @@ message MiscStateUpdateResponse {
     uint32 powerUpId = 1;
     string name = 2;
     string description = 3;
+  }
+  
+  message Notification {
+    string message = 1;
   }
 }
 

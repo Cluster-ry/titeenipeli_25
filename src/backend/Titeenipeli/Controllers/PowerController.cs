@@ -5,9 +5,11 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Extensions;
+using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
+using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Controllers;
 
@@ -18,6 +20,7 @@ public sealed class PowerController(
     IUserRepositoryService userRepositoryService,
     IMapUpdaterService mapUpdaterService,
     IJwtService jwtService,
+    IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService,
     GameOptions gameOptions
 ) : ControllerBase
 {
@@ -50,6 +53,7 @@ public sealed class PowerController(
         user.PowerUps.Remove(userPower);
         userRepositoryService.Update(user);
         await userRepositoryService.SaveChangesAsync();
+        SendPowerupMessage(user, powerUp);
         return result;
     }
 
@@ -102,7 +106,9 @@ public sealed class PowerController(
 
                 break;
         }
-
+        
+        
+        
         return Ok();
     }
 
@@ -113,6 +119,22 @@ public sealed class PowerController(
             Powerups.Titeenikirves => HandleTiteenikirves,
             _ => null
         };
+    }
+    
+    private void SendPowerupMessage(User user, Powerups powerup)
+    {
+        var message = $"Holy moly, {user.Guild.Name} just used {powerup} powerup!";
+
+        foreach (var sendUser in userRepositoryService.GetAll())
+        {
+            GrpcMiscGameStateUpdateInput stateUpdate = new()
+            {
+                User = sendUser,
+                Message = message
+            };
+    
+            miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);    
+        }
     }
 
     public static string GetDescription(Powerups powerup) => powerup switch
