@@ -183,12 +183,14 @@ public static class Program
             var dbContext = services.GetRequiredService<ApiDbContext>();
 
 
-            if (app.Environment.IsDevelopment()) {
+            if (app.Environment.IsDevelopment())
+            {
                 DbFiller.Clear(dbContext);
             }
 
             var newDatabase = dbContext.Database.EnsureCreated();
-            if (newDatabase) {
+            if (newDatabase)
+            {
                 DbFiller.Initialize(dbContext, gameOptions);
             }
         }
