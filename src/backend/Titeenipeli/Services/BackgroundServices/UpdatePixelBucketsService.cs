@@ -19,7 +19,7 @@ public class UpdatePixelBucketsService(
     {
         foreach (GuildName guildName in Enum.GetValues(typeof(GuildName)))
         {
-            UpdateGuildBuckets(guildName);
+            await UpdateGuildBuckets(guildName);
         }
 
         await Task.CompletedTask;

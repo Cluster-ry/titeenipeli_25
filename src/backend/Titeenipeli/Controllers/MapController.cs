@@ -93,7 +93,7 @@ public class MapController : ControllerBase
             Y = user.SpawnY + pixelsInput.Y
         };
 
-        if (!IsValidPlacement(globalCoordinate, user))
+        if (!await _mapUpdaterService.PlacePixel(_userRepositoryService, globalCoordinate, user))
         {
             var error = new ErrorResult
             {
@@ -104,30 +104,6 @@ public class MapController : ControllerBase
 
             return BadRequest(error);
         }
-
-        var pixelToUpdate = _mapProvider.GetByCoordinate(globalCoordinate);
-
-        if (pixelToUpdate == null)
-        {
-            return BadRequest();
-        }
-
-        if (pixelToUpdate.User != null &&
-            pixelToUpdate.User.SpawnX == globalCoordinate.X &&
-            pixelToUpdate.User.SpawnY == globalCoordinate.Y)
-        {
-            var error = new ErrorResult
-            {
-                Title = "Pixel is a spawn point",
-                Code = ErrorCode.PixelIsSpawnPoint,
-                Description = "Spawn pixels cannot be captured"
-            };
-
-            return BadRequest(error);
-        }
-
-
-        await _mapUpdaterService.PlacePixel(_userRepositoryService, globalCoordinate, user);
 
         user.PixelBucket--;
         _userRepositoryService.Update(user);
@@ -321,18 +297,5 @@ public class MapController : ControllerBase
             }
         }
         return inversedMap;
-    }
-
-    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
-    {
-        // Take neighboring pixels for the pixel the user is trying to set,
-        // but remove cornering pixels and only return pixels belonging to
-        // the user
-        return (from pixel in _mapProvider.GetAll()
-                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
-                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      pixel.User?.Id == user.Id
-                select pixel).Any();
     }
 }
