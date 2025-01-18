@@ -22,9 +22,9 @@ public static class DbFiller
                 Token = "#TITEENIKIRVES",
                 Powerup = new PowerUp
                 {
-                    PowerId = (int)Powerups.Titeenikirves,
-                    Name = Powerups.Titeenikirves.ToString(),
-                    Description = PowerController.GetDescription(Powerups.Titeenikirves)
+                    PowerId = (int)PowerUps.Titeenikirves,
+                    Name = PowerUps.Titeenikirves.ToString(),
+                    Description = PowerController.GetDescription(PowerUps.Titeenikirves)
                 },
             });
 
@@ -90,7 +90,7 @@ public static class DbFiller
 
         if (!dbContext.PowerUps.Any())
         {
-            foreach (var powerUp in Enum.GetValues<Powerups>())
+            foreach (var powerUp in Enum.GetValues<PowerUps>())
             {
                 dbContext.PowerUps.Add(new PowerUp
                 {
