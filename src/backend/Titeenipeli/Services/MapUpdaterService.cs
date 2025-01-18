@@ -32,7 +32,10 @@ public class MapUpdaterService(
         {
             lock (_mapUpdater)
             {
-                if (!IsValidPlacement(pixelCoordinate, newOwner)) return false;
+                if (!IsValidPlacement(pixelCoordinate, newOwner) || mapProvider.IsSpawn(pixelCoordinate))
+                {
+                    return false;
+                }
 
                 var map = GetMap(userRepositoryService);
                 var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);

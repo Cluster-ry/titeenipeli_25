@@ -93,28 +93,6 @@ public class MapController : ControllerBase
             Y = user.SpawnY + pixelsInput.Y
         };
 
-        var pixelToUpdate = _mapProvider.GetByCoordinate(globalCoordinate);
-
-        if (pixelToUpdate == null)
-        {
-            return BadRequest();
-        }
-
-        if (pixelToUpdate.User != null &&
-            pixelToUpdate.User.SpawnX == globalCoordinate.X &&
-            pixelToUpdate.User.SpawnY == globalCoordinate.Y)
-        {
-            var error = new ErrorResult
-            {
-                Title = "Pixel is a spawn point",
-                Code = ErrorCode.PixelIsSpawnPoint,
-                Description = "Spawn pixels cannot be captured"
-            };
-
-            return BadRequest(error);
-        }
-
-
         if (!await _mapUpdaterService.PlacePixel(_userRepositoryService, globalCoordinate, user))
         {
             var error = new ErrorResult
