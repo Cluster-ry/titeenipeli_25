@@ -13,5 +13,5 @@ export const useCtfStore = create<CtfModelStore>()((set) => ({
         set((state: CtfModelStore) => ({
             ...state,
             ctfModelOpen: newOpenState,
-        }))
+        })),
 }));

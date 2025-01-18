@@ -1,7 +1,7 @@
 import "./hamburger.css";
 import { useCtfStore } from "../../stores/ctfModalStore";
 const HamburgerMenuButton = () => {
-    const {setCtfModelOpenState} = useCtfStore();
+    const { setCtfModelOpenState } = useCtfStore();
 
     return (
         <div className="hamburger-button-wrapper">
