@@ -124,7 +124,7 @@ public sealed class PowerController(
 
     public static string GetDescription(Powerups powerup) => powerup switch
     {
-        Powerups.Titeenikirves => "Ota valta omiin käsiisi ja halkaise taistelukenttä kahtia mahtavalla 3 pikseliä leveällä titeenikirveellä",
+        Powerups.Titeenikirves => "Take might into your own hands and split the battlefield in half with a mighty 3 pixel wide titeenikirves.",
         _ => throw new NotSupportedException($"{nameof(Powerups)} with value {powerup.ToString()} = {(int)powerup} is not supported.")
     };
 }
