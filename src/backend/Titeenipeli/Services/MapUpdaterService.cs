@@ -48,6 +48,41 @@ public class MapUpdaterService(
         });
     }
 
+    public Task<User> PlaceSpawn(IUserRepositoryService userRepositoryService, User user)
+    {
+        return Task.Run(() =>
+        {
+            var spawnGeneratorService = scopeFactory.CreateScope()
+                                                    .ServiceProvider
+                                                    .GetRequiredService<SpawnGeneratorService>();
+
+            lock (_mapUpdater)
+            {
+                var map = GetMap(userRepositoryService);
+                var spawnPoint = spawnGeneratorService.GetSpawnPoint(user.Guild.Name);
+
+                user.SpawnX = spawnPoint.X;
+                user.SpawnY = spawnPoint.Y;
+
+                List<MapChange> changedPixels =
+                [
+                    new()
+                    {
+                        Coordinate = new Coordinate(spawnPoint.X, spawnPoint.Y),
+                        OldOwner = null,
+                        NewOwner = user
+                    }
+                ];
+
+                // TODO: This should use _mapUpdater.PlacePixel, but it doesn't support it
+                DoGrpcUpdate(map, changedPixels);
+                DoDatabaseUpdate(changedPixels, user);
+            }
+
+            return user;
+        });
+    }
+
     private PixelWithType[,] GetMap(IUserRepositoryService userRepositoryService)
     {
         var users = userRepositoryService.GetAll().ToArray();

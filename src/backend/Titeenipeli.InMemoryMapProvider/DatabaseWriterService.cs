@@ -31,8 +31,9 @@ public class DatabaseWriterService : IDisposable
 
     public void Dispose()
     {
-        _writePixelsTask.Dispose();
         PixelChannel.Writer.Complete();
+        _writePixelsTask.Wait();
+        _writePixelsTask.Dispose();
         GC.SuppressFinalize(this);
     }
 }

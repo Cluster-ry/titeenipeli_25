@@ -8,4 +8,6 @@ public interface IMapUpdaterService
 {
     public Task<bool> PlacePixel(IUserRepositoryService userRepositoryService, Coordinate pixelCoordinate,
                                  User newOwner);
+
+    public Task<User> PlaceSpawn(IUserRepositoryService userRepositoryService, User user);
 }
