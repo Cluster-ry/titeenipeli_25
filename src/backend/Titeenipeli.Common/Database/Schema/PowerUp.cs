@@ -5,6 +5,7 @@ namespace Titeenipeli.Common.Database.Schema;
 
 public class PowerUp : Entity
 {
+    public int PowerId { get; init; }
     [Column(TypeName = "VARCHAR")]
     [StringLength(32)]
     public required string Name { get; init; }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
@@ -27,13 +28,13 @@ public sealed class PowerController(
     {
         var user = HttpContext.GetUser(jwtService, userRepositoryService);
 
-        var userPower = user.PowerUps.FirstOrDefault(power => power.Id == body.Id);
+        var userPower = user.PowerUps.FirstOrDefault(power => power.PowerId == body.Id);
         if (userPower is null)
         {
             return BadRequest();
         }
 
-        Enum.TryParse<PowerUps>(userPower.Name, out var powerUp);
+        Enum.TryParse<Powerups>(userPower.Name, out var powerUp);
         var handler = SelectPowerHandler(powerUp);
         if (handler is null)
         {
@@ -55,52 +56,55 @@ public sealed class PowerController(
 
     private IActionResult HandleTiteenikirves(User user, PowerInput body)
     {
-        int realX = user.SpawnX + body.Location.X;
-        int realY = user.SpawnY + body.Location.Y;
+        Coordinate realLocation = new Coordinate()
+        {
+            X = body.Location.X + user.SpawnX,
+            Y = body.Location.Y + user.SpawnY
+        };
 
         switch (body.Direction)
         {
-            case DirectionEnum.Undefined:
+            case Direction.Undefined:
                 return BadRequest();
-            case DirectionEnum.North or DirectionEnum.South:
+            case Direction.North or Direction.South:
                 for (int y = 0; y < gameOptions.Height; y++)
                 {
                     //Axe cut is 3 pixel wide
                     mapUpdaterService.PlacePixel(
                         mapRepositoryService,
                         userRepositoryService,
-                        new Coordinate { X = realX - 1, Y = y }, user);
+                        new Coordinate { X = realLocation.X - 1, Y = y }, user);
 
                     mapUpdaterService.PlacePixel(
                         mapRepositoryService,
                         userRepositoryService,
-                        new Coordinate { X = realX, Y = y }, user);
+                        new Coordinate { X = realLocation.X, Y = y }, user);
 
                     mapUpdaterService.PlacePixel(
                         mapRepositoryService,
                         userRepositoryService,
-                        new Coordinate { X = realX + 1, Y = y }, user);
+                        new Coordinate { X = realLocation.X + 1, Y = y }, user);
                 }
 
                 break;
-            case DirectionEnum.West or DirectionEnum.East:
+            case Direction.West or Direction.East:
                 for (int x = 0; x < gameOptions.Width; x++)
                 {
                     //Axe cut is 3 pixel wide
                     mapUpdaterService.PlacePixel(
                         mapRepositoryService,
                         userRepositoryService,
-                        new Coordinate { X = x, Y = realY - 1 }, user);
+                        new Coordinate { X = x, Y = realLocation.Y - 1 }, user);
 
                     mapUpdaterService.PlacePixel(
                         mapRepositoryService,
                         userRepositoryService,
-                        new Coordinate { X = x, Y = realY }, user);
+                        new Coordinate { X = x, Y = realLocation.Y }, user);
 
                     mapUpdaterService.PlacePixel(
                         mapRepositoryService,
                         userRepositoryService,
-                        new Coordinate { X = x, Y = realY + 1 }, user);
+                        new Coordinate { X = x, Y = realLocation.Y + 1 }, user);
                 }
 
                 break;
@@ -109,17 +113,18 @@ public sealed class PowerController(
         return Ok();
     }
 
-    private Func<User, PowerInput, IActionResult>? SelectPowerHandler(PowerUps? powerUp)
+    private Func<User, PowerInput, IActionResult>? SelectPowerHandler(Powerups? powerUp)
     {
         return powerUp switch
         {
-            PowerUps.Titeenikirves => HandleTiteenikirves,
+            Powerups.Titeenikirves => HandleTiteenikirves,
             _ => null
         };
     }
-}
 
-public enum PowerUps
-{
-    Titeenikirves
+    public static string GetDescription(Powerups powerup) => powerup switch
+    {
+        Powerups.Titeenikirves => "Ota valta omiin käsiisi ja halkaise taistelukenttä kahtia mahtavalla 3 pikseliä leveällä titeenikirveellä",
+        _ => throw new NotSupportedException($"{nameof(Powerups)} with value {powerup.ToString()} = {(int)powerup} is not supported.")
+    };
 }

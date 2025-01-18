@@ -32,6 +32,7 @@ public class GameStateController(
 
         List<PowerUp> powerups = user.PowerUps.Select(power => new PowerUp()
         {
+            PowerUpId = power.PowerId,
             Name = power.Name,
             Description = power.Description
         }).ToList();
