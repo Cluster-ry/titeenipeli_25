@@ -10,8 +10,12 @@
     background-color: rgb(0, 0, 0, 0.4);
 }
 
+.opening {
+    animation: animatetop 0.4s ease;
+}
+
 .closing {
-    animation: animateclose 0.4s ease !important;  /* Needs to match js animation! */
+    animation: animateclose 0.4s ease;  /* Needs to match js animation! */
 }
 
 .modal-content {
@@ -23,7 +27,6 @@
     box-shadow:
         0 4px 8px 0 rgba(0, 0, 0, 0.2),
         0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    animation: animatetop 0.4s ease;
 }
 
 @-webkit-keyframes animatetop {

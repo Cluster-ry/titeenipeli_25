@@ -12,14 +12,14 @@ export const Modal: FC<ModalProps> = ({ title, children, onClose }) => {
     const onCloseClick = () => {
         modalRef.current && (modalRef.current.className = "modal-content closing");
         const onAnimationTimeout = () => {
-            modalRef.current && (modalRef.current.className = "modal-content");
+            modalRef.current && (modalRef.current.className = "modal-content opening");
             onClose();
         };
         setTimeout(onAnimationTimeout, 400); // Needs to match css animation!
     };
     return (
         <div className="modal" onClick={onCloseClick}>
-            <div ref={modalRef} className="modal-content" onClick={e => e.stopPropagation()}>
+            <div ref={modalRef} className="modal-content opening" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                     <button className="close" onClick={onCloseClick}>
                         &times;
