@@ -106,9 +106,9 @@ public sealed class PowerController(
 
                 break;
         }
-        
-        
-        
+
+
+
         return Ok();
     }
 
@@ -120,7 +120,7 @@ public sealed class PowerController(
             _ => null
         };
     }
-    
+
     private void SendPowerupMessage(User user, Powerups powerup)
     {
         var message = $"Holy moly, {user.Guild.Name} just used {powerup} powerup!";
@@ -132,8 +132,8 @@ public sealed class PowerController(
                 User = sendUser,
                 Message = message
             };
-    
-            miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);    
+
+            miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
         }
     }
 
