@@ -5,6 +5,7 @@ using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Options;
 using Titeenipeli.Services.Grpc;
 
@@ -13,38 +14,44 @@ namespace Titeenipeli.Services;
 public class MapUpdaterService(
     IServiceScopeFactory scopeFactory,
     GameOptions gameOptions,
-    IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService
+    IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
+    IMapProvider mapProvider
 ) : IMapUpdaterService
 {
     private const int BorderWidth = 1;
 
     private readonly MapUpdater _mapUpdater = new();
 
-    public Task PlacePixel(IMapRepositoryService mapRepositoryService,
-                           IUserRepositoryService userRepositoryService,
-                           Coordinate pixelCoordinates,
-                           User newOwner)
+    public Task<bool> PlacePixel(IUserRepositoryService userRepositoryService,
+                                 Coordinate pixelCoordinate,
+                                 User newOwner)
     {
-        var borderfiedCoordinate = pixelCoordinates + new Coordinate(1, 1);
+        var borderfiedCoordinate = pixelCoordinate + new Coordinate(1, 1);
 
         return Task.Run(() =>
         {
             lock (_mapUpdater)
             {
-                var map = GetMap(mapRepositoryService, userRepositoryService);
+                if (!IsValidPlacement(pixelCoordinate, newOwner) || mapProvider.IsSpawn(pixelCoordinate))
+                {
+                    return false;
+                }
+
+                var map = GetMap(userRepositoryService);
                 var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
 
                 DoGrpcUpdate(map, changedPixels);
-                DoDatabaseUpdate(mapRepositoryService, changedPixels, newOwner);
+                DoDatabaseUpdate(changedPixels, newOwner);
             }
+
+            return true;
         });
     }
 
-    private PixelWithType[,] GetMap(IMapRepositoryService mapRepositoryService,
-                                    IUserRepositoryService userRepositoryService)
+    private PixelWithType[,] GetMap(IUserRepositoryService userRepositoryService)
     {
         var users = userRepositoryService.GetAll().ToArray();
-        var pixels = mapRepositoryService.GetAll().ToArray();
+        var pixels = mapProvider.GetAll().ToArray();
 
         int width = gameOptions.Width + 2 * BorderWidth;
         int height = gameOptions.Height + 2 * BorderWidth;
@@ -110,9 +117,7 @@ public class MapUpdaterService(
         incrementalMapUpdateCoreService.UpdateUsersMapState(mapChanges);
     }
 
-    private void DoDatabaseUpdate(IMapRepositoryService mapRepositoryService,
-                                  List<MapChange> changedPixels,
-                                  User newOwner)
+    private void DoDatabaseUpdate(List<MapChange> changedPixels, User newOwner)
     {
         List<object> gameEvents = [];
         foreach (var changedPixel in changedPixels)
@@ -149,8 +154,7 @@ public class MapUpdaterService(
                 User = changedPixel.NewOwner
             };
 
-            mapRepositoryService.Update(newPixel);
-            mapRepositoryService.SaveChanges();
+            mapProvider.Update(newPixel);
         }
 
         var gameEvent = new GameEvent
@@ -183,5 +187,18 @@ public class MapUpdaterService(
                 action(coordinate);
             }
         }
+    }
+
+    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
+    {
+        // Take neighboring pixels for the pixel the user is trying to set,
+        // but remove cornering pixels and only return pixels belonging to
+        // the user
+        return (from pixel in mapProvider.GetAll()
+                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
+                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                      pixel.User?.Id == user.Id
+                select pixel).Any();
     }
 }

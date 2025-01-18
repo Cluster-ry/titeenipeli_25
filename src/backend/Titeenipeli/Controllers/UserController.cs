@@ -7,6 +7,7 @@ using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Inputs;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
+using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
@@ -22,7 +23,7 @@ public class UserController(
     IUserRepositoryService userRepositoryService,
     IGuildRepositoryService guildRepositoryService,
     IJwtService jwtService,
-    IMapRepositoryService mapRepositoryService) : ControllerBase
+    IMapProvider mapProvider) : ControllerBase
 {
     private const int LoginTokenLength = 32;
 
@@ -189,9 +190,7 @@ public class UserController(
             User = user
         };
 
-        mapRepositoryService.Update(pixel);
-        await mapRepositoryService.SaveChangesAsync();
-
+        mapProvider.Update(pixel);
         return user;
     }
 

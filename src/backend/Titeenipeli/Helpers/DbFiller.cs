@@ -73,9 +73,14 @@ public static class DbFiller
 
         if (!dbContext.PowerUps.Any())
         {
-            foreach (string powerUpName in Enum.GetNames<PowerUps>())
+            foreach (var powerUp in Enum.GetValues<Powerups>())
             {
-                dbContext.PowerUps.Add(new PowerUp { Name = powerUpName });
+                dbContext.PowerUps.Add(new PowerUp
+                {
+                    PowerId = (int)powerUp,
+                    Name = powerUp.ToString(),
+                    Description = PowerController.GetDescription(powerUp)
+                });
             }
         }
 
