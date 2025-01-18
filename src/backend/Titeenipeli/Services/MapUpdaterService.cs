@@ -22,22 +22,26 @@ public class MapUpdaterService(
 
     private readonly MapUpdater _mapUpdater = new();
 
-    public Task PlacePixel(IUserRepositoryService userRepositoryService,
-                           Coordinate pixelCoordinates,
-                           User newOwner)
+    public Task<bool> PlacePixel(IUserRepositoryService userRepositoryService,
+                                 Coordinate pixelCoordinate,
+                                 User newOwner)
     {
-        var borderfiedCoordinate = pixelCoordinates + new Coordinate(1, 1);
+        var borderfiedCoordinate = pixelCoordinate + new Coordinate(1, 1);
 
         return Task.Run(() =>
         {
             lock (_mapUpdater)
             {
+                if (!IsValidPlacement(pixelCoordinate, newOwner)) return false;
+
                 var map = GetMap(userRepositoryService);
                 var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
 
                 DoGrpcUpdate(map, changedPixels);
                 DoDatabaseUpdate(changedPixels, newOwner);
             }
+
+            return true;
         });
     }
 
@@ -180,5 +184,18 @@ public class MapUpdaterService(
                 action(coordinate);
             }
         }
+    }
+
+    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
+    {
+        // Take neighboring pixels for the pixel the user is trying to set,
+        // but remove cornering pixels and only return pixels belonging to
+        // the user
+        return (from pixel in mapProvider.GetAll()
+                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
+                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                      pixel.User?.Id == user.Id
+                select pixel).Any();
     }
 }

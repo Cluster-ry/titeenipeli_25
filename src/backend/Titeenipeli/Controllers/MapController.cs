@@ -93,18 +93,6 @@ public class MapController : ControllerBase
             Y = user.SpawnY + pixelsInput.Y
         };
 
-        if (!IsValidPlacement(globalCoordinate, user))
-        {
-            var error = new ErrorResult
-            {
-                Title = "Invalid pixel placement",
-                Code = ErrorCode.InvalidPixelPlacement,
-                Description = "Try another pixel"
-            };
-
-            return BadRequest(error);
-        }
-
         var pixelToUpdate = _mapProvider.GetByCoordinate(globalCoordinate);
 
         if (pixelToUpdate == null)
@@ -127,7 +115,17 @@ public class MapController : ControllerBase
         }
 
 
-        await _mapUpdaterService.PlacePixel(_userRepositoryService, globalCoordinate, user);
+        if (!await _mapUpdaterService.PlacePixel(_userRepositoryService, globalCoordinate, user))
+        {
+            var error = new ErrorResult
+            {
+                Title = "Invalid pixel placement",
+                Code = ErrorCode.InvalidPixelPlacement,
+                Description = "Try another pixel"
+            };
+
+            return BadRequest(error);
+        }
 
         user.PixelBucket--;
         _userRepositoryService.Update(user);
@@ -321,18 +319,5 @@ public class MapController : ControllerBase
             }
         }
         return inversedMap;
-    }
-
-    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
-    {
-        // Take neighboring pixels for the pixel the user is trying to set,
-        // but remove cornering pixels and only return pixels belonging to
-        // the user
-        return (from pixel in _mapProvider.GetAll()
-                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
-                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      pixel.User?.Id == user.Id
-                select pixel).Any();
     }
 }
