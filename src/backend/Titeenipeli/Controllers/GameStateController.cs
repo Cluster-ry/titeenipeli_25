@@ -34,6 +34,11 @@ public class GameStateController(
             });
         }
 
+        List<PowerUp> powerups = user.PowerUps.Select(power => new PowerUp()
+        {
+            Name = power.Name
+        }).ToList();
+
         GameStateResults results = new()
         {
             PixelBucket = new()
@@ -42,7 +47,8 @@ public class GameStateController(
                 MaxAmount = gameOptions.MaximumPixelBucket,
                 IncreasePerMinute = user.Guild.CurrentRateLimitIncreasePerMinutePerPlayer,
             },
-            Scores = scores
+            Scores = scores,
+            PowerUps = powerups
         };
 
         return Ok(results);
