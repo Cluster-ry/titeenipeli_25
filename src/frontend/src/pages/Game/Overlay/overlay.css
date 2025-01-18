@@ -1,14 +1,13 @@
 /* Top Overlay */
 
 .top-gradient {
-    background: linear-gradient(0, rgba(0, 0, 0, 0) 0%, rgba(183, 183, 183, 0.874667) 74.83%, #d9d9d9 100%);
+    background: linear-gradient(0, rgba(0, 0, 0, 0) 0%, rgba(241, 241, 241, 0.775) 25%, rgba(223, 223, 223, 0.875) 50%, #d9d9d9 100%);
 }
 
 .top-overlay {
     display: flex;
     align-items: center;
-    max-height: 15%;
-    padding-bottom: 10%;
+    padding-bottom: 30px;
     padding-inline: 16px;
     padding-top: 8px;
 }
@@ -21,9 +20,24 @@
     font-size: x-small;
 }
 
+.top-overlay__score-title {
+    text-align: left;
+    color: #00fff0;
+}
+
+.top-overlay__scores-container {
+    padding-bottom: 8px;
+}
+
 .top-overlay__score-container {
     display: flex;
     gap: 4px;
+}
+
+.top-overlay__score-button {
+    width: fit-content;
+    font-size: xx-small;
+    padding: 8px;
 }
 
 .top-overlay__middle {

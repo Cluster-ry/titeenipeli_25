@@ -4,9 +4,12 @@ import { PostCtfInput } from "../../models/Post/PostCtfInput";
 import "../../pages/Game/Overlay/overlay.css";
 import { useNotificationStore } from "../../stores/notificationStore";
 import "./ctf.css";
+import Modal from "../Modal/Modal";
+import { useCtfStore } from "../../stores/ctfModalStore";
 
-const Ctf = () => {
+const CtfModal = () => {
     const [token, setToken] = useState("");
+    const { setCtfModelOpenState } = useCtfStore();
     const { triggerNotification } = useNotificationStore();
 
     const CTF_DISCLAIMER: string = "Activate CTF";
@@ -37,22 +40,20 @@ const Ctf = () => {
     };
 
     return (
-        <div className="ctf-wrapper">
-            <div className="ctf-container">
-                <input
-                    className="ctf-input"
-                    type="text"
-                    placeholder="Enter Token"
-                    value={token}
-                    onChange={handleTokenChange}
-                    style={{ pointerEvents: "all" }}
-                />
-                <button className="ctf-icon" onClick={handleSubmit}>
-                    {CTF_DISCLAIMER}
-                </button>
-            </div>
-        </div>
+        <Modal title="CTF input" onClose={() => setCtfModelOpenState(false)}>
+            <input
+                className="ctf-input"
+                type="text"
+                placeholder="Enter Token"
+                value={token}
+                onChange={handleTokenChange}
+                style={{ pointerEvents: "all" }}
+            />
+            <button className="ctf-button" onClick={handleSubmit}>
+                {CTF_DISCLAIMER}
+            </button>
+        </Modal>
     );
 };
 
-export default Ctf;
+export default CtfModal;

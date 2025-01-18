@@ -1,5 +1,6 @@
 .notification {
     justify-self: center;
+    z-index: 3;
     min-width: 25vw;
     border-width: 0;
     border-radius: 15px;
