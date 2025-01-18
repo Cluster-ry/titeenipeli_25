@@ -60,7 +60,7 @@ public sealed class PowerController(
             X = body.Location.X + user.SpawnX,
             Y = body.Location.Y + user.SpawnY
         };
-        
+
         List<Coordinate> axeCoordinates = [];
 
         switch (body.Direction)
@@ -71,23 +71,23 @@ public sealed class PowerController(
                 for (var y = 0; y < gameOptions.Height; y++)
                 {
                     //Axe cut is 3 pixel wide
-                    axeCoordinates.Add(new Coordinate {X = realLocation.X - 1, Y = y});
-                    axeCoordinates.Add(new Coordinate {X = realLocation.X , Y = y});
-                    axeCoordinates.Add(new Coordinate {X = realLocation.X + 1, Y = y});
+                    axeCoordinates.Add(new Coordinate { X = realLocation.X - 1, Y = y });
+                    axeCoordinates.Add(new Coordinate { X = realLocation.X, Y = y });
+                    axeCoordinates.Add(new Coordinate { X = realLocation.X + 1, Y = y });
                 }
                 break;
             case Direction.West or Direction.East:
                 for (var x = 0; x < gameOptions.Width; x++)
                 {
                     //Axe cut is 3 pixel wide
-                    axeCoordinates.Add(new Coordinate {X = x, Y = realLocation.Y - 1});
-                    axeCoordinates.Add(new Coordinate {X = x, Y = realLocation.Y});
-                    axeCoordinates.Add(new Coordinate {X = x, Y = realLocation.Y + 1});
+                    axeCoordinates.Add(new Coordinate { X = x, Y = realLocation.Y - 1 });
+                    axeCoordinates.Add(new Coordinate { X = x, Y = realLocation.Y });
+                    axeCoordinates.Add(new Coordinate { X = x, Y = realLocation.Y + 1 });
                 }
 
                 break;
         }
-        
+
         mapUpdaterService.PlacePixels(userRepositoryService, axeCoordinates, user);
 
         return Ok();
