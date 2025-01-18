@@ -24,15 +24,18 @@ public class GameStateController(
         var user = HttpContext.GetUser(jwtService, userRepositoryService);
         var guilds = guildRepositoryService.GetAll();
 
-        List<Score> scores = [];
-        foreach (var guild in guilds)
+        List<Score> scores = guilds.Select(guild => new Score()
         {
-            scores.Add(new()
-            {
-                Guild = guild.Name,
-                Amount = guild.CurrentScore
-            });
-        }
+            Guild = guild.Name,
+            Amount = guild.CurrentScore
+        }).ToList();
+
+        List<PowerUp> powerups = user.PowerUps.Select(power => new PowerUp()
+        {
+            PowerUpId = power.PowerId,
+            Name = power.Name,
+            Description = power.Description
+        }).ToList();
 
         GameStateResults results = new()
         {
@@ -42,7 +45,8 @@ public class GameStateController(
                 MaxAmount = gameOptions.MaximumPixelBucket,
                 IncreasePerMinute = user.Guild.CurrentRateLimitIncreasePerMinutePerPlayer,
             },
-            Scores = scores
+            Scores = scores,
+            PowerUps = powerups
         };
 
         return Ok(results);
