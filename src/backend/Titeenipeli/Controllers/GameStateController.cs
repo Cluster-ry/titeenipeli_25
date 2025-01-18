@@ -43,7 +43,7 @@ public class GameStateController(
             {
                 Amount = (int)user.PixelBucket,
                 MaxAmount = gameOptions.MaximumPixelBucket,
-                IncreasePerMinute = user.Guild.CurrentRateLimitIncreasePerMinutePerPlayer,
+                IncreasePerMinute = user.Guild.RateLimitPerPlayer,
             },
             Scores = scores,
             PowerUps = powerups
