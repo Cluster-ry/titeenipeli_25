@@ -76,6 +76,7 @@
 .top-overlay__right {
     flex: 1;
     display: flex;
+    flex-wrap: wrap;
     justify-content: right;
     height: 80%;
 }
@@ -135,4 +136,18 @@
     height: 100%;
     z-index: 1;
     pointer-events: none;
+}
+
+/* CTF */
+.ctf-icon {
+    justify-content: left;
+    pointer-events: all;
+}
+
+.ctf-icon:hover {
+    cursor: pointer;
+}
+
+.ctf-container {
+    display: grid;
 }

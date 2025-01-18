@@ -1,14 +1,16 @@
-import "./overlay.css";
+import { FC, PropsWithChildren } from "react";
 import { RatelimitMeter } from "./RatelimitMeter";
 import { Scores } from "./Scores";
+import "./overlay.css";
+import HamburgerMenu from "../../../components/Ctf/HamburgerMenu";
 
-const TopOverlay = () => {
+const TopOverlay: FC<PropsWithChildren> = () => {
     return (
         <div className="top-overlay top-gradient">
             <Scores />
             <RatelimitMeter />
             <div className="top-overlay__right">
-                <img className="top-overlay__right__help" src="./src/assets/help.png" />
+              <HamburgerMenu />
             </div>
         </div>
     );

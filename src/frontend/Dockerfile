@@ -4,7 +4,9 @@ FROM node:latest AS build
 WORKDIR /app
 
 # Installing the dependencies
-COPY pnpm-lock.yaml package.json ./
+COPY frontend/pnpm-lock.yaml frontend/package.json ./frontend/
+COPY protobuf/ protobuf/
+WORKDIR frontend
 RUN npm i -g pnpm
 
 RUN pnpm i
@@ -17,8 +19,8 @@ RUN pnpm run build
 #Stage 2: Production
 FROM nginx:alpine AS production
 
-COPY --from=build /app/dist /usr/share/nginx/html/
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY --from=build /app/frontend/dist /usr/share/nginx/html/
+COPY frontend/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80     
 

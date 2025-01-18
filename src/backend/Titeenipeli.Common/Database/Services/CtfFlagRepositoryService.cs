@@ -3,15 +3,8 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 
 namespace Titeenipeli.Common.Database.Services;
 
-public class CtfFlagRepositoryService : ICtfFlagRepositoryService
+public class CtfFlagRepositoryService(ApiDbContext dbContext) : RepositoryService(dbContext), ICtfFlagRepositoryService
 {
-    private readonly ApiDbContext _dbContext;
-
-    public CtfFlagRepositoryService(ApiDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     public CtfFlag? GetById(int id)
     {
         return _dbContext.CtfFlags.Find(id);

@@ -28,7 +28,7 @@ public class CtfController : ControllerBase
     }
 
     [HttpPost("ctf")]
-    [Authorize(Policy = "MustHaveGuild")]
+    [Authorize]
     public IActionResult PostCtf([FromBody] PostCtfInput ctfInput)
     {
         var ctfFlag = _ctfFlagRepositoryService.GetByToken(ctfInput.Token);
@@ -54,21 +54,27 @@ public class CtfController : ControllerBase
         guild.ActiveCtfFlags.Add(ctfFlag);
         _guildRepositoryService.Update(guild);
 
-        if (ctfFlag.Powerup is null) HandleGuildPowerup(user.Guild);
-        else HandleUserPowerup(user, ctfFlag.Powerup);
+        if (ctfFlag.Powerup is null)
+        {
+            HandleGuildPowerUp(user.Guild);
+        }
+        else
+        {
+            HandleUserPowerUp(user, ctfFlag.Powerup);
+        }
 
         return Ok();
     }
 
 
-    private void HandleGuildPowerup(Guild guild)
+    private void HandleGuildPowerUp(Guild guild)
     {
         //TODO run powerup code
     }
 
-    private void HandleUserPowerup(User user, PowerUp powerup)
+    private void HandleUserPowerUp(User user, PowerUp powerUp)
     {
-        user.Powerups.Add(powerup);
+        user.PowerUps.Add(powerUp);
         _userRepositoryService.Update(user);
     }
 }

@@ -52,6 +52,5 @@
         "vite": "^5.2.14",
         "vite-plugin-http2-proxy": "^0.4.3",
         "vite-plugin-mkcert": "^1.17.5"
-    },
-    "proxy": "http://localhost:8080"
+    }
 }

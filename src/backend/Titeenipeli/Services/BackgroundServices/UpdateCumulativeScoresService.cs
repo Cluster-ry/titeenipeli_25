@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
@@ -12,9 +11,9 @@ public interface IUpdateCumulativeScoresService : IAsynchronousTimedBackgroundSe
 
 public class UpdateCumulativeScoresService(
     GameOptions gameOptions,
-    ApiDbContext dbContext,
     IUserRepositoryService userRepositoryService,
     IGuildRepositoryService guildRepositoryService,
+    IMapRepositoryService mapRepositoryService,
     IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService) : IUpdateCumulativeScoresService
 {
     public async Task DoWork()
@@ -25,9 +24,7 @@ public class UpdateCumulativeScoresService(
             guild.CurrentScore = 0;
         }
 
-        Pixel[] pixels = await dbContext.Map
-                                        .Include(pixel => pixel.User)
-                                        .ThenInclude(user => user!.Guild).ToArrayAsync();
+        Pixel[] pixels = [.. mapRepositoryService.GetAll()];
 
         foreach (Pixel pixel in pixels)
             if (pixel.User is { Guild: not null })
@@ -36,7 +33,7 @@ public class UpdateCumulativeScoresService(
                 pixel.User.Guild.CumulativeScore++;
             }
 
-        await dbContext.SaveChangesAsync();
+        await guildRepositoryService.SaveChangesAsync();
 
         UpdateRealtimeScores(guilds);
     }

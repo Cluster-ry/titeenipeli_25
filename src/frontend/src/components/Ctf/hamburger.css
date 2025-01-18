@@ -1,0 +1,30 @@
+.hamburger {
+  width: 45px;
+  height: 30px;
+  display:  flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: all;
+  cursor: pointer;
+  margin-top: 15%;
+  background-color: darkgray;
+
+  margin-top: -1%;
+  justify-self: right;
+
+  padding: 12px;
+  border-radius: 10px;
+  top: 0;
+  right: 0;
+}
+
+.hamburger-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background-color: #000;
+}
+
+.hamburger-wrapper {
+  display: grid;
+}

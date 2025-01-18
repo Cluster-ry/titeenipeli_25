@@ -7,9 +7,9 @@ export interface Coordinate {
 }
 
 export interface NewMapStore {
-    map: Map<Coordinate, Pixel | null> | null;
+    map: Map<string, Pixel | null> | null;
     setPixel: (coordinate: Coordinate, pixel: Pixel | null) => void;
-    setMap: (map: Map<Coordinate, Pixel> | null) => void;
+    setMap: (map: Map<string, Pixel> | null) => void;
     pixelsBoundingBox: { min: Coordinate; max: Coordinate };
     setPixelsBoundingBox: ({ min, max }: { min: Coordinate; max: Coordinate }) => void;
 }
@@ -25,10 +25,10 @@ export const useNewMapStore = create<NewMapStore>((set) => ({
             if (oldMap === null) {
                 throw new Error("Tried to set pixel in a null map!");
             }
-            return { map: new Map([...oldMap, [coordinate, pixel]]) };
+            return { map: new Map([...oldMap, [JSON.stringify(coordinate), pixel]]) };
         });
     },
-    setMap: (map: Map<Coordinate, Pixel> | null) => {
+    setMap: (map: Map<string, Pixel> | null) => {
         set({ map });
     },
     pixelsBoundingBox: { min: { x: 0, y: 0 }, max: { x: 0, y: 0 } },

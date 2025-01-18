@@ -1,3 +1,4 @@
+import { FC } from "react";
 import "./overlay.css";
 
 type ScoreProps = {
@@ -5,7 +6,7 @@ type ScoreProps = {
     score: number;
 };
 
-const Score = ({ guild, score }: ScoreProps) => {
+const Score: FC<ScoreProps> = ({ guild, score }) => {
     return (
         <div key={guild} className="top-overlay__score-container">
             <span>{guild}:</span>

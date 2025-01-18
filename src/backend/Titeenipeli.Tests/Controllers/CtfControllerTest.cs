@@ -1,6 +1,7 @@
 using FluentAssertions;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Moq;
 using NUnit.Framework;
@@ -32,7 +33,7 @@ public class CtfControllerTest
         Code = "",
         SpawnX = 0,
         SpawnY = 0,
-        Powerups = new(),
+        PowerUps = [],
         TelegramId = "",
         FirstName = "Own user",
         LastName = "",
@@ -78,7 +79,7 @@ public class CtfControllerTest
         httpcontext.Items[jwtClaimName] = CurrentClaim;
 
         CtfController controller = new CtfController(mockCtfFlagRepositoryService.Object, mockUserRepositoryService.Object, mockGuildRepositoryService.Object, mockJwtService.Object);
-        controller.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext
+        controller.ControllerContext = new ControllerContext
         {
             HttpContext = httpcontext
         };
