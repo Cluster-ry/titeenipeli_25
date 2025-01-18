@@ -12,6 +12,7 @@ using Titeenipeli.Common.Models;
 using Titeenipeli.Controllers;
 using Titeenipeli.Inputs;
 using Titeenipeli.Services;
+using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Tests.Controllers;
 
@@ -57,6 +58,7 @@ public class CtfControllerTest
         Mock<IUserRepositoryService> mockUserRepositoryService = new Mock<IUserRepositoryService>();
         Mock<IGuildRepositoryService> mockGuildRepositoryService = new Mock<IGuildRepositoryService>();
         Mock<IJwtService> mockJwtService = new Mock<IJwtService>();
+        Mock<IMiscGameStateUpdateCoreService> mockMiscGameStateUpdateCoreService = new Mock<IMiscGameStateUpdateCoreService>();
 
         //Setup jwt
         var jwtClaimName = "JwtClaim";
@@ -78,7 +80,7 @@ public class CtfControllerTest
         var httpcontext = new DefaultHttpContext();
         httpcontext.Items[jwtClaimName] = CurrentClaim;
 
-        CtfController controller = new CtfController(mockCtfFlagRepositoryService.Object, mockUserRepositoryService.Object, mockGuildRepositoryService.Object, mockJwtService.Object);
+        CtfController controller = new CtfController(mockCtfFlagRepositoryService.Object, mockUserRepositoryService.Object, mockGuildRepositoryService.Object, mockJwtService.Object, mockMiscGameStateUpdateCoreService.Object);
         controller.ControllerContext = new ControllerContext
         {
             HttpContext = httpcontext

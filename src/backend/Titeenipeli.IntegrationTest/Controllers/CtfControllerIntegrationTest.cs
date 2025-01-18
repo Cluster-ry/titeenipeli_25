@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services;
@@ -8,6 +9,7 @@ using Titeenipeli.Controllers;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
+using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.IntegrationTest.Controllers;
 
@@ -32,6 +34,7 @@ public class CtfControllerIntegrationTest : BaseFixture
         var userRepositoryService = new UserRepositoryService(_dbContext);
         var guildRepositoryService = new GuildRepositoryService(_dbContext);
         var jwtService = new JwtService(new JwtOptions());
+        var miscGameStateUpdateCoreService = new MiscGameStateUpdateCoreService(new Logger<StateUpdateService>(new LoggerFactory()));
 
         var guild = GenerateGuild();
         var user = GenerateUser(guild);
@@ -49,7 +52,7 @@ public class CtfControllerIntegrationTest : BaseFixture
         var httpcontext = new DefaultHttpContext();
         httpcontext.Items[jwtService.GetJwtClaimName()] = jwtClaim;
 
-        CtfController ctfController = new CtfController(ctfFlagRepositoryService, userRepositoryService, guildRepositoryService, jwtService);
+        CtfController ctfController = new CtfController(ctfFlagRepositoryService, userRepositoryService, guildRepositoryService, jwtService, miscGameStateUpdateCoreService);
         ctfController.ControllerContext = new ControllerContext
         {
             HttpContext = httpcontext

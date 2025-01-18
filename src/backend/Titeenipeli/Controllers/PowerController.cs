@@ -117,7 +117,7 @@ public sealed class PowerController(
 
     public static string GetDescription(Powerups powerup) => powerup switch
     {
-        Powerups.Titeenikirves => "Take might into your own hands and split the battlefield in half with a mighty 3 pixel wide titeenikirves.",
+        Powerups.Titeenikirves => "Take might into your own hands and split the battlefield in half with a mighty 3 pixel wide axe of the Titeen's.",
         _ => throw new NotSupportedException($"{nameof(Powerups)} with value {powerup.ToString()} = {(int)powerup} is not supported.")
     };
 }

@@ -5,8 +5,10 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
+using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Inputs;
 using Titeenipeli.Services;
+using Titeenipeli.Services.Grpc;
 using PowerUp = Titeenipeli.Common.Database.Schema.PowerUp;
 
 namespace Titeenipeli.Controllers;
@@ -19,13 +21,16 @@ public class CtfController : ControllerBase
     private readonly IGuildRepositoryService _guildRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
     private readonly IJwtService _jwtService;
+    private readonly IMiscGameStateUpdateCoreService _miscGameStateUpdateCoreService;
 
-    public CtfController(ICtfFlagRepositoryService ctfFlagRepositoryService, IUserRepositoryService userRepositoryService, IGuildRepositoryService guildRepositoryService, IJwtService jwtService)
+    public CtfController(ICtfFlagRepositoryService ctfFlagRepositoryService, IUserRepositoryService userRepositoryService, IGuildRepositoryService guildRepositoryService, IJwtService jwtService, IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService)
     {
         _ctfFlagRepositoryService = ctfFlagRepositoryService;
         _userRepositoryService = userRepositoryService;
         _guildRepositoryService = guildRepositoryService;
         _jwtService = jwtService;
+        _miscGameStateUpdateCoreService = miscGameStateUpdateCoreService;
+
     }
 
     [HttpPost("ctf")]
@@ -79,5 +84,13 @@ public class CtfController : ControllerBase
         user.PowerUps.Add(powerUp);
         _userRepositoryService.Update(user);
         await _userRepositoryService.SaveChangesAsync();
+
+        GrpcMiscGameStateUpdateInput stateUpdate = new()
+        {
+            User = user,
+            PowerUps = user.PowerUps.ToList()
+        };
+
+        _miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
     }
 }
