@@ -270,12 +270,20 @@ public class MapController : ControllerBase
         {
             for (int y = 0; y < map.Height; y++)
             {
-                var backgroundGraphic = _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(map.MinViewableX + x, map.MinViewableY + y));
+                if (map.Pixels[x, y].Type == PixelType.MapBorder)
+                {
+                    continue;
+                }
+
+                byte[]? backgroundGraphic =
+                    _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(map.MinViewableX + x,
+                        map.MinViewableY + y));
                 if (backgroundGraphic == null)
                 {
                     continue;
                 }
-                var backgroundGraphicWire = Convert.ToBase64String(backgroundGraphic);
+
+                string backgroundGraphicWire = Convert.ToBase64String(backgroundGraphic);
                 map.Pixels[x, y].BackgroundGraphic = backgroundGraphicWire;
             }
         }

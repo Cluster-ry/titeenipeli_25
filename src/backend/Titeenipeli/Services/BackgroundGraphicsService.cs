@@ -18,7 +18,7 @@ public class BackgroundGraphicsService : IBackgroundGraphicsService
         byte[]? allBytes = bitmap.Bytes;
 
         _splitBitmapWidth = bitmap.Width / 32;
-        _splitBitmapHeight = bitmap.Width / 32;
+        _splitBitmapHeight = bitmap.Height / 32;
         _splitBitmaps = new byte[_splitBitmapWidth, _splitBitmapHeight][];
         int bytesPerPixel = bitmap.BytesPerPixel;
         int rowSize = bitmap.Width * bytesPerPixel;
