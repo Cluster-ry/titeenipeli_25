@@ -161,6 +161,7 @@ public class UserController(
         await userRepositoryService.SaveChangesAsync();
 
         user = await mapUpdaterService.PlaceSpawn(userRepositoryService, user);
+        await userRepositoryService.SaveChangesAsync();
 
         return user;
     }
