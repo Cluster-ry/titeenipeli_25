@@ -1,14 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Extensions;
 using Titeenipeli.Inputs;
-using Titeenipeli.Options;
 using Titeenipeli.Services;
-using Titeenipeli.SpecialEffects;
 
 namespace Titeenipeli.Controllers;
 
@@ -18,8 +15,8 @@ namespace Titeenipeli.Controllers;
 public sealed class PowerController(
     IUserRepositoryService userRepositoryService,
     IMapUpdaterService mapUpdaterService,
-    IJwtService jwtService,
-    GameOptions gameOptions
+    IPowerupService powerupService,
+    IJwtService jwtService
 ) : ControllerBase
 {
     [HttpPost("activate")]
@@ -34,9 +31,13 @@ public sealed class PowerController(
             return BadRequest();
         }
 
-        Enum.TryParse<PowerUps>(userPower.Name, out var powerUp);
-        var specialEffect = SelectSpecialEffect(powerUp);
+        var specialEffect = powerupService.GetByDb(userPower);
         if (specialEffect is null)
+        {
+            return BadRequest();
+        }
+
+        if (userPower.Directed && body.Direction is Direction.Undefined)
         {
             return BadRequest();
         }
@@ -48,28 +49,5 @@ public sealed class PowerController(
         userRepositoryService.Update(user);
         await userRepositoryService.SaveChangesAsync();
         return Ok();
-    }
-
-
-
-    private ISpecialEffect? SelectSpecialEffect(PowerUps? powerUp)
-    {
-        return powerUp switch
-        {
-            PowerUps.TestEffect => new TestEffect(),
-            PowerUps.Titeenikirves => new TiteenikirvesEffect(gameOptions.Height, gameOptions.Width),
-            _ => null
-        };
-    }
-
-    public static string GetDescription(PowerUps powerUp)
-    {
-        return powerUp switch
-        {
-            PowerUps.Titeenikirves =>
-                "Take might into your own hands and split the battlefield in half with a mighty 3 pixel wide axe of the Titeen's.",
-            _ => throw new NotSupportedException(
-                $"{nameof(PowerUps)} with value {powerUp.ToString()} = {(int)powerUp} is not supported.")
-        };
     }
 }

@@ -6,10 +6,8 @@ namespace Titeenipeli.Common.Database.Schema;
 public class PowerUp : Entity
 {
     public int PowerId { get; init; }
+    public bool Directed { get; init; }
     [Column(TypeName = "VARCHAR")]
     [StringLength(32)]
     public required string Name { get; init; }
-    [Column(TypeName = "VARCHAR")]
-    [StringLength(256)]
-    public required string Description { get; init; }
 }

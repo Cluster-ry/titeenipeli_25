@@ -5,6 +5,10 @@ namespace Titeenipeli.SpecialEffects;
 
 public sealed class TiteenikirvesEffect(int height, int width) : ISpecialEffect
 {
+    public string Description { get; } =
+        "Take might into your own hands and split the battlefield in half with a mighty 3 pixel wide axe of the Titeen's.";
+    public bool Directed { get; } = true;
+
     public List<Coordinate> HandleSpecialEffect(Coordinate location, Direction direction)
     {
         List<Coordinate> axeCoordinates = [];
