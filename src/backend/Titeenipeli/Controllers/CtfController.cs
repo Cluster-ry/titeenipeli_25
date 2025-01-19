@@ -69,8 +69,8 @@ public class CtfController : ControllerBase
         {
             await HandleUserPowerUp(user, ctfFlag.Powerup);
         }
-        
-        
+
+
         return Ok(CreateCtfResult(ctfFlag));
     }
 
@@ -112,13 +112,13 @@ public class CtfController : ControllerBase
     {
         var benefits = new List<String>();
 
-        if(flag.BaserateMultiplier != 0) benefits.Add($"Base rate limit increased by {flag.BaserateMultiplier}x");
-        if(flag.FovRangeIncrease != 0) benefits.Add($"Field of view range increased by {flag.FovRangeIncrease}");
+        if (flag.BaserateMultiplier != 0) benefits.Add($"Base rate limit increased by {flag.BaserateMultiplier}x");
+        if (flag.FovRangeIncrease != 0) benefits.Add($"Field of view range increased by {flag.FovRangeIncrease}");
         if (flag.Powerup != null)
         {
             benefits.Add($"You got {flag.Powerup.Name}!\n");
         }
-        
+
         return benefits;
     }
 
