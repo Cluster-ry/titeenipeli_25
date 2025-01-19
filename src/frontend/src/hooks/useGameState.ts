@@ -46,7 +46,7 @@ export const useGameState = () => {
             }
             
             if(update.notification !== undefined){
-                triggerNotification("EVENT", update.notification.message)
+                triggerNotification(update.notification.message, "neutral")
             }
             
         },
