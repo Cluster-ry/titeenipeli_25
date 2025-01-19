@@ -51,11 +51,14 @@ public class IncrementalMapUpdateCoreService : GrpcService<IncrementalMapUpdateR
     {
         var guildRepositoryService = _serviceScopeFactory.CreateScope().ServiceProvider
                                                          .GetRequiredService<IGuildRepositoryService>();
+
+        var guilds = guildRepositoryService.GetAll();
+
         List<Task> updateTasks = new(Connections.Count);
         foreach (var connectionKeyValuePair in Connections)
         {
             var user = connectionKeyValuePair.Value.FirstOrDefault().Value.User;
-            user.Guild = guildRepositoryService.GetById(user.Guild.Id)!;
+            user.Guild = guilds.FirstOrDefault(guild => guild.Id == user.Guild.Id)!;
 
             MapUpdateProcessor mapUpdateProcessor =
                 new(this, mapChangesInput, connectionKeyValuePair.Value, _gameOptions, _backgroundGraphicsService,
