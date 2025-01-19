@@ -6,6 +6,7 @@ import { useNotificationStore } from "../../stores/notificationStore";
 import "./ctf.css";
 import Modal from "../Modal/Modal";
 import { useCtfStore } from "../../stores/ctfModalStore";
+import {CtfOk} from "../../models/CtfOk.ts";
 import {setRandomInterval} from "../../utils/setRandomInterval.ts";
 
 const CtfModal = () => {
@@ -14,8 +15,11 @@ const CtfModal = () => {
     const { triggerNotification } = useNotificationStore();
 
     const CTF_DISCLAIMER: string = "Activate CTF";
-    const NOTIFICATION_SUCCESS: string = "CTF activated successfully!";
     const NOTIFICATION_FAIL: string = "CTF activation failed.";
+
+    const createSuccessNotificationText = (result: CtfOk) => {
+        return `${result.title}\n${result.message}\nBenefits:${result.benefits.join('\n')}`;
+    };
 
     useEffect(() => {
         "#OH_YOU_FOUND_THIS?";
@@ -36,8 +40,8 @@ const CtfModal = () => {
                 triggerNotification(NOTIFICATION_FAIL, "error");
                 console.log("Request unsuccessful.");
                 return;
-            } else {
-                triggerNotification(NOTIFICATION_SUCCESS, "success");
+            } else if ("data" in result) {
+                triggerNotification(createSuccessNotificationText(result.data), "success");
             }
         } catch (error) {
             triggerNotification(NOTIFICATION_FAIL, "error");
