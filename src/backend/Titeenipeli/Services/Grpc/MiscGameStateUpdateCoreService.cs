@@ -72,7 +72,8 @@ public class MiscGameStateUpdateCoreService(IPowerupService powerupService, ILog
         scores.AddRange(guilds.Where(guild => guild.Name != GuildName.Nobody).Select(guild =>
             new MiscStateUpdateResponse.Types.Scores
             {
-                Guild = ConvertGuildToPixelGuild(guild.Name), Amount = (uint)guild.CurrentScore
+                Guild = ConvertGuildToPixelGuild(guild.Name),
+                Amount = (uint)guild.CurrentScore
             }));
 
         return scores;
