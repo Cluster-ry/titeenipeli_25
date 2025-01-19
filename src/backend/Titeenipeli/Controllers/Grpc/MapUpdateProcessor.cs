@@ -94,7 +94,7 @@ public class MapUpdateProcessor
             ComputeSurroundingPixelVisibility(change);
 
             // Special case, if lost pixel remains within field of view, update its value.
-            bool insideFogOfWar = _visibilityMap.GetVisibility(change.Coordinate);
+            bool insideFogOfWar = (_user?.IsGod ?? false) || _visibilityMap.GetVisibility(change.Coordinate);
             if (insideFogOfWar)
             {
                 AddStandardChange(change.Coordinate);
@@ -108,7 +108,7 @@ public class MapUpdateProcessor
             change.OldOwner?.Id != _user?.Id && change.NewOwner?.Id != _user?.Id);
         foreach (MapChange change in normalChanges)
         {
-            bool insideFogOfWar = _visibilityMap.GetVisibility(change.Coordinate);
+            bool insideFogOfWar = (_user?.IsGod ?? false) || _visibilityMap.GetVisibility(change.Coordinate);
             if (insideFogOfWar)
             {
                 AddStandardChange(change.Coordinate);

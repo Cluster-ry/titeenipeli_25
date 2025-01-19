@@ -93,8 +93,12 @@ public class UserController(
             return Unauthorized();
         }
 
-        user.AuthenticationToken = null;
-        user.AuthenticationTokenExpiryTime = null;
+        if (!user.IsGod)
+        {
+            user.AuthenticationToken = null;
+            user.AuthenticationTokenExpiryTime = null;
+        }
+
         userRepositoryService.Update(user);
         await userRepositoryService.SaveChangesAsync();
 

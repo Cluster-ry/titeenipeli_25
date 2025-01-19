@@ -183,7 +183,8 @@ public class MapUpdaterService(
 
     private static void MarkSpawns(PixelWithType[,] map, IEnumerable<User> users)
     {
-        foreach (var user in users) map[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
+        foreach (var user in users.Where(user => !user.IsGod))
+            map[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
     }
 
     private void DoGrpcUpdate(PixelWithType[,] pixels, List<MapChange> changedPixels)
