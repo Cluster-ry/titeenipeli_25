@@ -29,6 +29,10 @@ body {
     min-width: 320px;
 }
 
+body::after {
+    --token: "#TÄLLÄ_SAA";
+}
+
 h1 {
     font-size: 3.2em;
     line-height: 1.1;

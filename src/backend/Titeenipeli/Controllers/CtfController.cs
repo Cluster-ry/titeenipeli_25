@@ -15,6 +15,7 @@ namespace Titeenipeli.Controllers;
 
 [ApiController]
 [Authorize]
+[Route("ctf")]
 public class CtfController : ControllerBase
 {
     private readonly ICtfFlagRepositoryService _ctfFlagRepositoryService;
@@ -33,7 +34,7 @@ public class CtfController : ControllerBase
 
     }
 
-    [HttpPost("ctf")]
+    [HttpPost]
     [Authorize]
     public async Task<IActionResult> PostCtf([FromBody] PostCtfInput ctfInput)
     {
@@ -71,6 +72,12 @@ public class CtfController : ControllerBase
         }
 
         return Ok();
+    }
+
+    [HttpGet]
+    public IActionResult GetCtf()
+    {
+        return Ok("#GOOD_FOR_YOU");
     }
 
 

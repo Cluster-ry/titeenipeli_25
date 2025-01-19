@@ -95,11 +95,15 @@ public class MapController : ControllerBase
 
         if (!await _mapUpdaterService.PlacePixel(_userRepositoryService, globalCoordinate, user))
         {
+            string description = new Random().NextInt64(100) == 69
+                ? "Have a token #I_DONT_KNOW_THE_RULES"
+                : "Try another pixel";
+
             var error = new ErrorResult
             {
                 Title = "Invalid pixel placement",
                 Code = ErrorCode.InvalidPixelPlacement,
-                Description = "Try another pixel"
+                Description = description
             };
 
             return BadRequest(error);
