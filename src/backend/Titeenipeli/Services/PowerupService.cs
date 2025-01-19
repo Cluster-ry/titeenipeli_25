@@ -17,6 +17,7 @@ public sealed class PowerupService(GameOptions gameOptions) : IPowerupService
     {
         PowerUps.TestEffect => new TestEffect(),
         PowerUps.Titeenikirves => new TiteenikirvesEffect(gameOptions.Height, gameOptions.Width),
+        PowerUps.MFiles => new MFilesEffect(),
         _ => null
     };
 
