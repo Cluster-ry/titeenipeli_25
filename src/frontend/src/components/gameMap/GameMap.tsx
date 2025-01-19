@@ -1,4 +1,4 @@
-import { FC, useMemo, useRef } from "react";
+import { FC, useCallback, useMemo, useRef } from "react";
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import ForegroundRectangle from "./ForegroundRectangle.tsx";
@@ -11,6 +11,8 @@ import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.ts";
 import BackgroundRectangle from "./BackgroundRectangle.tsx";
 import { useInputEventStore } from "../../stores/inputEventStore.ts";
+import { usePowerUpStore } from "../../stores/powerupStore.ts";
+import { Coordinate } from "../../models/Coordinate.ts";
 
 /**
  * @component GameMap
@@ -27,10 +29,17 @@ import { useInputEventStore } from "../../stores/inputEventStore.ts";
 const GameMap: FC = () => {
     const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
     const map = useNewMapStore((state) => state.map);
-    const inputEventStore = useInputEventStore();
+    const setMoving = useInputEventStore((state) => state.setMoving);
+    const usePowerUp = usePowerUpStore((state) => state.usePowerUp);
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
+
+    const handleMapClick = useCallback((coordinate: Coordinate) => {
+        const powerUpClick = usePowerUp(coordinate);
+        if (powerUpClick) return;
+        conquer(coordinate);
+    }, [usePowerUp, conquer]);
 
     const mappedBoundingBox = {
         minY: pixelsBoundingBox.min.y,
@@ -56,7 +65,7 @@ const GameMap: FC = () => {
                         width={mapConfig.PixelSize}
                         height={mapConfig.PixelSize}
                         backgroundGraphic={pixel?.backgroundGraphic}
-                        onClick={() => conquer(parsedCoordinate)}
+                        onClick={() => handleMapClick(parsedCoordinate)}
                     />,
                 );
             }
@@ -92,8 +101,8 @@ const GameMap: FC = () => {
                     width={window.innerWidth}
                     height={window.innerHeight}
                     boundingBox={mappedBoundingBox}
-                    onMoveStart={() => inputEventStore.setMoving(true)}
-                    onMoveEnd={() => inputEventStore.setMoving(false)}
+                    onMoveStart={() => setMoving(true)}
+                    onMoveEnd={() => setMoving(false)}
                 >
                     <Container>{pixelElements}</Container>
                     <EffectContainer ref={effectRef} />
