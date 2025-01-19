@@ -60,6 +60,18 @@ public class UserController(
                     Description = "Provide valid guild"
                 });
             }
+
+            user = userRepositoryService.GetById(user.Id);
+
+            if (user == null)
+            {
+                return BadRequest(new ErrorResult
+                {
+                    Title = "Unable to create user",
+                    Code = ErrorCode.Unknown,
+                    Description = "Unknown error. Please try to create user again."
+                });
+            }
         }
 
         string token = await CreateNewLoginTokenForUser(user);
