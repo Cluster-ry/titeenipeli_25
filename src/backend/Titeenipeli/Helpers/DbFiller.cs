@@ -12,7 +12,7 @@ public static class DbFiller
     {
         if (!dbContext.CtfFlags.Any())
         {
-            dbContext.AddRange(getCtfFlags());
+            dbContext.AddRange(GetCtfFlags());
             dbContext.SaveChanges();
         }
 
@@ -129,7 +129,7 @@ public static class DbFiller
         dbContext.Database.EnsureDeleted();
     }
 
-    private static List<CtfFlag> getCtfFlags()
+    private static List<CtfFlag> GetCtfFlags()
     {
         return
         [
@@ -142,9 +142,9 @@ public static class DbFiller
                 Token = "#TITEENIKIRVES",
                 Powerup = new PowerUp
                 {
-                    PowerId = (int)Powerups.Titeenikirves,
-                    Name = Powerups.Titeenikirves.ToString(),
-                    Description = PowerController.GetDescription(Powerups.Titeenikirves)
+                    PowerId = (int)PowerUps.Titeenikirves,
+                    Name = PowerUps.Titeenikirves.ToString(),
+                    Description = PowerController.GetDescription(PowerUps.Titeenikirves)
                 }
             },
             new CtfFlag
