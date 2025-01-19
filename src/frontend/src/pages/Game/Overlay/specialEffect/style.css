@@ -7,7 +7,7 @@
 }
 .special-effect .button {
     transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.5s;
-    width: 8em;
+    width: 6em;
     aspect-ratio: 1;
     display: flex;
     background: #75757580;
@@ -18,14 +18,14 @@
     align-items: center;
 }
 .special-effect .button .icon {
-    width: 6em;
+    width: 4em;
     aspect-ratio: 1;
     object-fit: contain;
 }
 
 .special-effect .label {
     flex: 1 1 4em;
-    width: 10em;
+    width: 8em;
     text-align: center;
 }
 
@@ -51,8 +51,8 @@
     0% {
         rotate: 0deg;
         transform: scale(1);
-        box-shadow: 0px 0px 40px 20px rgba(255,46,206,0.75);
-      }
+        box-shadow: 0px 0px 40px 20px rgba(255, 46, 206, 0.75);
+    }
     30% {
         rotate: 6deg;
         transform: scale(1.1);
@@ -60,46 +60,46 @@
     }
     50% {
         rotate: 2deg;
-        transform: scale(1.0);
+        transform: scale(1);
         box-shadow: 0px 0px 20px 5px rgba(255, 46, 46, 0.75);
     }
     70% {
         rotate: -6deg;
         transform: scale(1.1);
         box-shadow: 0px 0px 30px 15px rgba(213, 46, 255, 0.75);
-      }
+    }
     100% {
         rotate: 0deg;
         transform: scale(1);
-        box-shadow: 0px 0px 40px 20px rgba(255,46,206,0.75);
+        box-shadow: 0px 0px 40px 20px rgba(255, 46, 206, 0.75);
     }
 }
 @keyframes overlay-selected {
     0% {
         transform: scale(0.9);
         filter: blur(2px);
-        background: radial-gradient(rgba(255,46,206,0.75), rgba(255, 46, 206, 0));
-      }
+        background: radial-gradient(rgba(255, 46, 206, 0.75), rgba(255, 46, 206, 0));
+    }
     40% {
         transform: scale(1.1);
         filter: blur(5px);
         background: radial-gradient(rgba(213, 46, 255, 0.75), rgba(255, 46, 206, 0));
     }
     80% {
-        transform: scale(1.0);
+        transform: scale(1);
         filter: blur(8px);
-        background: radial-gradient(rgba(255,46,206,0.75), rgba(255, 46, 206, 0));
+        background: radial-gradient(rgba(255, 46, 206, 0.75), rgba(255, 46, 206, 0));
     }
     100% {
         transform: scale(0.9);
         filter: blur(2px);
-        background: radial-gradient(rgba(255,46,206,0.75), rgba(255, 46, 206, 0));
-      }
+        background: radial-gradient(rgba(255, 46, 206, 0.75), rgba(255, 46, 206, 0));
+    }
 }
 @keyframes clickAnimation {
     0% {
         transform: rotate(0deg);
-      }
+    }
     30% {
         transform: rotate(50deg);
     }

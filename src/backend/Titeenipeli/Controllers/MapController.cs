@@ -60,7 +60,7 @@ public class MapController : ControllerBase
 
         var map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
-        map = CalculateFogOfWar(map, user.Id);
+        map = CalculateFogOfWar(map, user);
         InjectBackgroundGraphics(map);
         var inversedMap = InverseMap(map);
 
@@ -118,7 +118,7 @@ public class MapController : ControllerBase
 
     private static Map ConstructMap(IEnumerable<Pixel> pixels, int width, int height, User? user)
     {
-        Map map = new Map
+        var map = new Map
         {
             Pixels = new PixelModel[width, height],
             Width = width,
@@ -139,9 +139,9 @@ public class MapController : ControllerBase
             }
         }
 
-        foreach (Pixel pixel in pixels)
+        foreach (var pixel in pixels)
         {
-            PixelModel mapPixel = new PixelModel
+            var mapPixel = new PixelModel
             {
                 Type = PixelType.Normal,
                 Guild = pixel.User?.Guild.Name,
@@ -156,26 +156,27 @@ public class MapController : ControllerBase
 
     private static void MarkSpawns(Map map, IEnumerable<User> users)
     {
-        foreach (User user in users) map.Pixels[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
+        foreach (var user in users.Where(user => !user.IsGod))
+            map.Pixels[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
     }
 
-    private Map CalculateFogOfWar(Map map, int userId)
+    private Map CalculateFogOfWar(Map map, User user)
     {
         int width = map.Pixels.GetLength(0);
         int height = map.Pixels.GetLength(1);
-        Map fogOfWarMap = CreateEmptyMap(width, height);
+        var fogOfWarMap = CreateEmptyMap(width, height);
 
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                if (map.Pixels[x, y].Owner == userId)
+                if (user.IsGod || map.Pixels[x, y].Owner == user.Id)
                 {
                     fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new Coordinate
                     {
                         X = x,
                         Y = y
-                    }, _gameOptions.FogOfWarDistance);
+                    }, user.IsGod ? _gameOptions.Width : user.Guild.FogOfWarDistance);
                 }
             }
         }
@@ -185,7 +186,7 @@ public class MapController : ControllerBase
 
     private Map CreateEmptyMap(int width, int height)
     {
-        Map map = new Map
+        var map = new Map
         {
             Pixels = new PixelModel[width, height],
             Width = width,
@@ -206,7 +207,9 @@ public class MapController : ControllerBase
         return map;
     }
 
-    private static Map MarkPixelsInFogOfWar(Map fogOfWarMap, Map map, Coordinate pixel,
+    private static Map MarkPixelsInFogOfWar(Map fogOfWarMap,
+                                            Map map,
+                                            Coordinate pixel,
                                             int fogOfWarDistance)
     {
         int minX = int.Clamp(pixel.X - fogOfWarDistance, 0, map.Width - 1);
@@ -232,7 +235,7 @@ public class MapController : ControllerBase
 
     private static Map TrimMap(Map map)
     {
-        Map trimmedMap = new Map
+        var trimmedMap = new Map
         {
             Pixels = new PixelModel[map.MaxViewableX - (map.MinViewableX + 1),
                 map.MaxViewableY - (map.MinViewableY + 1)],
@@ -295,7 +298,7 @@ public class MapController : ControllerBase
 
     private static Map InverseMap(Map map)
     {
-        Map inversedMap = new Map
+        var inversedMap = new Map
         {
             Pixels = new PixelModel[map.Height, map.Width],
             Width = map.Height,

@@ -30,31 +30,29 @@ public sealed class JwtService : IJwtService
                 X = user.SpawnX,
                 Y = user.SpawnY
             },
-            GuildId = user.Guild.Name
+            Guild = user.Guild.Name
         };
     }
 
     // ReSharper disable once MemberCanBePrivate.Global
     public string GetJwtToken(JwtClaim jwtClaim)
     {
-        SymmetricSecurityKey secretKey =
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
+        var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
 
-        SymmetricSecurityKey encryptionKey =
-            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Encryption));
+        var encryptionKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Encryption));
 
-        SigningCredentials signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
-        EncryptingCredentials encryptingCredentials = new EncryptingCredentials(encryptionKey,
-            SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256CbcHmacSha512);
+        var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
+        var encryptingCredentials = new EncryptingCredentials(encryptionKey,
+            SecurityAlgorithms.Aes256KW,
+            SecurityAlgorithms.Aes256CbcHmacSha512);
 
-        List<Claim> claims = [new Claim(_jwtOptions.ClaimName, JsonSerializer.Serialize(jwtClaim))];
+        List<Claim> claims =
+        [
+            new(_jwtOptions.ClaimName, JsonSerializer.Serialize(jwtClaim))
+        ];
 
-        if (jwtClaim.GuildId != null)
-        {
-            claims.Add(new Claim(_jwtOptions.GuildClaimName, jwtClaim.GuildId.ToString()!));
-        }
 
-        JwtSecurityToken tokeOptions = new JwtSecurityTokenHandler().CreateJwtSecurityToken(
+        var tokeOptions = new JwtSecurityTokenHandler().CreateJwtSecurityToken(
             _jwtOptions.ValidIssuer,
             _jwtOptions.ValidAudience,
             new ClaimsIdentity(claims),
