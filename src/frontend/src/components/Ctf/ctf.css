@@ -11,6 +11,11 @@
     background-color: #000000;
 }
 
+.ctf-input::after {
+    display: none;
+    content: "#TÄLLÄ_EI_SAA_POWER_UPIA";
+}
+
 .ctf-button {
     display: block;
     margin: auto;
