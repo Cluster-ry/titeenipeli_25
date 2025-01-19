@@ -69,10 +69,58 @@ public class CtfController : ControllerBase
         {
             await HandleUserPowerUp(user, ctfFlag.Powerup);
         }
-
-        return Ok();
+        
+        
+        return Ok(CreateCtfResult(ctfFlag));
     }
 
+    private PostCtfResult CreateCtfResult(CtfFlag flag)
+    {
+        return new PostCtfResult()
+        {
+            Title = "Flag captured",
+            Message = GetGoodEndingMessage(),
+            Benefits = GetBenefits(flag),
+        };
+    }
+
+    private static string GetGoodEndingMessage()
+    {
+        string[] messages =
+        [
+            "You nailed it like a last-minute assignment!",
+            "Flag captured! Time to celebrate with ramen and Netflix.",
+            "Great job! You deserve a break... or maybe just a coffee.",
+            "You did it! Now go binge-watch your favorite series.",
+            "Victory! Just like acing that surprise quiz.",
+            "Well done! Treat yourself to some instant noodles.",
+            "You captured the flag! Now back to procrastinating.",
+            "Awesome! This calls for a pizza party.",
+            "You rock! Time to update your social media status.",
+            "Flag secured! Now you can finally take that nap.",
+            "The cake is a lie, but not this ctf flag!",
+            "You did it! You finally got a ctf token right! Hooray! #WeAreProudOfYou",
+            "You know there is no prize for this, right? Just bragging rights.",
+            "You know that there other stuff to do at titeens'? Like, you know, the game?",
+            "You know that you can't actually eat the flag, right?",
+            "Titeens' is not responsible for any injuries sustained during the capture of this flag."
+        ];
+        return Random.Shared.GetItems(messages, 1)[0];
+    }
+
+    private List<String> GetBenefits(CtfFlag flag)
+    {
+        var benefits = new List<String>();
+
+        if(flag.BaserateMultiplier != 0) benefits.Add($"Base rate limit increased by {flag.BaserateMultiplier}x");
+        if(flag.FovRangeIncrease != 0) benefits.Add($"Field of view range increased by {flag.FovRangeIncrease}");
+        if (flag.Powerup != null)
+        {
+            benefits.Add($"You got {flag.Powerup.Name}!\n");
+        }
+        
+        return benefits;
+    }
 
     private async Task HandleGuildPowerUp(Guild guild, CtfFlag ctfFlag)
     {
