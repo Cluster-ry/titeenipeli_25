@@ -20,4 +20,5 @@ export interface PowerUp {
     id: number;
     name: string;
     description: string;
+    directed: boolean;
 }
