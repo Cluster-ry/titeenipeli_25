@@ -21,7 +21,8 @@ public class UserController(
     IUserRepositoryService userRepositoryService,
     IGuildRepositoryService guildRepositoryService,
     IJwtService jwtService,
-    IMapUpdaterService mapUpdaterService) : ControllerBase
+    IMapUpdaterService mapUpdaterService,
+    GameOptions gameOptions) : ControllerBase
 {
     private const int LoginTokenLength = 32;
 
@@ -148,6 +149,8 @@ public class UserController(
 
             SpawnX = -1,
             SpawnY = -1,
+
+            PixelBucket = gameOptions.InitialPixelBucket,
 
             PowerUps = [],
 
