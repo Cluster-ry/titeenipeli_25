@@ -1,15 +1,15 @@
 .notification {
+    white-space: pre;
     justify-self: center;
     z-index: 3;
     min-width: 25vw;
     border-width: 0;
     border-radius: 15px;
 
-    max-height: 7vh;
     display: grid;
     align-items: center;
     justify-content: center;
-    animation: flash 1500ms ease infinite alternate;
+    animation: flash 5000ms ease infinite alternate;
 
     position: absolute;
     right: 0;

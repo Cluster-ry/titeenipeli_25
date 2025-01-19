@@ -6,6 +6,7 @@ import { useNotificationStore } from "../../stores/notificationStore";
 import "./ctf.css";
 import Modal from "../Modal/Modal";
 import { useCtfStore } from "../../stores/ctfModalStore";
+import {CtfOk} from "../../models/CtfOk.ts";
 
 const CtfModal = () => {
     const [token, setToken] = useState("");
@@ -16,6 +17,10 @@ const CtfModal = () => {
     const NOTIFICATION_SUCCESS: string = "CTF activated successfully!";
     const NOTIFICATION_FAIL: string = "CTF activation failed.";
 
+    const createSuccessNotificationText = (result: CtfOk) => {
+        return `${NOTIFICATION_SUCCESS}\n${result.title}\n${result.message}\nBenefits:${result.benefits.join('\n')}`;
+    };
+    
     const handleTokenChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setToken(event.target.value);
     };
@@ -31,7 +36,7 @@ const CtfModal = () => {
                 console.log("Request unsuccessful.");
                 return;
             } else {
-                triggerNotification(NOTIFICATION_SUCCESS, "success");
+                triggerNotification(createSuccessNotificationText(result?.data), "success");
             }
         } catch (error) {
             triggerNotification(NOTIFICATION_FAIL, "error");
