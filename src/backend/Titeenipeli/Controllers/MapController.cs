@@ -156,7 +156,8 @@ public class MapController : ControllerBase
 
     private static void MarkSpawns(Map map, IEnumerable<User> users)
     {
-        foreach (var user in users) map.Pixels[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
+        foreach (var user in users.Where(user => !user.IsGod))
+            map.Pixels[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
     }
 
     private Map CalculateFogOfWar(Map map, User user)
@@ -169,13 +170,13 @@ public class MapController : ControllerBase
         {
             for (int y = 0; y < height; y++)
             {
-                if (map.Pixels[x, y].Owner == user.Id)
+                if (user.IsGod || map.Pixels[x, y].Owner == user.Id)
                 {
                     fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new Coordinate
                     {
                         X = x,
                         Y = y
-                    }, user.Guild.FogOfWarDistance);
+                    }, user.IsGod ? _gameOptions.Width : user.Guild.FogOfWarDistance);
                 }
             }
         }

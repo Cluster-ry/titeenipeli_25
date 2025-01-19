@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
 using Titeenipeli.Options;
@@ -25,13 +26,13 @@ public class GameStateController(
         var user = HttpContext.GetUser(jwtService, userRepositoryService);
         var guilds = guildRepositoryService.GetAll();
 
-        List<Score> scores = guilds.Select(guild => new Score()
+        var scores = guilds.Where(guild => guild.Name != GuildName.Nobody).Select(guild => new Score
         {
             Guild = guild.Name,
             Amount = guild.CurrentScore
         }).ToList();
 
-        List<PowerUp> powerups = user.PowerUps.Select(power =>
+        var powerUps = user.PowerUps.Select(power =>
         {
             var info = powerupService.GetByDb(power);
             return new PowerUp()
@@ -45,14 +46,14 @@ public class GameStateController(
 
         GameStateResults results = new()
         {
-            PixelBucket = new()
+            PixelBucket = new PixelBucket
             {
                 Amount = (int)user.PixelBucket,
                 MaxAmount = gameOptions.MaximumPixelBucket,
                 IncreasePerMinute = user.Guild.RateLimitPerPlayer,
             },
             Scores = scores,
-            PowerUps = powerups
+            PowerUps = powerUps
         };
 
         return Ok(results);

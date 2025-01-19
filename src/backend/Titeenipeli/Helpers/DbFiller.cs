@@ -63,12 +63,28 @@ public static class DbFiller
             Username = ""
         };
 
+        var god = new User
+        {
+            Code = "God",
+            Guild = new Guild
+            {
+                Name = GuildName.Nobody
+            },
+            SpawnX = -10,
+            SpawnY = -10,
+            PowerUps = [],
+            AuthenticationToken = "puE0g4NkCQlfIQFnrs5xPr0aRQZ9STCv",
+            TelegramId = "99",
+            FirstName = "God",
+            LastName = "",
+            Username = "God",
+            IsGod = true
+        };
+
 
         if (!dbContext.Users.Any())
         {
-            dbContext.Users.Add(testUser);
-            dbContext.Users.Add(testOpponent);
-
+            dbContext.Users.AddRange(testUser, testOpponent, god);
             dbContext.SaveChanges();
         }
 
