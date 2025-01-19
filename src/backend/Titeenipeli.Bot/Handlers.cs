@@ -142,6 +142,14 @@ public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
             case "/start" or "/login":
                 await HandleUserCreationOrLogin(user);
                 break;
+            case "/token":
+                await bot.SendTextMessageAsync(user.Id, "#COMMAND_NOT_FOUND");
+                break;
+            case "/ruusu":
+                await bot.SendTextMessageAsync(user.Id,
+                    "#RUUSU_KASVAA_MUN_SYDÄMMESSÄNI\n\nhttps://youtu.be/xcwjaJ6MIwY\nSäännöt: powi.fi/ruusu");
+
+                break;
         }
 
         await Task.CompletedTask;

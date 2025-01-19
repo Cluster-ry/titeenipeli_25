@@ -1,8 +1,8 @@
 using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Enums;
-using Titeenipeli.Controllers;
 using Titeenipeli.Options;
+using Titeenipeli.Services;
 
 namespace Titeenipeli.Helpers;
 
@@ -12,23 +12,7 @@ public static class DbFiller
     {
         if (!dbContext.CtfFlags.Any())
         {
-            dbContext.CtfFlags.Add(new CtfFlag
-            {
-                Token = "#TEST_FLAG",
-            });
-
-            dbContext.CtfFlags.Add(new CtfFlag
-            {
-                Token = "#TITEENIKIRVES",
-                Powerup = new PowerUp
-                {
-                    PowerId = (int)Powerups.Titeenikirves,
-                    Name = Powerups.Titeenikirves.ToString(),
-                    Description = PowerController.GetDescription(Powerups.Titeenikirves)
-                },
-            });
-
-
+            dbContext.AddRange(GetCtfFlags());
             dbContext.SaveChanges();
         }
 
@@ -90,13 +74,14 @@ public static class DbFiller
 
         if (!dbContext.PowerUps.Any())
         {
-            foreach (var powerUp in Enum.GetValues<Powerups>())
+            var powerUpService = new PowerupService(gameOptions);
+            foreach (var powerUp in Enum.GetValues<PowerUps>())
             {
                 dbContext.PowerUps.Add(new PowerUp
                 {
                     PowerId = (int)powerUp,
                     Name = powerUp.ToString(),
-                    Description = PowerController.GetDescription(powerUp)
+                    Directed = powerUpService.GetByEnum(powerUp)?.Directed ?? false
                 });
             }
         }
@@ -143,5 +128,66 @@ public static class DbFiller
     public static void Clear(ApiDbContext dbContext)
     {
         dbContext.Database.EnsureDeleted();
+    }
+
+    private static List<CtfFlag> GetCtfFlags()
+    {
+        return
+        [
+            new CtfFlag
+            {
+                Token = "#TEST_FLAG"
+            },
+            new CtfFlag
+            {
+                Token = "#TITEENIKIRVES",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Titeenikirves,
+                    Name = PowerUps.Titeenikirves.ToString(),
+                    Directed = true,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "FGSTLBGXM3YB7USWS28KE2JV9Z267L48"
+            },
+            new CtfFlag
+            {
+                Token = "#COMMAND_NOT_FOUND"
+            },
+            new CtfFlag
+            {
+                Token = "#RUUSU_KASVAA_MUN_SYDÄMMESSÄNI"
+            },
+            new CtfFlag
+            {
+                Token = "#GOOD_FOR_YOU"
+            },
+            new CtfFlag
+            {
+                Token = "#I_DONT_KNOW_THE_RULES"
+            },
+            new CtfFlag
+            {
+                Token = "#TÄLLÄ_EI_SAA_POWER_UPIA"
+            },
+            new CtfFlag
+            {
+                Token = "#TÄLLÄ_SAA"
+            },
+            new CtfFlag
+            {
+                Token = "#ARE_YOU_SURE?"
+            },
+            new CtfFlag
+            {
+                Token = "#OH_YOU_FOUND_THIS?"
+            },
+            new CtfFlag
+            {
+                Token = "#TITEENIJAMIT2025"
+            },
+        ];
     }
 }

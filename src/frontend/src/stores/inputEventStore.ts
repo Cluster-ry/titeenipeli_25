@@ -7,7 +7,7 @@ export interface InputEventStore {
 }
 
 export const useInputEventStore = create<InputEventStore>((set) => ({
-    moving: true,
+    moving: false,
     moveEnded: new Date(0),
     setMoving: (newMovingState: boolean) => {
         if (newMovingState) {

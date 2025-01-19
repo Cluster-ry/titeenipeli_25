@@ -62,6 +62,6 @@ public class MapProvider : IMapProvider
     public bool IsSpawn(Coordinate pixelCoordinate)
     {
         var pixel = GetByCoordinate(pixelCoordinate);
-        return !(pixel?.User == null || (pixel.User.SpawnX != pixel.X && pixel.User.SpawnY != pixel.Y));
+        return pixel?.User != null && pixel.User.SpawnX == pixel.X && pixel.User.SpawnY == pixel.Y;
     }
 }

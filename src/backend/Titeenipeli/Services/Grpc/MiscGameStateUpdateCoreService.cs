@@ -8,7 +8,7 @@ using Titeenipeli.Grpc.Services;
 
 namespace Titeenipeli.Services.Grpc;
 
-public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) :
+public class MiscGameStateUpdateCoreService(IPowerupService powerupService, ILogger<StateUpdateService> logger) :
     GrpcService<MiscStateUpdateResponse>, IMiscGameStateUpdateCoreService
 {
     public async void UpdateMiscGameState(GrpcMiscGameStateUpdateInput gameStateUpdateInput)
@@ -91,16 +91,20 @@ public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) 
         return success ? result : PixelGuild.Nobody;
     }
 
-    private static List<MiscStateUpdateResponse.Types.PowerUps> ConvertPowerupsToGrpc(List<PowerUp> powerUps)
+    private List<MiscStateUpdateResponse.Types.PowerUps> ConvertPowerupsToGrpc(List<PowerUp> powerUps)
     {
         List<MiscStateUpdateResponse.Types.PowerUps> grpcPowerUps = [];
         foreach (var powerUp in powerUps)
         {
+            var actualPowerUp = powerupService.GetByDb(powerUp);
+            if (actualPowerUp == null) continue;
+
             MiscStateUpdateResponse.Types.PowerUps grpcPowerUp = new()
             {
                 PowerUpId = (uint)powerUp.PowerId,
                 Name = powerUp.Name,
-                Description = powerUp.Description
+                Description = actualPowerUp.Description,
+                Directed = actualPowerUp.Directed
             };
             grpcPowerUps.Add(grpcPowerUp);
         }

@@ -7,9 +7,9 @@ const BottomOverlay = () => {
     const [selected, setSelected] = useState<number|null>(null);
     // Placeholders
     const specialEffects: PowerUp[] = [
-        {Id: 1, Name: "Titeenikirves", Description: "Jeejee"},
-        {Id: 2, Name: "Pyssy saatana", Description: "Juujuu"},
-        {Id: 3, Name: "Taktinen anustappi", Description: "Jiijee"},
+        {Id: 1, Name: "Titeenikirves", Description: "Jeejee", Directed: true},
+        {Id: 2, Name: "Pyssy saatana", Description: "Juujuu", Directed: false},
+        {Id: 3, Name: "Taktinen anustappi", Description: "Jiijee", Directed: false},
     ];
     const onClick = useCallback((id: number) => {
         setSelected(prev => prev !== id ? id : null);
