@@ -9,7 +9,7 @@
     display: grid;
     align-items: center;
     justify-content: center;
-    animation: flash 5000ms ease infinite alternate;
+    animation: flash 7500ms ease infinite alternate;
 
     position: absolute;
     right: 0;
