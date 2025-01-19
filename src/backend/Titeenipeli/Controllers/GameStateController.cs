@@ -15,6 +15,7 @@ public class GameStateController(
         GameOptions gameOptions,
         IUserRepositoryService userRepositoryService,
         IGuildRepositoryService guildRepositoryService,
+        IPowerupService powerupService,
         IJwtService jwtService
     ) : ControllerBase
 {
@@ -30,11 +31,16 @@ public class GameStateController(
             Amount = guild.CurrentScore
         }).ToList();
 
-        List<PowerUp> powerups = user.PowerUps.Select(power => new PowerUp()
+        List<PowerUp> powerups = user.PowerUps.Select(power =>
         {
-            PowerUpId = power.PowerId,
-            Name = power.Name,
-            Description = power.Description
+            var info = powerupService.GetByDb(power);
+            return new PowerUp()
+            {
+                PowerUpId = power.PowerId,
+                Name = power.Name,
+                Description = info!.Description,
+                Directed = info.Directed,
+            };
         }).ToList();
 
         GameStateResults results = new()

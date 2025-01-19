@@ -15,6 +15,7 @@ namespace Titeenipeli.Controllers;
 
 [ApiController]
 [Authorize]
+[Route("ctf")]
 public class CtfController : ControllerBase
 {
     private readonly ICtfFlagRepositoryService _ctfFlagRepositoryService;
@@ -33,7 +34,7 @@ public class CtfController : ControllerBase
 
     }
 
-    [HttpPost("ctf")]
+    [HttpPost]
     [Authorize]
     public async Task<IActionResult> PostCtf([FromBody] PostCtfInput ctfInput)
     {
@@ -63,7 +64,7 @@ public class CtfController : ControllerBase
 
         if (ctfFlag.Powerup is null)
         {
-            HandleGuildPowerUp(user.Guild);
+            await HandleGuildPowerUp(user.Guild, ctfFlag);
         }
         else
         {
@@ -73,10 +74,20 @@ public class CtfController : ControllerBase
         return Ok();
     }
 
-
-    private void HandleGuildPowerUp(Guild guild)
+    [HttpGet]
+    public IActionResult GetCtf()
     {
-        //TODO run powerup code
+        return Ok("#GOOD_FOR_YOU");
+    }
+
+
+    private async Task HandleGuildPowerUp(Guild guild, CtfFlag ctfFlag)
+    {
+        if (ctfFlag.BaserateMultiplier != 0) guild.BaseRateLimit *= ctfFlag.BaserateMultiplier;
+        if (ctfFlag.FovRangeIncrease != 0) guild.FovRangeDistance += ctfFlag.FovRangeIncrease;
+
+        _guildRepositoryService.Update(guild);
+        await _guildRepositoryService.SaveChangesAsync();
     }
 
     private async Task HandleUserPowerUp(User user, PowerUp powerUp)

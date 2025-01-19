@@ -26,6 +26,9 @@ properties:
         powerUpId: 
           description: "Unique identifier for the powerup"
           type: string
+        directed:
+          description: "Whether the powerup is directed at a cardinal direction"
+          type: boolean
         name:
           description: "Name of the powerup"
           type: string
