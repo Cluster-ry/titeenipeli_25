@@ -1,9 +1,14 @@
-import { Sprite } from "@pixi/react";
+import { Container, Sprite, withFilters } from "@pixi/react";
 import { FederatedPointerEvent, Texture } from "pixi.js";
 import BackgroundRectangleProps from "../../models/BackgroundRectangleProps";
 import { useInputEventStore } from "../../stores/inputEventStore";
+import { GlowFilter } from "pixi-filters";
 
 const backgroundGraphicSize = 32;
+
+const Filters = withFilters(Container, {
+    glow: GlowFilter
+});
 
 const BackgroundRectangle = ({ x, y, width, height, backgroundGraphic, onClick }: BackgroundRectangleProps) => {
     const inputEventStore = useInputEventStore();
@@ -18,23 +23,25 @@ const BackgroundRectangle = ({ x, y, width, height, backgroundGraphic, onClick }
             return;
         }
 
-        onClick({ x: x, y: y });
+        onClick({ x, y });
     };
 
     const texture = Texture.fromBuffer(backgroundGraphic, backgroundGraphicSize, backgroundGraphicSize);
 
     return (
-        <Sprite
-            position={{ x: x, y: y }}
-            image="test"
-            width={width}
-            height={height}
-            cullable={true}
-            texture={texture}
-            eventMode="static"
-            mousedown={handleEvent}
-            tap={handleEvent}
-        />
+        <Filters glow={{ enabled: false, outerStrength: 5, innerStrength: 2, color: 0xfde90d, alpha: 1, knockout: false }}>
+            <Sprite
+                position={{ x: x, y: y }}
+                image="test"
+                width={width}
+                height={height}
+                cullable={true}
+                texture={texture}
+                eventMode="static"
+                mousedown={handleEvent}
+                tap={handleEvent}
+            />
+        </Filters>
     );
 };
 
