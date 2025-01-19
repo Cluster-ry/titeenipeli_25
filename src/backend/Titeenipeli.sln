@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Bot", "Titeenip
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.InMemoryMapProvider", "Titeenipeli.InMemoryMapProvider\Titeenipeli.InMemoryMapProvider.csproj", "{C96AE099-A2C3-4F25-89D6-C1CB4685D1F2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.SpecialEffects", "Titeenipeli.SpecialEffects\Titeenipeli.SpecialEffects.csproj", "{23617BB6-1663-4E04-AE65-6A10CD1CABB7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{C96AE099-A2C3-4F25-89D6-C1CB4685D1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C96AE099-A2C3-4F25-89D6-C1CB4685D1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C96AE099-A2C3-4F25-89D6-C1CB4685D1F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23617BB6-1663-4E04-AE65-6A10CD1CABB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23617BB6-1663-4E04-AE65-6A10CD1CABB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23617BB6-1663-4E04-AE65-6A10CD1CABB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23617BB6-1663-4E04-AE65-6A10CD1CABB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
