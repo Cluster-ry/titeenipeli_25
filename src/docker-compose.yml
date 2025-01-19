@@ -5,7 +5,7 @@
       context: .
       dockerfile: backend/Titeenipeli/Dockerfile
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: 80
       ASPNETCORE_HTTPS_PORTS: 443
       JWT__Secret: ${JWT_SECRET}
