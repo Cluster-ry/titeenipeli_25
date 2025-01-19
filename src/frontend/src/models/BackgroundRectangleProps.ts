@@ -4,6 +4,7 @@ interface BackgroundRectangleProps {
     width: number;
     height: number;
     backgroundGraphic: Uint8Array;
+    highlight: boolean;
     onClick: (event: { x: number; y: number }) => void;
 }
 

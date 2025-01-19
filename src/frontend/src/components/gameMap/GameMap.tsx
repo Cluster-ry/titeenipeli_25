@@ -31,6 +31,7 @@ const GameMap: FC = () => {
     const map = useNewMapStore((state) => state.map);
     const setMoving = useInputEventStore((state) => state.setMoving);
     const usePowerUp = usePowerUpStore((state) => state.usePowerUp);
+    const selectedLocation = usePowerUpStore((state) => state.location);
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
@@ -52,6 +53,7 @@ const GameMap: FC = () => {
         const result: JSX.Element[] = [];
         if (map == null) return result;
         for (const [coordinate, pixel] of map) {
+            const selected = selectedLocation ? JSON.stringify(selectedLocation) === coordinate : false;
             const parsedCoordinate = JSON.parse(coordinate);
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
@@ -65,6 +67,7 @@ const GameMap: FC = () => {
                         width={mapConfig.PixelSize}
                         height={mapConfig.PixelSize}
                         backgroundGraphic={pixel?.backgroundGraphic}
+                        highlight={selected}
                         onClick={() => handleMapClick(parsedCoordinate)}
                     />,
                 );
@@ -83,7 +86,7 @@ const GameMap: FC = () => {
             }
         }
         return result;
-    }, [map]);
+    }, [map, selectedLocation]);
 
     if (map === null) {
         return <span>Loading...</span>;

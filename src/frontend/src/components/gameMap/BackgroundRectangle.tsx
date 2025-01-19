@@ -10,7 +10,7 @@ const Filters = withFilters(Container, {
     glow: GlowFilter
 });
 
-const BackgroundRectangle = ({ x, y, width, height, backgroundGraphic, onClick }: BackgroundRectangleProps) => {
+const BackgroundRectangle = ({ x, y, width, height, backgroundGraphic, highlight, onClick }: BackgroundRectangleProps) => {
     const inputEventStore = useInputEventStore();
 
     // When a client clicks a pixel
@@ -29,7 +29,7 @@ const BackgroundRectangle = ({ x, y, width, height, backgroundGraphic, onClick }
     const texture = Texture.fromBuffer(backgroundGraphic, backgroundGraphicSize, backgroundGraphicSize);
 
     return (
-        <Filters glow={{ enabled: false, outerStrength: 5, innerStrength: 2, color: 0xfde90d, alpha: 1, knockout: false }}>
+        <Filters glow={{ enabled: highlight, outerStrength: 5, innerStrength: 2, color: 0xfde90d, alpha: 1, knockout: false }}>
             <Sprite
                 position={{ x: x, y: y }}
                 image="test"
