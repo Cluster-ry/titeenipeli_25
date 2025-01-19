@@ -5,8 +5,13 @@ namespace Titeenipeli.SpecialEffects;
 
 public abstract class BaseSpecialEffect : ISpecialEffect
 {
-    public abstract byte[,] Template { get; }
-    public abstract Coordinate Origin { get; }
+    public abstract String Description { get; }
+    public bool Directed { get; } = true;
+    
+    
+    protected abstract byte[,] Template { get; }
+    protected abstract Coordinate Origin { get; }
+    
 
 
     public virtual List<Coordinate> HandleSpecialEffect(Coordinate location, Direction direction)
