@@ -15,11 +15,10 @@ const CtfModal = () => {
     const { triggerNotification } = useNotificationStore();
 
     const CTF_DISCLAIMER: string = "Activate CTF";
-    const NOTIFICATION_SUCCESS: string = "CTF activated successfully!";
     const NOTIFICATION_FAIL: string = "CTF activation failed.";
 
     const createSuccessNotificationText = (result: CtfOk) => {
-        return `${NOTIFICATION_SUCCESS}\n${result.title}\n${result.message}\nBenefits:${result.benefits.join('\n')}`;
+        return `${result.title}\n${result.message}\nBenefits:${result.benefits.join('\n')}`;
     };
 
     useEffect(() => {
@@ -41,8 +40,8 @@ const CtfModal = () => {
                 triggerNotification(NOTIFICATION_FAIL, "error");
                 console.log("Request unsuccessful.");
                 return;
-            } else {
-                triggerNotification(createSuccessNotificationText(result?.data), "success");
+            } else if ("data" in result) {
+                triggerNotification(createSuccessNotificationText(result.data), "success");
             }
         } catch (error) {
             triggerNotification(NOTIFICATION_FAIL, "error");
