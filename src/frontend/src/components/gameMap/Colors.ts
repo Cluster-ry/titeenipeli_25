@@ -26,6 +26,9 @@ const guildColorMapping: Record<Guild, HslaColour> = {
 const mapBorderColor = { hue: 44, saturation: 98, lightness: 50 };
 const black = { hue: 0, saturation: 0, lightness: 0 };
 
+const lightnessChange = 20
+const saturationChange = 40
+
 export function pixelColor(pixel: Pixel | null, user: User | null): HslaColour {
     let color = pixelBaseColor(pixel);
     color = pixelOwnerModifier(pixel, user, color);
@@ -57,7 +60,7 @@ const spawnModifier = (pixel: Pixel | null, color: HslaColour): HslaColour => {
     const alteredColor: HslaColour = {
         hue: color.hue,
         saturation: color.saturation,
-        lightness: color.lightness - 20,
+        lightness: color.lightness - lightnessChange,
     };
 
     return alteredColor;
@@ -77,7 +80,7 @@ const pixelOwnerModifier = (pixel: Pixel | null, user: User | null, color: HslaC
 
     const alteredColor: HslaColour = {
         hue: color.hue,
-        saturation: color.saturation - 20,
+        saturation: color.saturation - saturationChange,
         lightness: color.lightness,
     };
 
