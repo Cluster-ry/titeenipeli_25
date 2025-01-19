@@ -33,8 +33,9 @@ public class CtfControllerIntegrationTest : BaseFixture
         var ctfFlagRepositoryService = new CtfFlagRepositoryService(_dbContext);
         var userRepositoryService = new UserRepositoryService(_dbContext);
         var guildRepositoryService = new GuildRepositoryService(_dbContext);
+        var powerUpService = new PowerupService(new GameOptions());
         var jwtService = new JwtService(new JwtOptions());
-        var miscGameStateUpdateCoreService = new MiscGameStateUpdateCoreService(new Logger<StateUpdateService>(new LoggerFactory()));
+        var miscGameStateUpdateCoreService = new MiscGameStateUpdateCoreService(powerUpService, new Logger<StateUpdateService>(new LoggerFactory()));
 
         var guild = GenerateGuild();
         var user = GenerateUser(guild);

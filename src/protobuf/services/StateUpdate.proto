@@ -46,8 +46,9 @@ message MiscStateUpdateResponse {
   
   message PowerUps {
     uint32 powerUpId = 1;
-    string name = 2;
-    string description = 3;
+    bool Directed = 2;
+    string name = 3;
+    string description = 4;
   }
 }
 

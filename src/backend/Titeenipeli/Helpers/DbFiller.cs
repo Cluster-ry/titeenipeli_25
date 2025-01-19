@@ -1,8 +1,8 @@
 using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Enums;
-using Titeenipeli.Controllers;
 using Titeenipeli.Options;
+using Titeenipeli.Services;
 
 namespace Titeenipeli.Helpers;
 
@@ -24,7 +24,7 @@ public static class DbFiller
                 {
                     PowerId = (int)PowerUps.Titeenikirves,
                     Name = PowerUps.Titeenikirves.ToString(),
-                    Description = PowerController.GetDescription(PowerUps.Titeenikirves)
+                    Directed = true,
                 },
             });
 
@@ -90,13 +90,14 @@ public static class DbFiller
 
         if (!dbContext.PowerUps.Any())
         {
+            var powerUpService = new PowerupService(gameOptions);
             foreach (var powerUp in Enum.GetValues<PowerUps>())
             {
                 dbContext.PowerUps.Add(new PowerUp
                 {
                     PowerId = (int)powerUp,
                     Name = powerUp.ToString(),
-                    Description = PowerController.GetDescription(powerUp)
+                    Directed = powerUpService.GetByEnum(powerUp)?.Directed ?? false
                 });
             }
         }
