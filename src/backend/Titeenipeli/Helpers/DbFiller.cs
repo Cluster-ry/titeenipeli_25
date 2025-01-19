@@ -1,8 +1,8 @@
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
-using Titeenipeli.Context;
+using Titeenipeli.Common.Database;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Enums;
 using Titeenipeli.Options;
-using Titeenipeli.Schema;
+using Titeenipeli.Services;
 
 namespace Titeenipeli.Helpers;
 
@@ -10,105 +10,103 @@ public static class DbFiller
 {
     public static void Initialize(ApiDbContext dbContext, GameOptions gameOptions)
     {
-        RelationalDatabaseCreator databaseCreator =
-            (RelationalDatabaseCreator)dbContext.Database.GetService<IDatabaseCreator>();
-
         if (!dbContext.CtfFlags.Any())
         {
-            dbContext.CtfFlags.Add(new CtfFlag
-            {
-                Token = "#TEST_FLAG",
-                Id = 0
-            });
-
+            dbContext.AddRange(GetCtfFlags());
             dbContext.SaveChanges();
         }
 
         if (!dbContext.Guilds.Any())
         {
-            Guild[] guilds =
-            [
-                new Guild
-                {
-                    Color = 0
-                },
-                new Guild
-                {
-                    Color = 1
-                },
-                new Guild
-                {
-                    Color = 2
-                },
-                new Guild
-                {
-                    Color = 3
-                },
-                new Guild
-                {
-                    Color = 4
-                },
-                new Guild
-                {
-                    Color = 5
-                },
-                new Guild
-                {
-                    Color = 6
-                },
-                new Guild
-                {
-                    Color = 7
-                }
-            ];
+            List<Guild> guilds = [];
+            var guildNames = Enum.GetValues(typeof(GuildName)).Cast<GuildName>().ToList();
+            // Skip Nobody.
+            guildNames = guildNames.Skip(1).ToList();
+            guilds.AddRange(from GuildName name in guildNames
+                            select new Guild
+                            {
+                                Name = name,
+                                ActiveCtfFlags = [],
+                                BaseRateLimit = gameOptions.PixelsPerMinutePerGuild,
+                                FogOfWarDistance = gameOptions.FogOfWarDistance
+                            });
 
             dbContext.Guilds.AddRange(guilds);
 
             dbContext.SaveChanges();
         }
 
-        User testUser = new User
+        var testUser = new User
         {
             Code = "test",
             Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
             SpawnX = 5,
             SpawnY = 5,
-            TelegramId = "test",
+            PixelBucket = gameOptions.InitialPixelBucket,
+            PowerUps = [],
+            TelegramId = "0",
             FirstName = "",
             LastName = "",
             Username = "",
-            PhotoUrl = "",
-            AuthDate = "",
-            Hash = ""
         };
 
-        User testOpponent = new User
+        var testOpponent = new User
         {
             Code = "opponent",
-            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Color == 4) ?? throw new InvalidOperationException(),
+            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ??
+                    throw new InvalidOperationException(),
             SpawnX = 3,
             SpawnY = 2,
-            TelegramId = "opponent",
+            PixelBucket = gameOptions.InitialPixelBucket,
+            PowerUps = [],
+            TelegramId = "1",
             FirstName = "",
             LastName = "",
-            Username = "",
-            PhotoUrl = "",
-            AuthDate = "",
-            Hash = ""
+            Username = ""
+        };
+
+        var god = new User
+        {
+            Code = "God",
+            Guild = new Guild
+            {
+                Name = GuildName.Nobody
+            },
+            SpawnX = -10,
+            SpawnY = -10,
+            PowerUps = [],
+            AuthenticationToken = "puE0g4NkCQlfIQFnrs5xPr0aRQZ9STCv",
+            TelegramId = "99",
+            FirstName = "God",
+            LastName = "",
+            Username = "God",
+            IsGod = true
         };
 
 
         if (!dbContext.Users.Any())
         {
-            dbContext.Users.Add(testUser);
-            dbContext.Users.Add(testOpponent);
-
+            dbContext.Users.AddRange(testUser, testOpponent, god);
             dbContext.SaveChanges();
+        }
+
+
+        if (!dbContext.PowerUps.Any())
+        {
+            var powerUpService = new PowerupService(gameOptions);
+            foreach (var powerUp in Enum.GetValues<PowerUps>())
+            {
+                dbContext.PowerUps.Add(new PowerUp
+                {
+                    PowerId = (int)powerUp,
+                    Name = powerUp.ToString(),
+                    Directed = powerUpService.GetByEnum(powerUp)?.Directed ?? false
+                });
+            }
         }
 
         if (!dbContext.Map.Any())
         {
-            Random random = new Random(1);
             for (int x = 0; x < gameOptions.Width; x++)
             {
                 for (int y = 0; y < gameOptions.Height; y++)
@@ -117,7 +115,7 @@ public static class DbFiller
                     {
                         X = x,
                         Y = y,
-                        User = random.Next(10) < 1 && x > 3 && y > 3 && x < 17 && y < 17 ? testUser : testOpponent
+                        User = null
                     });
                 }
             }
@@ -149,5 +147,66 @@ public static class DbFiller
     public static void Clear(ApiDbContext dbContext)
     {
         dbContext.Database.EnsureDeleted();
+    }
+
+    private static List<CtfFlag> GetCtfFlags()
+    {
+        return
+        [
+            new CtfFlag
+            {
+                Token = "#TEST_FLAG"
+            },
+            new CtfFlag
+            {
+                Token = "#TITEENIKIRVES",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Titeenikirves,
+                    Name = PowerUps.Titeenikirves.ToString(),
+                    Directed = true,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "FGSTLBGXM3YB7USWS28KE2JV9Z267L48"
+            },
+            new CtfFlag
+            {
+                Token = "#COMMAND_NOT_FOUND"
+            },
+            new CtfFlag
+            {
+                Token = "#RUUSU_KASVAA_MUN_SYDÄMMESSÄNI"
+            },
+            new CtfFlag
+            {
+                Token = "#GOOD_FOR_YOU"
+            },
+            new CtfFlag
+            {
+                Token = "#I_DONT_KNOW_THE_RULES"
+            },
+            new CtfFlag
+            {
+                Token = "#TÄLLÄ_EI_SAA_POWER_UPIA"
+            },
+            new CtfFlag
+            {
+                Token = "#TÄLLÄ_SAA"
+            },
+            new CtfFlag
+            {
+                Token = "#ARE_YOU_SURE?"
+            },
+            new CtfFlag
+            {
+                Token = "#OH_YOU_FOUND_THIS?"
+            },
+            new CtfFlag
+            {
+                Token = "#TITEENIJAMIT2025"
+            },
+        ];
     }
 }

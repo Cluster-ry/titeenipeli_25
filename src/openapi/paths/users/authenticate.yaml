@@ -1,0 +1,19 @@
+post:
+  tags:
+    - users
+  summary: "Authenticates user using token."
+  operationId: "authenticateUser"
+  requestBody:
+    description: "User authentication token received from Telegram."
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/telegramToken.yaml"
+  responses:
+    "200":
+      $ref: "../../components/responses/200UserAuthorization.yaml"
+    "403":
+      $ref: "../../components/responses/403AuthorizationError.yaml"
+  security:
+    - botAuth: []

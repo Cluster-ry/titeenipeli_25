@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+import "components/enums/pixelGuild.proto";
+import "components/enums/pixelTypes.proto";
+import "components/schemas/pixelUser.proto";
+import "components/schemas/relativeCoordinate.proto";
+
+option csharp_namespace = "GrpcGeneratedServices";
+package Game;
+
+message IncrementalMapUpdateRequest {
+
+}
+
+message IncrementalMapUpdateResponse {
+  repeated IncrementalMapUpdate updates = 1;
+
+  message IncrementalMapUpdate {
+    RelativeCoordinate spawnRelativeCoordinate = 1;
+    PixelTypes type = 2;
+    PixelGuild guild = 3;
+    PixelUser owner = 4;
+    bytes backgroundGraphic = 5;
+  }  
+}
+
+message MiscStateUpdateRequest {
+
+}
+
+message MiscStateUpdateResponse {
+  PixelBucket pixelBucket = 1;
+  repeated Scores scores = 2;
+  repeated PowerUps powerUps = 3;
+  bool powerupUpdate = 5;
+
+  message PixelBucket {
+    uint32 amount = 1;
+    uint32 maxAmount = 2;
+    float increasePerMinute = 3;
+  }
+
+  message Scores {
+    PixelGuild guild = 1;
+    uint32 amount = 2;
+  }
+  
+  message PowerUps {
+    uint32 powerUpId = 1;
+    bool Directed = 2;
+    string name = 3;
+    string description = 4;
+  }
+}
+
+service StateUpdate {
+  rpc GetIncrementalMapUpdate(IncrementalMapUpdateRequest) returns (stream IncrementalMapUpdateResponse);
+  rpc GetMiscGameStateUpdate(MiscStateUpdateRequest) returns (stream MiscStateUpdateResponse);
+}

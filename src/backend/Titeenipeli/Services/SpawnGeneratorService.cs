@@ -1,42 +1,33 @@
-using Titeenipeli.Enums;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
-using Titeenipeli.Models;
+using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Options;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Services;
 
 public class SpawnGeneratorService
 {
     private readonly Coordinate _mapCenter;
-    private readonly IMapRepositoryService _mapRepositoryService;
+    private readonly IMapProvider _mapProvider;
     private readonly SpawnGenerator _spawnGenerator;
 
-    public SpawnGeneratorService(GameOptions gameOptions, IMapRepositoryService mapRepositoryService)
+    public SpawnGeneratorService(GameOptions gameOptions, IMapProvider mapProvider)
     {
-        _mapRepositoryService = mapRepositoryService;
+        _mapProvider = mapProvider;
         _spawnGenerator = new SpawnGenerator(gameOptions);
         _mapCenter = new Coordinate { X = gameOptions.Width / 2, Y = gameOptions.Height / 2 };
     }
 
     public Coordinate GetSpawnPoint(GuildName guildName)
     {
-        Coordinate spawnCoordinate = AddOffset(_spawnGenerator.GetSpawnPoint(guildName));
+        Coordinate spawnCoordinate;
 
-        while (_mapRepositoryService.IsSpawn(spawnCoordinate))
+        do
         {
-            spawnCoordinate = AddOffset(_spawnGenerator.GetSpawnPoint(guildName));
-        }
+            spawnCoordinate = _mapCenter + _spawnGenerator.GetSpawnPoint(guildName);
+        } while (!_mapProvider.IsValid(spawnCoordinate) || _mapProvider.IsSpawn(spawnCoordinate));
 
         return spawnCoordinate;
-    }
-
-    private Coordinate AddOffset(Coordinate coordinate)
-    {
-        return new Coordinate
-        {
-            X = _mapCenter.X + coordinate.X,
-            Y = _mapCenter.Y + coordinate.Y
-        };
     }
 }

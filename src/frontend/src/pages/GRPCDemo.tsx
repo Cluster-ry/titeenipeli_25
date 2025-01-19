@@ -1,22 +1,21 @@
 import { useState } from "react";
-import { IncrementalMapUpdateResponse } from "../generated/grpc/services/MapUpdate";
-import { getGrpcClient } from "../core/grpc/grpcClient";
+import { IncrementalMapUpdateResponse } from "../generated/grpc/services/StateUpdate";
+import GrpcClients from "../core/grpc/grpcClients";
 
-export default function GRPCTest() {
-  const [grpcConnectionStatus, setGrpcConnectionStatus] = useState(false);
-  const [latestGrpcResponse, setLatestGrpcResponse] =
-    useState<IncrementalMapUpdateResponse>();
+const GRPCTest = () => {
+    const [grpcConnectionStatus, setGrpcConnectionStatus] = useState(false);
+    const [latestGrpcResponse, setLatestGrpcResponse] = useState<IncrementalMapUpdateResponse>();
 
-  const grpcClient = getGrpcClient();
-  grpcClient.registerOnConnectionStatusChangedListener(setGrpcConnectionStatus);
-  grpcClient.incrementalMapUpdateClient?.registerOnResponseListener(
-    setLatestGrpcResponse
-  );
+    const grpcClient = GrpcClients.getGrpcClients();
+    grpcClient.incrementalMapUpdateClient.registerOnConnectionStatusChangedListener(setGrpcConnectionStatus);
+    grpcClient.incrementalMapUpdateClient?.registerOnResponseListener(setLatestGrpcResponse);
 
-  return (
-    <div id="grpcdemo">
-      <p>Connection status: {grpcConnectionStatus.toString()}</p>
-      <p>Response: {JSON.stringify(latestGrpcResponse)}</p>
-    </div>
-  )
-}
+    return (
+        <div id="grpcdemo">
+            <p>Connection status: {grpcConnectionStatus.toString()}</p>
+            <p>Response: {JSON.stringify(latestGrpcResponse)}</p>
+        </div>
+    );
+};
+
+export default GRPCTest;

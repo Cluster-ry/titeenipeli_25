@@ -1,0 +1,97 @@
+.modal {
+    display: flex;
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    overflow: auto;
+    background-color: rgb(0, 0, 0, 0.4);
+}
+
+.opening {
+    animation: animatetop 0.4s ease;
+}
+
+.closing {
+    animation: animateclose 0.4s ease;  /* Needs to match js animation! */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: fit-content;
+    box-shadow:
+        0 4px 8px 0 rgba(0, 0, 0, 0.2),
+        0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+@-webkit-keyframes animatetop {
+    from {
+        transform: translateY(-200px);
+        filter: opacity(0%) blur(4px);
+    }
+    to {
+        transform: translateY(0px);
+        filter: opacity(100%) blur(0px);
+    }
+}
+
+@keyframes animatetop {
+    from {
+        transform: translateY(-200px);
+        filter: opacity(0%) blur(4px);
+    }
+    to {
+        transform: translateY(0px);
+        filter: opacity(100%) blur(0px);
+    }
+}
+
+@-webkit-keyframes animateclose{
+    from {
+        transform: translateY(0px);
+        filter: opacity(100%) blur(0px);
+    }
+    to {
+        transform: translateY(-200px);
+        filter: opacity(0%) blur(4px);
+    }
+}
+
+@keyframes animateclose {
+    from {
+        transform: translateY(0px);
+        filter: opacity(100%) blur(0px);
+    }
+    to {
+        transform: translateY(-200px);
+        filter: opacity(0%) blur(4px);
+    }
+}
+
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #7a7a7a;
+    text-decoration: none;
+}
+
+.modal-header {
+    padding: 2px 16px;
+    background-color: #1a1a1a;
+    color: white;
+}
+
+.modal-body {
+    padding: 16px 32px;
+}

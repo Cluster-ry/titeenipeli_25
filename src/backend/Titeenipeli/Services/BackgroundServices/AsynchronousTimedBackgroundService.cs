@@ -29,11 +29,11 @@ public class AsynchronousTimedBackgroundService<TService, TServiceImplementation
 
     private async Task RunPeriodic(CancellationToken cancellationToken)
     {
-        using PeriodicTimer timer = new PeriodicTimer(period);
-        do
+        using PeriodicTimer timer = new(period);
+        while (await timer.WaitForNextTickAsync(cancellationToken))
         {
             await DoWorkWithErrorHandling();
-        } while (await timer.WaitForNextTickAsync(cancellationToken));
+        }
     }
 
     private async Task DoWorkWithErrorHandling()

@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using Titeenipeli.Enums;
-using Titeenipeli.Models;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 
 namespace Titeenipeli.Tests.GameLogic;
 
@@ -20,7 +21,7 @@ public static class MapUtils
         { GuildName.Datateknologerna, 37 }
     };
 
-    public static Map BuildMapFromOwnerMatrix(GuildPixel[,] owners)
+    public static PixelWithType[,] BuildMapFromOwnerMatrix(GuildPixel[,] owners)
     {
         int ySize = owners.GetUpperBound(0) + 1;
         int xSize = owners.GetUpperBound(1) + 1;
@@ -31,20 +32,19 @@ public static class MapUtils
         {
             for (int x = 1; x < xSize + 1; x++)
             {
-                GuildPixel pixelData = owners[y - 1, x - 1];
-                map[y, x] = new PixelModel
+                var pixelData = owners[y - 1, x - 1];
+                map[x, y] = new PixelWithType
                 {
-                    OwnPixel = false,
                     Type = pixelData.isSpawn ? PixelType.Spawn : PixelType.Normal,
-                    Owner = pixelData.guild
+                    Owner = GuildNameToUser(pixelData.guild)
                 };
             }
         }
 
-        return new Map { Pixels = map, Height = ySize, Width = xSize };
+        return map;
     }
 
-    public static Map BuildMapFromSpawnPointList(int size, (int x, int y, GuildName owner)[] spawnPoints)
+    public static PixelWithType[,] BuildMapFromSpawnPointList(int size, (int x, int y, GuildName owner)[] spawnPoints)
     {
         PixelModel[,] map = BuildMapBorders(size, size);
 
@@ -52,61 +52,82 @@ public static class MapUtils
         {
             for (int x = 1; x < size + 1; x++)
             {
-                map[y, x] = new PixelModel
+                map[x, y] = new PixelWithType
                 {
-                    OwnPixel = false,
                     Type = PixelType.Normal,
                     Owner = null
                 };
             }
         }
 
-        foreach ((int x, int y, GuildName owner) in spawnPoints)
-            map[y, x] = new PixelModel { OwnPixel = false, Type = PixelType.Spawn, Owner = owner };
-
-        return new Map { Pixels = map, Height = size, Width = size };
-    }
-
-    private static PixelModel[,] BuildMapBorders(int xSize, int ySize)
-    {
-        PixelModel[,] map = new PixelModel[ySize + 2, xSize + 2];
-        for (int x = 0; x < xSize + 2; x++)
+        foreach (var (x, y, owner) in spawnPoints)
         {
-            map[0, x] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
-        }
-
-        for (int y = 1; y < ySize + 1; y++)
-        {
-            map[y, 0] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
-            map[y, xSize + 1] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
-        }
-
-        for (int x = 0; x < xSize + 2; x++)
-        {
-            map[ySize + 1, x] = new PixelModel { OwnPixel = false, Type = PixelType.MapBorder };
+            map[x, y] = new PixelWithType { Type = PixelType.Spawn, Owner = GuildNameToUser(owner) };
         }
 
         return map;
     }
 
-    public static string MapAsColours(Map map)
+    private static PixelWithType[,] BuildMapBorders(int xSize, int ySize)
     {
-        int ySize = map.Pixels.GetUpperBound(0) + 1;
-        int xSize = map.Pixels.GetUpperBound(1) + 1;
-        StringBuilder builder = new StringBuilder();
-        for (int y = 0; y < ySize; y++)
+        var map = new PixelWithType[xSize + 2, ySize + 2];
+        for (var x = 0; x < xSize + 2; x++)
+        {
+            map[x, 0] = new PixelWithType { Type = PixelType.MapBorder };
+        }
+
+        for (int y = 1; y < ySize + 1; y++)
+        {
+            map[0, y] = new PixelWithType { Type = PixelType.MapBorder };
+            map[xSize + 1, y] = new PixelWithType { Type = PixelType.MapBorder };
+        }
+
+        for (int x = 0; x < xSize + 2; x++)
+        {
+            map[x, ySize + 1] = new PixelWithType { Type = PixelType.MapBorder };
+        }
+
+        return map;
+    }
+
+    public static User GuildNameToUser(GuildName? guildName)
+    {
+        var guild = guildName != null ? new Guild { Name = (GuildName)guildName, ActiveCtfFlags = [] } : null;
+
+        return new User
+        {
+            Guild = guild,
+            PowerUps = [],
+            Code = "",
+            SpawnX = 0,
+            SpawnY = 0,
+            PixelBucket = 0,
+            TelegramId = "",
+            FirstName = "",
+
+            LastName = "",
+            Username = "",
+        };
+    }
+
+    public static string MapAsColours(PixelWithType[,] map)
+    {
+        var xSize = map.GetUpperBound(0) + 1;
+        var ySize = map.GetUpperBound(1) + 1;
+        var builder = new StringBuilder();
+        for (var y = 0; y < ySize; y++)
         {
             for (int x = 0; x < xSize; x++)
             {
-                GuildName? pixelOwner = map.Pixels[y, x].Owner;
-                if (pixelOwner is null)
+                var pixelOwner = map[x, y].Owner;
+                if (pixelOwner is null || pixelOwner.Guild is null)
                 {
                     builder.Append(' ');
                     continue;
                 }
 
                 // For some reason static analysis doesn't recognize the null guard just above ... oh well
-                builder.Append($"\x1b[{_colourMappings[(GuildName)pixelOwner]}m\u2588\x1b[0m");
+                builder.Append($"\x1b[{_colourMappings[pixelOwner.Guild.Name]}m\u2588\x1b[0m");
             }
 
             builder.Append('\n');
@@ -115,24 +136,24 @@ public static class MapUtils
         return builder.ToString();
     }
 
-    public static string MapAsNumbers(Map map)
+    public static string MapAsNumbers(PixelWithType[,] map)
     {
-        int ySize = map.Pixels.GetUpperBound(0) + 1;
-        int xSize = map.Pixels.GetUpperBound(1) + 1;
-        StringBuilder builder = new StringBuilder();
-        for (int y = 0; y < ySize; y++)
+        var xSize = map.GetUpperBound(0) + 1;
+        var ySize = map.GetUpperBound(1) + 1;
+        var builder = new StringBuilder();
+        for (var y = 0; y < ySize; y++)
         {
             for (int x = 0; x < xSize; x++)
             {
-                GuildName? pixelOwner = map.Pixels[y, x].Owner;
-                if (pixelOwner is null)
+                var pixelOwner = map[x, y].Owner;
+                if (pixelOwner is null || pixelOwner.Guild is null)
                 {
                     builder.Append(' ');
                     continue;
                 }
 
                 // For some reason static analysis doesn't recognize the null guard just above ... oh well
-                builder.Append((int)pixelOwner);
+                builder.Append((int)pixelOwner.Guild.Name);
             }
 
             builder.Append('\n');

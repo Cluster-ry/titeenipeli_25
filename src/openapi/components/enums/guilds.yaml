@@ -24,4 +24,8 @@ oneOf:
     description: Datateknologerna
   - const: Sosa
     title: Sosa
+  - const: Date
+    title: Date
+  - const: Tutti
+    title: Tutti
     description: Software Students Association

@@ -1,11 +1,12 @@
-﻿using Titeenipeli.Enums;
+﻿using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 
 namespace Titeenipeli.GameLogic.MapCalculationDataTypes;
 
 public record Node
 {
-    public required GuildName? Guild { get; init; }
+    public required GuildName? Guild { get; set; }
     public HashSet<int> Neighbours { get; } = [];
-    public HashSet<(int, int)> Pixels { get; } = [];
+    public HashSet<Coordinate> Pixels { get; } = [];
     public bool HasSpawn { get; set; }
 }

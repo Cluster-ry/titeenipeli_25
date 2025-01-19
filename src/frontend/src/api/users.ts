@@ -1,39 +1,15 @@
 import axios, { AxiosResponse } from "axios";
-import { PostUsersInput } from "../models/Post/PostUsersInput";
-import { PutUsersInput } from "../models/Put/PutUsersInput";
-import { ClientApiError } from "../models/ClientApiError";
-import { PostUserResult } from "../models/Post/PostUserResult";
-import { ClientApiOk } from "../models/ClientApiOk";
+import { PostUsersAuthenticateInput } from "../models/Post/PostUsersAuthenticateInput";
+import { GetCurrentUserResult } from "../models/Get/GetCurrentUserResult.ts";
 
-const USERS_URL = "http://localhost:8080/users";
+const USERS_URL = "api/v1/users";
 
-export async function postUsers(postUsersInput: PostUsersInput): Promise<AxiosResponse<PostUserResult> | ClientApiError> {
-    try {
-        const response = await axios.post<PostUserResult>(
-            USERS_URL,
-            postUsersInput,
-        );
+export async function postUsersAuthenticate(postUsersInput: PostUsersAuthenticateInput): Promise<AxiosResponse> {
+    const response = await axios.post(USERS_URL + "/authenticate", postUsersInput);
 
-        console.log("Success.");
-        return response;
-
-    } catch(error) {
-        console.error(error);
-        return { msg: "Request unsuccessful." };
-    }
+    return response;
 }
 
-export async function putUsers(putUsersInput: PutUsersInput): Promise<AxiosResponse<ClientApiOk> | ClientApiError> {
-    try {
-        const response = await axios.put<ClientApiOk>(
-            USERS_URL,
-            putUsersInput
-        );
-
-        console.log("Success.");
-        return response;
-    } catch(error) {
-        console.error(error);
-        return { msg: "Request unsuccessful." };
-    }
+export async function getCurrentUser() {
+    return await axios.get<GetCurrentUserResult>(USERS_URL + "/current");
 }

@@ -2,8 +2,10 @@ type: object
 properties:
   type:
     $ref: "../enums/pixelTypes.yaml"
+  guild:
+    $ref: "../enums/pixelGuild.yaml"
   owner:
-    $ref: "../enums/pixelOwners.yaml"
-  ownPixel:
-    type: boolean
-    example: false
+    type: int
+  backgroundGraphic:
+    type: string
+    format: byte

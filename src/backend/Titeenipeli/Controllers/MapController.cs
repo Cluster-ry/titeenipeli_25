@@ -1,150 +1,124 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Titeenipeli.Enums;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
+using Titeenipeli.Common.Results;
+using Titeenipeli.Common.Results.CustomStatusCodes;
+using Titeenipeli.Extensions;
+using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Inputs;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
-using Titeenipeli.Results;
-using Titeenipeli.Results.CustomStatusCodes;
-using Titeenipeli.Schema;
 using Titeenipeli.Services;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli.Controllers;
 
 [ApiController]
-[Route("map/pixels")]
-[Authorize(Policy = "MustHaveGuild")]
+[Route("state/map/pixels")]
+[Authorize]
 public class MapController : ControllerBase
 {
     private const int BorderWidth = 1;
+
     private readonly GameOptions _gameOptions;
 
-    private readonly IGameEventRepositoryService _gameEventRepositoryService;
-    private readonly IMapRepositoryService _mapRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
+    private readonly IBackgroundGraphicsService _backgroundGraphicsService;
 
-    private readonly RateLimitService _rateLimitService;
+    private readonly IMapUpdaterService _mapUpdaterService;
+    private readonly IMapProvider _mapProvider;
+
+    private readonly IJwtService _jwtService;
 
     public MapController(GameOptions gameOptions,
-                         RateLimitService rateLimitService,
+                         IJwtService jwtService,
                          IUserRepositoryService userRepositoryService,
-                         IMapRepositoryService mapRepositoryService,
-                         IGameEventRepositoryService gameEventRepositoryService)
+                         IMapProvider mapProvider,
+                         IMapUpdaterService mapUpdaterService,
+                         IBackgroundGraphicsService backgroundGraphicsService)
     {
         _gameOptions = gameOptions;
-        _rateLimitService = rateLimitService;
         _userRepositoryService = userRepositoryService;
-        _mapRepositoryService = mapRepositoryService;
-        _gameEventRepositoryService = gameEventRepositoryService;
+        _mapProvider = mapProvider;
+        _jwtService = jwtService;
+        _mapUpdaterService = mapUpdaterService;
+        _backgroundGraphicsService = backgroundGraphicsService;
     }
 
     [HttpGet]
     public IActionResult GetPixels()
     {
-        // TODO: Remove temporary testing user
-        User? user = _userRepositoryService.GetByCode("test");
+        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
 
-        if (user == null)
-        {
-            return BadRequest();
-        }
-
-        User[] users = _userRepositoryService.GetAll().ToArray();
-        Pixel[] pixels = _mapRepositoryService.GetAll().ToArray();
+        var users = _userRepositoryService.GetAll().ToArray();
+        var pixels = _mapProvider.GetAll().ToArray();
 
         // +2 to account for the borders
         int width = _gameOptions.Width + 2 * BorderWidth;
         int height = _gameOptions.Height + 2 * BorderWidth;
 
-        Map map = ConstructMap(pixels, width, height, user);
+        var map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
-        map = CalculateFogOfWar(map);
+        map = CalculateFogOfWar(map, user);
+        InjectBackgroundGraphics(map);
+        var inversedMap = InverseMap(map);
 
-        GetPixelsResult result = new GetPixelsResult
+        var result = new GetPixelsResult
         {
             PlayerSpawn = new Coordinate
             {
-                X = user.SpawnX,
-                Y = user.SpawnY
+                X = user.SpawnX - map.MinViewableX,
+                Y = user.SpawnY - map.MinViewableY
             },
-            Pixels = map.Pixels
+            Pixels = inversedMap.Pixels
         };
 
         return Ok(result);
     }
 
     [HttpPost]
-    public IActionResult PostPixels([FromBody] PostPixelsInput pixelsInput)
+    public async Task<IActionResult> PostPixels([FromBody] PostPixelsInput pixelsInput)
     {
-        // TODO: Remove temporary testing user
-        User? user = _userRepositoryService.GetByCode("test");
+        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
 
-        if (user == null)
+        if (user.PixelBucket < 1)
         {
-            return BadRequest();
+            return new TooManyRequestsResult("Try again later", TimeSpan.FromMinutes(1));
         }
 
-        if (!_rateLimitService.CanPlacePixel(user))
-        {
-            return new TooManyRequestsResult("Try again later", _rateLimitService.TimeBeforeNextPixel(user));
-        }
-
-
-        Coordinate globalCoordinate = new Coordinate
+        var globalCoordinate = new Coordinate
         {
             X = user.SpawnX + pixelsInput.X,
             Y = user.SpawnY + pixelsInput.Y
         };
 
-        if (IsValidPlacement(globalCoordinate, user))
+        if (!await _mapUpdaterService.PlacePixel(_userRepositoryService, globalCoordinate, user))
         {
-            return BadRequest();
+            string description = new Random().NextInt64(100) == 69
+                ? "Have a token #I_DONT_KNOW_THE_RULES"
+                : "Try another pixel";
+
+            var error = new ErrorResult
+            {
+                Title = "Invalid pixel placement",
+                Code = ErrorCode.InvalidPixelPlacement,
+                Description = description
+            };
+
+            return BadRequest(error);
         }
 
-        Pixel? pixelToUpdate = _mapRepositoryService.GetByCoordinate(globalCoordinate);
-
-        if (pixelToUpdate == null)
-        {
-            return BadRequest();
-        }
-
-        if (pixelToUpdate.User != null &&
-            pixelToUpdate.User.SpawnX == globalCoordinate.X &&
-            pixelToUpdate.User.SpawnY == globalCoordinate.Y)
-        {
-            return BadRequest();
-        }
-
-
-        pixelToUpdate.User = user;
-        _mapRepositoryService.Update(pixelToUpdate);
-
-        user.LastPlacement = DateTime.UtcNow;
+        user.PixelBucket--;
         _userRepositoryService.Update(user);
-
-        GameEvent gameEvent = new GameEvent
-        {
-            User = user,
-            // TODO: This is only temporary, fix this when GameEvent structure is more clear
-            Event = JsonSerializer.Serialize("{ " +
-                                             "   'eventType': 'SetPixel'," +
-                                             "   'coordinates': {" +
-                                             "       'x': " + globalCoordinate.X + "," +
-                                             "       'y': " + globalCoordinate.Y + "," +
-                                             "   }" +
-                                             "}")
-        };
-
-        _gameEventRepositoryService.Add(gameEvent);
+        await _userRepositoryService.SaveChangesAsync();
 
         return Ok();
     }
 
     private static Map ConstructMap(IEnumerable<Pixel> pixels, int width, int height, User? user)
     {
-        Map map = new Map
+        var map = new Map
         {
             Pixels = new PixelModel[width, height],
             Width = width,
@@ -159,21 +133,19 @@ public class MapController : ControllerBase
                 {
                     map.Pixels[x, y] = new PixelModel
                     {
-                        OwnPixel = false,
                         Type = PixelType.MapBorder
                     };
                 }
             }
         }
 
-        foreach (Pixel pixel in pixels)
+        foreach (var pixel in pixels)
         {
-            PixelModel mapPixel = new PixelModel
+            var mapPixel = new PixelModel
             {
                 Type = PixelType.Normal,
-                Owner = (GuildName?)pixel.User?.Guild?.Color,
-                // TODO: Verify owning status of pixel, this can be done when we get user information from JWT
-                OwnPixel = pixel.User == user
+                Guild = pixel.User?.Guild.Name,
+                Owner = pixel.User?.Id ?? 0,
             };
 
             map.Pixels[pixel.X + 1, pixel.Y + 1] = mapPixel;
@@ -184,14 +156,37 @@ public class MapController : ControllerBase
 
     private static void MarkSpawns(Map map, IEnumerable<User> users)
     {
-        foreach (User user in users) map.Pixels[user.SpawnX, user.SpawnY].Type = PixelType.Spawn;
+        foreach (var user in users.Where(user => !user.IsGod))
+            map.Pixels[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
     }
 
-    private Map CalculateFogOfWar(Map map)
+    private Map CalculateFogOfWar(Map map, User user)
     {
         int width = map.Pixels.GetLength(0);
         int height = map.Pixels.GetLength(1);
-        Map fogOfWarMap = new Map
+        var fogOfWarMap = CreateEmptyMap(width, height);
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (user.IsGod || map.Pixels[x, y].Owner == user.Id)
+                {
+                    fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new Coordinate
+                    {
+                        X = x,
+                        Y = y
+                    }, user.IsGod ? _gameOptions.Width : user.Guild.FogOfWarDistance);
+                }
+            }
+        }
+
+        return TrimMap(fogOfWarMap);
+    }
+
+    private Map CreateEmptyMap(int width, int height)
+    {
+        var map = new Map
         {
             Pixels = new PixelModel[width, height],
             Width = width,
@@ -202,21 +197,19 @@ public class MapController : ControllerBase
         {
             for (int y = 0; y < height; y++)
             {
-                if (map.Pixels[x, y].OwnPixel)
+                map.Pixels[x, y] = new PixelModel()
                 {
-                    fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new Coordinate
-                    {
-                        X = x,
-                        Y = y
-                    }, _gameOptions.FogOfWarDistance);
-                }
+                    Type = PixelType.FogOfWar
+                };
             }
         }
 
-        return TrimMap(fogOfWarMap);
+        return map;
     }
 
-    private static Map MarkPixelsInFogOfWar(Map fogOfWarMap, Map map, Coordinate pixel,
+    private static Map MarkPixelsInFogOfWar(Map fogOfWarMap,
+                                            Map map,
+                                            Coordinate pixel,
                                             int fogOfWarDistance)
     {
         int minX = int.Clamp(pixel.X - fogOfWarDistance, 0, map.Width - 1);
@@ -229,9 +222,9 @@ public class MapController : ControllerBase
         fogOfWarMap.MaxViewableX = int.Max(maxX + 1, fogOfWarMap.MaxViewableX);
         fogOfWarMap.MaxViewableY = int.Max(maxY + 1, fogOfWarMap.MaxViewableY);
 
-        for (int x = minY; x <= maxY; x++)
+        for (int x = minX; x <= maxX; x++)
         {
-            for (int y = minX; y <= maxX; y++)
+            for (int y = minY; y <= maxY; y++)
             {
                 fogOfWarMap.Pixels[x, y] = map.Pixels[x, y];
             }
@@ -242,12 +235,16 @@ public class MapController : ControllerBase
 
     private static Map TrimMap(Map map)
     {
-        Map trimmedMap = new Map
+        var trimmedMap = new Map
         {
             Pixels = new PixelModel[map.MaxViewableX - (map.MinViewableX + 1),
                 map.MaxViewableY - (map.MinViewableY + 1)],
             Width = map.MaxViewableX - (map.MinViewableX + 1),
-            Height = map.MaxViewableY - (map.MinViewableY + 1)
+            Height = map.MaxViewableY - (map.MinViewableY + 1),
+            MinViewableX = map.MinViewableX,
+            MinViewableY = map.MinViewableY,
+            MaxViewableX = map.MaxViewableX,
+            MaxViewableY = map.MaxViewableY
         };
 
         int offsetX = map.MinViewableX + 1;
@@ -274,16 +271,46 @@ public class MapController : ControllerBase
         return trimmedMap;
     }
 
-    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
+    private void InjectBackgroundGraphics(Map map)
     {
-        // Take neighboring pixels for the pixel the user is trying to set,
-        // but remove cornering pixels and only return pixels belonging to
-        // the user
-        return (from pixel in _mapRepositoryService.GetAll()
-                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
-                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      pixel.User == user
-                select pixel).Any();
+        for (int x = 0; x < map.Width; x++)
+        {
+            for (int y = 0; y < map.Height; y++)
+            {
+                if (map.Pixels[x, y].Type == PixelType.MapBorder)
+                {
+                    continue;
+                }
+
+                byte[]? backgroundGraphic =
+                    _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(map.MinViewableX + x,
+                        map.MinViewableY + y));
+                if (backgroundGraphic == null)
+                {
+                    continue;
+                }
+
+                string backgroundGraphicWire = Convert.ToBase64String(backgroundGraphic);
+                map.Pixels[x, y].BackgroundGraphic = backgroundGraphicWire;
+            }
+        }
+    }
+
+    private static Map InverseMap(Map map)
+    {
+        var inversedMap = new Map
+        {
+            Pixels = new PixelModel[map.Height, map.Width],
+            Width = map.Height,
+            Height = map.Width
+        };
+        for (int x = 0; x < map.Width; x++)
+        {
+            for (int y = 0; y < map.Height; y++)
+            {
+                inversedMap.Pixels[y, x] = map.Pixels[x, y];
+            }
+        }
+        return inversedMap;
     }
 }

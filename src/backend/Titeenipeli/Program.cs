@@ -1,6 +1,5 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -11,16 +10,15 @@ using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Titeenipeli.Context;
-using Titeenipeli.gRPC;
+using Titeenipeli.Common.Database;
+using Titeenipeli.Common.Database.Services;
+using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Helpers;
+using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
-using Titeenipeli.Policies;
 using Titeenipeli.Services;
 using Titeenipeli.Services.BackgroundServices;
-using Titeenipeli.Services.RepositoryServices;
-using Titeenipeli.Services.RepositoryServices.Interfaces;
 
 namespace Titeenipeli;
 
@@ -28,30 +26,33 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddDbContext<ApiDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
 
-        JwtOptions jwtOptions = new JwtOptions();
+        var jwtOptions = new JwtOptions();
         builder.Configuration.GetSection("JWT").Bind(jwtOptions);
         builder.Services.AddSingleton(jwtOptions);
 
-        GameOptions gameOptions = new GameOptions();
+        var botOptions = new BotOptions();
+        builder.Configuration.GetSection("Bot").Bind(botOptions);
+        builder.Services.AddSingleton(botOptions);
+
+        var gameOptions = new GameOptions();
         builder.Configuration.GetSection("Game").Bind(gameOptions);
         builder.Services.AddSingleton(gameOptions);
 
-        builder.Services.AddScoped<JwtService>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<SpawnGeneratorService>();
-        builder.Services.AddScoped<RateLimitService>();
 
         // Adding OpenTelemetry tracing and metrics
         IOpenTelemetryBuilder openTelemetry = builder.Services.AddOpenTelemetry();
 
         string openTelemetryEndpoint = builder.Configuration["OpenTelemetryEndpoint"] ?? "localhost:4318";
 
-        openTelemetry.ConfigureResource(resource => resource
-            .AddService(builder.Environment.ApplicationName));
+        openTelemetry.ConfigureResource(resource =>
+            resource.AddService(builder.Environment.ApplicationName));
 
         openTelemetry.WithMetrics(metrics =>
         {
@@ -125,8 +126,11 @@ public static class Program
 
         builder.Services.AddAuthentication(options =>
         {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultAuthenticateScheme =
+                JwtBearerDefaults.AuthenticationScheme;
+
+            options.DefaultChallengeScheme =
+                JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(options =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
@@ -141,7 +145,8 @@ public static class Program
                     new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtOptions.Secret)),
                 TokenDecryptionKey =
-                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Encryption))
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(jwtOptions.Encryption))
             };
 
             options.Events = new JwtBearerEvents
@@ -154,33 +159,50 @@ public static class Program
             };
         });
 
-        builder.Services.AddAuthorizationBuilder()
-               .AddPolicy("MustHaveGuild", policy => policy.Requirements.Add(new MustHaveGuildRequirement()));
-
-        builder.Services.AddSingleton<IAuthorizationHandler, MustHaveGuildHandler>();
-
         builder.Services.AddControllers()
                .AddNewtonsoftJson(options =>
                {
-                   options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                   options.SerializerSettings.ContractResolver =
+                       new CamelCasePropertyNamesContractResolver();
                });
 
         builder.Services.AddGrpc();
         builder.Services.AddGrpcReflection();
+        GrpcServiceRegister.AddSingletonGrpcServices(builder.Services);
 
         AddBackgroundServices(builder.Services);
         AddRepositoryServices(builder.Services);
 
-        WebApplication app = builder.Build();
+        builder.Services.AddSingleton<DatabaseWriterService>();
+        builder.Services.AddSingleton<IMapProvider, MapProvider>();
+        builder.Services.AddSingleton<IMapUpdaterService, MapUpdaterService>();
+        builder.Services.AddSingleton<IBackgroundGraphicsService, BackgroundGraphicsService>();
+        builder.Services.AddSingleton<IPowerupService, PowerupService>();
 
-        using (IServiceScope scope = app.Services.CreateScope())
+        var app = builder.Build();
+
+        using (var scope = app.Services.CreateScope())
         {
-            IServiceProvider services = scope.ServiceProvider;
-            ApiDbContext dbContext = services.GetRequiredService<ApiDbContext>();
+            var services = scope.ServiceProvider;
+            var dbContext = services.GetRequiredService<ApiDbContext>();
+            var mapProvider = services.GetRequiredService<IMapProvider>();
 
-            DbFiller.Clear(dbContext);
-            dbContext.Database.EnsureCreated();
-            DbFiller.Initialize(dbContext, gameOptions);
+
+            if (app.Environment.IsDevelopment())
+            {
+                DbFiller.Clear(dbContext);
+            }
+
+            var newDatabase = dbContext.Database.EnsureCreated();
+            if (newDatabase)
+            {
+                DbFiller.Initialize(dbContext, gameOptions);
+            }
+
+            mapProvider.Initialize(dbContext.Map.Select(pixel => pixel)
+                                            .Include(pixel => pixel.User)
+                                            .ThenInclude(user => user!.Guild)
+                                            .ToList());
         }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
@@ -202,23 +224,37 @@ public static class Program
 
         app.MapControllers();
 
-        GRPCServiceRegister.AddGRPCServices(app);
+        GrpcServiceRegister.AddGrpcServices(app);
 
         app.Run();
     }
 
     private static void AddBackgroundServices(IServiceCollection services)
     {
-        TimeSpan updateCumulativeScoresServicePeriod = TimeSpan.FromMinutes(1);
+        var updateCumulativeScoresServicePeriod = TimeSpan.FromMinutes(1);
+        var updatePixelBucketsServicePeriod = TimeSpan.FromMinutes(1);
 
         services.AddScoped<IUpdateCumulativeScoresService, UpdateCumulativeScoresService>();
+
+        services.AddHostedService(
+            serviceProvider =>
+                new AsynchronousTimedBackgroundService<IUpdateCumulativeScoresService, UpdateCumulativeScoresService>(
+                    serviceProvider,
+                    GetNonNullService<ILogger<UpdateCumulativeScoresService>>(
+                        serviceProvider),
+                    updateCumulativeScoresServicePeriod));
+
+        services.AddScoped<IUpdatePixelBucketsService, UpdatePixelBucketsService>();
+
         services.AddHostedService(
             serviceProvider =>
                 new AsynchronousTimedBackgroundService<
-                    IUpdateCumulativeScoresService, UpdateCumulativeScoresService>(
+                    IUpdatePixelBucketsService,
+                    UpdatePixelBucketsService>(
                     serviceProvider,
-                    GetNonNullService<ILogger<UpdateCumulativeScoresService>>(serviceProvider),
-                    updateCumulativeScoresServicePeriod));
+                    GetNonNullService<ILogger<UpdatePixelBucketsService>>(
+                        serviceProvider),
+                    updatePixelBucketsServicePeriod));
     }
 
     private static void AddRepositoryServices(IServiceCollection services)

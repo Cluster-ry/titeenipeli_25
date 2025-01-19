@@ -9,9 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Grpc.AspNetCore" Version="2.63.0" />
-        <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.63.0" />
-        <PackageReference Include="Grpc.AspNetCore.Web" Version="2.63.0" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.6"/>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.6"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.4"/>
@@ -22,17 +19,28 @@
         <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.8.1"/>
         <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.11"/>
         <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1"/>
+        <PackageReference Include="SkiaSharp" Version="2.88.8"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.8"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Titeenipeli.gRPC\Titeenipeli.gRPC.csproj" />
-      </ItemGroup>
-
-    <ItemGroup>
-        <Content Include="..\.dockerignore">
+        <Content Include="../.dockerignore">
             <Link>.dockerignore</Link>
+            <DependentUpon>Dockerfile</DependentUpon>
         </Content>
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\Titeenipeli.Common\Titeenipeli.Common.csproj"/>
+        <ProjectReference Include="../Titeenipeli.Grpc/Titeenipeli.Grpc.csproj"/>
+        <ProjectReference Include="..\Titeenipeli.InMemoryMapProvider\Titeenipeli.InMemoryMapProvider.csproj"/>
+        <ProjectReference Include="..\Titeenipeli.SpecialEffects\Titeenipeli.SpecialEffects.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Resources\**\*">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>
