@@ -13,6 +13,7 @@ import BackgroundRectangle from "./BackgroundRectangle.tsx";
 import { useInputEventStore } from "../../stores/inputEventStore.ts";
 import { usePowerUpStore } from "../../stores/powerupStore.ts";
 import { Coordinate } from "../../models/Coordinate.ts";
+import { useGameStateStore } from "../../stores/gameStateStore.ts";
 
 /**
  * @component GameMap
@@ -29,6 +30,7 @@ import { Coordinate } from "../../models/Coordinate.ts";
 const GameMap: FC = () => {
     const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
     const map = useNewMapStore((state) => state.map);
+    const popPowerUp = useGameStateStore((state) => state.popPowerUp);
     const setMoving = useInputEventStore((state) => state.setMoving);
     const usePowerUp = usePowerUpStore((state) => state.usePowerUp);
     const selectedLocation = usePowerUpStore((state) => state.location);
@@ -37,10 +39,10 @@ const GameMap: FC = () => {
     const conquer = useOptimisticConquer(user, effectRef);
 
     const handleMapClick = useCallback((coordinate: Coordinate) => {
-        const powerUpClick = usePowerUp(coordinate);
+        const powerUpClick = usePowerUp(coordinate, popPowerUp);
         if (powerUpClick) return;
         conquer(coordinate);
-    }, [usePowerUp, conquer]);
+    }, [usePowerUp, popPowerUp, conquer]);
 
     const mappedBoundingBox = {
         minY: pixelsBoundingBox.min.y,
@@ -53,6 +55,7 @@ const GameMap: FC = () => {
         const result: JSX.Element[] = [];
         if (map == null) return result;
         for (const [coordinate, pixel] of map) {
+            const highlight = coordinate === JSON.stringify(selectedLocation);
             const parsedCoordinate = JSON.parse(coordinate);
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
@@ -66,7 +69,7 @@ const GameMap: FC = () => {
                         width={mapConfig.PixelSize}
                         height={mapConfig.PixelSize}
                         backgroundGraphic={pixel?.backgroundGraphic}
-                        highlight={!!pixel.highlight}
+                        highlight={highlight}
                         onClick={() => handleMapClick(parsedCoordinate)}
                     />,
                 );

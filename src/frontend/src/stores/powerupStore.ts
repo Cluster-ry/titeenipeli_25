@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { Coordinate } from "../models/Coordinate";
 import { activatePowerUp } from "../api/powerup";
+import { PostPowerup } from "../models/Post/PostPowerup";
 
 export interface PowerUpStore {
     powerUp: number | null;
     location: Coordinate | null;
     setPowerUp: (id: number | null) => void;
-    usePowerUp: (coordinate: Coordinate) => boolean;
+    usePowerUp: (coordinate: Coordinate, callback?: (id: number) => void) => boolean;
 }
 
 enum Direction {
@@ -32,20 +33,24 @@ export const usePowerUpStore = create<PowerUpStore>((set, get) => ({
     location: null,
     setPowerUp: (value: number | null) => {
         set(state => {
-            return { ...state, powerUp: value === state.powerUp ? null : value };
+            const cancel = value === state.powerUp;
+            return { ...state, powerUp: cancel ? null : value, location: cancel ? null : state.location  };
         })
     },
-    usePowerUp: (coordinate: Coordinate, ) => {
+    usePowerUp: (coordinate: Coordinate, callback?: (id: number) => void) => {
         const state = get();
-        console.log(state);
         if (state.powerUp === null) return false;
         if (state.location === null) {
             set(prev => ({ ...prev, location: coordinate }));
             return true;
         }
         const direction = getDirection(state.location, coordinate);
-        if (direction === 0) return false;
-        activatePowerUp({ id: state.powerUp, location: state.location, direction });
+        if (direction === 0) return true;
+        const activate = async (props: PostPowerup) => {
+            const result = await activatePowerUp(props);
+            if (result && callback) callback(props.id);
+        };
+        activate({ id: state.powerUp, location: state.location, direction });
         set(prev => ({ ...prev, powerUp: null, location: null }))
         return true;
     }

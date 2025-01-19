@@ -3,6 +3,7 @@ import Guild from "../enum/Guild";
 export interface GetGameState {
     pixelBucket: PixelBucket;
     scores: Score[];
+    powerUps: PowerUp[];
 }
 
 export interface PixelBucket {
