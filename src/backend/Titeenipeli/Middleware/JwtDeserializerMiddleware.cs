@@ -16,7 +16,7 @@ public class JwtDeserializerMiddleware
 
     public async Task Invoke(HttpContext httpContext, JwtOptions jwtOptions)
     {
-        ClaimsIdentity? identity = (ClaimsIdentity?)httpContext.User.Identity;
+        var identity = (ClaimsIdentity?)httpContext.User.Identity;
 
         if (identity == null)
         {
