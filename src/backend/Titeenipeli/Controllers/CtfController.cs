@@ -77,7 +77,7 @@ public class CtfController : ControllerBase
     private async Task HandleGuildPowerUp(Guild guild, CtfFlag ctfFlag)
     {
         if (ctfFlag.BaserateMultiplier != 0) guild.BaseRateLimit *= ctfFlag.BaserateMultiplier;
-        if (ctfFlag.FovRangeIncrease != 0) guild.FovRangeLimit += ctfFlag.FovRangeIncrease;
+        if (ctfFlag.FovRangeIncrease != 0) guild.FovRangeDistance += ctfFlag.FovRangeIncrease;
         
         _guildRepositoryService.Update(guild);
         await _guildRepositoryService.SaveChangesAsync();
