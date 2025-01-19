@@ -10,5 +10,5 @@ public class CtfFlag : Entity
     public required string Token { get; init; }
     public PowerUp? Powerup { get; init; }
     public int BaserateMultiplier { get; init; }
-    public int FovRangeIncrease { get; init; }
+    public int FogOfWarIncrease { get; init; }
 }

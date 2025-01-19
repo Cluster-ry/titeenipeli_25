@@ -18,7 +18,6 @@ public class MapUpdateProcessor
     private readonly IIncrementalMapUpdateCoreService _incrementalMapUpdateCoreService;
 
     private readonly GrpcMapChangesInput _mapChangesInput;
-    private readonly User? _user;
     private readonly ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _grpcConnections;
     private readonly GameOptions _gameOptions;
     private readonly IBackgroundGraphicsService _backgroundGraphicsService;
@@ -27,23 +26,23 @@ public class MapUpdateProcessor
 
     private readonly VisibilityMap _visibilityMap;
 
+    private readonly User? _user;
+
     public MapUpdateProcessor(
             IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
             GrpcMapChangesInput mapChangesInput,
             ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> connections,
             GameOptions gameOptions,
-            IBackgroundGraphicsService backgroundGraphicsService
-        )
+            IBackgroundGraphicsService backgroundGraphicsService, User? user)
     {
         _incrementalMapUpdateCoreService = incrementalMapUpdateCoreService;
         _mapChangesInput = mapChangesInput;
         _gameOptions = gameOptions;
         _backgroundGraphicsService = backgroundGraphicsService;
         _grpcConnections = connections;
-        _visibilityMap = new VisibilityMap(gameOptions.Width, gameOptions.Height, gameOptions.FogOfWarDistance);
+        _visibilityMap = new VisibilityMap(gameOptions.Width, gameOptions.Height, _gameOptions.MaxFogOfWarDistance);
 
-        KeyValuePair<int, IGrpcConnection<IncrementalMapUpdateResponse>> connection = connections.FirstOrDefault();
-        _user = connection.Value.User;
+        _user = user;
     }
 
     public async Task Process()
@@ -149,7 +148,7 @@ public class MapUpdateProcessor
 
     private void LoopNearbyPixelsInsideFogOfWar(Action<Coordinate> action, Coordinate aroundCoordinate)
     {
-        int fogOfWarDistance = _gameOptions.FogOfWarDistance;
+        int fogOfWarDistance = _user?.Guild.FogOfWarDistance ?? _gameOptions.FogOfWarDistance;
         int minY = aroundCoordinate.Y - fogOfWarDistance;
         int maxY = aroundCoordinate.Y + fogOfWarDistance;
         int minX = aroundCoordinate.X - fogOfWarDistance;

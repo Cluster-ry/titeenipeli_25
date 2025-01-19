@@ -262,10 +262,9 @@ public class MapUpdaterService(
         }
     }
 
-    private void LoopNearbyPixelsInsideFogOfWar(Action<Coordinate> action,
-                                                Coordinate aroundCoordinate)
+    private void LoopNearbyPixelsInsideFogOfWar(Action<Coordinate> action, Coordinate aroundCoordinate)
     {
-        int fogOfWarDistance = gameOptions.FogOfWarDistance * 2;
+        int fogOfWarDistance = gameOptions.MaxFogOfWarDistance * 2;
         int minY = Math.Clamp(aroundCoordinate.Y - fogOfWarDistance, 0, gameOptions.Height);
         int maxY = Math.Clamp(aroundCoordinate.Y + fogOfWarDistance, 0, gameOptions.Height);
         int minX = Math.Clamp(aroundCoordinate.X - fogOfWarDistance, 0, gameOptions.Width);
