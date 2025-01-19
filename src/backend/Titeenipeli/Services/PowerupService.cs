@@ -10,8 +10,8 @@ public sealed class PowerupService(GameOptions gameOptions) : IPowerupService
     public ISpecialEffect? GetByEnum(PowerUps powerUp) => SelectSpecialEffect(powerUp);
     public ISpecialEffect? GetByPowerId(int powerId) => SelectSpecialEffect((PowerUps)powerId);
     public ISpecialEffect? GetByDb(PowerUp powerUp) => SelectSpecialEffect((PowerUps)powerUp.PowerId);
-    
-    
+
+
     private ISpecialEffect? SelectSpecialEffect(PowerUps? powerUp) =>
     powerUp switch
     {
@@ -19,6 +19,6 @@ public sealed class PowerupService(GameOptions gameOptions) : IPowerupService
         PowerUps.Titeenikirves => new TiteenikirvesEffect(gameOptions.Height, gameOptions.Width),
         _ => null
     };
-    
-    
+
+
 }

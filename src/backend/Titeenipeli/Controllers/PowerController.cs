@@ -36,8 +36,8 @@ public sealed class PowerController(
         {
             return BadRequest();
         }
-        
-        if(userPower.Directed && body.Direction is Direction.Undefined)
+
+        if (userPower.Directed && body.Direction is Direction.Undefined)
         {
             return BadRequest();
         }

@@ -92,8 +92,8 @@ public class MiscGameStateUpdateCoreService(IPowerupService powerupService, ILog
         foreach (var powerUp in powerUps)
         {
             var actualPowerUp = powerupService.GetByDb(powerUp);
-            if(actualPowerUp == null) continue;
-            
+            if (actualPowerUp == null) continue;
+
             MiscStateUpdateResponse.Types.PowerUps grpcPowerUp = new()
             {
                 PowerUpId = (uint)powerUp.PowerId,
