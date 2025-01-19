@@ -33,7 +33,7 @@ public class CtfController : ControllerBase
         _miscGameStateUpdateCoreService = miscGameStateUpdateCoreService;
 
     }
-    
+
     [HttpGet]
     public IActionResult GetCtf()
     {
