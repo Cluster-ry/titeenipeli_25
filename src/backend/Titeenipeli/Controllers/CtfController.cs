@@ -64,7 +64,7 @@ public class CtfController : ControllerBase
 
         if (ctfFlag.Powerup is null)
         {
-            HandleGuildPowerUp(user.Guild);
+            await HandleGuildPowerUp(user.Guild, ctfFlag);
         }
         else
         {
@@ -81,9 +81,13 @@ public class CtfController : ControllerBase
     }
 
 
-    private void HandleGuildPowerUp(Guild guild)
+    private async Task HandleGuildPowerUp(Guild guild, CtfFlag ctfFlag)
     {
-        //TODO run powerup code
+        if (ctfFlag.BaserateMultiplier != 0) guild.BaseRateLimit *= ctfFlag.BaserateMultiplier;
+        if (ctfFlag.FovRangeIncrease != 0) guild.FovRangeDistance += ctfFlag.FovRangeIncrease;
+
+        _guildRepositoryService.Update(guild);
+        await _guildRepositoryService.SaveChangesAsync();
     }
 
     private async Task HandleUserPowerUp(User user, PowerUp powerUp)
