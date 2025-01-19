@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Google.Protobuf;
 using GrpcGeneratedServices;
 using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Grpc.ChangeEntities;
@@ -18,29 +19,32 @@ public class MapUpdateProcessor
     private readonly IIncrementalMapUpdateCoreService _incrementalMapUpdateCoreService;
 
     private readonly GrpcMapChangesInput _mapChangesInput;
-    private readonly User? _user;
     private readonly ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _grpcConnections;
     private readonly GameOptions _gameOptions;
     private readonly IBackgroundGraphicsService _backgroundGraphicsService;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     private readonly Dictionary<Coordinate, IncrementalMapUpdate> _pixelWireChanges = [];
 
     private readonly VisibilityMap _visibilityMap;
+
+    private User? _user;
 
     public MapUpdateProcessor(
             IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
             GrpcMapChangesInput mapChangesInput,
             ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> connections,
             GameOptions gameOptions,
-            IBackgroundGraphicsService backgroundGraphicsService
-        )
+            IBackgroundGraphicsService backgroundGraphicsService,
+            IServiceScopeFactory serviceScopeFactory)
     {
         _incrementalMapUpdateCoreService = incrementalMapUpdateCoreService;
         _mapChangesInput = mapChangesInput;
         _gameOptions = gameOptions;
         _backgroundGraphicsService = backgroundGraphicsService;
+        _serviceScopeFactory = serviceScopeFactory;
         _grpcConnections = connections;
-        _visibilityMap = new VisibilityMap(gameOptions.Width, gameOptions.Height, gameOptions.FogOfWarDistance);
+        _visibilityMap = new VisibilityMap(gameOptions.Width, gameOptions.Height, _gameOptions.MaxFogOfWarDistance);
 
         KeyValuePair<int, IGrpcConnection<IncrementalMapUpdateResponse>> connection = connections.FirstOrDefault();
         _user = connection.Value.User;
@@ -54,6 +58,11 @@ public class MapUpdateProcessor
         {
             return;
         }
+
+        var userRepositoryService = _serviceScopeFactory.CreateScope().ServiceProvider
+                                                        .GetRequiredService<IUserRepositoryService>();
+
+        _user = userRepositoryService.GetById(_user.Id);
 
         try
         {
@@ -149,7 +158,7 @@ public class MapUpdateProcessor
 
     private void LoopNearbyPixelsInsideFogOfWar(Action<Coordinate> action, Coordinate aroundCoordinate)
     {
-        int fogOfWarDistance = _gameOptions.FogOfWarDistance;
+        int fogOfWarDistance = _user?.Guild.FogOfWarDistance ?? _gameOptions.FogOfWarDistance;
         int minY = aroundCoordinate.Y - fogOfWarDistance;
         int maxY = aroundCoordinate.Y + fogOfWarDistance;
         int minX = aroundCoordinate.X - fogOfWarDistance;

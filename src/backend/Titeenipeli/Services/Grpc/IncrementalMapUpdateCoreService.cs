@@ -6,7 +6,6 @@ using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Grpc.Common;
 using Titeenipeli.Grpc.Services;
 using Titeenipeli.Options;
-using Titeenipeli.Services;
 
 namespace Titeenipeli.Services.Grpc;
 
@@ -17,6 +16,7 @@ public class IncrementalMapUpdateCoreService : GrpcService<IncrementalMapUpdateR
     private readonly ILogger<StateUpdateService> _logger;
     private readonly GameOptions _gameOptions;
     private readonly IBackgroundGraphicsService _backgroundGraphicsService;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     private readonly Channel<GrpcMapChangesInput> _mapChangeQueue =
         Channel.CreateBounded<GrpcMapChangesInput>(MaxChannelSize);
@@ -24,12 +24,13 @@ public class IncrementalMapUpdateCoreService : GrpcService<IncrementalMapUpdateR
     public IncrementalMapUpdateCoreService(
             ILogger<StateUpdateService> logger,
             GameOptions gameOptions,
-            IBackgroundGraphicsService backgroundGraphicsService
-        )
+            IBackgroundGraphicsService backgroundGraphicsService,
+            IServiceScopeFactory serviceScopeFactory)
     {
         _logger = logger;
         _gameOptions = gameOptions;
         _backgroundGraphicsService = backgroundGraphicsService;
+        _serviceScopeFactory = serviceScopeFactory;
         Task.Run(ProcessMapChangeRequests);
     }
 
@@ -54,7 +55,8 @@ public class IncrementalMapUpdateCoreService : GrpcService<IncrementalMapUpdateR
                      connectionKeyValuePair in Connections)
         {
             MapUpdateProcessor mapUpdateProcessor =
-                new(this, mapChangesInput, connectionKeyValuePair.Value, _gameOptions, _backgroundGraphicsService);
+                new(this, mapChangesInput, connectionKeyValuePair.Value, _gameOptions, _backgroundGraphicsService,
+                    _serviceScopeFactory);
 
             var updateTask = Task.Run(mapUpdateProcessor.Process);
             updateTasks.Add(updateTask);

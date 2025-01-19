@@ -60,7 +60,7 @@ public class MapController : ControllerBase
 
         var map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
-        map = CalculateFogOfWar(map, user.Id);
+        map = CalculateFogOfWar(map, user);
         InjectBackgroundGraphics(map);
         var inversedMap = InverseMap(map);
 
@@ -159,7 +159,7 @@ public class MapController : ControllerBase
         foreach (User user in users) map.Pixels[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
     }
 
-    private Map CalculateFogOfWar(Map map, int userId)
+    private Map CalculateFogOfWar(Map map, User user)
     {
         int width = map.Pixels.GetLength(0);
         int height = map.Pixels.GetLength(1);
@@ -169,13 +169,13 @@ public class MapController : ControllerBase
         {
             for (int y = 0; y < height; y++)
             {
-                if (map.Pixels[x, y].Owner == userId)
+                if (map.Pixels[x, y].Owner == user.Id)
                 {
                     fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new Coordinate
                     {
                         X = x,
                         Y = y
-                    }, _gameOptions.FogOfWarDistance);
+                    }, user.Guild.FogOfWarDistance);
                 }
             }
         }

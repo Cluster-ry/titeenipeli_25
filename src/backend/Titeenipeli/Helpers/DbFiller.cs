@@ -27,7 +27,8 @@ public static class DbFiller
                             {
                                 Name = name,
                                 ActiveCtfFlags = [],
-                                BaseRateLimit = gameOptions.PixelsPerMinutePerGuild
+                                BaseRateLimit = gameOptions.PixelsPerMinutePerGuild,
+                                FogOfWarDistance = gameOptions.FogOfWarDistance
                             });
 
             dbContext.Guilds.AddRange(guilds);
