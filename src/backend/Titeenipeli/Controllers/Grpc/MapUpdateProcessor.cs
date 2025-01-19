@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using Google.Protobuf;
 using GrpcGeneratedServices;
 using Titeenipeli.Common.Database.Schema;
-using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Grpc.ChangeEntities;
@@ -22,32 +21,28 @@ public class MapUpdateProcessor
     private readonly ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _grpcConnections;
     private readonly GameOptions _gameOptions;
     private readonly IBackgroundGraphicsService _backgroundGraphicsService;
-    private readonly IServiceScopeFactory _serviceScopeFactory;
 
     private readonly Dictionary<Coordinate, IncrementalMapUpdate> _pixelWireChanges = [];
 
     private readonly VisibilityMap _visibilityMap;
 
-    private User? _user;
+    private readonly User? _user;
 
     public MapUpdateProcessor(
             IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
             GrpcMapChangesInput mapChangesInput,
             ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> connections,
             GameOptions gameOptions,
-            IBackgroundGraphicsService backgroundGraphicsService,
-            IServiceScopeFactory serviceScopeFactory)
+            IBackgroundGraphicsService backgroundGraphicsService, User? user)
     {
         _incrementalMapUpdateCoreService = incrementalMapUpdateCoreService;
         _mapChangesInput = mapChangesInput;
         _gameOptions = gameOptions;
         _backgroundGraphicsService = backgroundGraphicsService;
-        _serviceScopeFactory = serviceScopeFactory;
         _grpcConnections = connections;
         _visibilityMap = new VisibilityMap(gameOptions.Width, gameOptions.Height, _gameOptions.MaxFogOfWarDistance);
 
-        KeyValuePair<int, IGrpcConnection<IncrementalMapUpdateResponse>> connection = connections.FirstOrDefault();
-        _user = connection.Value.User;
+        _user = user;
     }
 
     public async Task Process()
@@ -58,11 +53,6 @@ public class MapUpdateProcessor
         {
             return;
         }
-
-        var userRepositoryService = _serviceScopeFactory.CreateScope().ServiceProvider
-                                                        .GetRequiredService<IUserRepositoryService>();
-
-        _user = userRepositoryService.GetById(_user.Id);
 
         try
         {
