@@ -53,7 +53,6 @@ const GameMap: FC = () => {
         const result: JSX.Element[] = [];
         if (map == null) return result;
         for (const [coordinate, pixel] of map) {
-            const selected = selectedLocation ? JSON.stringify(selectedLocation) === coordinate : false;
             const parsedCoordinate = JSON.parse(coordinate);
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
@@ -67,7 +66,7 @@ const GameMap: FC = () => {
                         width={mapConfig.PixelSize}
                         height={mapConfig.PixelSize}
                         backgroundGraphic={pixel?.backgroundGraphic}
-                        highlight={selected}
+                        highlight={!!pixel.highlight}
                         onClick={() => handleMapClick(parsedCoordinate)}
                     />,
                 );

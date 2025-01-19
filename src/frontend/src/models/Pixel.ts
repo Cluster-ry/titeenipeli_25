@@ -6,6 +6,7 @@ export interface Pixel {
     guild: PixelGuild | undefined;
     owner: number | undefined;
     backgroundGraphic?: Uint8Array;
+    highlight?: boolean;
 }
 
 export interface EncodedPixel {
