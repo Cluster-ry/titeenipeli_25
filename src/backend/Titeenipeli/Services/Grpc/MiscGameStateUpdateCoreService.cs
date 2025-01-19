@@ -54,6 +54,7 @@ public class MiscGameStateUpdateCoreService(IPowerupService powerupService, ILog
                 {
                     var grpcPowerUps = ConvertPowerupsToGrpc(gameStateUpdateInput.PowerUps);
                     incrementalResponse.PowerUps.Add(grpcPowerUps);
+                    incrementalResponse.PowerupUpdate = true;
                 }
 
                 await responseStream.WriteAsync(incrementalResponse);

@@ -32,6 +32,7 @@ message MiscStateUpdateResponse {
   PixelBucket pixelBucket = 1;
   repeated Scores scores = 2;
   repeated PowerUps powerUps = 3;
+  bool powerupUpdate = 5;
 
   message PixelBucket {
     uint32 amount = 1;
