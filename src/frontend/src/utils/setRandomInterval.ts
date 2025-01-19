@@ -1,4 +1,4 @@
-export const setRandomInterval = (intervalFunction: Function, minDelay: number, maxDelay: number) => {
+export const setRandomInterval = (intervalFunction: () => void, minDelay: number, maxDelay: number) => {
     let timeout: ReturnType<typeof setTimeout>;
 
     const runInterval = () => {
