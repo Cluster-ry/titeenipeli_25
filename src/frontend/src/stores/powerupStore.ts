@@ -7,7 +7,8 @@ export interface PowerUpStore {
     powerUp: number | null;
     location: Coordinate | null;
     setPowerUp: (id: number | null) => void;
-    usePowerUp: (coordinate: Coordinate) => boolean;
+    // Returns whether event propagation should be stopped
+    usePowerUp: (coordinate: Coordinate, targeted: boolean) => boolean;
 }
 
 enum Direction {
@@ -37,20 +38,22 @@ export const usePowerUpStore = create<PowerUpStore>((set, get) => ({
             return { ...state, powerUp: cancel ? null : value, location: cancel ? null : state.location  };
         })
     },
-    usePowerUp: (coordinate: Coordinate) => {
+    usePowerUp: (coordinate: Coordinate, targeted: boolean) => {
         const state = get();
         if (state.powerUp === null) return false;
         if (state.location === null) {
             set(prev => ({ ...prev, location: coordinate }));
             return true;
         }
-        const direction = getDirection(state.location, coordinate);
-        if (direction === 0) return true;
-        const activate = async (props: PostPowerup) => {
-            await activatePowerUp(props);
-        };
-        activate({ id: state.powerUp, location: state.location, direction });
-        set(prev => ({ ...prev, powerUp: null, location: null }))
+        if (targeted) {
+            const direction = getDirection(state.location, coordinate);
+            if (direction === 0) return true;
+            const activate = async (props: PostPowerup) => {
+                await activatePowerUp(props);
+            };
+            activate({ id: state.powerUp, location: state.location, direction });
+            set(prev => ({ ...prev, powerUp: null, location: null }))
+        }
         return true;
     }
 }));

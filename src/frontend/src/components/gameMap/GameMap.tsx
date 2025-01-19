@@ -38,8 +38,8 @@ const GameMap: FC = () => {
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
 
-    const handleMapClick = useCallback((coordinate: Coordinate) => {
-        const powerUpClick = usePowerUp(coordinate);
+    const handleMapClick = useCallback((coordinate: Coordinate, targeted: boolean) => {
+        const powerUpClick = usePowerUp(coordinate, targeted);
         if (powerUpClick) return;
         conquer(coordinate);
     }, [usePowerUp, popPowerUp, conquer]);
@@ -70,7 +70,7 @@ const GameMap: FC = () => {
                         height={mapConfig.PixelSize}
                         backgroundGraphic={pixel?.backgroundGraphic}
                         highlight={highlight}
-                        onClick={() => handleMapClick(parsedCoordinate)}
+                        onClick={() => handleMapClick(parsedCoordinate, highlight)}
                     />,
                 );
             }
