@@ -7,7 +7,7 @@ export interface PowerUpStore {
     powerUp: number | null;
     location: Coordinate | null;
     setPowerUp: (id: number | null) => void;
-    usePowerUp: (coordinate: Coordinate, callback?: (id: number) => void) => boolean;
+    usePowerUp: (coordinate: Coordinate) => boolean;
 }
 
 enum Direction {
@@ -37,7 +37,7 @@ export const usePowerUpStore = create<PowerUpStore>((set, get) => ({
             return { ...state, powerUp: cancel ? null : value, location: cancel ? null : state.location  };
         })
     },
-    usePowerUp: (coordinate: Coordinate, callback?: (id: number) => void) => {
+    usePowerUp: (coordinate: Coordinate) => {
         const state = get();
         if (state.powerUp === null) return false;
         if (state.location === null) {
@@ -47,8 +47,7 @@ export const usePowerUpStore = create<PowerUpStore>((set, get) => ({
         const direction = getDirection(state.location, coordinate);
         if (direction === 0) return true;
         const activate = async (props: PostPowerup) => {
-            const result = await activatePowerUp(props);
-            if (result && callback) callback(props.id);
+            await activatePowerUp(props);
         };
         activate({ id: state.powerUp, location: state.location, direction });
         set(prev => ({ ...prev, powerUp: null, location: null }))

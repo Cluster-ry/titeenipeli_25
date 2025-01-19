@@ -39,7 +39,7 @@ const GameMap: FC = () => {
     const conquer = useOptimisticConquer(user, effectRef);
 
     const handleMapClick = useCallback((coordinate: Coordinate) => {
-        const powerUpClick = usePowerUp(coordinate, popPowerUp);
+        const powerUpClick = usePowerUp(coordinate);
         if (powerUpClick) return;
         conquer(coordinate);
     }, [usePowerUp, popPowerUp, conquer]);
@@ -55,8 +55,8 @@ const GameMap: FC = () => {
         const result: JSX.Element[] = [];
         if (map == null) return result;
         for (const [coordinate, pixel] of map) {
-            const highlight = coordinate === JSON.stringify(selectedLocation);
             const parsedCoordinate = JSON.parse(coordinate);
+            const highlight = parsedCoordinate.x === selectedLocation?.x || parsedCoordinate.y === selectedLocation?.y;
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);

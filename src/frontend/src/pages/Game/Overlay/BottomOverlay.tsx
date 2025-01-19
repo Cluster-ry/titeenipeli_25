@@ -10,7 +10,7 @@ const BottomOverlay = () => {
 
     return (
         <div className="bottom-overlay bottom-gradient">
-            {specialEffects.map(effect => <SpecialEffect key={effect.id} {...effect} selected={powerUp} onClick={setPowerUp} />)}
+            {specialEffects.map((effect, index) => <SpecialEffect key={`${effect.id}-${index}`} {...effect} selected={powerUp} onClick={setPowerUp} />)}
         </div>
     );
 };
