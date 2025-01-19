@@ -78,7 +78,7 @@ public class CtfController : ControllerBase
     {
         if (ctfFlag.BaserateMultiplier != 0) guild.BaseRateLimit *= ctfFlag.BaserateMultiplier;
         if (ctfFlag.FovRangeIncrease != 0) guild.FovRangeDistance += ctfFlag.FovRangeIncrease;
-        
+
         _guildRepositoryService.Update(guild);
         await _guildRepositoryService.SaveChangesAsync();
     }
