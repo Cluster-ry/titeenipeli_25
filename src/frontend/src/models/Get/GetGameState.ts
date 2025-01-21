@@ -18,7 +18,7 @@ export interface Score {
 }
 
 export interface PowerUp {
-    id: number;
+    powerUpId: number;
     name: string;
     description: string;
     directed: boolean;

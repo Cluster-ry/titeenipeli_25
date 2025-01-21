@@ -9,11 +9,10 @@ import { useNewMapStore } from "../../stores/newMapStore.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.ts";
-import BackgroundRectangle from "./BackgroundRectangle.tsx";
-import { useInputEventStore } from "../../stores/inputEventStore.ts";
-import { usePowerUpStore } from "../../stores/powerupStore.ts";
 import { Coordinate } from "../../models/Coordinate.ts";
-import { useGameStateStore } from "../../stores/gameStateStore.ts";
+import BackgroundRectangle from "./BackgroundRectangle.tsx";
+import { usePowerUps } from "../../hooks/usePowerUps.ts";
+import { usePowerUpStore } from "../../stores/powerupStore.ts";
 
 /**
  * @component GameMap
@@ -30,10 +29,8 @@ import { useGameStateStore } from "../../stores/gameStateStore.ts";
 const GameMap: FC = () => {
     const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
     const map = useNewMapStore((state) => state.map);
-    const popPowerUp = useGameStateStore((state) => state.popPowerUp);
-    const setMoving = useInputEventStore((state) => state.setMoving);
-    const usePowerUp = usePowerUpStore((state) => state.usePowerUp);
-    const selectedLocation = usePowerUpStore((state) => state.location);
+    const { usePowerUp } = usePowerUps();
+    const target = usePowerUpStore(state => state.target);
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
@@ -42,7 +39,7 @@ const GameMap: FC = () => {
         const powerUpClick = usePowerUp(coordinate, targeted);
         if (powerUpClick) return;
         conquer(coordinate);
-    }, [usePowerUp, popPowerUp, conquer]);
+    }, [usePowerUp, conquer]);
 
     const mappedBoundingBox = {
         minY: pixelsBoundingBox.min.y,
@@ -56,7 +53,7 @@ const GameMap: FC = () => {
         if (map == null) return result;
         for (const [coordinate, pixel] of map) {
             const parsedCoordinate = JSON.parse(coordinate);
-            const highlight = parsedCoordinate.x === selectedLocation?.x || parsedCoordinate.y === selectedLocation?.y;
+            const highlight = parsedCoordinate.x === target?.x || parsedCoordinate.y === target?.y;
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
@@ -88,14 +85,13 @@ const GameMap: FC = () => {
             }
         }
         return result;
-    }, [map, selectedLocation]);
+    }, [map, target]);
 
     if (map === null) {
         return <span>Loading...</span>;
     }
 
     return (
-        <>
             <Stage
                 width={window.innerWidth}
                 height={window.innerHeight}
@@ -106,14 +102,11 @@ const GameMap: FC = () => {
                     width={window.innerWidth}
                     height={window.innerHeight}
                     boundingBox={mappedBoundingBox}
-                    onMoveStart={() => setMoving(true)}
-                    onMoveEnd={() => setMoving(false)}
                 >
                     <Container>{pixelElements}</Container>
                     <EffectContainer ref={effectRef} />
                 </Viewport>
             </Stage>
-        </>
     );
 };
 

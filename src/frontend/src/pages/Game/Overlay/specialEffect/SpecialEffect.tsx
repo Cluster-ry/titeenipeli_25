@@ -16,11 +16,11 @@ const getEffectIcon = (index: number) => {
     return SpecialEffectIcon[index] ?? SpecialEffectIcon[1];
 };
 
-export const SpecialEffect: FC<PowerUp & Props> = ({ id, name, selected, onClick }) => {
-    const isSelected = useMemo(() => selected === id, [id, selected]);
-    const icon = useMemo(() => getEffectIcon(id), [id]);
+export const SpecialEffect: FC<PowerUp & Props> = ({ selected, powerUpId, name, onClick }) => {
+    const isSelected = useMemo(() => selected === powerUpId, [powerUpId, selected]);
+    const icon = useMemo(() => getEffectIcon(powerUpId), [powerUpId]);
     return (
-        <div key={id} className={"special-effect"} onClick={() => onClick(id)}>
+        <div key={powerUpId} className={"special-effect"} onClick={() => onClick(powerUpId)}>
             <div className={`button ${isSelected ? "selected" : ""}`}>
                 <img className="icon" src={icon} />
             </div>

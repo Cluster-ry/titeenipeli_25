@@ -38,7 +38,7 @@ export const useGameState = () => {
             }
             
             if(update.powerupUpdate) {
-                const powerups = update.powerUps.map((powerup) => ({ id: powerup.powerUpId,  name: powerup.name, description : powerup.description, directed: powerup.directed }));
+                const powerups = update.powerUps.map((powerup) => ({ powerUpId: powerup.powerUpId,  name: powerup.name, description : powerup.description, directed: powerup.directed }));
                 setPowerUps(powerups);
             }
             
