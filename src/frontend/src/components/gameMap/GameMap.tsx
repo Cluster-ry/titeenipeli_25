@@ -13,6 +13,7 @@ import { Coordinate } from "../../models/Coordinate.ts";
 import BackgroundRectangle from "./BackgroundRectangle.tsx";
 import { usePowerUps } from "../../hooks/usePowerUps.ts";
 import { usePowerUpStore } from "../../stores/powerupStore.ts";
+import { useIsMoving } from "../../hooks/useIsMoving.ts";
 
 /**
  * @component GameMap
@@ -31,6 +32,7 @@ const GameMap: FC = () => {
     const map = useNewMapStore((state) => state.map);
     const { usePowerUp } = usePowerUps();
     const target = usePowerUpStore(state => state.target);
+    const { isMoving, startMoving, stopMoving } = useIsMoving();
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
@@ -67,6 +69,7 @@ const GameMap: FC = () => {
                         height={mapConfig.PixelSize}
                         backgroundGraphic={pixel?.backgroundGraphic}
                         highlight={highlight}
+                        moving={isMoving}
                         onClick={() => handleMapClick(parsedCoordinate, highlight)}
                     />,
                 );
@@ -90,7 +93,7 @@ const GameMap: FC = () => {
     if (map === null) {
         return <span>Loading...</span>;
     }
-
+    //console.log(isMoving);
     return (
             <Stage
                 width={window.innerWidth}
@@ -102,8 +105,10 @@ const GameMap: FC = () => {
                     width={window.innerWidth}
                     height={window.innerHeight}
                     boundingBox={mappedBoundingBox}
+                    onMoveStart={startMoving}
+                    onMoveEnd={stopMoving}
                 >
-                    <Container>{pixelElements}</Container>
+                    <Container >{pixelElements}</Container>
                     <EffectContainer ref={effectRef} />
                 </Viewport>
             </Stage>

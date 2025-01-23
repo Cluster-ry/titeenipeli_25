@@ -50,6 +50,10 @@ const PixiComponentViewport = PixiComponent("Viewport", {
         viewport.options.disableOnContextMenu = true;
         viewport.options.stopPropagation = true;
 
+        viewport.addEventListener("pinch-start", props.onMoveStart);
+        viewport.addEventListener("drag-start", props.onMoveStart);
+        viewport.addEventListener("moved-end", props.onMoveEnd);
+
         return viewport;
     },
 
