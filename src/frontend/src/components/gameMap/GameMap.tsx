@@ -1,4 +1,4 @@
-import { FC, useMemo, useRef } from "react";
+import { FC, useCallback, useMemo, useRef } from "react";
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import ForegroundRectangle from "./ForegroundRectangle.tsx";
@@ -9,8 +9,11 @@ import { useNewMapStore } from "../../stores/newMapStore.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.ts";
+import { Coordinate } from "../../models/Coordinate.ts";
 import BackgroundRectangle from "./BackgroundRectangle.tsx";
-import { useInputEventStore } from "../../stores/inputEventStore.ts";
+import { usePowerUps } from "../../hooks/usePowerUps.ts";
+import { usePowerUpStore } from "../../stores/powerupStore.ts";
+import { useIsMoving } from "../../hooks/useIsMoving.ts";
 
 /**
  * @component GameMap
@@ -27,10 +30,18 @@ import { useInputEventStore } from "../../stores/inputEventStore.ts";
 const GameMap: FC = () => {
     const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
     const map = useNewMapStore((state) => state.map);
-    const inputEventStore = useInputEventStore();
+    const { usePowerUp } = usePowerUps();
+    const target = usePowerUpStore(state => state.target);
+    const { isMoving, startMoving, stopMoving } = useIsMoving();
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
+
+    const handleMapClick = useCallback((coordinate: Coordinate, targeted: boolean) => {
+        const powerUpClick = usePowerUp(coordinate, targeted);
+        if (powerUpClick) return;
+        conquer(coordinate);
+    }, [usePowerUp, conquer]);
 
     const mappedBoundingBox = {
         minY: pixelsBoundingBox.min.y,
@@ -44,6 +55,7 @@ const GameMap: FC = () => {
         if (map == null) return result;
         for (const [coordinate, pixel] of map) {
             const parsedCoordinate = JSON.parse(coordinate);
+            const highlight = parsedCoordinate.x === target?.x || parsedCoordinate.y === target?.y;
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
@@ -56,7 +68,9 @@ const GameMap: FC = () => {
                         width={mapConfig.PixelSize}
                         height={mapConfig.PixelSize}
                         backgroundGraphic={pixel?.backgroundGraphic}
-                        onClick={() => conquer(parsedCoordinate)}
+                        highlight={highlight}
+                        moving={isMoving}
+                        onClick={() => handleMapClick(parsedCoordinate, highlight)}
                     />,
                 );
             }
@@ -74,14 +88,13 @@ const GameMap: FC = () => {
             }
         }
         return result;
-    }, [map]);
+    }, [map, target]);
 
     if (map === null) {
         return <span>Loading...</span>;
     }
-
+    //console.log(isMoving);
     return (
-        <>
             <Stage
                 width={window.innerWidth}
                 height={window.innerHeight}
@@ -92,14 +105,13 @@ const GameMap: FC = () => {
                     width={window.innerWidth}
                     height={window.innerHeight}
                     boundingBox={mappedBoundingBox}
-                    onMoveStart={() => inputEventStore.setMoving(true)}
-                    onMoveEnd={() => inputEventStore.setMoving(false)}
+                    onMoveStart={startMoving}
+                    onMoveEnd={stopMoving}
                 >
-                    <Container>{pixelElements}</Container>
+                    <Container >{pixelElements}</Container>
                     <EffectContainer ref={effectRef} />
                 </Viewport>
             </Stage>
-        </>
     );
 };
 

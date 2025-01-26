@@ -16,8 +16,7 @@ export const useGameState = () => {
     const setPixelBucket = useGameStateStore((state) => state.setPixelBucket);
     const setScores = useGameStateStore((state) => state.setScores);
     const setState = useGameStateStore((state) => state.setMiscGameState);
-    const setPowerups = useGameStateStore((state) => state.setPowerups);
-    
+    const setPowerUps = useGameStateStore((state) => state.setPowerUps);
     
     const { data, isSuccess, status } = useQuery({
         queryKey: [stateQueryKey],
@@ -38,14 +37,13 @@ export const useGameState = () => {
                 setScores(scores);
             }
             
-            
             if(update.powerupUpdate) {
-                const powerups = update.powerUps.map((powerup) => ({ id: powerup.powerUpId,  name: powerup.name, description : powerup.description, directed: powerup.directed }));
-                setPowerups(powerups);
+                const powerups = update.powerUps.map((powerup) => ({ powerUpId: powerup.powerUpId,  name: powerup.name, description : powerup.description, directed: powerup.directed }));
+                setPowerUps(powerups);
             }
             
         },
-        [setPixelBucket, setScores, setPowerups],
+        [setPixelBucket, setScores, setPowerUps],
     );
 
     const onIncrementalUpdate = useCallback(

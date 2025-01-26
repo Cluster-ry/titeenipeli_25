@@ -11,7 +11,6 @@ namespace Titeenipeli.Controllers;
 
 [ApiController]
 [Route("state/powerups")]
-[Authorize(Policy = "MustHaveGuild")]
 public sealed class PowerController(
     IUserRepositoryService userRepositoryService,
     IMapUpdaterService mapUpdaterService,

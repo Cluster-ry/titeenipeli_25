@@ -1,31 +1,57 @@
-import { Sprite } from "@pixi/react";
+import { Container, Sprite, withFilters } from "@pixi/react";
 import { FederatedPointerEvent, Texture } from "pixi.js";
 import BackgroundRectangleProps from "../../models/BackgroundRectangleProps";
-import { useInputEventStore } from "../../stores/inputEventStore";
+import { GlowFilter } from "pixi-filters";
+import { ReactNode, useCallback, useMemo } from "react";
 
 const backgroundGraphicSize = 32;
 
-const BackgroundRectangle = ({ x, y, width, height, backgroundGraphic, onClick }: BackgroundRectangleProps) => {
-    const inputEventStore = useInputEventStore();
+const Filters = withFilters(Container, {
+    glow: GlowFilter,
+});
 
-    // When a client clicks a pixel
-    const handleEvent = (event: FederatedPointerEvent) => {
-        if (event.pointerType === "mouse" && event.button !== 0) {
-            return;
-        }
+const filterSprite = (child: ReactNode) => (
+    <Filters
+        glow={{
+            outerStrength: 5,
+            innerStrength: 2,
+            color: 0xfde90d,
+            alpha: 1,
+            knockout: false,
+        }}
+    >
+        {child}
+    </Filters>
+);
 
-        if (inputEventStore.moving || inputEventStore.moveEnded.getTime() > new Date().getTime() - 300) {
-            return;
-        }
+const BackgroundRectangle = ({
+    x,
+    y,
+    width,
+    height,
+    backgroundGraphic,
+    highlight,
+    moving,
+    onClick,
+}: BackgroundRectangleProps) => {
+    const handleEvent = useCallback(
+        (event: FederatedPointerEvent) => {
+            if (event.pointerType === "mouse" && event.button !== 0 || moving.current) {
+                return;
+            }
+            onClick({ x, y });
+        },
+        [onClick],
+    );
 
-        onClick({ x: x, y: y });
-    };
+    const texture = useMemo(
+        () => Texture.fromBuffer(backgroundGraphic, backgroundGraphicSize, backgroundGraphicSize),
+        [backgroundGraphic],
+    );
 
-    const texture = Texture.fromBuffer(backgroundGraphic, backgroundGraphicSize, backgroundGraphicSize);
-
-    return (
+    const sprite = useMemo(() => (
         <Sprite
-            position={{ x: x, y: y }}
+            position={{ x, y }}
             image="test"
             width={width}
             height={height}
@@ -35,7 +61,9 @@ const BackgroundRectangle = ({ x, y, width, height, backgroundGraphic, onClick }
             mousedown={handleEvent}
             tap={handleEvent}
         />
-    );
+    ), [x, y , width, height, texture, handleEvent]);
+
+    return highlight ? filterSprite(sprite) : sprite;
 };
 
 export default BackgroundRectangle;
