@@ -52,23 +52,23 @@ export const useNewMapStore = create<NewMapStore>((set) => ({
         set({ pixelsBoundingBox: { min, max } }),
 }));
 
-const backgroundGraphics: Map<string, Uint8Array | undefined> = new Map()
+const backgroundGraphics: Map<string, Uint8Array | undefined> = new Map();
 
 export const setBackgroundGraphic = (coordinate: string, decodedGraphics: Uint8Array | undefined) => {
-    backgroundGraphics.set(coordinate, decodedGraphics)
-}
+    backgroundGraphics.set(coordinate, decodedGraphics);
+};
 
 export const updateBackgroundGraphic = (coordinate: string, decodedGraphics: Uint8Array | undefined) => {
     if (!backgroundGraphics.has(coordinate) && decodedGraphics !== undefined && decodedGraphics.length > 0) {
-        backgroundGraphics.set(coordinate, decodedGraphics)
+        backgroundGraphics.set(coordinate, decodedGraphics);
     }
-}
+};
 
 export const getBackgroundGraphic = (coordinate: string) => {
-    const backgroundGraphic = backgroundGraphics.get(coordinate)
+    const backgroundGraphic = backgroundGraphics.get(coordinate);
     return backgroundGraphic;
-}
+};
 
 export const deleteBackgroundGraphic = (coordinate: string) => {
-    backgroundGraphics.delete(coordinate)
-}
+    backgroundGraphics.delete(coordinate);
+};

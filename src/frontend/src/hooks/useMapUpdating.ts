@@ -1,5 +1,10 @@
 import { IncrementalMapUpdateResponse } from "./../generated/grpc/services/StateUpdate";
-import { deleteBackgroundGraphic, setBackgroundGraphic, updateBackgroundGraphic, useNewMapStore } from "../stores/newMapStore.ts";
+import {
+    deleteBackgroundGraphic,
+    setBackgroundGraphic,
+    updateBackgroundGraphic,
+    useNewMapStore,
+} from "../stores/newMapStore.ts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPixels, postPixels } from "../api/map.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -75,10 +80,10 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
                     };
                     events.onPixelUpdated && events.onPixelUpdated(pixelCoordinates, pixel);
                     setPixel(pixelCoordinates, pixel);
-                    updateBackgroundGraphic(JSON.stringify(pixelCoordinates), updatedPixel.backgroundGraphic)
+                    updateBackgroundGraphic(JSON.stringify(pixelCoordinates), updatedPixel.backgroundGraphic);
                 } else {
                     setPixel(pixelCoordinates, null);
-                    deleteBackgroundGraphic(JSON.stringify(pixelCoordinates))
+                    deleteBackgroundGraphic(JSON.stringify(pixelCoordinates));
                 }
             }
         },
@@ -100,7 +105,7 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
         results.pixels.map((layer, y) => {
             layer.map((pixel, x) => {
                 if (pixel.type !== PixelType.FogOfWar) {
-                    const coordinate = JSON.stringify({ x: x - playerX, y: y - playerY })
+                    const coordinate = JSON.stringify({ x: x - playerX, y: y - playerY });
                     const decodedPixel = decodePixel(coordinate, pixel);
                     pixels.set(coordinate, decodedPixel);
                 }
@@ -113,7 +118,7 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
         const decodedGraphics = encodedPixel.backgroundGraphic
             ? Uint8Array.from(atob(encodedPixel.backgroundGraphic), (c) => c.charCodeAt(0))
             : undefined;
-        setBackgroundGraphic(coordinate, decodedGraphics)
+        setBackgroundGraphic(coordinate, decodedGraphics);
         const decodePixel: Pixel = {
             type: encodedPixel.type,
             guild: encodedPixel.guild,

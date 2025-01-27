@@ -8,7 +8,7 @@ const backgroundGraphicSize = 32;
 
 const Filters = withFilters(Container, {
     glow: GlowFilter,
-    overlay: ColorOverlayFilter
+    overlay: ColorOverlayFilter,
 });
 
 const BackgroundRectangle = ({
@@ -42,12 +42,12 @@ const BackgroundRectangle = ({
 
     const overlayColor = useMemo(() => {
         if (color) {
-            const pixiColor = new Color(`hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`)
+            const pixiColor = new Color(`hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`);
             return [pixiColor.red, pixiColor.green, pixiColor.blue];
         } else {
             return [0, 0, 0];
         }
-    }, [color])
+    }, [color]);
 
     const sprite = useMemo(
         () => (
@@ -63,7 +63,7 @@ const BackgroundRectangle = ({
                 overlay={{
                     enabled: color !== undefined,
                     color: overlayColor,
-                    alpha: color?.alpha ?? 0.75
+                    alpha: color?.alpha ?? 0.75,
                 }}
             >
                 <Sprite

@@ -25,8 +25,8 @@ const guildColorMapping: Record<Guild, HslaColour> = {
 };
 const mapBorderColor = { hue: 44, saturation: 98, lightness: 50 };
 
-const lightnessChange = 20
-const saturationChange = 40
+const lightnessChange = 20;
+const saturationChange = 40;
 
 export function pixelColor(pixel: Pixel | null, user: User | null): HslaColour | undefined {
     let color = pixelBaseColor(pixel);
