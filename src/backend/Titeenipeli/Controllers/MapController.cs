@@ -60,10 +60,13 @@ public class MapController : ControllerBase
 
         var map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
-        if (user.IsGod) {
+        if (user.IsGod)
+        {
             map.MinViewableX = -1;
             map.MinViewableY = -1;
-        } else {
+        }
+        else
+        {
             map = CalculateFogOfWar(map, user);
         }
         InjectBackgroundGraphics(map);
