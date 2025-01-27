@@ -3,7 +3,7 @@ import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import { pixelColor } from "./Colors.ts";
 import { mapConfig } from "./MapConfig";
-import { useNewMapStore } from "../../stores/newMapStore.ts";
+import { getBackgroundGraphic, useNewMapStore } from "../../stores/newMapStore.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.ts";
@@ -64,7 +64,7 @@ const GameMap: FC = () => {
                     y={rectangleY}
                     width={mapConfig.PixelSize}
                     height={mapConfig.PixelSize}
-                    backgroundGraphic={pixel?.backgroundGraphic}
+                    backgroundGraphic={getBackgroundGraphic(coordinate)}
                     color={color}
                     highlight={highlight}
                     moving={isMoving}

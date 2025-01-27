@@ -1,5 +1,5 @@
 import { IncrementalMapUpdateResponse } from "./../generated/grpc/services/StateUpdate";
-import { useNewMapStore } from "../stores/newMapStore.ts";
+import { deleteBackgroundGraphic, setBackgroundGraphic, updateBackgroundGraphic, useNewMapStore } from "../stores/newMapStore.ts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPixels, postPixels } from "../api/map.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -67,23 +67,18 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
                     y: updatedPixel.spawnRelativeCoordinate?.y ?? 0,
                 };
                 if (pixelType !== PixelType.FogOfWar) {
-                    // Background graphic is provided only ones.
-                    // Use old background graphic during owner updates.
-                    const oldBackgroundGraphic = getPixel(pixelCoordinates)?.backgroundGraphic;
                     const pixel = {
                         type: pixelType,
                         guild: updatedPixel.guild ? Number(updatedPixel.guild) : undefined,
                         owner: updatedPixel.owner?.id,
-                        backgroundGraphic:
-                            updatedPixel.backgroundGraphic.length !== 0
-                                ? updatedPixel.backgroundGraphic
-                                : oldBackgroundGraphic,
                         ...pixelCoordinates,
                     };
                     events.onPixelUpdated && events.onPixelUpdated(pixelCoordinates, pixel);
                     setPixel(pixelCoordinates, pixel);
+                    updateBackgroundGraphic(JSON.stringify(pixelCoordinates), updatedPixel.backgroundGraphic)
                 } else {
                     setPixel(pixelCoordinates, null);
+                    deleteBackgroundGraphic(JSON.stringify(pixelCoordinates))
                 }
             }
         },
@@ -105,23 +100,24 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
         results.pixels.map((layer, y) => {
             layer.map((pixel, x) => {
                 if (pixel.type !== PixelType.FogOfWar) {
-                    const decodedPixel = decodePixel(pixel);
-                    pixels.set(JSON.stringify({ x: x - playerX, y: y - playerY }), decodedPixel);
+                    const coordinate = JSON.stringify({ x: x - playerX, y: y - playerY })
+                    const decodedPixel = decodePixel(coordinate, pixel);
+                    pixels.set(coordinate, decodedPixel);
                 }
             });
         });
         return pixels;
     }, []);
 
-    const decodePixel = (encodedPixel: EncodedPixel) => {
+    const decodePixel = (coordinate: string, encodedPixel: EncodedPixel) => {
         const decodedGraphics = encodedPixel.backgroundGraphic
             ? Uint8Array.from(atob(encodedPixel.backgroundGraphic), (c) => c.charCodeAt(0))
             : undefined;
+        setBackgroundGraphic(coordinate, decodedGraphics)
         const decodePixel: Pixel = {
             type: encodedPixel.type,
             guild: encodedPixel.guild,
             owner: encodedPixel.owner,
-            backgroundGraphic: decodedGraphics,
         };
         return decodePixel;
     };
