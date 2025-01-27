@@ -60,7 +60,12 @@ public class MapController : ControllerBase
 
         var map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
-        map = CalculateFogOfWar(map, user);
+        if (user.IsGod) {
+            map.MinViewableX = -1;
+            map.MinViewableY = -1;
+        } else {
+            map = CalculateFogOfWar(map, user);
+        }
         InjectBackgroundGraphics(map);
         var inversedMap = InverseMap(map);
 
@@ -170,13 +175,13 @@ public class MapController : ControllerBase
         {
             for (int y = 0; y < height; y++)
             {
-                if (user.IsGod || map.Pixels[x, y].Owner == user.Id)
+                if (map.Pixels[x, y].Owner == user.Id)
                 {
                     fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new Coordinate
                     {
                         X = x,
                         Y = y
-                    }, user.IsGod ? _gameOptions.Width : user.Guild.FogOfWarDistance);
+                    }, user.Guild.FogOfWarDistance);
                 }
             }
         }

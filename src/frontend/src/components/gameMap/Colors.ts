@@ -24,13 +24,16 @@ const guildColorMapping: Record<Guild, HslaColour> = {
     [Guild.Tutti]: { hue: 312, saturation: 100, lightness: 50 },
 };
 const mapBorderColor = { hue: 44, saturation: 98, lightness: 50 };
-const black = { hue: 0, saturation: 0, lightness: 0 };
 
 const lightnessChange = 20
 const saturationChange = 40
 
-export function pixelColor(pixel: Pixel | null, user: User | null): HslaColour {
+export function pixelColor(pixel: Pixel | null, user: User | null): HslaColour | undefined {
     let color = pixelBaseColor(pixel);
+    if (color === undefined) {
+        return undefined;
+    }
+
     color = pixelOwnerModifier(pixel, user, color);
     color = spawnModifier(pixel, color);
     return color;
@@ -38,7 +41,7 @@ export function pixelColor(pixel: Pixel | null, user: User | null): HslaColour {
 
 const pixelBaseColor = (pixel?: Pixel | null) => {
     if (!pixel) {
-        return black;
+        return undefined;
     }
 
     if (pixel.type === PixelType.MapBorder) {
@@ -46,24 +49,10 @@ const pixelBaseColor = (pixel?: Pixel | null) => {
     }
 
     if (pixel.guild === undefined) {
-        return black;
+        return undefined;
     }
 
-    return guildColorMapping[pixel.guild as unknown as Guild] ?? black;
-};
-
-const spawnModifier = (pixel: Pixel | null, color: HslaColour): HslaColour => {
-    if (pixel?.type !== PixelType.Spawn) {
-        return color;
-    }
-
-    const alteredColor: HslaColour = {
-        hue: color.hue,
-        saturation: color.saturation,
-        lightness: color.lightness - lightnessChange,
-    };
-
-    return alteredColor;
+    return guildColorMapping[pixel.guild as unknown as Guild] ?? undefined;
 };
 
 /**
@@ -82,6 +71,20 @@ const pixelOwnerModifier = (pixel: Pixel | null, user: User | null, color: HslaC
         hue: color.hue,
         saturation: color.saturation - saturationChange,
         lightness: color.lightness,
+    };
+
+    return alteredColor;
+};
+
+const spawnModifier = (pixel: Pixel | null, color: HslaColour): HslaColour => {
+    if (pixel?.type !== PixelType.Spawn) {
+        return color;
+    }
+
+    const alteredColor: HslaColour = {
+        hue: color.hue,
+        saturation: color.saturation,
+        lightness: color.lightness - lightnessChange,
     };
 
     return alteredColor;
