@@ -1,0 +1,14 @@
+description: "All pixels of the map."
+content:
+  application/json:
+    title:
+      type: string
+      description: "Title text of capture"
+    message:
+      type: string
+      description: "Message text of capture"
+    benefits:
+      type: array
+      items:
+        type: string
+        description: "Benefits of capture"

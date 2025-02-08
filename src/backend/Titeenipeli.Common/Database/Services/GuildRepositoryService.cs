@@ -4,39 +4,38 @@ using Titeenipeli.Common.Enums;
 
 namespace Titeenipeli.Common.Database.Services;
 
-public class GuildRepositoryService(ApiDbContext dbContext) : RepositoryService(dbContext), IGuildRepositoryService
+public class GuildRepositoryService(ApiDbContext dbContext)
+    : EntityRepositoryService(dbContext), IGuildRepositoryService
 {
     public Guild? GetById(int id)
     {
-        return _dbContext.Guilds.FirstOrDefault(guild => guild.Id == id);
+        return DbContext.Guilds.FirstOrDefault(guild => guild.Id == id);
     }
 
     public List<Guild> GetAll()
     {
-        return _dbContext.Guilds.ToList();
+        return DbContext.Guilds.ToList();
     }
 
     public void Add(Guild guild)
     {
-        _dbContext.Guilds.Add(guild);
-        _dbContext.SaveChanges();
+        DbContext.Guilds.Add(guild);
     }
 
     public Guild? GetByName(GuildName name)
     {
-        return _dbContext.Guilds.FirstOrDefault(guild => guild.Name == name);
+        return DbContext.Guilds.FirstOrDefault(guild => guild.Name == name);
     }
 
     public void Update(Guild guild)
     {
-        Guild? existingGuild = GetById(guild.Id);
+        var existingGuild = GetById(guild.Id);
 
         if (existingGuild == null)
         {
             throw new Exception("Guild doesn't exist.");
         }
 
-        _dbContext.Entry(existingGuild).CurrentValues.SetValues(guild);
-        _dbContext.SaveChanges();
+        DbContext.Entry(existingGuild).CurrentValues.SetValues(guild);
     }
 }

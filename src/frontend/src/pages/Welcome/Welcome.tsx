@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect } from "react";
+import { PropsWithChildren, useCallback, useEffect } from "react";
 import { LogoContainer } from "./LogoContainer";
 import { GreetingContainer } from "./GreetingContainer";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -13,25 +13,41 @@ export const Welcome = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
+        handleAuthenticationRedirections();
+    }, []);
+
+    const handleTokenParameter = useCallback(async (): Promise<boolean> => {
         const token = searchParams.get("token");
         if (token === null) {
-            return;
+            return false;
         }
-        handleToken(token);
 
-        async function handleToken(token: string) {
-            const authenticationInput = { token: token };
-            try {
-                const response = await postUsersAuthenticate(authenticationInput);
-                if (response.status === 200) {
-                    navigate("/game");
-                }
-            } catch (error) {
-                setSearchParams({});
-                console.log(error);
+        const authenticationInput = { token: token };
+        try {
+            const response = await postUsersAuthenticate(authenticationInput);
+            if (response.status === 200) {
+                navigate("/game");
+                return true;
             }
+        } catch (error) {
+            setSearchParams({});
+            console.log(error);
         }
-    }, []);
+        return false;
+    }, [navigate]);
+
+    const handleAuthenticationCookie = useCallback(async () => {
+        if (document.cookie.indexOf("X-Authorization=") !== -1) {
+            navigate("/game");
+        }
+    }, [navigate]);
+
+    const handleAuthenticationRedirections = useCallback(async () => {
+        const handled = await handleTokenParameter();
+        if (!handled) {
+            handleAuthenticationCookie();
+        }
+    }, [handleTokenParameter, handleAuthenticationCookie]);
 
     return (
         <>

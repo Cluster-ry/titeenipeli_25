@@ -1,0 +1,109 @@
+.special-effect {
+    margin: 0 1em;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.special-effect .button {
+    transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.5s;
+    width: 6em;
+    aspect-ratio: 1;
+    display: flex;
+    background: #75757580;
+    border: 5px solid #757575;
+    border-radius: 8px;
+    pointer-events: all;
+    justify-content: center;
+    align-items: center;
+}
+.special-effect .button .icon {
+    width: 4em;
+    aspect-ratio: 1;
+    object-fit: contain;
+}
+
+.special-effect .label {
+    flex: 1 1 4em;
+    width: 8em;
+    text-align: center;
+}
+
+.special-effect .button:hover {
+    transform: scale(1.1);
+}
+.special-effect .button:active {
+    animation: clickAnimation 0.25s forwards;
+}
+.special-effect .selected {
+    animation: selected 1.2s ease-in-out infinite;
+}
+.overlay-effect {
+    opacity: 0.1;
+    aspect-ratio: 1;
+    position: absolute;
+    top: 30vh;
+    right: 10vw;
+    width: 20em;
+    animation: overlay-selected 5s ease-in-out infinite;
+}
+@keyframes selected {
+    0% {
+        rotate: 0deg;
+        transform: scale(1);
+        box-shadow: 0px 0px 40px 20px rgba(255, 46, 206, 0.75);
+    }
+    30% {
+        rotate: 6deg;
+        transform: scale(1.1);
+        box-shadow: 0px 0px 30px 15px rgba(213, 46, 255, 0.75);
+    }
+    50% {
+        rotate: 2deg;
+        transform: scale(1);
+        box-shadow: 0px 0px 20px 5px rgba(255, 46, 46, 0.75);
+    }
+    70% {
+        rotate: -6deg;
+        transform: scale(1.1);
+        box-shadow: 0px 0px 30px 15px rgba(213, 46, 255, 0.75);
+    }
+    100% {
+        rotate: 0deg;
+        transform: scale(1);
+        box-shadow: 0px 0px 40px 20px rgba(255, 46, 206, 0.75);
+    }
+}
+@keyframes overlay-selected {
+    0% {
+        transform: scale(0.9);
+        filter: blur(2px);
+        background: radial-gradient(rgba(255, 46, 206, 0.75), rgba(255, 46, 206, 0));
+    }
+    40% {
+        transform: scale(1.1);
+        filter: blur(5px);
+        background: radial-gradient(rgba(213, 46, 255, 0.75), rgba(255, 46, 206, 0));
+    }
+    80% {
+        transform: scale(1);
+        filter: blur(8px);
+        background: radial-gradient(rgba(255, 46, 206, 0.75), rgba(255, 46, 206, 0));
+    }
+    100% {
+        transform: scale(0.9);
+        filter: blur(2px);
+        background: radial-gradient(rgba(255, 46, 206, 0.75), rgba(255, 46, 206, 0));
+    }
+}
+@keyframes clickAnimation {
+    0% {
+        transform: rotate(0deg);
+    }
+    30% {
+        transform: rotate(50deg);
+    }
+    100% {
+        transform: rotate(10deg);
+    }
+}

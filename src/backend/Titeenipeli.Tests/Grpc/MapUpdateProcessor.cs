@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -37,6 +38,7 @@ public class MapUpdateProcessorTest
     private const int Width = 10;
     private const int Height = 10;
     private const int FogOfWarDistance = 2;
+    private const int MaxFogOfWarDistance = 5;
 
     private IGrpcConnection<IncrementalMapUpdateResponse> _connection;
     private ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _connections;
@@ -47,12 +49,14 @@ public class MapUpdateProcessorTest
     private static readonly Guild OwnGuild = new()
     {
         Name = GuildName.Cluster,
-        ActiveCtfFlags = new(),
+        FogOfWarDistance = FogOfWarDistance,
+        ActiveCtfFlags = []
     };
     private static readonly Guild OtherGuild = new()
     {
         Name = GuildName.Tietokilta,
-        ActiveCtfFlags = new(),
+        FogOfWarDistance = FogOfWarDistance,
+        ActiveCtfFlags = []
     };
     private static readonly User CurrentUser = new()
     {
@@ -61,29 +65,32 @@ public class MapUpdateProcessorTest
         Code = "",
         SpawnX = 0,
         SpawnY = 0,
-        Powerups = new(),
+        PowerUps = [],
         TelegramId = "",
         FirstName = "Own user",
         LastName = "",
         Username = ""
     };
-    private static readonly User _otherUser = new()
+
+    private static readonly User OtherUser = new()
     {
         Id = 2,
         Guild = OtherGuild,
         Code = "",
         SpawnX = 0,
         SpawnY = 0,
-        Powerups = new(),
+        PowerUps = [],
         TelegramId = "",
         FirstName = "Other user",
         LastName = "",
         Username = ""
     };
-    private static readonly List<User> _users = new() {
+
+    private static readonly List<User> Users =
+    [
         CurrentUser,
-        _otherUser
-    };
+        OtherUser
+    ];
 
     [SetUp]
     public void Init()
@@ -98,7 +105,8 @@ public class MapUpdateProcessorTest
         {
             Width = Width,
             Height = Height,
-            FogOfWarDistance = FogOfWarDistance
+            FogOfWarDistance = FogOfWarDistance,
+            MaxFogOfWarDistance = MaxFogOfWarDistance
         };
         _incrementalMapUpdateCoreService = new Mock<IIncrementalMapUpdateCoreService>().Object;
     }
@@ -113,9 +121,11 @@ public class MapUpdateProcessorTest
     [TestCaseSource(nameof(IncrementalMapUpdateTestCases))]
     public async Task GrpcMapUpdateProcessorTests(int[,] inputMap, List<MapChange> changes, int[,] outputMap)
     {
-        Dictionary<Coordinate, GrpcChangePixel> newPixels = MapUtils.MatrixOfUsersToPixels(inputMap, _users);
+        var newPixels = MapUtils.MatrixOfUsersToPixels(inputMap, Users);
         GrpcMapChangesInput input = new(newPixels, changes);
-        MapUpdateProcessor mapUpdateProcessor = new(_incrementalMapUpdateCoreService, input, _connections, _gameOptions, _backgroundGraphicsService);
+        var user = _connections.FirstOrDefault().Value.User;
+        MapUpdateProcessor mapUpdateProcessor = new(_incrementalMapUpdateCoreService, input, _connections, _gameOptions,
+            _backgroundGraphicsService, user);
 
         await mapUpdateProcessor.Process();
 
@@ -143,7 +153,7 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
                 new List<MapChange> {
-                    new MapChange(new Coordinate {X = 5, Y = 5}, null, _otherUser)
+                    new(new Coordinate { X = 5, Y = 5 }, null, OtherUser)
                 },
                 new[,]
                 {
@@ -211,7 +221,7 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
                 new List<MapChange> {
-                    new MapChange(new Coordinate {X = 5, Y = 5}, CurrentUser, _otherUser)
+                    new(new Coordinate { X = 5, Y = 5 }, CurrentUser, OtherUser)
                 },
                 new[,]
                 {
@@ -245,31 +255,31 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
                 new List<MapChange> {
-                    new MapChange(new Coordinate {X = 5, Y = 6}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 2, Y = 2}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 3, Y = 2}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 4, Y = 2}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 5, Y = 2}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 6, Y = 2}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 7, Y = 2}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 8, Y = 2}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 8, Y = 3}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 8, Y = 4}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 8, Y = 5}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 8, Y = 6}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 8, Y = 7}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 8, Y = 8}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 7, Y = 8}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 6, Y = 8}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 5, Y = 8}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 4, Y = 8}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 3, Y = 8}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 2, Y = 8}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 2, Y = 7}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 2, Y = 6}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 2, Y = 5}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 2, Y = 4}, null, _otherUser),
-                    new MapChange(new Coordinate {X = 2, Y = 3}, null, _otherUser),
+                    new(new Coordinate { X = 5, Y = 6 }, null, OtherUser),
+                    new(new Coordinate { X = 2, Y = 2 }, null, OtherUser),
+                    new(new Coordinate { X = 3, Y = 2 }, null, OtherUser),
+                    new(new Coordinate { X = 4, Y = 2 }, null, OtherUser),
+                    new(new Coordinate { X = 5, Y = 2 }, null, OtherUser),
+                    new(new Coordinate { X = 6, Y = 2 }, null, OtherUser),
+                    new(new Coordinate { X = 7, Y = 2 }, null, OtherUser),
+                    new(new Coordinate { X = 8, Y = 2 }, null, OtherUser),
+                    new(new Coordinate { X = 8, Y = 3 }, null, OtherUser),
+                    new(new Coordinate { X = 8, Y = 4 }, null, OtherUser),
+                    new(new Coordinate { X = 8, Y = 5 }, null, OtherUser),
+                    new(new Coordinate { X = 8, Y = 6 }, null, OtherUser),
+                    new(new Coordinate { X = 8, Y = 7 }, null, OtherUser),
+                    new(new Coordinate { X = 8, Y = 8 }, null, OtherUser),
+                    new(new Coordinate { X = 7, Y = 8 }, null, OtherUser),
+                    new(new Coordinate { X = 6, Y = 8 }, null, OtherUser),
+                    new(new Coordinate { X = 5, Y = 8 }, null, OtherUser),
+                    new(new Coordinate { X = 4, Y = 8 }, null, OtherUser),
+                    new(new Coordinate { X = 3, Y = 8 }, null, OtherUser),
+                    new(new Coordinate { X = 2, Y = 8 }, null, OtherUser),
+                    new(new Coordinate { X = 2, Y = 7 }, null, OtherUser),
+                    new(new Coordinate { X = 2, Y = 6 }, null, OtherUser),
+                    new(new Coordinate { X = 2, Y = 5 }, null, OtherUser),
+                    new(new Coordinate { X = 2, Y = 4 }, null, OtherUser),
+                    new(new Coordinate { X = 2, Y = 3 }, null, OtherUser)
                 },
                 new[,]
                 {
@@ -303,7 +313,7 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
                 new List<MapChange> {
-                    new MapChange(new Coordinate {X = 5, Y = 5}, CurrentUser, _otherUser)
+                    new(new Coordinate { X = 5, Y = 5 }, CurrentUser, OtherUser)
                 },
                 new[,]
                 {
@@ -371,7 +381,7 @@ public class MapUpdateProcessorTest
                     { Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth, Oth },
                 },
                 new List<MapChange> {
-                    new MapChange(new Coordinate {X = 0, Y = 0}, CurrentUser, _otherUser)
+                    new(new Coordinate { X = 0, Y = 0 }, CurrentUser, OtherUser)
                 },
                 new[,]
                 {
@@ -405,9 +415,9 @@ public class MapUpdateProcessorTest
                     { Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp, Emp },
                 },
                 new List<MapChange> {
-                    new MapChange(new Coordinate {X = 1, Y = 1}, CurrentUser, _otherUser),
-                    new MapChange(new Coordinate {X = 2, Y = 1}, _otherUser, CurrentUser),
-                    new MapChange(new Coordinate {X = 1, Y = 2}, null, _otherUser),
+                    new(new Coordinate { X = 1, Y = 1 }, CurrentUser, OtherUser),
+                    new(new Coordinate { X = 2, Y = 1 }, OtherUser, CurrentUser),
+                    new(new Coordinate { X = 1, Y = 2 }, null, OtherUser)
                 },
                 new[,]
                 {

@@ -7,6 +7,7 @@ using Titeenipeli.Common.Models;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Common.Results.CustomStatusCodes;
 using Titeenipeli.Extensions;
+using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
@@ -22,23 +23,24 @@ public class MapController : ControllerBase
 
     private readonly GameOptions _gameOptions;
 
-    private readonly IMapRepositoryService _mapRepositoryService;
     private readonly IUserRepositoryService _userRepositoryService;
-    private readonly IMapUpdaterService _mapUpdaterService;
     private readonly IBackgroundGraphicsService _backgroundGraphicsService;
+
+    private readonly IMapUpdaterService _mapUpdaterService;
+    private readonly IMapProvider _mapProvider;
 
     private readonly IJwtService _jwtService;
 
     public MapController(GameOptions gameOptions,
                          IJwtService jwtService,
                          IUserRepositoryService userRepositoryService,
-                         IMapRepositoryService mapRepositoryService,
+                         IMapProvider mapProvider,
                          IMapUpdaterService mapUpdaterService,
                          IBackgroundGraphicsService backgroundGraphicsService)
     {
         _gameOptions = gameOptions;
         _userRepositoryService = userRepositoryService;
-        _mapRepositoryService = mapRepositoryService;
+        _mapProvider = mapProvider;
         _jwtService = jwtService;
         _mapUpdaterService = mapUpdaterService;
         _backgroundGraphicsService = backgroundGraphicsService;
@@ -49,20 +51,20 @@ public class MapController : ControllerBase
     {
         var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
 
-        User[] users = _userRepositoryService.GetAll().ToArray();
-        Pixel[] pixels = _mapRepositoryService.GetAll().ToArray();
+        var users = _userRepositoryService.GetAll().ToArray();
+        var pixels = _mapProvider.GetAll().ToArray();
 
         // +2 to account for the borders
         int width = _gameOptions.Width + 2 * BorderWidth;
         int height = _gameOptions.Height + 2 * BorderWidth;
 
-        Map map = ConstructMap(pixels, width, height, user);
+        var map = ConstructMap(pixels, width, height, user);
         MarkSpawns(map, users);
-        map = CalculateFogOfWar(map, user.Id);
+        map = CalculateFogOfWar(map, user);
         InjectBackgroundGraphics(map);
-        Map inversedMap = InverseMap(map);
+        var inversedMap = InverseMap(map);
 
-        GetPixelsResult result = new GetPixelsResult
+        var result = new GetPixelsResult
         {
             PlayerSpawn = new Coordinate
             {
@@ -85,57 +87,38 @@ public class MapController : ControllerBase
             return new TooManyRequestsResult("Try again later", TimeSpan.FromMinutes(1));
         }
 
-        Coordinate globalCoordinate = new Coordinate
+        var globalCoordinate = new Coordinate
         {
             X = user.SpawnX + pixelsInput.X,
             Y = user.SpawnY + pixelsInput.Y
         };
 
-        if (!IsValidPlacement(globalCoordinate, user))
+        if (!await _mapUpdaterService.PlacePixel(_userRepositoryService, globalCoordinate, user))
         {
-            ErrorResult error = new ErrorResult
+            string description = new Random().NextInt64(100) == 69
+                ? "Have a token #I_DONT_KNOW_THE_RULES"
+                : "Try another pixel";
+
+            var error = new ErrorResult
             {
                 Title = "Invalid pixel placement",
                 Code = ErrorCode.InvalidPixelPlacement,
-                Description = "Try another pixel"
+                Description = description
             };
 
             return BadRequest(error);
         }
-
-        Pixel? pixelToUpdate = _mapRepositoryService.GetByCoordinate(globalCoordinate);
-
-        if (pixelToUpdate == null)
-        {
-            return BadRequest();
-        }
-
-        if (pixelToUpdate.User != null &&
-            pixelToUpdate.User.SpawnX == globalCoordinate.X &&
-            pixelToUpdate.User.SpawnY == globalCoordinate.Y)
-        {
-            ErrorResult error = new ErrorResult
-            {
-                Title = "Pixel is a spawn point",
-                Code = ErrorCode.PixelIsSpawnPoint,
-                Description = "Spawn pixels cannot be captured"
-            };
-
-            return BadRequest(error);
-        }
-
-
-        await _mapUpdaterService.PlacePixel(globalCoordinate, user);
 
         user.PixelBucket--;
         _userRepositoryService.Update(user);
+        await _userRepositoryService.SaveChangesAsync();
 
         return Ok();
     }
 
     private static Map ConstructMap(IEnumerable<Pixel> pixels, int width, int height, User? user)
     {
-        Map map = new Map
+        var map = new Map
         {
             Pixels = new PixelModel[width, height],
             Width = width,
@@ -156,9 +139,9 @@ public class MapController : ControllerBase
             }
         }
 
-        foreach (Pixel pixel in pixels)
+        foreach (var pixel in pixels)
         {
-            PixelModel mapPixel = new PixelModel
+            var mapPixel = new PixelModel
             {
                 Type = PixelType.Normal,
                 Guild = pixel.User?.Guild.Name,
@@ -173,26 +156,27 @@ public class MapController : ControllerBase
 
     private static void MarkSpawns(Map map, IEnumerable<User> users)
     {
-        foreach (User user in users) map.Pixels[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
+        foreach (var user in users.Where(user => !user.IsGod))
+            map.Pixels[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
     }
 
-    private Map CalculateFogOfWar(Map map, int userId)
+    private Map CalculateFogOfWar(Map map, User user)
     {
         int width = map.Pixels.GetLength(0);
         int height = map.Pixels.GetLength(1);
-        Map fogOfWarMap = CreateEmptyMap(width, height);
+        var fogOfWarMap = CreateEmptyMap(width, height);
 
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                if (map.Pixels[x, y].Owner == userId)
+                if (user.IsGod || map.Pixels[x, y].Owner == user.Id)
                 {
                     fogOfWarMap = MarkPixelsInFogOfWar(fogOfWarMap, map, new Coordinate
                     {
                         X = x,
                         Y = y
-                    }, _gameOptions.FogOfWarDistance);
+                    }, user.IsGod ? _gameOptions.Width : user.Guild.FogOfWarDistance);
                 }
             }
         }
@@ -202,7 +186,7 @@ public class MapController : ControllerBase
 
     private Map CreateEmptyMap(int width, int height)
     {
-        Map map = new Map
+        var map = new Map
         {
             Pixels = new PixelModel[width, height],
             Width = width,
@@ -223,7 +207,9 @@ public class MapController : ControllerBase
         return map;
     }
 
-    private static Map MarkPixelsInFogOfWar(Map fogOfWarMap, Map map, Coordinate pixel,
+    private static Map MarkPixelsInFogOfWar(Map fogOfWarMap,
+                                            Map map,
+                                            Coordinate pixel,
                                             int fogOfWarDistance)
     {
         int minX = int.Clamp(pixel.X - fogOfWarDistance, 0, map.Width - 1);
@@ -249,7 +235,7 @@ public class MapController : ControllerBase
 
     private static Map TrimMap(Map map)
     {
-        Map trimmedMap = new Map
+        var trimmedMap = new Map
         {
             Pixels = new PixelModel[map.MaxViewableX - (map.MinViewableX + 1),
                 map.MaxViewableY - (map.MinViewableY + 1)],
@@ -291,12 +277,20 @@ public class MapController : ControllerBase
         {
             for (int y = 0; y < map.Height; y++)
             {
-                var backgroundGraphic = _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(x - 1, y - 1));
+                if (map.Pixels[x, y].Type == PixelType.MapBorder)
+                {
+                    continue;
+                }
+
+                byte[]? backgroundGraphic =
+                    _backgroundGraphicsService.GetBackgroundGraphic(new Coordinate(map.MinViewableX + x,
+                        map.MinViewableY + y));
                 if (backgroundGraphic == null)
                 {
                     continue;
                 }
-                var backgroundGraphicWire = Convert.ToBase64String(backgroundGraphic);
+
+                string backgroundGraphicWire = Convert.ToBase64String(backgroundGraphic);
                 map.Pixels[x, y].BackgroundGraphic = backgroundGraphicWire;
             }
         }
@@ -304,7 +298,7 @@ public class MapController : ControllerBase
 
     private static Map InverseMap(Map map)
     {
-        Map inversedMap = new Map
+        var inversedMap = new Map
         {
             Pixels = new PixelModel[map.Height, map.Width],
             Width = map.Height,
@@ -318,18 +312,5 @@ public class MapController : ControllerBase
             }
         }
         return inversedMap;
-    }
-
-    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
-    {
-        // Take neighboring pixels for the pixel the user is trying to set,
-        // but remove cornering pixels and only return pixels belonging to
-        // the user
-        return (from pixel in _mapRepositoryService.GetAll()
-                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
-                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      pixel.User == user
-                select pixel).Any();
     }
 }

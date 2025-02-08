@@ -5,6 +5,7 @@ using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Options;
 using Titeenipeli.Services.Grpc;
 
@@ -13,51 +14,141 @@ namespace Titeenipeli.Services;
 public class MapUpdaterService(
     IServiceScopeFactory scopeFactory,
     GameOptions gameOptions,
-    IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService
+    IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
+    IMapProvider mapProvider
 ) : IMapUpdaterService
 {
     private const int BorderWidth = 1;
 
     private readonly MapUpdater _mapUpdater = new();
 
-    public Task PlacePixel(Coordinate pixelCoordinates, User newOwner)
+    public Task<bool> PlacePixel(IUserRepositoryService userRepositoryService,
+                                 Coordinate pixelCoordinate,
+                                 User newOwner)
     {
-        var borderfiedCoordinate = pixelCoordinates + new Coordinate(1, 1);
+        var borderfiedCoordinate = pixelCoordinate + new Coordinate(1, 1);
 
         return Task.Run(() =>
         {
             lock (_mapUpdater)
             {
-                PixelWithType[,] map = GetMap();
-                List<MapChange> changedPixels =
-                    _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
+                if (!IsValidPlacement(pixelCoordinate, newOwner) || mapProvider.IsSpawn(pixelCoordinate))
+                {
+                    return false;
+                }
+
+                var map = GetMap(userRepositoryService);
+                var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
 
                 DoGrpcUpdate(map, changedPixels);
                 DoDatabaseUpdate(changedPixels, newOwner);
             }
+
+            return true;
         });
     }
 
-    private PixelWithType[,] GetMap()
+    public Task<bool> PlacePixels(IUserRepositoryService userRepositoryService,
+                                  List<Coordinate> pixelCoordinates,
+                                  User newOwner)
     {
-        User[] users;
-        Pixel[] pixels;
-        using (var scope = scopeFactory.CreateScope())
+        return Task.Run(() =>
         {
-            var userRepositoryService = scope.ServiceProvider
-                                             .GetRequiredService<IUserRepositoryService>();
+            lock (_mapUpdater)
+            {
+                var grpcBatch = PlacePixelsWithRetry(userRepositoryService, pixelCoordinates, newOwner);
+                DoGrpcUpdate(GetMap(userRepositoryService), grpcBatch);
+            }
 
-            users = userRepositoryService.GetAll().ToArray();
-            var mapRepositoryService = scope.ServiceProvider
-                                            .GetRequiredService<IMapRepositoryService>();
+            return true;
+        });
+    }
 
-            pixels = mapRepositoryService.GetAll().ToArray();
-        }
+    public Task<User> PlaceSpawn(IUserRepositoryService userRepositoryService, User user)
+    {
+        return Task.Run(() =>
+        {
+            var spawnGeneratorService = scopeFactory.CreateScope()
+                                                    .ServiceProvider
+                                                    .GetRequiredService<SpawnGeneratorService>();
+
+            lock (_mapUpdater)
+            {
+                var map = GetMap(userRepositoryService);
+                var spawnPoint = spawnGeneratorService.GetSpawnPoint(user.Guild.Name);
+
+                user.SpawnX = spawnPoint.X;
+                user.SpawnY = spawnPoint.Y;
+
+                List<MapChange> changedPixels =
+                [
+                    new()
+                    {
+                        Coordinate = new Coordinate(spawnPoint.X, spawnPoint.Y),
+                        OldOwner = null,
+                        NewOwner = user
+                    }
+                ];
+
+                // TODO: This should use _mapUpdater.PlacePixel, but it doesn't support it
+                DoGrpcUpdate(map, changedPixels);
+                DoDatabaseUpdate(changedPixels, user);
+            }
+
+            return user;
+        });
+    }
+
+    private List<MapChange> PlacePixelsWithRetry(IUserRepositoryService userRepositoryService,
+                                                 List<Coordinate> pixelCoordinates,
+                                                 User newOwner)
+    {
+        int lastFailedCount;
+        List<Coordinate> failedPlacements = [];
+        List<MapChange> grpcBatch = [];
+
+        do
+        {
+            lastFailedCount = failedPlacements.Count;
+            failedPlacements = [];
+
+            foreach (var pixelCoordinate in pixelCoordinates)
+            {
+                if (!IsValidPlacement(pixelCoordinate, newOwner))
+                {
+                    failedPlacements.Add(pixelCoordinate);
+                    continue;
+                }
+
+                if (mapProvider.IsSpawn(pixelCoordinate))
+                {
+                    continue;
+                }
+
+                var pixelCoordinateWithBorder = pixelCoordinate + new Coordinate(1, 1);
+                var map = GetMap(userRepositoryService);
+                var changedPixels = _mapUpdater.PlacePixel(map, pixelCoordinateWithBorder, newOwner);
+
+                grpcBatch = [.. grpcBatch, .. changedPixels];
+
+                DoDatabaseUpdate(changedPixels, newOwner);
+            }
+
+            pixelCoordinates = failedPlacements;
+        } while (failedPlacements.Count > 0 && failedPlacements.Count != lastFailedCount);
+
+        return grpcBatch;
+    }
+
+    private PixelWithType[,] GetMap(IUserRepositoryService userRepositoryService)
+    {
+        var users = userRepositoryService.GetAll().ToArray();
+        var pixels = mapProvider.GetAll().ToArray();
 
         int width = gameOptions.Width + 2 * BorderWidth;
         int height = gameOptions.Height + 2 * BorderWidth;
 
-        PixelWithType[,] map = new PixelWithType[width, height];
+        var map = new PixelWithType[width, height];
 
         for (int x = 0; x < width; x++)
         {
@@ -92,11 +183,11 @@ public class MapUpdaterService(
 
     private static void MarkSpawns(PixelWithType[,] map, IEnumerable<User> users)
     {
-        foreach (var user in users) map[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
+        foreach (var user in users.Where(user => !user.IsGod))
+            map[user.SpawnX + 1, user.SpawnY + 1].Type = PixelType.Spawn;
     }
 
-    private void DoGrpcUpdate(PixelWithType[,] pixels,
-                              List<MapChange> changedPixels)
+    private void DoGrpcUpdate(PixelWithType[,] pixels, List<MapChange> changedPixels)
     {
         Dictionary<Coordinate, GrpcChangePixel> nearbyPixels = [];
         List<MapChange> changes = [];
@@ -108,7 +199,7 @@ public class MapUpdaterService(
                 nearbyPixels[coordinate] = new GrpcChangePixel
                 {
                     Coordinate = coordinate,
-                    User = pixel?.Owner
+                    User = pixel.Owner
                 };
             }, changedPixel.Coordinate);
 
@@ -149,20 +240,14 @@ public class MapUpdaterService(
                 }
             });
 
-            using (var scope = scopeFactory.CreateScope())
+            Pixel newPixel = new()
             {
-                var mapRepositoryService = scope.ServiceProvider
-                                                .GetRequiredService<IMapRepositoryService>();
+                X = changedPixel.Coordinate.X,
+                Y = changedPixel.Coordinate.Y,
+                User = changedPixel.NewOwner
+            };
 
-                Pixel newPixel = new()
-                {
-                    X = changedPixel.Coordinate.X,
-                    Y = changedPixel.Coordinate.Y,
-                    User = changedPixel.NewOwner
-                };
-
-                mapRepositoryService.Update(newPixel);
-            }
+            mapProvider.Update(newPixel);
         }
 
         var gameEvent = new GameEvent
@@ -172,16 +257,15 @@ public class MapUpdaterService(
 
         using (var scope = scopeFactory.CreateScope())
         {
-            var gameEventRepositoryService = scope.ServiceProvider
-                                                  .GetRequiredService<IGameEventRepositoryService>();
+            var gameEventRepositoryService = scope.ServiceProvider.GetRequiredService<IGameEventRepositoryService>();
             gameEventRepositoryService.Add(gameEvent);
+            gameEventRepositoryService.SaveChanges();
         }
     }
 
-    private void LoopNearbyPixelsInsideFogOfWar(Action<Coordinate> action,
-                                                Coordinate aroundCoordinate)
+    private void LoopNearbyPixelsInsideFogOfWar(Action<Coordinate> action, Coordinate aroundCoordinate)
     {
-        int fogOfWarDistance = gameOptions.FogOfWarDistance * 2;
+        int fogOfWarDistance = gameOptions.MaxFogOfWarDistance * 2;
         int minY = Math.Clamp(aroundCoordinate.Y - fogOfWarDistance, 0, gameOptions.Height);
         int maxY = Math.Clamp(aroundCoordinate.Y + fogOfWarDistance, 0, gameOptions.Height);
         int minX = Math.Clamp(aroundCoordinate.X - fogOfWarDistance, 0, gameOptions.Width);
@@ -195,5 +279,18 @@ public class MapUpdaterService(
                 action(coordinate);
             }
         }
+    }
+
+    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
+    {
+        // Take neighboring pixels for the pixel the user is trying to set,
+        // but remove cornering pixels and only return pixels belonging to
+        // the user
+        return (from pixel in mapProvider.GetAll()
+                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
+                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                      pixel.User?.Id == user.Id
+                select pixel).Any();
     }
 }

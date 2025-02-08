@@ -9,8 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Tests", "Titeen
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FD3271D3-DCD9-4EC8-AB8B-9BAB6F87BAAF}"
 	ProjectSection(SolutionItems) = preProject
-		.env = .env
-		.env.example = .env.example
+		..\docker-compose.yml = ..\docker-compose.yml
+		..\.env = ..\.env
+		..\.env.example = ..\.env.example
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.IntegrationTest", "Titeenipeli.IntegrationTest\Titeenipeli.IntegrationTest.csproj", "{F52DC122-CE84-44C4-8C8B-353B9D00F909}"
@@ -22,6 +23,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Grpc", "Titeenipeli.Grpc\Titeenipeli.Grpc.csproj", "{E5842D8C-D160-435B-BDFF-13398B2F7301}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Bot", "Titeenipeli.Bot\Titeenipeli.Bot.csproj", "{93164875-EFC6-4CB5-BA33-E93CDEE57AA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.InMemoryMapProvider", "Titeenipeli.InMemoryMapProvider\Titeenipeli.InMemoryMapProvider.csproj", "{C96AE099-A2C3-4F25-89D6-C1CB4685D1F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.SpecialEffects", "Titeenipeli.SpecialEffects\Titeenipeli.SpecialEffects.csproj", "{23617BB6-1663-4E04-AE65-6A10CD1CABB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +62,14 @@ Global
 		{93164875-EFC6-4CB5-BA33-E93CDEE57AA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93164875-EFC6-4CB5-BA33-E93CDEE57AA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93164875-EFC6-4CB5-BA33-E93CDEE57AA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C96AE099-A2C3-4F25-89D6-C1CB4685D1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C96AE099-A2C3-4F25-89D6-C1CB4685D1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C96AE099-A2C3-4F25-89D6-C1CB4685D1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C96AE099-A2C3-4F25-89D6-C1CB4685D1F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23617BB6-1663-4E04-AE65-6A10CD1CABB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23617BB6-1663-4E04-AE65-6A10CD1CABB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23617BB6-1663-4E04-AE65-6A10CD1CABB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23617BB6-1663-4E04-AE65-6A10CD1CABB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

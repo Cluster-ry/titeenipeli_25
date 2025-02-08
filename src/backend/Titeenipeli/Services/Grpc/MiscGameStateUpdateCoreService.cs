@@ -8,7 +8,7 @@ using Titeenipeli.Grpc.Services;
 
 namespace Titeenipeli.Services.Grpc;
 
-public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) :
+public class MiscGameStateUpdateCoreService(IPowerupService powerupService, ILogger<StateUpdateService> logger) :
     GrpcService<MiscStateUpdateResponse>, IMiscGameStateUpdateCoreService
 {
     public async void UpdateMiscGameState(GrpcMiscGameStateUpdateInput gameStateUpdateInput)
@@ -32,20 +32,29 @@ public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) 
             foreach (KeyValuePair<int, IGrpcConnection<MiscStateUpdateResponse>> userConnection in userConnections)
             {
                 var responseStream = userConnection.Value.ResponseStreamQueue.Writer;
-                MiscStateUpdateResponse incrementalResponse = new()
+                MiscStateUpdateResponse incrementalResponse = new();
+
+                if (gameStateUpdateInput.MaximumPixelBucket != 0)
                 {
-                    PixelBucket = new()
+                    incrementalResponse.PixelBucket = new()
                     {
                         Amount = (uint)gameStateUpdateInput.User.PixelBucket,
                         MaxAmount = (uint)gameStateUpdateInput.MaximumPixelBucket,
-                        IncreasePerMinute = gameStateUpdateInput.User.Guild.CurrentRateLimitIncreasePerMinutePerPlayer
-                    }
-                };
+                        IncreasePerMinute = gameStateUpdateInput.User.Guild.RateLimitPerPlayer
+                    };
+                }
 
                 if (gameStateUpdateInput.Guilds != null)
                 {
                     var scores = GuildsToScores(gameStateUpdateInput.Guilds);
                     incrementalResponse.Scores.Add(scores);
+                }
+
+                if (gameStateUpdateInput.PowerUps != null)
+                {
+                    var grpcPowerUps = ConvertPowerupsToGrpc(gameStateUpdateInput.PowerUps);
+                    incrementalResponse.PowerUps.Add(grpcPowerUps);
+                    incrementalResponse.PowerupUpdate = true;
                 }
 
                 await responseStream.WriteAsync(incrementalResponse);
@@ -60,15 +69,13 @@ public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) 
     private static List<MiscStateUpdateResponse.Types.Scores> GuildsToScores(List<Guild> guilds)
     {
         List<MiscStateUpdateResponse.Types.Scores> scores = [];
-        foreach (var guild in guilds)
-        {
-            MiscStateUpdateResponse.Types.Scores score = new()
+        scores.AddRange(guilds.Where(guild => guild.Name != GuildName.Nobody).Select(guild =>
+            new MiscStateUpdateResponse.Types.Scores
             {
                 Guild = ConvertGuildToPixelGuild(guild.Name),
                 Amount = (uint)guild.CurrentScore
-            };
-            scores.Add(score);
-        }
+            }));
+
         return scores;
     }
 
@@ -76,5 +83,25 @@ public class MiscGameStateUpdateCoreService(ILogger<StateUpdateService> logger) 
     {
         bool success = Enum.TryParse(guildName.ToString(), false, out PixelGuild result);
         return success ? result : PixelGuild.Nobody;
+    }
+
+    private List<MiscStateUpdateResponse.Types.PowerUps> ConvertPowerupsToGrpc(List<PowerUp> powerUps)
+    {
+        List<MiscStateUpdateResponse.Types.PowerUps> grpcPowerUps = [];
+        foreach (var powerUp in powerUps)
+        {
+            var actualPowerUp = powerupService.GetByDb(powerUp);
+            if (actualPowerUp == null) continue;
+
+            MiscStateUpdateResponse.Types.PowerUps grpcPowerUp = new()
+            {
+                PowerUpId = (uint)powerUp.PowerId,
+                Name = powerUp.Name,
+                Description = actualPowerUp.Description,
+                Directed = actualPowerUp.Directed
+            };
+            grpcPowerUps.Add(grpcPowerUp);
+        }
+        return grpcPowerUps;
     }
 }

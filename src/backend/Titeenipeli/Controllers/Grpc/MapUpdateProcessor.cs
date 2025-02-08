@@ -18,7 +18,6 @@ public class MapUpdateProcessor
     private readonly IIncrementalMapUpdateCoreService _incrementalMapUpdateCoreService;
 
     private readonly GrpcMapChangesInput _mapChangesInput;
-    private readonly User? _user;
     private readonly ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _grpcConnections;
     private readonly GameOptions _gameOptions;
     private readonly IBackgroundGraphicsService _backgroundGraphicsService;
@@ -27,23 +26,23 @@ public class MapUpdateProcessor
 
     private readonly VisibilityMap _visibilityMap;
 
+    private readonly User? _user;
+
     public MapUpdateProcessor(
             IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
             GrpcMapChangesInput mapChangesInput,
             ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> connections,
             GameOptions gameOptions,
-            IBackgroundGraphicsService backgroundGraphicsService
-        )
+            IBackgroundGraphicsService backgroundGraphicsService, User? user)
     {
         _incrementalMapUpdateCoreService = incrementalMapUpdateCoreService;
         _mapChangesInput = mapChangesInput;
         _gameOptions = gameOptions;
         _backgroundGraphicsService = backgroundGraphicsService;
         _grpcConnections = connections;
-        _visibilityMap = new VisibilityMap(gameOptions.Width, gameOptions.Height, gameOptions.FogOfWarDistance);
+        _visibilityMap = new VisibilityMap(gameOptions.Width, gameOptions.Height, _gameOptions.MaxFogOfWarDistance);
 
-        KeyValuePair<int, IGrpcConnection<IncrementalMapUpdateResponse>> connection = connections.FirstOrDefault();
-        _user = connection.Value.User;
+        _user = user;
     }
 
     public async Task Process()
@@ -95,7 +94,7 @@ public class MapUpdateProcessor
             ComputeSurroundingPixelVisibility(change);
 
             // Special case, if lost pixel remains within field of view, update its value.
-            bool insideFogOfWar = _visibilityMap.GetVisibility(change.Coordinate);
+            bool insideFogOfWar = (_user?.IsGod ?? false) || _visibilityMap.GetVisibility(change.Coordinate);
             if (insideFogOfWar)
             {
                 AddStandardChange(change.Coordinate);
@@ -109,7 +108,7 @@ public class MapUpdateProcessor
             change.OldOwner?.Id != _user?.Id && change.NewOwner?.Id != _user?.Id);
         foreach (MapChange change in normalChanges)
         {
-            bool insideFogOfWar = _visibilityMap.GetVisibility(change.Coordinate);
+            bool insideFogOfWar = (_user?.IsGod ?? false) || _visibilityMap.GetVisibility(change.Coordinate);
             if (insideFogOfWar)
             {
                 AddStandardChange(change.Coordinate);
@@ -149,7 +148,7 @@ public class MapUpdateProcessor
 
     private void LoopNearbyPixelsInsideFogOfWar(Action<Coordinate> action, Coordinate aroundCoordinate)
     {
-        int fogOfWarDistance = _gameOptions.FogOfWarDistance;
+        int fogOfWarDistance = _user?.Guild.FogOfWarDistance ?? _gameOptions.FogOfWarDistance;
         int minY = aroundCoordinate.Y - fogOfWarDistance;
         int maxY = aroundCoordinate.Y + fogOfWarDistance;
         int minX = aroundCoordinate.X - fogOfWarDistance;
@@ -199,7 +198,7 @@ public class MapUpdateProcessor
         bool isNewSpawn = coordinate.X == newPixel.User?.SpawnX && coordinate.Y == newPixel.User?.SpawnY;
         PixelTypes type = isNewSpawn ? PixelTypes.Spawn : PixelTypes.Normal;
         PixelGuild guild = ConvertGuildToPixelGuild(newPixel.User?.Guild?.Name);
-        PixelUser owner = new PixelUser() { Id = _user?.Id ?? 0 };
+        PixelUser owner = new() { Id = newPixel.User?.Id ?? 0 };
 
         IncrementalMapUpdate mapUpdate = new()
         {

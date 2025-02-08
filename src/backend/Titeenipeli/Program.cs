@@ -14,6 +14,7 @@ using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Services;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Helpers;
+using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
@@ -25,7 +26,7 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddDbContext<ApiDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
@@ -158,11 +159,6 @@ public static class Program
             };
         });
 
-        builder.Services
-               .AddSingleton<IMapUpdaterService, MapUpdaterService>();
-        builder.Services
-               .AddSingleton<IBackgroundGraphicsService, BackgroundGraphicsService>();
-
         builder.Services.AddControllers()
                .AddNewtonsoftJson(options =>
                {
@@ -177,16 +173,36 @@ public static class Program
         AddBackgroundServices(builder.Services);
         AddRepositoryServices(builder.Services);
 
-        WebApplication app = builder.Build();
+        builder.Services.AddSingleton<DatabaseWriterService>();
+        builder.Services.AddSingleton<IMapProvider, MapProvider>();
+        builder.Services.AddSingleton<IMapUpdaterService, MapUpdaterService>();
+        builder.Services.AddSingleton<IBackgroundGraphicsService, BackgroundGraphicsService>();
+        builder.Services.AddSingleton<IPowerupService, PowerupService>();
 
-        using (IServiceScope scope = app.Services.CreateScope())
+        var app = builder.Build();
+
+        using (var scope = app.Services.CreateScope())
         {
-            IServiceProvider services = scope.ServiceProvider;
+            var services = scope.ServiceProvider;
             var dbContext = services.GetRequiredService<ApiDbContext>();
+            var mapProvider = services.GetRequiredService<IMapProvider>();
 
-            DbFiller.Clear(dbContext);
-            dbContext.Database.EnsureCreated();
-            DbFiller.Initialize(dbContext, gameOptions);
+
+            if (app.Environment.IsDevelopment())
+            {
+                DbFiller.Clear(dbContext);
+            }
+
+            var newDatabase = dbContext.Database.EnsureCreated();
+            if (newDatabase)
+            {
+                DbFiller.Initialize(dbContext, gameOptions);
+            }
+
+            mapProvider.Initialize(dbContext.Map.Select(pixel => pixel)
+                                            .Include(pixel => pixel.User)
+                                            .ThenInclude(user => user!.Guild)
+                                            .ToList());
         }
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
@@ -215,25 +231,21 @@ public static class Program
 
     private static void AddBackgroundServices(IServiceCollection services)
     {
-        TimeSpan updateCumulativeScoresServicePeriod = TimeSpan.FromMinutes(1);
-        TimeSpan updatePixelBucketsServicePeriod = TimeSpan.FromMinutes(1);
+        var updateCumulativeScoresServicePeriod = TimeSpan.FromMinutes(1);
+        var updatePixelBucketsServicePeriod = TimeSpan.FromMinutes(1);
 
-        services
-            .AddScoped<IUpdateCumulativeScoresService,
-                UpdateCumulativeScoresService>();
+        services.AddScoped<IUpdateCumulativeScoresService, UpdateCumulativeScoresService>();
+
         services.AddHostedService(
             serviceProvider =>
-                new AsynchronousTimedBackgroundService<
-                    IUpdateCumulativeScoresService,
-                    UpdateCumulativeScoresService>(
+                new AsynchronousTimedBackgroundService<IUpdateCumulativeScoresService, UpdateCumulativeScoresService>(
                     serviceProvider,
                     GetNonNullService<ILogger<UpdateCumulativeScoresService>>(
                         serviceProvider),
                     updateCumulativeScoresServicePeriod));
 
-        services
-            .AddScoped<IUpdatePixelBucketsService,
-                UpdatePixelBucketsService>();
+        services.AddScoped<IUpdatePixelBucketsService, UpdatePixelBucketsService>();
+
         services.AddHostedService(
             serviceProvider =>
                 new AsynchronousTimedBackgroundService<
@@ -247,25 +259,11 @@ public static class Program
 
     private static void AddRepositoryServices(IServiceCollection services)
     {
-        services
-            .AddScoped<IUserRepositoryService,
-                UserRepositoryService>();
-
-        services
-            .AddScoped<IGuildRepositoryService,
-                GuildRepositoryService>();
-
-        services
-            .AddScoped<IMapRepositoryService,
-                MapRepositoryService>();
-
-        services
-            .AddScoped<IGameEventRepositoryService,
-                GameEventRepositoryService>();
-
-        services
-            .AddScoped<ICtfFlagRepositoryService,
-                CtfFlagRepositoryService>();
+        services.AddScoped<IUserRepositoryService, UserRepositoryService>();
+        services.AddScoped<IGuildRepositoryService, GuildRepositoryService>();
+        services.AddScoped<IMapRepositoryService, MapRepositoryService>();
+        services.AddScoped<IGameEventRepositoryService, GameEventRepositoryService>();
+        services.AddScoped<ICtfFlagRepositoryService, CtfFlagRepositoryService>();
     }
 
     private static TService GetNonNullService<TService>(IServiceProvider serviceProvider)

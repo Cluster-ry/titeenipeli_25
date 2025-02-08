@@ -13,12 +13,12 @@ public class BackgroundGraphicsService : IBackgroundGraphicsService
 
     public BackgroundGraphicsService()
     {
-        var image = SKImage.FromEncodedData("Resources/Images/Background.jpg");
+        var image = SKImage.FromEncodedData("Resources/Images/Background.webp");
         var bitmap = SKBitmap.FromImage(image);
         byte[]? allBytes = bitmap.Bytes;
 
         _splitBitmapWidth = bitmap.Width / 32;
-        _splitBitmapHeight = bitmap.Width / 32;
+        _splitBitmapHeight = bitmap.Height / 32;
         _splitBitmaps = new byte[_splitBitmapWidth, _splitBitmapHeight][];
         int bytesPerPixel = bitmap.BytesPerPixel;
         int rowSize = bitmap.Width * bytesPerPixel;

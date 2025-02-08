@@ -1,6 +1,7 @@
 using FluentAssertions;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Moq;
 using NUnit.Framework;
@@ -11,6 +12,7 @@ using Titeenipeli.Common.Models;
 using Titeenipeli.Controllers;
 using Titeenipeli.Inputs;
 using Titeenipeli.Services;
+using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Tests.Controllers;
 
@@ -32,7 +34,7 @@ public class CtfControllerTest
         Code = "",
         SpawnX = 0,
         SpawnY = 0,
-        Powerups = new(),
+        PowerUps = [],
         TelegramId = "",
         FirstName = "Own user",
         LastName = "",
@@ -42,7 +44,7 @@ public class CtfControllerTest
     private static readonly JwtClaim CurrentClaim = new()
     {
         Id = 0,
-        GuildId = OwnGuild.Name,
+        Guild = OwnGuild.Name,
         CoordinateOffset = new(0, 0),
     };
 
@@ -56,6 +58,7 @@ public class CtfControllerTest
         Mock<IUserRepositoryService> mockUserRepositoryService = new Mock<IUserRepositoryService>();
         Mock<IGuildRepositoryService> mockGuildRepositoryService = new Mock<IGuildRepositoryService>();
         Mock<IJwtService> mockJwtService = new Mock<IJwtService>();
+        Mock<IMiscGameStateUpdateCoreService> mockMiscGameStateUpdateCoreService = new Mock<IMiscGameStateUpdateCoreService>();
 
         //Setup jwt
         var jwtClaimName = "JwtClaim";
@@ -77,8 +80,8 @@ public class CtfControllerTest
         var httpcontext = new DefaultHttpContext();
         httpcontext.Items[jwtClaimName] = CurrentClaim;
 
-        CtfController controller = new CtfController(mockCtfFlagRepositoryService.Object, mockUserRepositoryService.Object, mockGuildRepositoryService.Object, mockJwtService.Object);
-        controller.ControllerContext = new Microsoft.AspNetCore.Mvc.ControllerContext
+        CtfController controller = new CtfController(mockCtfFlagRepositoryService.Object, mockUserRepositoryService.Object, mockGuildRepositoryService.Object, mockJwtService.Object, mockMiscGameStateUpdateCoreService.Object);
+        controller.ControllerContext = new ControllerContext
         {
             HttpContext = httpcontext
         };
@@ -88,7 +91,7 @@ public class CtfControllerTest
             Token = token
         };
 
-        IStatusCodeActionResult result = controller.PostCtf(input) as IStatusCodeActionResult;
+        var result = controller.PostCtf(input) as IStatusCodeActionResult;
 
         result?.StatusCode.Should().Be(statusCode);
     }

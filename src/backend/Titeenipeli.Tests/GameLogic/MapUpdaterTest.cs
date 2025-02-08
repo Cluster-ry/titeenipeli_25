@@ -116,6 +116,24 @@ public class MapUpdaterTest
             yield return new TestCaseData(
                 new[,]
                 {
+                    { Clus, Clus, CLUS, Clus, Clus },
+                    { Clus, ALGO, Clus, Clus, Clus },
+                    { Clus, Algo, Clus, Clus, Clus },
+                    { Clus, Algo, Clus, Clus, Clus },
+                    { Clus, Clus, Clus, Clus, Clus }
+                },
+                new[] { (GuildName.Cluster, new Coordinate(2, 3)) },
+                new[,]
+                {
+                    { Clus, Clus, CLUS, Clus, Clus },
+                    { Clus, ALGO, Clus, Clus, Clus },
+                    { Clus, Clus, Clus, Clus, Clus },
+                    { Clus, Clus, Clus, Clus, Clus },
+                    { Clus, Clus, Clus, Clus, Clus }
+                }).SetName("Should fill cut cells");
+            yield return new TestCaseData(
+                new[,]
+                {
                     { Clus, Clus, CLUS, Clus },
                     { Clus, ALGO, TiKi, Clus },
                     { Clus, Algo, Algo, None },
@@ -126,9 +144,9 @@ public class MapUpdaterTest
                 {
                     { Clus, Clus, CLUS, Clus },
                     { Clus, ALGO, Clus, Clus },
-                    { Clus, Clus, Clus, Clus },
+                    { Clus, Algo, Algo, Clus },
                     { Clus, Clus, Clus, Clus }
-                }).SetName("Should not fill spawn cells");
+                }).SetName("Should not fill spawn connected cells");
             yield return new TestCaseData(
                 new[,]
                 {

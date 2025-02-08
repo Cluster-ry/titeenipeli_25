@@ -1,19 +1,19 @@
 /* Top Overlay */
 
 .top-gradient {
-    background: linear-gradient(0, rgba(0, 0, 0, 0) 0%, rgba(183, 183, 183, 0.874667) 74.83%, #d9d9d9 100%);
+    background: linear-gradient(rgb(255 255 255) 0%, rgb(241 241 241 / 0%) 30%);
 }
 
 .top-overlay {
+    flex: 1;
     display: flex;
-    align-items: center;
-    max-height: 15%;
-    padding-bottom: 10%;
+    padding-bottom: 30px;
     padding-inline: 16px;
     padding-top: 8px;
 }
 
 .top-overlay__left {
+    transition: all 0.5s;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -21,9 +21,26 @@
     font-size: x-small;
 }
 
+.top-overlay__score-title {
+    text-align: left;
+    color: #00fff0;
+}
+
+.top-overlay__scores-container {
+    padding-bottom: 8px;
+}
+
 .top-overlay__score-container {
+    transition: all 0.5s;
     display: flex;
     gap: 4px;
+}
+
+.top-overlay__score-button {
+    width: fit-content;
+    font-size: xx-small;
+    padding: 8px;
+    pointer-events: all;
 }
 
 .top-overlay__middle {
@@ -34,7 +51,7 @@
     flex-direction: column;
     position: relative;
     height: 100%;
-    font-size: x-large;
+    font-size: large;
 }
 
 .top-overlay__middle__bucket {
@@ -76,6 +93,7 @@
 .top-overlay__right {
     flex: 1;
     display: flex;
+    flex-wrap: wrap;
     justify-content: right;
     height: 80%;
 }
@@ -90,39 +108,17 @@
 /* Bottom Overlay */
 
 .bottom-gradient {
-    background: radial-gradient(50% 50% at 50% 25%, #ffffff 0%, rgba(255, 255, 255, 0) 65.5%);
+    background: linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(1, 1, 1, 0) 70%);
 }
 
 .bottom-overlay {
+    flex: 1;
+    overflow-x: auto;
+    transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.5s;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-    max-height: 10%;
-    padding-bottom: 32px;
+    align-items: flex-end;
     font-size: small;
-}
-
-.bottom-overlay__button {
-    aspect-ratio: 1;
-    padding: 8px;
-    height: 100%;
-    max-height: 100%;
-    max-width: 100%;
-    background: #75757580;
-    border: 5px solid #757575;
-    border-radius: 8px;
-    pointer-events: all;
-}
-
-.bottom-overlay__button__icon {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-}
-
-.bottom-overlay__button__text {
-    width: 100%;
 }
 
 /* Overlay */
@@ -135,4 +131,18 @@
     height: 100%;
     z-index: 1;
     pointer-events: none;
+}
+
+/* CTF */
+.ctf-icon {
+    justify-content: left;
+    pointer-events: all;
+}
+
+.ctf-icon:hover {
+    cursor: pointer;
+}
+
+.ctf-container {
+    display: grid;
 }

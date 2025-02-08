@@ -1,28 +1,29 @@
+using Microsoft.EntityFrameworkCore;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 
 namespace Titeenipeli.Common.Database.Services;
 
-public class CtfFlagRepositoryService(ApiDbContext dbContext) : RepositoryService(dbContext), ICtfFlagRepositoryService
+public class CtfFlagRepositoryService(ApiDbContext dbContext)
+    : EntityRepositoryService(dbContext), ICtfFlagRepositoryService
 {
     public CtfFlag? GetById(int id)
     {
-        return _dbContext.CtfFlags.Find(id);
+        return DbContext.CtfFlags.Find(id);
     }
 
     public List<CtfFlag> GetAll()
     {
-        return _dbContext.CtfFlags.ToList();
+        return DbContext.CtfFlags.ToList();
     }
 
     public void Add(CtfFlag ctfFlag)
     {
-        _dbContext.CtfFlags.Add(ctfFlag);
-        _dbContext.SaveChanges();
+        DbContext.CtfFlags.Add(ctfFlag);
     }
 
     public CtfFlag? GetByToken(string token)
     {
-        return _dbContext.CtfFlags.FirstOrDefault(flag => flag.Token == token);
+        return DbContext.CtfFlags.Include(flag => flag.Powerup).FirstOrDefault(flag => flag.Token == token);
     }
 }

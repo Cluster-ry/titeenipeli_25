@@ -7,9 +7,10 @@ export interface Coordinate {
 }
 
 export interface NewMapStore {
-    map: Map<Coordinate, Pixel | null> | null;
+    map: Map<string, Pixel | null> | null;
     setPixel: (coordinate: Coordinate, pixel: Pixel | null) => void;
-    setMap: (map: Map<Coordinate, Pixel> | null) => void;
+    getPixel: (coordinate: Coordinate) => Pixel | undefined | null;
+    setMap: (map: Map<string, Pixel> | null) => void;
     pixelsBoundingBox: { min: Coordinate; max: Coordinate };
     setPixelsBoundingBox: ({ min, max }: { min: Coordinate; max: Coordinate }) => void;
 }
@@ -25,10 +26,25 @@ export const useNewMapStore = create<NewMapStore>((set) => ({
             if (oldMap === null) {
                 throw new Error("Tried to set pixel in a null map!");
             }
-            return { map: new Map([...oldMap, [coordinate, pixel]]) };
+
+            if (pixel !== null) {
+                return { map: new Map([...oldMap, [JSON.stringify(coordinate), pixel]]) };
+            } else {
+                const newMap = new Map(oldMap);
+                newMap.delete(JSON.stringify(coordinate));
+                return { map: newMap };
+            }
         });
     },
-    setMap: (map: Map<Coordinate, Pixel> | null) => {
+    getPixel: (coordinate: Coordinate) => {
+        let pixel: Pixel | undefined | null;
+        set((state) => {
+            pixel = state.map?.get(JSON.stringify(coordinate));
+            return state;
+        });
+        return pixel;
+    },
+    setMap: (map: Map<string, Pixel> | null) => {
         set({ map });
     },
     pixelsBoundingBox: { min: { x: 0, y: 0 }, max: { x: 0, y: 0 } },

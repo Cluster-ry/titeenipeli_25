@@ -1,13 +1,16 @@
 import "./overlay.css";
-import special_effect from "../../../assets/special_effect.png";
+import { SpecialEffect } from "./specialEffect";
+import { useGameStateStore } from "../../../stores/gameStateStore";
+import { usePowerUpStore } from "../../../stores/powerupStore";
 
 const BottomOverlay = () => {
+    const specialEffects = useGameStateStore(state => state.powerUps);
+    const powerUp = usePowerUpStore(state => state.powerUp);
+    const setPowerUp = usePowerUpStore(state => state.setPowerUp);
+
     return (
         <div className="bottom-overlay bottom-gradient">
-            <div className="bottom-overlay__button">
-                <img className="bottom-overlay__button__icon" src={special_effect} />
-            </div>
-            <span className="bottom-overlay__button__text">Special Effect</span>
+            {specialEffects.map((effect, index) => <SpecialEffect key={`${effect.powerUpId}-${index}`} {...effect} selected={powerUp} onClick={setPowerUp} />)}
         </div>
     );
 };
