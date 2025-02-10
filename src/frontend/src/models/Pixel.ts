@@ -5,7 +5,6 @@ export interface Pixel {
     type: PixelType;
     guild: PixelGuild | undefined;
     owner: number | undefined;
-    backgroundGraphic?: Uint8Array;
 }
 
 export interface EncodedPixel {
