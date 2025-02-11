@@ -24,3 +24,8 @@
     margin-bottom: 8px;
     width: 100%;
 }
+
+.instructions {
+  border-top: 3px solid black;
+  padding-top: 1.5vh;
+}

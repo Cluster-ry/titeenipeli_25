@@ -8,11 +8,13 @@ import Modal from "../Modal/Modal";
 import { useCtfStore } from "../../stores/ctfModalStore";
 import {CtfOk} from "../../models/CtfOk.ts";
 import {setRandomInterval} from "../../utils/setRandomInterval.ts";
+import { instructionsStore } from "../../stores/instructionsStore.ts";
 
 const CtfModal = () => {
     const [token, setToken] = useState("");
     const { setCtfModelOpenState } = useCtfStore();
     const { triggerNotification } = useNotificationStore();
+    const { setInstructionsOn } = instructionsStore();  
 
     const CTF_DISCLAIMER: string = "Activate CTF";
     const NOTIFICATION_FAIL: string = "CTF activation failed.";
@@ -49,21 +51,27 @@ const CtfModal = () => {
         }
     };
 
-    return (
-        <Modal title="CTF input" onClose={() => setCtfModelOpenState(false)}>
-            <input
-                className="ctf-input"
-                type="text"
-                placeholder="Enter Token"
-                value={token}
-                onChange={handleTokenChange}
-                style={{ pointerEvents: "all" }}
-            />
-            <button className="ctf-button" onClick={handleSubmit}>
-                {CTF_DISCLAIMER}
-            </button>
-        </Modal>
-    );
+  return (
+    <Modal title="CTF input" onClose={() => setCtfModelOpenState(false)}>
+      <input
+        className="ctf-input"
+        type="text"
+        placeholder="Enter Token"
+        value={token}
+        onChange={handleTokenChange}
+        style={{ pointerEvents: "all" }}
+      />
+      <button className="ctf-button" onClick={handleSubmit}>
+        {CTF_DISCLAIMER}
+      </button>
+
+      <div className="instructions">
+        <button className="instructions-button" onClick={() => setInstructionsOn(true)}>
+          Check instructions
+        </button>
+      </div>
+    </Modal>
+  );
 };
 
 export default CtfModal;
