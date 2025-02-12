@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: frontend
+  template:
+    metadata:
+      labels:
+        service: frontend
+    spec:
+      containers:
+        - image: titeenipelitacr.azurecr.io/frontend:latest
+          name: frontend
+      restartPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: backend
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: backend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        service: backend
+    spec:
+      containers:
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: ASPNETCORE_HTTPS_PORTS
+              value: "443"
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "80"
+            - name: ASPNETCORE_Kestrel__Certificates__Default__Password
+            - name: ASPNETCORE_Kestrel__Certificates__Default__Path
+              value: /https/aspnetapp.pfx
+            - name: Bot__Token
+            - name: JWT__Encryption
+            - name: JWT__Secret
+            - name: SQLCONNSTR_Database
+              value: Server=db;Port=5432;Userid=;Timeout=15;Database=;Password=;
+          image: titeenipelitacr.azurecr.io/backend:latest
+          name: backend
+          volumeMounts:
+            - mountPath: /https
+              name: cert
+              readOnly: true
+      restartPolicy: Always
+      volumes:
+        - name: cert
+          persistentVolumeClaim:
+            claimName: cert
+            readOnly: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: bot
+  name: bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: bot
+  template:
+    metadata:
+      labels:
+        service: bot
+    spec:
+      containers:
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: Backend__AuthorizationHeaderName
+              value: X-BOT-KEY
+            - name: Backend__BackendUrl
+              value: http://proxy
+            - name: Backend__FrontendUrl
+              value: http://localhost:8080
+            - name: Backend__Token
+            - name: Telegram__Token
+          image: titeenipelitacr.azurecr.io/bot:latest
+          name: bot
+      restartPolicy: Always

@@ -12,3 +12,10 @@ spec:
   dnsNames:
     - "{{ .Values.hostedZoneName }}"
     - "*.{{ .Values.hostedZoneName }}"
+  keystores:
+    pkcs12:
+      create: true
+      passwordSecretRef:
+        name: example-com-tls-keystore
+        key: password
+      profile: Modern2023
