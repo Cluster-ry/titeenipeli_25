@@ -6,8 +6,8 @@ import (
 	v1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/helm/v3"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
+	"github.com/pulumi/pulumi-random/sdk/v4/go/random"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi/config"
-	"github.com/sethvargo/go-password/password"
 
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
@@ -112,20 +112,172 @@ func buildCharts(
 	helm.NewChart(ctx, "external-dns", externalDnsChartArgs,
 		pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{edNS}))
 
-	traefikNS, err := v1.NewNamespace(ctx, "traefik", &v1.NamespaceArgs{
+	monNS, err := v1.NewNamespace(ctx, "monitoring", &v1.NamespaceArgs{
 		Metadata: &metav1.ObjectMetaArgs{
-			Name: pulumi.String("traefik"),
+			Name: pulumi.String("monitoring"),
+			Labels: pulumi.StringMap{
+				"prometheus": pulumi.String("watch"),
+			},
 		}},
 		pulumi.Providers(k8sProvider))
 	if err != nil {
 		return err
 	}
 
-	pw, err := password.Generate(20, 5, 5, false, false)
+	grafanaPw, err := random.NewRandomPassword(ctx, "grafana-pw", &random.RandomPasswordArgs{
+		Length:  pulumi.Int(20),
+		Lower:   pulumi.Bool(true),
+		Upper:   pulumi.Bool(true),
+		Number:  pulumi.Bool(true),
+		Special: pulumi.Bool(false),
+		Keepers: pulumi.StringMap{
+			"key": pulumi.String("static-value"),
+		},
+	})
 	if err != nil {
 		return err
 	}
-	ctx.Export("traefikPass", pulumi.ToSecret(pw))
+	ctx.Export("grafanaPass", pulumi.ToSecret(grafanaPw.Result))
+
+	kubePrometheusStack, err := helm.NewRelease(ctx, "kube-prometheus-stack", &helm.ReleaseArgs{
+		Chart:     pulumi.String("kube-prometheus-stack"),
+		Namespace: pulumi.String("monitoring"),
+		RepositoryOpts: helm.RepositoryOptsArgs{
+			Repo: pulumi.String("https://prometheus-community.github.io/helm-charts"),
+		},
+		Values: pulumi.Map{
+			"nameOverride":     pulumi.String("kube-prometheus-stack-app"),
+			"fullnameOverride": pulumi.String("kube-prometheus-stack"),
+			"enabled":          pulumi.Bool(true),
+			"kubeControllerManager": pulumi.Map{
+				"enabled": pulumi.Bool(false),
+			},
+			"nodeExporter": pulumi.Map{
+				"enabled": pulumi.Bool(false),
+			},
+			"defaultRules": pulumi.Map{
+				"create": pulumi.Bool(true),
+				"rules": pulumi.Map{
+					"k8s":                         pulumi.Bool(true),
+					"kubelet":                     pulumi.Bool(true),
+					"node":                        pulumi.Bool(true),
+					"nodeExporterRecording":       pulumi.Bool(true),
+					"alertmanager":                pulumi.Bool(false),
+					"etcd":                        pulumi.Bool(false),
+					"configReloaders":             pulumi.Bool(false),
+					"general":                     pulumi.Bool(false),
+					"kubeApiserver":               pulumi.Bool(false),
+					"kubeApiserverAvailability":   pulumi.Bool(false),
+					"kubeApiserverSlos":           pulumi.Bool(false),
+					"kubeProxy":                   pulumi.Bool(false),
+					"kubePrometheusGeneral":       pulumi.Bool(false),
+					"kubePrometheusNodeRecording": pulumi.Bool(false),
+					"kubernetesApps":              pulumi.Bool(false),
+					"kubernetesResources":         pulumi.Bool(false),
+					"kubernetesStorage":           pulumi.Bool(false),
+					"kubernetesSystem":            pulumi.Bool(false),
+					"kubeScheduler":               pulumi.Bool(false),
+					"kubeStateMetrics":            pulumi.Bool(false),
+					"network":                     pulumi.Bool(false),
+					"nodeExporterAlerting":        pulumi.Bool(false),
+					"prometheus":                  pulumi.Bool(false),
+					"prometheusOperator":          pulumi.Bool(false),
+				},
+			},
+			"prometheus": pulumi.Map{
+				"prometheusSpec": pulumi.Map{
+					"podMonitorSelectorNilUsesHelmValues":     pulumi.Bool(false),
+					"ruleSelectorNilUsesHelmValues":           pulumi.Bool(false),
+					"serviceMonitorSelectorNilUsesHelmValues": pulumi.Bool(false),
+					"probeSelectorNilUsesHelmValues":          pulumi.Bool(false),
+					"serviceMonitorNamespaceSelector": pulumi.Map{
+						"matchLabels": pulumi.StringMap{
+							"prometheus": pulumi.String("watch"),
+						},
+					},
+				},
+			},
+			"grafana": pulumi.Map{
+				"enabled":                  pulumi.Bool(true),
+				"adminPassword":            grafanaPw.Result,
+				"defaultDashboardsEnabled": pulumi.Bool(true),
+				"ingress": pulumi.Map{
+					"enabled": pulumi.Bool(true),
+				},
+				"fullnameOverride": pulumi.String("grafana"),
+				"sidecar": pulumi.Map{
+					"dashboards": pulumi.Map{
+						"enabled": pulumi.Bool(true),
+					},
+				},
+				"dashboardProviders": pulumi.Map{
+					"dashboardproviders.yaml": pulumi.Map{
+						"apiVersion": pulumi.Int(1),
+						"providers": pulumi.Array{
+							pulumi.Map{
+								"name":            pulumi.String("provider-site"),
+								"orgId":           pulumi.Int(1),
+								"folder":          pulumi.String(""),
+								"type":            pulumi.String("file"),
+								"disableDeletion": pulumi.Bool(false),
+								"editable":        pulumi.Bool(true),
+								"options": pulumi.Map{
+									"path": pulumi.String("/var/lib/grafana/dashboards/provider-site"),
+								},
+							},
+						},
+					},
+				},
+				"dashboards": pulumi.Map{
+					"provider-site": pulumi.Map{
+						"cloudnative-pg": pulumi.Map{
+							"gnetId":     pulumi.Int(20417),
+							"revision":   pulumi.Int(3),
+							"datasource": pulumi.String("Prometheus"),
+						},
+						"traefik": pulumi.Map{
+							"gnetId":     pulumi.Int(17346),
+							"revision":   pulumi.Int(9),
+							"datasource": pulumi.String("Prometheus"),
+						},
+					},
+				},
+			},
+			"alertmanager": pulumi.Map{
+				"enabled": pulumi.Bool(false),
+			},
+		},
+	}, pulumi.DependsOn([]pulumi.Resource{monNS}))
+	if err != nil {
+		return err
+	}
+
+	traefikNS, err := v1.NewNamespace(ctx, "traefik", &v1.NamespaceArgs{
+		Metadata: &metav1.ObjectMetaArgs{
+			Name: pulumi.String("traefik"),
+			Labels: pulumi.StringMap{
+				"prometheus": pulumi.String("watch"),
+			},
+		}},
+		pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{kubePrometheusStack}))
+	if err != nil {
+		return err
+	}
+
+	pw, err := random.NewRandomPassword(ctx, "traefik-pw", &random.RandomPasswordArgs{
+		Length:  pulumi.Int(20),
+		Lower:   pulumi.Bool(true),
+		Upper:   pulumi.Bool(true),
+		Number:  pulumi.Bool(true),
+		Special: pulumi.Bool(false),
+		Keepers: pulumi.StringMap{
+			"key": pulumi.String("static-value"),
+		},
+	})
+	if err != nil {
+		return err
+	}
+	ctx.Export("traefikPass", pulumi.ToSecret(pw.Result))
 
 	traefikChartArgs := helm.ChartArgs{
 		Chart:   pulumi.String("traefik"),
@@ -135,6 +287,61 @@ func buildCharts(
 		},
 		Namespace: pulumi.String("traefik"),
 		Values: pulumi.Map{
+			"metrics": pulumi.Map{
+				"prometheus": pulumi.Map{
+					"service": pulumi.Map{
+						"enabled": pulumi.Bool(true),
+					},
+					"disableAPICheck": pulumi.Bool(false),
+					"serviceMonitor": pulumi.Map{
+						"enabled": pulumi.Bool(true),
+						"metricRelabelings": pulumi.Array{
+							pulumi.Map{
+								"sourceLabels": pulumi.StringArray{
+									pulumi.String("__name__"),
+								},
+								"separator":   pulumi.String(";"),
+								"regex":       pulumi.String("^fluentd_output_status_buffer_(oldest|newest)_.+"),
+								"replacement": pulumi.String("$1"),
+								"action":      pulumi.String("drop"),
+							},
+						},
+						"relabelings": pulumi.Array{
+							pulumi.Map{
+								"sourceLabels": pulumi.StringArray{
+									pulumi.String("__meta_kubernetes_pod_node_name"),
+								},
+								"separator":   pulumi.String(";"),
+								"regex":       pulumi.String("^(.*)$"),
+								"targetLabel": pulumi.String("nodename"),
+								"replacement": pulumi.String("$1"),
+								"action":      pulumi.String("replace"),
+							},
+						},
+						"jobLabel":    pulumi.String("traefik"),
+						"interval":    pulumi.String("30s"),
+						"honorLabels": pulumi.Bool(true),
+					},
+					"prometheusRule": pulumi.Map{
+						"enabled": pulumi.Bool(true),
+						"rules": pulumi.Array{
+							pulumi.Map{
+								"alert": pulumi.String("TraefikDown"),
+								"expr":  pulumi.String(`up{job="traefik"} == 0`),
+								"for":   pulumi.String("5m"),
+								"labels": pulumi.Map{
+									"context":  pulumi.String("traefik"),
+									"severity": pulumi.String("warning"),
+								},
+								"annotations": pulumi.Map{
+									"summary":     pulumi.String("Traefik Down"),
+									"description": pulumi.String("{{ $labels.pod }} on {{ $labels.nodename }} is down"),
+								},
+							},
+						},
+					},
+				},
+			},
 			"persistence": pulumi.Map{
 				"enabled": pulumi.Bool(true),
 				"size":    pulumi.String("128Mi"),
@@ -142,40 +349,11 @@ func buildCharts(
 			"serviceAccountAnnotations": pulumi.Map{
 				"azure.workload.identity/tenant-id": pulumi.String(current.TenantId),
 				"azure.workload.identity/client-id": traefikIdentityClientId,
-			}, /*
-				"certificatesResolvers": pulumi.Map{
-					"letsencrypt": pulumi.Map{
-						"acme": pulumi.Map{
-							"email":    email,
-							"caServer": pulumi.String("https://acme-staging-v02.api.letsencrypt.org/directory"),
-							"dnsChallenge": pulumi.Map{
-								"provider": pulumi.String("azuredns"),
-							},
-							"storage": pulumi.String("/data/acme.json"),
-						},
-					},
-				},*/
+			},
 			"deployment": pulumi.Map{
 				"annotations": pulumi.Map{
 					"azure.workload.identity/use": pulumi.String("true"),
-				}, /*
-					"initContainers": pulumi.Array{
-						pulumi.Map{
-							"name":  pulumi.String("volume-permissions"),
-							"image": pulumi.String("busybox:latest"),
-							"command": pulumi.Array{
-								pulumi.String("sh"),
-								pulumi.String("-c"),
-								pulumi.String("ls -la /; touch /data/acme.json; chmod -v 600 /data/acme.json"),
-							},
-							"volumeMounts": pulumi.Array{
-								pulumi.Map{
-									"mountPath": pulumi.String("/data"),
-									"name":      pulumi.String("data"),
-								},
-							},
-						},
-					},*/
+				},
 			},
 			"podSecurityContext": pulumi.Map{
 				"fsGroup":             pulumi.Int(65532),
@@ -187,7 +365,7 @@ func buildCharts(
 				},
 				"annotations": pulumi.Map{
 					"service.beta.kubernetes.io/azure-pip-name": publicIpName,
-					"external-dns.alpha.kubernetes.io/hostname": pulumi.String("traefik.test.cluster2017.fi"), // dynamic domain
+					"external-dns.alpha.kubernetes.io/hostname": pulumi.String("traefik.test.cluster2017.fi,grafana.test.cluster2017.fi"), // dynamic domain
 				},
 			},
 			"ports": pulumi.Map{
@@ -215,10 +393,7 @@ func buildCharts(
 					"middlewares": pulumi.Array{
 						pulumi.Map{
 							"name": pulumi.String("traefik-dashboard-auth"),
-						}, /*
-							pulumi.Map{
-								"name": pulumi.String("https-redirect"),
-							},*/
+						},
 					},
 				},
 			},
@@ -232,7 +407,7 @@ func buildCharts(
 					"type": pulumi.String("kubernetes.io/basic-auth"),
 					"stringData": pulumi.Map{
 						"username": pulumi.String("admin"),
-						"password": pulumi.String(pw),
+						"password": pw.Result,
 					},
 				},
 				pulumi.Map{
@@ -246,73 +421,74 @@ func buildCharts(
 							"secret": pulumi.String("traefik-dashboard-auth-secret"),
 						},
 					},
-				}, /*
-					pulumi.Map{
-						"apiVersion": pulumi.String("traefik.io/v1alpha1"),
-						"kind":       pulumi.String("Middleware"),
-						"metadata": pulumi.Map{
-							"name": pulumi.String("https-redirect"),
+				},
+				pulumi.Map{
+					"apiVersion": pulumi.String("traefik.io/v1alpha1"),
+					"kind":       pulumi.String("IngressRoute"),
+					"metadata": pulumi.Map{
+						"labels": pulumi.Map{
+							"app.kubernetes.io/name": pulumi.String("grafana"),
 						},
-						"spec": pulumi.Map{
-							"redirectScheme": pulumi.Map{
-								"scheme": pulumi.String("https"),
-							},
-							"permanent": pulumi.Map{
-								"scheme": pulumi.Bool(true),
+						"name":      pulumi.String("grafana-dashboard"),
+						"namespace": pulumi.String("monitoring"),
+					},
+					"spec": pulumi.Map{
+						"entryPoints": pulumi.Array{
+							pulumi.String("websecure"),
+						},
+						"routes": pulumi.Array{
+							pulumi.Map{
+								"kind":  pulumi.String("Rule"),
+								"match": pulumi.String("Host(`grafana.test.cluster2017.fi`)"),
+								"services": pulumi.Array{
+									pulumi.Map{
+										"name": pulumi.String("grafana"),
+										"port": pulumi.Int(80),
+									},
+								},
 							},
 						},
-					},*/
+					},
+				},
 			},
 		},
 	}
 
 	helm.NewChart(ctx, "traefik", traefikChartArgs,
-		pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{traefikNS, certs}))
+		pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{traefikNS, certs, kubePrometheusStack}))
+
+	cnpgNS, err := v1.NewNamespace(ctx, "cnpg-system", &v1.NamespaceArgs{
+		Metadata: &metav1.ObjectMetaArgs{
+			Name: pulumi.String("cnpg-system"),
+			Labels: pulumi.StringMap{
+				"prometheus": pulumi.String("watch"),
+			},
+		}},
+		pulumi.Providers(k8sProvider))
+	if err != nil {
+		return err
+	}
+
+	cnpgChartArgs := helm.ChartArgs{
+		Chart:   pulumi.String("cloudnative-pg"),
+		Version: pulumi.String("0.23.0"),
+		FetchArgs: helm.FetchArgs{
+			Repo: pulumi.String("https://cloudnative-pg.github.io/charts"),
+		},
+		Namespace: pulumi.String("cnpg-system"),
+		Values: pulumi.Map{
+			"replicaCount": pulumi.Int(1),
+			"monitoring": pulumi.Map{
+				"podMonitorEnabled": pulumi.Bool(true),
+				"grafanaDashboard": pulumi.Map{
+					"create": pulumi.Bool(true),
+				},
+			},
+		},
+	}
+
+	helm.NewChart(ctx, "cloudnative-pg-chart", cnpgChartArgs,
+		pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{cnpgNS}))
 
 	return nil
 }
-
-/* removed as no values are read from yaml
-func mapValues(path string) (pulumi.Map, error) {
-	valuesData, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("unable to read values.yaml: %w", err)
-	}
-
-	var values map[interface{}]interface{}
-	if err := yaml.Unmarshal(valuesData, &values); err != nil {
-		return nil, fmt.Errorf("unable to parse values.yaml: %w", err)
-	}
-
-	pulumiMap := make(pulumi.Map)
-	for k, v := range convertMap(values) {
-		pulumiMap[k] = pulumi.Any(v)
-	}
-
-	return pulumiMap, nil
-}
-
-func convertMap(in map[interface{}]interface{}) map[string]interface{} {
-	out := make(map[string]interface{})
-	for k, v := range in {
-		key, ok := k.(string)
-		if !ok {
-			continue
-		}
-		out[key] = convertValue(v)
-	}
-	return out
-}
-
-func convertValue(v interface{}) interface{} {
-	switch val := v.(type) {
-	case map[interface{}]interface{}:
-		return convertMap(val)
-	case []interface{}:
-		for i, elem := range val {
-			val[i] = convertValue(elem)
-		}
-	}
-	return v
-}
-*/

@@ -1,18 +1,15 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: my-cert
-  namespace: my-namespace
+  name: {{ include "titeenipeli.name" . }}-cert
+  labels:
+    {{- include "titeenipeli.labels" . | indent 4 }}
 spec:
-  secretName: my-cert-secret
+  secretName: {{ include "titeenipeli.name" . }}-cert
   issuerRef:
-    name: my-issuer
-    kind: Issuer
-  commonName: example.com
-  keystores:
-    pkcs12:
-      create: true
-      passwordSecretRef:
-        name: example-com-tls-keystore
-        key: password
-      profile: Modern2023
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: "{{ .Values.hostedZoneName }}"
+  dnsNames:
+    - "{{ .Values.hostedZoneName }}"
+    - "*.{{ .Values.hostedZoneName }}"

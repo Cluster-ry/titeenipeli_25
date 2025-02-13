@@ -22,7 +22,7 @@ func main() {
 			return err
 		}
 
-		createCosmosDB(ctx, k8sCluster)
+		//createCosmosDB(ctx, k8sCluster)
 
 		kubeconfig := getKubeconfig(ctx, k8sCluster)
 

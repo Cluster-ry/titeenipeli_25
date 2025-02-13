@@ -18,7 +18,6 @@ require (
 	github.com/pulumi/pulumi-tls/sdk/v5 v5.0.4
 	github.com/pulumi/pulumi/sdk/v3 v3.144.1
 	github.com/pulumiverse/pulumi-time/sdk v0.1.0
-	github.com/sethvargo/go-password v0.3.1
 )
 
 require (

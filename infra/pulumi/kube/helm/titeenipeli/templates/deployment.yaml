@@ -1,16 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: {{ include "titeenipeli.frontendName" . }}
+  labels:
+    {{- include "titeenipeli.frontendLabels" . | indent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      service: frontend
+      {{- include "titeenipeli.frontendSelectorLabels" . | indent 6 }}
   template:
     metadata:
       labels:
-        service: frontend
+        {{- include "titeenipeli.frontendSelectorLabels" . | indent 8 }}
     spec:
       containers:
         - image: titeenipelitacr.azurecr.io/frontend:latest
@@ -20,25 +22,25 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: {{ include "titeenipeli.backendName" . }}
   labels:
-    service: backend
-  name: backend
+    {{- include "titeenipeli.backendLabels" . | indent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      service: backend
+      {{- include "titeenipeli.backendSelectorLabels" . | indent 6 }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        service: backend
+        {{- include "titeenipeli.backendLabels" . | indent 8 }}
     spec:
       containers:
         - env:
             - name: ASPNETCORE_ENVIRONMENT
-              value: Development
+              value: Production
             - name: ASPNETCORE_HTTPS_PORTS
               value: "443"
             - name: ASPNETCORE_HTTP_PORTS
@@ -49,8 +51,12 @@ spec:
             - name: Bot__Token
             - name: JWT__Encryption
             - name: JWT__Secret
+            - name: DB_NAME
+              value: {{ .Values.databaseName }}
+            - name: DB_USERNAME
+              value: {{ .Values.databaseUserName }}
             - name: SQLCONNSTR_Database
-              value: Server=db;Port=5432;Userid=;Timeout=15;Database=;Password=;
+              value: Server=db;Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(SECRET_PART1);
           image: titeenipelitacr.azurecr.io/backend:latest
           name: backend
           volumeMounts:
@@ -67,18 +73,18 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: {{ include "titeenipeli.botName" . }}
   labels:
-    service: bot
-  name: bot
+    {{- include "titeenipeli.botLabels" . | indent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      service: bot
+      {{- include "titeenipeli.botSelectorLabels" . | indent 6 }}
   template:
     metadata:
       labels:
-        service: bot
+        {{- include "titeenipeli.botLabels" . | indent 8 }}
     spec:
       containers:
         - env:

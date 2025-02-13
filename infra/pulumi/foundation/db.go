@@ -3,17 +3,26 @@ package main
 import (
 	dbforpostgresql "github.com/pulumi/pulumi-azure-native-sdk/dbforpostgresql/v2/v20240801"
 	network "github.com/pulumi/pulumi-azure-native-sdk/network/v2"
+	"github.com/pulumi/pulumi-random/sdk/v4/go/random"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
-	"github.com/sethvargo/go-password/password"
 )
 
 func createCosmosDB(ctx *pulumi.Context, k8sCluster *ClusterInfo) error {
 
-	pw, err := password.Generate(20, 5, 5, false, false)
+	pw, err := random.NewRandomPassword(ctx, "adminDBPass", &random.RandomPasswordArgs{
+		Length:  pulumi.Int(20),
+		Lower:   pulumi.Bool(true),
+		Upper:   pulumi.Bool(true),
+		Number:  pulumi.Bool(true),
+		Special: pulumi.Bool(false),
+		Keepers: pulumi.StringMap{
+			"key": pulumi.String("static-value"),
+		},
+	})
 	if err != nil {
 		return err
 	}
-	ctx.Export("adminDBPass", pulumi.ToSecret(pw))
+	ctx.Export("adminDBPass", pulumi.ToSecret(pw.Result))
 
 	postgresServer, err := dbforpostgresql.NewServer(ctx, "titeeniDB", &dbforpostgresql.ServerArgs{
 		ResourceGroupName: k8sCluster.ResourceGroup.Name,
@@ -24,7 +33,7 @@ func createCosmosDB(ctx *pulumi.Context, k8sCluster *ClusterInfo) error {
 			Tier: pulumi.String(dbforpostgresql.SkuTierBurstable),
 		},
 		AdministratorLogin:         pulumi.String("myadmin"),
-		AdministratorLoginPassword: pulumi.String(pw),
+		AdministratorLoginPassword: pw.Result,
 		AvailabilityZone:           pulumi.String("1"),
 		Backup: &dbforpostgresql.BackupTypeArgs{
 			BackupRetentionDays: pulumi.Int(7),
