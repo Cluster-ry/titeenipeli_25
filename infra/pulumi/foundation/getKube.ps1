@@ -1,1 +1,1 @@
-pulumi stack output kubeconfig --show-secrets > C:\Users\elias\.kube\config
+pulumi stack output kubeconfig --show-secrets > ~\.kube\config

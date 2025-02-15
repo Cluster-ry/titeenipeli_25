@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: {{ include "titeenipeli.frontendName" . }}
   labels:
-    {{- include "titeenipeli.frontendLabels" . | indent 4 }}
+    {{- include "titeenipeli.frontendLabels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "titeenipeli.frontendSelectorLabels" . | indent 6 }}
+      {{- include "titeenipeli.frontendSelectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "titeenipeli.frontendSelectorLabels" . | indent 8 }}
+        {{- include "titeenipeli.frontendSelectorLabels" . | nindent 8 }}
     spec:
       containers:
         - image: titeenipelitacr.azurecr.io/frontend:latest
@@ -24,67 +24,92 @@ kind: Deployment
 metadata:
   name: {{ include "titeenipeli.backendName" . }}
   labels:
-    {{- include "titeenipeli.backendLabels" . | indent 4 }}
+    {{- include "titeenipeli.backendLabels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "titeenipeli.backendSelectorLabels" . | indent 6 }}
+      {{- include "titeenipeli.backendSelectorLabels" . | nindent 6 }}
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        {{- include "titeenipeli.backendLabels" . | indent 8 }}
+        {{- include "titeenipeli.backendLabels" . | nindent 8 }}
     spec:
       containers:
         - env:
             - name: ASPNETCORE_ENVIRONMENT
               value: Production
             - name: ASPNETCORE_HTTPS_PORTS
-              value: "443"
+              value: "8443"
             - name: ASPNETCORE_HTTP_PORTS
-              value: "80"
-            - name: ASPNETCORE_Kestrel__Certificates__Default__Password
+              value: "8080"
+            - name: ASPNETCORE_Kestrel__Certificates__Default__KeyPath
+              value: /https/tls.key
             - name: ASPNETCORE_Kestrel__Certificates__Default__Path
-              value: /https/aspnetapp.pfx
+              value: /https/tls.crt
             - name: Bot__Token
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-secret
+                  key: bot-token
             - name: JWT__Encryption
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-secret
+                  key: jwt-encryption
             - name: JWT__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-secret
+                  key: jwt-secert
             - name: DB_NAME
-              value: {{ .Values.databaseName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-cluster-app
+                  key: dbname
             - name: DB_USERNAME
-              value: {{ .Values.databaseUserName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-cluster-app
+                  key: username
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-cluster-app
+                  key: password
+            - name: DB_ADDRESS
+              value: {{ include "titeenipeli.name" . }}-cluster-rw.{{ .Release.Namespace }}.svc
             - name: SQLCONNSTR_Database
-              value: Server=db;Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(SECRET_PART1);
+              value: Server=$(DB_ADDRESS);Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(DB_PASS);
           image: titeenipelitacr.azurecr.io/backend:latest
           name: backend
           volumeMounts:
             - mountPath: /https
-              name: cert
+              name: certs
               readOnly: true
       restartPolicy: Always
       volumes:
-        - name: cert
-          persistentVolumeClaim:
-            claimName: cert
-            readOnly: true
+        - name: certs
+          secret:
+            secretName: {{ include "titeenipeli.name" . }}-cert-self-sign
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "titeenipeli.botName" . }}
   labels:
-    {{- include "titeenipeli.botLabels" . | indent 4 }}
+    {{- include "titeenipeli.botLabels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{- include "titeenipeli.botSelectorLabels" . | indent 6 }}
+      {{- include "titeenipeli.botSelectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "titeenipeli.botLabels" . | indent 8 }}
+        {{- include "titeenipeli.botLabels" . | nindent 8 }}
     spec:
       containers:
         - env:
@@ -93,11 +118,30 @@ spec:
             - name: Backend__AuthorizationHeaderName
               value: X-BOT-KEY
             - name: Backend__BackendUrl
-              value: http://proxy
+              value: https://{{ include "titeenipeli.backendName" . }}.{{ .Release.Namespace }}.svc.cluster.local:8443
             - name: Backend__FrontendUrl
-              value: http://localhost:8080
+              value: https://{{ .Values.gameUrl }}
             - name: Backend__Token
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-secret
+                  key: bot-token
             - name: Telegram__Token
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-secret
+                  key: tg-token
           image: titeenipelitacr.azurecr.io/bot:latest
+          command: ['sh', '-c', 'update-ca-certificates && dotnet Titeenipeli.Bot.dll']
+          volumeMounts:
+            - name: ca-cert-volume
+              mountPath: /usr/local/share/ca-certificates/ca.crt
+              subPath: ca.crt
           name: bot
+          securityContext:
+            runAsUser: 0
       restartPolicy: Always
+      volumes:
+      - name: ca-cert-volume
+        secret:
+          secretName: {{ include "titeenipeli.name" . }}-cert-self-sign

@@ -57,6 +57,7 @@ func main() {
 
 		installCSI(ctx, k8sProvider)
 		installCertManager(ctx, k8sProvider)
+		installMonitoring(ctx, k8sProvider)
 
 		// Exports
 		ctx.Export("domainName", domain.Name)

@@ -53,3 +53,31 @@ func addResourceGroupReaderRoleToId(ctx *pulumi.Context, rg *resources.ResourceG
 
 	return nil
 }
+
+func addAcrPullRoleToId(ctx *pulumi.Context, principalId pulumi.StringOutput, name pulumi.String) error {
+	primary, err := core.LookupSubscription(ctx, nil, nil)
+	if err != nil {
+		return err
+	}
+
+	referencedStack, err := pulumi.NewStackReference(ctx, "organization/essentials/dev", nil)
+	if err != nil {
+		return fmt.Errorf("error referencing stack: %w", err)
+	}
+	registryID := referencedStack.GetOutput(pulumi.String("registryID")).AsStringOutput()
+
+	// Role for AcrPull
+	roleDefinitionId := pulumi.String(fmt.Sprintf("%s/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d", primary.Id))
+
+	_, err = authorization.NewRoleAssignment(ctx, fmt.Sprintf("resourceGroupReaderAssignment_%s", name), &authorization.RoleAssignmentArgs{
+		PrincipalId:      principalId,
+		PrincipalType:    pulumi.String("ServicePrincipal"),
+		RoleDefinitionId: roleDefinitionId,
+		Scope:            registryID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

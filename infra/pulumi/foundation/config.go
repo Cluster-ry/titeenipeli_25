@@ -70,7 +70,7 @@ func configure(ctx *pulumi.Context) (Config, error) {
 
 	out.NodeCount = cfg.GetInt("nodeCount")
 	if out.NodeCount == 0 {
-		out.NodeCount = 2
+		out.NodeCount = 3
 	}
 
 	out.NodeSize = cfg.Get("nodeSize")

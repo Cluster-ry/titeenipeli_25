@@ -2,24 +2,28 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "titeenipeli.frontendName" . }}
-  labels: {{- include "titeenipeli.frontendLabels" . | indent 4 }}
+  labels: {{- include "titeenipeli.frontendLabels" . | nindent 4 }}
 spec:
   ports:
     - name: http
       port: 80
-      protocol: tcp
+      protocol: TCP
       targetport: http
-  selector: {{- include "titeenipeli.frontendSelectorLabels" . | indent 4 }}
+  selector: {{- include "titeenipeli.frontendSelectorLabels" . | nindent 4 }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "titeenipeli.backendName" . }}
-  labels: {{- include "titeenipeli.backendLabels" . | indent 4 }}
+  labels: {{- include "titeenipeli.backendLabels" . | nindent 4 }}
 spec:
   ports:
-    - name: https
-      port: 443
-      protocol: tcp
-      targetport: https
-  selector: {{- include "titeenipeli.backendSelectorLabels" . | indent 4 }}
+    - name: https-off
+      port: 8443
+      protocol: TCP
+      targetport: 8443
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetport: 8080
+  selector: {{- include "titeenipeli.backendSelectorLabels" . | nindent 4 }}

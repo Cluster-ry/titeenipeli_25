@@ -91,7 +91,7 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 					MaxPods:      pulumi.Int(110),
 					Mode:         pulumi.String("System"),
 					Name:         pulumi.String("agentpool"),
-					OsDiskSizeGB: pulumi.Int(30),
+					OsDiskSizeGB: pulumi.Int(30), // TODO: maybe a bigger disc for monitoring?
 					OsType:       pulumi.String("Linux"),
 					Type:         pulumi.String("VirtualMachineScaleSets"),
 					VnetSubnetID: nodeSubnet.ID(),
@@ -148,6 +148,10 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 		pulumi.DependsOn([]pulumi.Resource{
 			sleep,
 		}))
+
+	objectId := k8sCluster.IdentityProfile.MapIndex(pulumi.String("kubeletidentity")).ObjectId()
+
+	addAcrPullRoleToId(ctx, objectId.Elem(), "acrPull")
 
 	// Create a Public IP
 	publicIP, err := network.NewPublicIPAddress(ctx, "aks-pip", &network.PublicIPAddressArgs{

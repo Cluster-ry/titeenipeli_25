@@ -4,3 +4,5 @@ config:
   azure-native:location: swedencentral
   titeenipelikube:email:
     secure: v1:acKXqXxhvb0uVRxA:Zy9aQC3D3I4YMyqdE1B5KJPp8E/lCNa1KzZLuuYi0Hl/YWtCsGqO
+  titeenipelikube:tgToken:
+    secure: v1:Bvr4IrzEuaGFn2cX:qEhJRkqPkv3OJIYLPuflOHL4aJQudcCw+9ms+34pYxzZx7Aiv4e6iSRE+4ifwZMQuVoTyD7SWDoChpjK+DA=
