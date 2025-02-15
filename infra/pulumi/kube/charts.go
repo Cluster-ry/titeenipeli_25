@@ -254,7 +254,7 @@ func buildCharts(
 				},
 				"annotations": pulumi.Map{
 					"service.beta.kubernetes.io/azure-pip-name": publicIpName,
-					"external-dns.alpha.kubernetes.io/hostname": pulumi.String("traefik.test.cluster2017.fi,grafana.test.cluster2017.fi,peli.test.cluster2017.fi"), // dynamic domain
+					"external-dns.alpha.kubernetes.io/hostname": pulumi.String("traefik.test.cluster2017.fi,grafana.test.cluster2017.fi,peli.test.cluster2017.fi,grcp.peli.test.cluster2017.fi"), // dynamic domain
 				},
 			},
 			"ports": pulumi.Map{

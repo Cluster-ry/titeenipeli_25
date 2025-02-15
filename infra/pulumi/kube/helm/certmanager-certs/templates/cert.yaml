@@ -12,6 +12,12 @@ spec:
   dnsNames:
     - "{{ .Values.hostedZoneName }}"
     - "*.{{ .Values.hostedZoneName }}"
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "{{ .Values.titeenipeliNS }}"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "{{ .Values.titeenipeliNS }}"
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer

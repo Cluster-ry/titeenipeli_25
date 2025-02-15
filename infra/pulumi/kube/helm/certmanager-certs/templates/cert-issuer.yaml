@@ -17,3 +17,23 @@ spec:
           environment: AzurePublicCloud
           managedIdentity:
             clientID: {{ .Values.clientID }}
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: {{ .Values.email }}
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - dns01:
+        azureDNS:
+          hostedZoneName: {{ .Values.hostedZoneName }}
+          resourceGroupName: {{ .Values.titeenipeliRG }}
+          subscriptionID: {{ .Values.subscriptionID }}
+          environment: AzurePublicCloud
+          managedIdentity:
+            clientID: {{ .Values.clientID }}

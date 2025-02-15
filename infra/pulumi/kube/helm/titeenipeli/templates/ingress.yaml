@@ -41,10 +41,10 @@ spec:
   entryPoints:
     - websecure
   routes:
-  - match: HostSNI(`{{ .Values.gameUrl }}`) && ALPN(`h2`)
+  - match: HostSNI(`grpc.{{ .Values.gameUrl }}`)
     priority: 100
     services:
       - name: {{ include "titeenipeli.backendName" . }}
         port: 8443
   tls:
-    passthrough: true
+    secretName: wildcard-tls
