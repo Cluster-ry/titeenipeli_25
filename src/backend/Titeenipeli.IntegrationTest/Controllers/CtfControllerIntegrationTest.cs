@@ -21,6 +21,13 @@ public class CtfControllerIntegrationTest : BaseFixture
     {
         await _dbContext.Database.EnsureCreatedAsync();
     }
+    
+    [OneTimeTearDown]
+    public async Task AfterAll()
+    {
+        await _dbContext.Database.EnsureDeletedAsync();
+        await _dbContext.DisposeAsync();
+    }
 
     private readonly ApiDbContext _dbContext =
         new ApiDbContext(new DbContextOptionsBuilder().UseNpgsql(Postgres.GetConnectionString()).Options);
@@ -28,7 +35,7 @@ public class CtfControllerIntegrationTest : BaseFixture
     [TestCase("#TEST_FLAG", 200, TestName = "Should return success code for valid flag")]
     [TestCase("#INVALID_FLAG", 400, TestName = "Should return failure code for invalid flag")]
     [TestCase(null, 400, TestName = "Should return failure code for null flag")]
-    public void Test1(string token, int statusCode)
+    public void Test1(string? token, int statusCode)
     {
         var ctfFlagRepositoryService = new CtfFlagRepositoryService(_dbContext);
         var userRepositoryService = new UserRepositoryService(_dbContext);
@@ -59,7 +66,7 @@ public class CtfControllerIntegrationTest : BaseFixture
             HttpContext = httpcontext
         };
 
-        PostCtfInput input = new PostCtfInput { Token = token };
+        PostCtfInput input = new PostCtfInput { Token = token! };
 
 
         IStatusCodeActionResult? result = ctfController.PostCtf(input) as IStatusCodeActionResult;
