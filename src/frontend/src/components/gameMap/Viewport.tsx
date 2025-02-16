@@ -43,7 +43,7 @@ const PixiComponentViewport = PixiComponent("Viewport", {
                 bounceBox: bounceRectangle,
             })
             .clampZoom({
-                minScale: 0.5,
+                minScale: 0.1,
                 maxScale: 2,
             })
             .moveCenter(centerX, centerY);

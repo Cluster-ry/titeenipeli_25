@@ -4,19 +4,21 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Extensions;
+using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.Inputs;
 using Titeenipeli.Services;
+using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Controllers;
 
 [ApiController]
 [Route("state/powerups")]
-[Authorize(Policy = "MustHaveGuild")]
 public sealed class PowerController(
     IUserRepositoryService userRepositoryService,
     IMapUpdaterService mapUpdaterService,
     IPowerupService powerupService,
-    IJwtService jwtService
+    IJwtService jwtService,
+    IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService
 ) : ControllerBase
 {
     [HttpPost("activate")]
@@ -48,6 +50,14 @@ public sealed class PowerController(
         user.PowerUps.Remove(userPower);
         userRepositoryService.Update(user);
         await userRepositoryService.SaveChangesAsync();
+
+        GrpcMiscGameStateUpdateInput stateUpdate = new()
+        {
+            User = user,
+            PowerUps = [.. user.PowerUps]
+        };
+        miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
+
         return Ok();
     }
 }

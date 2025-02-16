@@ -44,7 +44,7 @@ public class CtfControllerTest
     private static readonly JwtClaim CurrentClaim = new()
     {
         Id = 0,
-        GuildId = OwnGuild.Name,
+        Guild = OwnGuild.Name,
         CoordinateOffset = new(0, 0),
     };
 

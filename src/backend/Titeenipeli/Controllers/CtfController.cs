@@ -120,7 +120,7 @@ public class CtfController : ControllerBase
         var benefits = new List<String>();
 
         if (flag.BaserateMultiplier != 0) benefits.Add($"Base rate limit increased by {flag.BaserateMultiplier}x");
-        if (flag.FovRangeIncrease != 0) benefits.Add($"Field of view range increased by {flag.FovRangeIncrease}");
+        if (flag.FogOfWarIncrease != 0) benefits.Add($"Field of view range increased by {flag.FogOfWarIncrease}");
         if (flag.BucketSizeIncrease != 0) benefits.Add($"Pixel bucket size increased by {flag.BucketSizeIncrease}");
         if (flag.Powerup != null)
         {
@@ -134,7 +134,7 @@ public class CtfController : ControllerBase
     {
         var guild = user.Guild;
         if (ctfFlag.BaserateMultiplier != 0) guild.BaseRateLimit *= ctfFlag.BaserateMultiplier;
-        if (ctfFlag.FovRangeIncrease != 0) guild.FovRangeDistance += ctfFlag.FovRangeIncrease;
+        if (ctfFlag.FogOfWarIncrease != 0) guild.FogOfWarDistance += ctfFlag.FogOfWarIncrease;
         if (ctfFlag.BucketSizeIncrease != 0) guild.PixelBucketSize += ctfFlag.BucketSizeIncrease;
 
         _guildRepositoryService.Update(guild);

@@ -21,7 +21,8 @@ public class UserController(
     IUserRepositoryService userRepositoryService,
     IGuildRepositoryService guildRepositoryService,
     IJwtService jwtService,
-    IMapUpdaterService mapUpdaterService) : ControllerBase
+    IMapUpdaterService mapUpdaterService,
+    GameOptions gameOptions) : ControllerBase
 {
     private const int LoginTokenLength = 32;
 
@@ -92,8 +93,12 @@ public class UserController(
             return Unauthorized();
         }
 
-        user.AuthenticationToken = null;
-        user.AuthenticationTokenExpiryTime = null;
+        if (!user.IsGod)
+        {
+            user.AuthenticationToken = null;
+            user.AuthenticationTokenExpiryTime = null;
+        }
+
         userRepositoryService.Update(user);
         await userRepositoryService.SaveChangesAsync();
 
@@ -149,6 +154,8 @@ public class UserController(
             SpawnX = -1,
             SpawnY = -1,
 
+            PixelBucket = gameOptions.InitialPixelBucket,
+
             PowerUps = [],
 
             TelegramId = usersInput.TelegramId,
@@ -157,9 +164,11 @@ public class UserController(
             Username = usersInput.Username
         };
 
-        user = await mapUpdaterService.PlaceSpawn(userRepositoryService, user);
-
         userRepositoryService.Add(user);
+        await userRepositoryService.SaveChangesAsync();
+
+        user = await mapUpdaterService.PlaceSpawn(userRepositoryService, user);
+        userRepositoryService.Update(user);
         await userRepositoryService.SaveChangesAsync();
 
         return user;
