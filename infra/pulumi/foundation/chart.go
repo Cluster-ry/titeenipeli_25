@@ -304,6 +304,11 @@ func installMonitoring(ctx *pulumi.Context, k8sProvider *kubernetes.Provider) er
 							"revision":   pulumi.Int(2),
 							"datasource": pulumi.String("Loki"),
 						},
+						"pods": pulumi.Map{
+							"gnetId":     pulumi.Int(15760),
+							"revision":   pulumi.Int(36),
+							"datasource": pulumi.String("Mimir"),
+						},
 					},
 				},
 			},

@@ -5,4 +5,4 @@ config:
   titeenipelikube:email:
     secure: v1:acKXqXxhvb0uVRxA:Zy9aQC3D3I4YMyqdE1B5KJPp8E/lCNa1KzZLuuYi0Hl/YWtCsGqO
   titeenipelikube:tgToken:
-    secure: v1:Bvr4IrzEuaGFn2cX:qEhJRkqPkv3OJIYLPuflOHL4aJQudcCw+9ms+34pYxzZx7Aiv4e6iSRE+4ifwZMQuVoTyD7SWDoChpjK+DA=
+    secure: v1:6N9iz74Aa+fzuAP3:JA6xE2rLnQafv4LdF11L4cRE7Xkmid2538/In/k7w6GPEUW06mZbdz/dooUniMBkN6hQ6HQRwvIeXNRV5pU=
