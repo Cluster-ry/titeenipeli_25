@@ -14,7 +14,6 @@ namespace Titeenipeli.Controllers;
 
 [ApiController]
 [Route("state/powerups")]
-[Authorize(Policy = "MustHaveGuild")]
 public sealed class PowerController(
     IUserRepositoryService userRepositoryService,
     IMapUpdaterService mapUpdaterService,
@@ -66,24 +65,41 @@ public sealed class PowerController(
             User = user,
             PowerUps = [.. user.PowerUps]
         };
+        
         miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
-
     }
 
 
     private void SendPowerupMessage(User user, PowerUp powerup)
     {
-        var message = $"Holy moly, {user.Guild.Name} just used {powerup} powerup!";
-
         foreach (var sendUser in userRepositoryService.GetAll())
         {
             GrpcMiscGameStateUpdateInput stateUpdate = new()
             {
                 User = sendUser,
-                Message = message
+                Message = SelectPowerupMessage(user, powerup)
             };
 
             miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
         }
+    }
+    
+    private string SelectPowerupMessage(User user, PowerUp powerup)
+    {
+        string[] messages = new[]
+        {
+            $"Holy moly, {user.Guild.Name} just used {powerup.Name}!",
+            $"{user.Guild.Name} activated {powerup.Name}!",
+            $"{user.Guild.Name} just went Super Saiyan with {powerup.Name}!",
+            $"{user.Guild.Name} just pulled a 360 no-scope with {powerup.Name}!",
+            $"{user.Guild.Name} activated {powerup.Name}!",
+            $"{user.Guild.Name} just unleashed {powerup.Name}!",
+            $"{user.Guild.Name} used {powerup.Name}!",
+            $"{user.Guild.Name} just summoned {powerup.Name}!",
+            $"{user.Guild.Name} deployed {powerup.Name}!",
+            $"{user.Guild.Name} just destroyed the competition with {powerup.Name}!",
+        };
+
+        return Random.Shared.GetItems(messages, 1)[0];
     }
 }
