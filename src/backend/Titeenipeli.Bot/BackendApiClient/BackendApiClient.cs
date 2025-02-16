@@ -15,7 +15,7 @@ public class BackendClient(BackendOptions backendOptions)
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
-    
+
     private readonly HttpClient _httpClient = new();
 
     public async Task<string?> CreateUserOrLoginRequest(PostUsersInput userInput)

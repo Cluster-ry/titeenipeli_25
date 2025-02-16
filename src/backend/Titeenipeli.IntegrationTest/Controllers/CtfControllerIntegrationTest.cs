@@ -21,7 +21,7 @@ public class CtfControllerIntegrationTest : BaseFixture
     {
         await _dbContext.Database.EnsureCreatedAsync();
     }
-    
+
     [OneTimeTearDown]
     public async Task AfterAll()
     {
