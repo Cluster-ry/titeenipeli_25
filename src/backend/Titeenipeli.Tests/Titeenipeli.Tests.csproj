@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
-
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
