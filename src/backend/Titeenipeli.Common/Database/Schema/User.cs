@@ -20,6 +20,8 @@ public class User : Entity
 
     public List<PowerUp> PowerUps { get; init; } = [];
 
+    public bool IsGod { get; init; } = false;
+
     #region Telegram
     [StringLength(64)]
     public required string TelegramId { get; init; }

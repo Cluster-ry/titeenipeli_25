@@ -1,7 +1,7 @@
 /* Top Overlay */
 
 .top-gradient {
-    background: linear-gradient(rgb(255 255 255) 0%, rgb(241 241 241 / 0%) 30%)
+    background: linear-gradient(rgb(255 255 255) 0%, rgb(241 241 241 / 0%) 30%);
 }
 
 .top-overlay {
@@ -51,7 +51,7 @@
     flex-direction: column;
     position: relative;
     height: 100%;
-    font-size: x-large;
+    font-size: large;
 }
 
 .top-overlay__middle__bucket {
@@ -108,7 +108,7 @@
 /* Bottom Overlay */
 
 .bottom-gradient {
-    background: linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(1, 1, 1, 0.0) 70%);
+    background: linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(1, 1, 1, 0) 70%);
 }
 
 .bottom-overlay {

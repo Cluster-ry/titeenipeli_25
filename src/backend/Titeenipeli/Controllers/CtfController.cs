@@ -120,7 +120,11 @@ public class CtfController : ControllerBase
         var benefits = new List<String>();
 
         if (flag.BaserateMultiplier != 0) benefits.Add($"Base rate limit increased by {flag.BaserateMultiplier}x");
-        if (flag.FovRangeIncrease != 0) benefits.Add($"Field of view range increased by {flag.FovRangeIncrease}");
+        if (flag.FogOfWarIncrease != 0)
+        {
+            benefits.Add($"Field of view range increased by {flag.FogOfWarIncrease}");
+        }
+
         if (flag.Powerup != null)
         {
             benefits.Add($"You got {flag.Powerup.Name}!\n");
@@ -132,7 +136,10 @@ public class CtfController : ControllerBase
     private async Task HandleGuildPowerUp(Guild guild, CtfFlag ctfFlag)
     {
         if (ctfFlag.BaserateMultiplier != 0) guild.BaseRateLimit *= ctfFlag.BaserateMultiplier;
-        if (ctfFlag.FovRangeIncrease != 0) guild.FovRangeDistance += ctfFlag.FovRangeIncrease;
+        if (ctfFlag.FogOfWarIncrease != 0)
+        {
+            guild.FogOfWarDistance += ctfFlag.FogOfWarIncrease;
+        }
 
         _guildRepositoryService.Update(guild);
         await _guildRepositoryService.SaveChangesAsync();

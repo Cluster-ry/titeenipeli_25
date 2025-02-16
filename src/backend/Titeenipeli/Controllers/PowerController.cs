@@ -46,7 +46,7 @@ public sealed class PowerController(
             return BadRequest();
         }
 
-        var pixelsToPlace = specialEffect.HandleSpecialEffect(new Coordinate(body.Location.X, body.Location.Y), body.Direction);
+        var pixelsToPlace = specialEffect.HandleSpecialEffect(new Coordinate(user.SpawnX + body.Location.X, user.SpawnY + body.Location.Y), body.Direction);
         await mapUpdaterService.PlacePixels(userRepositoryService, pixelsToPlace, user);
 
         user.PowerUps.Remove(userPower);
@@ -54,7 +54,20 @@ public sealed class PowerController(
         await userRepositoryService.SaveChangesAsync();
 
         SendPowerupMessage(user, userPower);
+        SendPowerupUpdate(user);
+        
         return Ok();
+    }
+
+    private void SendPowerupUpdate(User user)
+    {
+        GrpcMiscGameStateUpdateInput stateUpdate = new()
+        {
+            User = user,
+            PowerUps = [.. user.PowerUps]
+        };
+        miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
+
     }
 
 

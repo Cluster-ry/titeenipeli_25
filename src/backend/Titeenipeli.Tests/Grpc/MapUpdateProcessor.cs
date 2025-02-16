@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using FluentAssertions;
@@ -37,6 +38,7 @@ public class MapUpdateProcessorTest
     private const int Width = 10;
     private const int Height = 10;
     private const int FogOfWarDistance = 2;
+    private const int MaxFogOfWarDistance = 5;
 
     private IGrpcConnection<IncrementalMapUpdateResponse> _connection;
     private ConcurrentDictionary<int, IGrpcConnection<IncrementalMapUpdateResponse>> _connections;
@@ -47,11 +49,13 @@ public class MapUpdateProcessorTest
     private static readonly Guild OwnGuild = new()
     {
         Name = GuildName.Cluster,
+        FogOfWarDistance = FogOfWarDistance,
         ActiveCtfFlags = []
     };
     private static readonly Guild OtherGuild = new()
     {
         Name = GuildName.Tietokilta,
+        FogOfWarDistance = FogOfWarDistance,
         ActiveCtfFlags = []
     };
     private static readonly User CurrentUser = new()
@@ -101,7 +105,8 @@ public class MapUpdateProcessorTest
         {
             Width = Width,
             Height = Height,
-            FogOfWarDistance = FogOfWarDistance
+            FogOfWarDistance = FogOfWarDistance,
+            MaxFogOfWarDistance = MaxFogOfWarDistance
         };
         _incrementalMapUpdateCoreService = new Mock<IIncrementalMapUpdateCoreService>().Object;
     }
@@ -118,7 +123,9 @@ public class MapUpdateProcessorTest
     {
         var newPixels = MapUtils.MatrixOfUsersToPixels(inputMap, Users);
         GrpcMapChangesInput input = new(newPixels, changes);
-        MapUpdateProcessor mapUpdateProcessor = new(_incrementalMapUpdateCoreService, input, _connections, _gameOptions, _backgroundGraphicsService);
+        var user = _connections.FirstOrDefault().Value.User;
+        MapUpdateProcessor mapUpdateProcessor = new(_incrementalMapUpdateCoreService, input, _connections, _gameOptions,
+            _backgroundGraphicsService, user);
 
         await mapUpdateProcessor.Process();
 
