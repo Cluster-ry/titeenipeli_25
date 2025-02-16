@@ -70,7 +70,7 @@ public class CtfController : ControllerBase
 
         if (ctfFlag.Powerup is null)
         {
-            await HandleGuildPowerUp(user.Guild, ctfFlag);
+            await HandleGuildPowerUp(user, ctfFlag);
         }
         else
         {
@@ -115,12 +115,13 @@ public class CtfController : ControllerBase
         return Random.Shared.GetItems(messages, 1)[0];
     }
 
-    private List<String> GetBenefits(CtfFlag flag)
+    private static List<String> GetBenefits(CtfFlag flag)
     {
         var benefits = new List<String>();
 
         if (flag.BaserateMultiplier != 0) benefits.Add($"Base rate limit increased by {flag.BaserateMultiplier}x");
         if (flag.FovRangeIncrease != 0) benefits.Add($"Field of view range increased by {flag.FovRangeIncrease}");
+        if (flag.BucketSizeIncrease != 0) benefits.Add($"Pixel bucket size increased by {flag.BucketSizeIncrease}");
         if (flag.Powerup != null)
         {
             benefits.Add($"You got {flag.Powerup.Name}!\n");
@@ -129,13 +130,16 @@ public class CtfController : ControllerBase
         return benefits;
     }
 
-    private async Task HandleGuildPowerUp(Guild guild, CtfFlag ctfFlag)
+    private async Task HandleGuildPowerUp(User user, CtfFlag ctfFlag)
     {
+        var guild = user.Guild;
         if (ctfFlag.BaserateMultiplier != 0) guild.BaseRateLimit *= ctfFlag.BaserateMultiplier;
         if (ctfFlag.FovRangeIncrease != 0) guild.FovRangeDistance += ctfFlag.FovRangeIncrease;
+        if (ctfFlag.BucketSizeIncrease != 0) guild.PixelBucketSize += ctfFlag.BucketSizeIncrease;
 
         _guildRepositoryService.Update(guild);
         await _guildRepositoryService.SaveChangesAsync();
+        SendGameUpdate(user);
     }
 
     private async Task HandleUserPowerUp(User user, PowerUp powerUp)
@@ -144,12 +148,18 @@ public class CtfController : ControllerBase
         _userRepositoryService.Update(user);
         await _userRepositoryService.SaveChangesAsync();
 
+        SendGameUpdate(user);
+    }
+    
+    private void SendGameUpdate(User user)
+    {
         GrpcMiscGameStateUpdateInput stateUpdate = new()
         {
             User = user,
+            MaximumPixelBucket = user.Guild.PixelBucketSize,
             PowerUps = user.PowerUps.ToList()
         };
-
+        
         _miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
     }
 }

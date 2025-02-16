@@ -9,6 +9,7 @@ public class Guild : Entity
     public int CurrentScore { get; set; }
     public float BaseRateLimit { get; set; }
     public int FovRangeDistance { get; set; }
+    public int PixelBucketSize { get; set; } = 10;
     public float RateLimitPerPlayer { get; set; }
     public List<CtfFlag> ActiveCtfFlags { get; init; } = [];
 }

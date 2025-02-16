@@ -48,7 +48,7 @@ public class UpdateCumulativeScoresService(
                 GrpcMiscGameStateUpdateInput stateUpdate = new()
                 {
                     User = user,
-                    MaximumPixelBucket = gameOptions.MaximumPixelBucket,
+                    MaximumPixelBucket = user.Guild.PixelBucketSize,
                     Guilds = guilds,
                 };
                 miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);

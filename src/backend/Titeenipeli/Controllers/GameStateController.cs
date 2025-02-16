@@ -48,7 +48,7 @@ public class GameStateController(
             PixelBucket = new()
             {
                 Amount = (int)user.PixelBucket,
-                MaxAmount = gameOptions.MaximumPixelBucket,
+                MaxAmount = user.Guild.PixelBucketSize,
                 IncreasePerMinute = user.Guild.RateLimitPerPlayer,
             },
             Scores = scores,
