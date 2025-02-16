@@ -54,7 +54,7 @@ public sealed class PowerController(
 
         SendPowerupMessage(user, userPower);
         SendPowerupUpdate(user);
-        
+
         return Ok();
     }
 
@@ -65,7 +65,7 @@ public sealed class PowerController(
             User = user,
             PowerUps = [.. user.PowerUps]
         };
-        
+
         miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
     }
 
@@ -83,7 +83,7 @@ public sealed class PowerController(
             miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
         }
     }
-    
+
     private string SelectPowerupMessage(User user, PowerUp powerup)
     {
         string[] messages = new[]
