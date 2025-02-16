@@ -150,7 +150,7 @@ public class CtfController : ControllerBase
 
         SendGameUpdate(user);
     }
-    
+
     private void SendGameUpdate(User user)
     {
         GrpcMiscGameStateUpdateInput stateUpdate = new()
@@ -159,7 +159,7 @@ public class CtfController : ControllerBase
             MaximumPixelBucket = user.Guild.PixelBucketSize,
             PowerUps = user.PowerUps.ToList()
         };
-        
+
         _miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
     }
 }
