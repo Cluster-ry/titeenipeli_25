@@ -59,7 +59,10 @@ public class MiscGameStateUpdateCoreService(IPowerupService powerupService, ILog
 
                 if (gameStateUpdateInput.Message != null)
                 {
-                    incrementalResponse.Notification.Message = gameStateUpdateInput.Message;
+                    incrementalResponse.Notification = new()
+                    {
+                        Message = gameStateUpdateInput.Message
+                    };
                 }
 
                 await responseStream.WriteAsync(incrementalResponse);
