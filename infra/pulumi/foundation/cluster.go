@@ -91,12 +91,13 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 					MaxPods:      pulumi.Int(110),
 					Mode:         pulumi.String("System"),
 					Name:         pulumi.String("agentpool"),
-					OsDiskSizeGB: pulumi.Int(30), // TODO: maybe a bigger disc for monitoring?
+					OsDiskSizeGB: pulumi.Int(60),
 					OsType:       pulumi.String("Linux"),
 					Type:         pulumi.String("VirtualMachineScaleSets"),
 					VnetSubnetID: nodeSubnet.ID(),
 					PodSubnetID:  podSubnet.ID(),
-				},
+				}, // TODO: add autoscaling to agentpool
+				// TODO: create new pool for backend pod
 			},
 			DnsPrefix:  entra.ResourceGroup.Name,
 			EnableRBAC: pulumi.Bool(true),

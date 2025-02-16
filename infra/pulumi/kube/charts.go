@@ -165,7 +165,7 @@ func buildCharts(
 		Values: pulumi.Map{
 			"logs": pulumi.Map{
 				"general": pulumi.Map{
-					"level": pulumi.String("DEBUG"),
+					"level": pulumi.String("INFO"),
 				},
 			},
 

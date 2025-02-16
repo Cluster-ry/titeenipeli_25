@@ -22,8 +22,6 @@ func main() {
 			return err
 		}
 
-		//createCosmosDB(ctx, k8sCluster)
-
 		kubeconfig := getKubeconfig(ctx, k8sCluster)
 
 		certManagerIdentity, err := createNewIdentity(ctx, k8sCluster, "cert-manager", "cert-manager")

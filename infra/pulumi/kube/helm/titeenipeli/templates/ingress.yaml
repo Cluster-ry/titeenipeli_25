@@ -31,20 +31,12 @@ spec:
       port: 8443
       scheme: https
       serversTransport: "custom-ca-transport"
----
-apiVersion: traefik.io/v1alpha1
-kind: IngressRouteTCP
-metadata:
-  name: {{ include "titeenipeli.name" . }}-grpc-ingress
-  labels: {{- include "titeenipeli.labels" . | nindent 4 }}
-spec:
-  entryPoints:
-    - websecure
-  routes:
-  - match: HostSNI(`grpc.{{ .Values.gameUrl }}`)
-    priority: 100
+
+  - kind: Rule
+    match: Host(`{{ .Values.gameUrl }}`) && PathPrefix(`/Game.StateUpdate`)
     services:
-      - name: {{ include "titeenipeli.backendName" . }}
-        port: 8443
-  tls:
-    secretName: wildcard-tls
+    - name: {{ include "titeenipeli.backendName" . }}
+      port: 8443
+      scheme: https
+      serversTransport: "custom-ca-transport"
+  

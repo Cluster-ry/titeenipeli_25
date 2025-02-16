@@ -15,7 +15,7 @@ spec:
         {{- include "titeenipeli.frontendSelectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - image: titeenipelitacr.azurecr.io/frontend:v0.1
+        - image: titeenipelitacr.azurecr.io/frontend:latest
           name: frontend
       restartPolicy: Always
 ---

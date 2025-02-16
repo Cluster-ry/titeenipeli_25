@@ -6,18 +6,12 @@ metadata:
 spec:
   secretName: wildcard-tls
   issuerRef:
-    name: letsencrypt-staging
+    name: letsencrypt-production
     kind: ClusterIssuer
   commonName: "{{ .Values.hostedZoneName }}"
   dnsNames:
     - "{{ .Values.hostedZoneName }}"
     - "*.{{ .Values.hostedZoneName }}"
-  secretTemplate:
-    annotations:
-      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
-      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "{{ .Values.titeenipeliNS }}"
-      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
-      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "{{ .Values.titeenipeliNS }}"
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -43,10 +37,6 @@ spec:
     kind: ClusterIssuer
     group: cert-manager.io
   commonName: {{ .Values.titeenipeliBackendName }}.{{ .Values.titeenipeliNS }}.svc
-  nameConstraints:
-    critical: true
-    permitted:
-      ipRanges: ["10.0.0.0/16"]
   dnsNames:
     - {{ .Values.titeenipeliBackendName }}.{{ .Values.titeenipeliNS }}.svc
     - {{ .Values.titeenipeliBackendName }}.{{ .Values.titeenipeliNS }}.svc.cluster.local
