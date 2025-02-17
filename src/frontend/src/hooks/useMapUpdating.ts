@@ -87,7 +87,7 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
                 }
             }
         },
-        [setPixel, getPixel],
+        [setPixel, getPixel, events.onPixelUpdated],
     );
     const consumeUpdates = useCallback(() => {
         while (incrementalUpdateBuffer.current.length > 0) {

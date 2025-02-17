@@ -1,5 +1,5 @@
 import { MutableRefObject } from "react";
-import { HslaColour } from "./HslaColour";
+import { Coordinate } from "./Coordinate";
 
 interface RectangleProps {
     x: number;
@@ -7,10 +7,13 @@ interface RectangleProps {
     width: number;
     height: number;
     backgroundGraphic?: Uint8Array;
-    color?: HslaColour;
-    moving: MutableRefObject<boolean>;
+    hue?: number,
+    alpha?: number,
+    saturation?: number,
+    lightness?: number
     highlight: boolean;
-    onClick: (event: { x: number; y: number }) => void;
+    moving: MutableRefObject<boolean>;
+    onClickRef: MutableRefObject<((coordinate: Coordinate, highlight: boolean) => void) | null>;
 }
 
 export default RectangleProps;
