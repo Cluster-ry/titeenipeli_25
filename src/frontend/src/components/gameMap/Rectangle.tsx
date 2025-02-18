@@ -2,7 +2,7 @@ import { Container, Sprite, withFilters } from "@pixi/react";
 import { Color, FederatedPointerEvent, Texture } from "pixi.js";
 import RectangleProps from "../../models/RectangleProps";
 import { ColorOverlayFilter, GlowFilter } from "pixi-filters";
-import { useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 
 const backgroundGraphicSize = 32;
 
@@ -11,25 +11,18 @@ const Filters = withFilters(Container, {
     overlay: ColorOverlayFilter,
 });
 
-const BackgroundRectangle = ({
-    x,
-    y,
-    width,
-    height,
-    backgroundGraphic,
-    color,
-    highlight,
-    moving,
-    onClick,
-}: RectangleProps) => {
+const BackgroundRectangle = (props: RectangleProps) => {
+    const { x, y, width, height, backgroundGraphic, hue, saturation, lightness, alpha, highlight, moving, onClickRef } =
+        props;
     const handleEvent = useCallback(
         (event: FederatedPointerEvent) => {
             if ((event.pointerType === "mouse" && event.button !== 0) || moving.current) {
                 return;
             }
-            onClick({ x, y });
+            const coordinate = { x, y };
+            onClickRef.current && onClickRef.current(coordinate, highlight);
         },
-        [onClick],
+        [x, y, highlight, moving, onClickRef],
     );
 
     const texture = useMemo(() => {
@@ -41,14 +34,13 @@ const BackgroundRectangle = ({
     }, [backgroundGraphic]);
 
     const overlayColor = useMemo(() => {
-        if (color) {
-            const pixiColor = new Color(`hsl(${color.hue}, ${color.saturation}%, ${color.lightness}%)`);
+        if (hue !== undefined && saturation !== undefined && lightness !== undefined) {
+            const pixiColor = new Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
             return [pixiColor.red, pixiColor.green, pixiColor.blue];
         } else {
             return [0, 0, 0];
         }
-    }, [color]);
-
+    }, [hue, saturation, lightness]);
     const sprite = useMemo(
         () => (
             <Filters
@@ -61,9 +53,9 @@ const BackgroundRectangle = ({
                     knockout: false,
                 }}
                 overlay={{
-                    enabled: color !== undefined,
+                    enabled: hue !== undefined,
                     color: overlayColor,
-                    alpha: color?.alpha ?? 0.75,
+                    alpha: alpha ?? 0.75,
                 }}
             >
                 <Sprite
@@ -78,10 +70,10 @@ const BackgroundRectangle = ({
                 />
             </Filters>
         ),
-        [x, y, width, height, texture, handleEvent],
+        [x, y, width, height, texture, highlight, overlayColor, handleEvent],
     );
 
     return sprite;
 };
 
-export default BackgroundRectangle;
+export default memo(BackgroundRectangle);
