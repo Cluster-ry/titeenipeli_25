@@ -12,7 +12,7 @@ export interface GameStateStore {
     powerUps: PowerUp[];
     setPixelBucket: (newPixelBucket: PixelBucket) => void;
     setScores: (newScores: Score[]) => void;
-    setPowerups: (newPowerups: PowerUp[]) => void;
+    setPowerUps: (newPowerups: PowerUp[]) => void;
     setMiscGameState: (newState: GetGameState) => void;
     decreaseBucket: () => void;
     increaseBucket: () => void;
@@ -32,13 +32,14 @@ export const useGameStateStore = create<GameStateStore>((set) => ({
     setScores: (newScores: Score[]) => {
         set({ scores: newScores });
     },
-    setPowerups: (newPowerups: PowerUp[]) => {
+    setPowerUps: (newPowerups: PowerUp[]) => {
         set({ powerUps: newPowerups });
     },
     setMiscGameState: (newState: GetGameState) => {
         const state = {
             pixelBucket: { ...newState.pixelBucket },
             scores: newState.scores,
+            powerUps: newState.powerUps
         };
         set(state);
     },

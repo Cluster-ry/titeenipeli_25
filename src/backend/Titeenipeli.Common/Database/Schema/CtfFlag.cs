@@ -11,4 +11,5 @@ public class CtfFlag : Entity
     public PowerUp? Powerup { get; init; }
     public int BaserateMultiplier { get; init; }
     public int FogOfWarIncrease { get; init; }
+    public int BucketSizeIncrease { get; init; }
 }
