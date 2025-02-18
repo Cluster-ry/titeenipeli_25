@@ -12,7 +12,7 @@ permissions:
   checks: write
 
 env:
-  dotnet-version: "8.0.x"
+  dotnet-version: "9.0.x"
 
 jobs:
   run-tests:
