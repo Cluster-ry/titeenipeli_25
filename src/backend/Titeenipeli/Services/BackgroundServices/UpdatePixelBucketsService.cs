@@ -42,13 +42,13 @@ public class UpdatePixelBucketsService(
         foreach (var user in guildUsers)
         {
             float newBucket = user.PixelBucket + guildPerPlayerIncrease;
-            if (newBucket < gameOptions.MaximumPixelBucket)
+            if (newBucket < guild.PixelBucketSize)
             {
                 user.PixelBucket = newBucket;
             }
             else
             {
-                user.PixelBucket = gameOptions.MaximumPixelBucket;
+                user.PixelBucket = guild.PixelBucketSize;
             }
             userRepositoryService.Update(user);
             await userRepositoryService.SaveChangesAsync();
@@ -56,7 +56,7 @@ public class UpdatePixelBucketsService(
             GrpcMiscGameStateUpdateInput stateUpdate = new()
             {
                 User = user,
-                MaximumPixelBucket = gameOptions.MaximumPixelBucket
+                MaximumPixelBucket = user.Guild.PixelBucketSize,
             };
             miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
         }
