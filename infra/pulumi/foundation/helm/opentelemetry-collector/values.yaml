@@ -1,0 +1,9 @@
+config:
+  exporters:
+    otlp:
+      endpoint: lgtm-distributed-tempo-distributor.monitoring.svc:4317
+image:
+  repository: otel/opentelemetry-collector-k8s
+command:
+  name: otelcol-k8s
+mode: daemonset

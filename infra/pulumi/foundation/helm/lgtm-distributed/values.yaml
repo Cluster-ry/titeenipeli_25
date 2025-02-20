@@ -1,0 +1,182 @@
+grafana:
+  enabled: true
+  adminPassword: "test" # this is replaced in pulumi values
+  defaultDashboardsEnabled: true
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Loki
+          uid: loki
+          type: loki
+          url: "http://{{ .Release.Name }}-loki-gateway"
+          isDefault: false
+        - name: Mimir
+          uid: prom
+          type: prometheus
+          url: "http://{{ .Release.Name }}-mimir-nginx/prometheus"
+          isDefault: true
+        - name: Tempo
+          uid: tempo
+          type: tempo
+          url: "http://{{ .Release.Name }}-tempo-query-frontend:3100"
+          isDefault: false
+          jsonData:
+            tracesToLogsV2:
+              datasourceUid: loki
+            lokiSearch:
+              datasourceUid: loki
+            tracesToMetrics:
+              datasourceUid: prom
+            serviceMap:
+              datasourceUid: prom
+  ingress:
+    enabled: true
+  sidecar:
+    dashboards:
+      enabled: true
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: provider-site
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: "/var/lib/grafana/dashboards/provider-site"
+  dashboards:
+    provider-site:
+      cloudnative-pg:
+        gnetId: 20417
+        revision: 3
+        datasource: Mimir
+      traefik:
+        gnetId: 17346
+        revision: 9
+        datasource: Mimir
+      mimir-overview:
+        gnetId: 17607
+        revision: 10
+        datasource: Mimir
+      loki-promtail:
+        gnetId: 10880
+        revision: 1
+        datasource: Mimir
+      node-exporter:
+        gnetId: 1860
+        revision: 37
+        datasource: Mimir
+      logs:
+        gnetId: 13639
+        revision: 2
+        datasource: Loki
+      pods:
+        gnetId: 15760
+        revision: 36
+        datasource: Mimir
+
+mimir:
+  enabled: true
+  metaMonitoring:
+    dashboards:
+      enabled: true
+    serviceMonitor:
+      enabled: true
+      labels:
+        release: kube-prometheus-stack
+  alertmanager:
+    resources:
+      requests:
+        cpu: "20m"
+  compactor:
+    resources:
+      requests:
+        cpu: "20m"
+  distributor:
+    resources:
+      requests:
+        cpu: "20m"
+  ingester:
+    replicas: 2
+    zoneAwareReplication:
+      enabled: false
+    resources:
+      requests:
+        cpu: "20m"
+  overrides_exporter:
+    resources:
+      requests:
+        cpu: "20m"
+  querier:
+    replicas: 1
+    resources:
+      requests:
+        cpu: "20m"
+  query_frontend:
+    resources:
+      requests:
+        cpu: "20m"
+  query_scheduler:
+    replicas: 1
+    resources:
+      requests:
+        cpu: "20m"
+  ruler:
+    resources:
+      requests:
+        cpu: "20m"
+  store_gateway:
+    zoneAwareReplication:
+      enabled: false
+    resources:
+      requests:
+        cpu: "20m"
+  minio:
+    resources:
+      requests:
+        cpu: "20m"
+  rollout_operator:
+    resources:
+      requests:
+        cpu: "20m"
+
+tempo:
+  enabled: true
+  ingester:
+    replicas: 1
+    config:
+      replication_factor: 1
+  metaMonitoring:
+    dashboards:
+      enabled: true
+    serviceMonitor:
+      enabled: true
+      labels:
+        release: kube-prometheus-stack
+    prometheusRule:
+      enabled: true
+      labels:
+        release: kube-prometheus-stack
+  metricsGenerator:
+    enabled: true
+    config:
+      storage:
+        remote_write:
+          - url: "http://lgtm-distributed-mimir-nginx.monitoring.svc:80/api/v1/push"
+            send_exemplars: true
+  traces:
+    otlp:
+      grpc:
+        enabled: true
+      http:
+        enabled: true
+
+loki:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    labels:
+      release: kube-prometheus-stack
