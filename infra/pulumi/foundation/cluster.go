@@ -87,7 +87,7 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 			AgentPoolProfiles: cs.ManagedClusterAgentPoolProfileArray{
 				cs.ManagedClusterAgentPoolProfileArgs{
 					Count:             pulumi.Int(2),
-					VmSize:            pulumi.String("Standard_D2pds_v6"),
+					VmSize:            pulumi.String("Standard_D2ds_v5"),
 					MaxPods:           pulumi.Int(110),
 					Mode:              pulumi.String("System"),
 					Name:              pulumi.String("agentpool"),
@@ -110,7 +110,7 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 					PodSubnetID:       podSubnet.ID(),
 					EnableAutoScaling: pulumi.Bool(false),
 					NodeTaints: pulumi.StringArray{
-						pulumi.String("key=value:NoSchedule"),
+						pulumi.String("dedicated=node:NoSchedule"),
 					},
 					NodeLabels: pulumi.StringMap{
 						"dedicated": pulumi.String("titeenipeli"),

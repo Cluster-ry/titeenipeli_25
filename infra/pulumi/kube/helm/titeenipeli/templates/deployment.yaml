@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "titeenipeli.frontendLabels" . | nindent 4 }}
 spec:
-  replicas: 5
+  replicas: 1
   selector:
     matchLabels:
       {{- include "titeenipeli.frontendSelectorLabels" . | nindent 6 }}
@@ -18,6 +18,12 @@ spec:
         - image: titeenipelitacr.azurecr.io/frontend:latest
           name: frontend
           imagePullPolicy: Always
+          resources:
+            limits:
+              mem: 200Mi
+            requests:
+              cpu: 100m
+              mem: 100Mi
       restartPolicy: Always
 ---
 apiVersion: apps/v1
@@ -107,6 +113,17 @@ spec:
               subPath: appsettings.json
       restartPolicy: Always
       imagePullPolicy: Always
+      resources:
+            limits:
+              mem: 4000Mi
+            requests:
+              cpu: 1500m
+              mem: 2000Mi
+      tolerations:
+      - key: "dedicated"
+        operator: "Exists"
+        value: "node"
+        effect: "NoSchedule"
       volumes:
         - name: certs
           secret:
@@ -158,6 +175,12 @@ spec:
               mountPath: /usr/local/share/ca-certificates/ca.crt
               subPath: ca.crt
           name: bot
+          resources:
+            limits:
+              mem: 200Mi
+            requests:
+              cpu: 100m
+              mem: 100Mi
           securityContext:
             runAsUser: 0
       restartPolicy: Always
