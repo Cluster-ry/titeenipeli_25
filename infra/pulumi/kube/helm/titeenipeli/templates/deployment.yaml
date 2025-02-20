@@ -50,8 +50,20 @@ spec:
               value: /https/tls.key
             - name: ASPNETCORE_Kestrel__Certificates__Default__Path
               value: /https/tls.crt
-            - name: OpenTelemetryEndpoint
-              value: opentelemetry-collector.monitoring.svc:4318
+            - name: OTEL_SERVICE_NAME
+              value: titeeni
+            - name: OTEL_EXPORTER_OTPL_ENDPOINT
+              value: http://opentelemetry-collector.monitoring.svc:4317
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: grcp
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: service.namespace=titeenit
+            - name: OTEL_PROPAGATOR
+              value: b3multi
+            - name: OTEL_EXPORTER_OTLP_INSECURE 
+              value: "true"
+            - name: OTEL_LOG_LEVEL
+              value: "debug"
             - name: Bot__Token
               valueFrom:
                 secretKeyRef:
@@ -86,7 +98,7 @@ spec:
               value: {{ include "titeenipeli.name" . }}-cluster-rw.{{ .Release.Namespace }}.svc
             - name: SQLCONNSTR_Database
               value: Server=$(DB_ADDRESS);Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(DB_PASS);
-          image: titeenipelitacr.azurecr.io/backend:latest
+          image: titeenipelitacr.azurecr.io/backend:v0.1
           name: backend
           volumeMounts:
             - name: certs
@@ -96,6 +108,7 @@ spec:
               mountPath: /app/appsettings.json
               subPath: appsettings.json
       restartPolicy: Always
+      imagePullPolicy: Always
       volumes:
         - name: certs
           secret:
