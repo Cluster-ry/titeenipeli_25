@@ -74,36 +74,14 @@ func buildCharts(
 		RepositoryOpts: helm.RepositoryOptsArgs{
 			Repo: pulumi.String("https://kubernetes-sigs.github.io/external-dns/"),
 		},
+		ValueYamlFiles: pulumi.AssetOrArchiveArray{
+			pulumi.NewFileAsset("./helm/external-dns/values.yaml"),
+		},
 		Values: pulumi.Map{
-			"fullnameOverride": pulumi.String("external-dns"),
 			"serviceAccount": pulumi.Map{
-				"labels": pulumi.Map{
-					"azure.workload.identity/use": pulumi.String("true"),
-				},
 				"annotations": pulumi.Map{
 					"azure.workload.identity/client-id": externalDnsClientId,
 				},
-			},
-			"podLabels": pulumi.Map{
-				"azure.workload.identity/use": pulumi.String("true"),
-			},
-			"extraVolumes": pulumi.Array{
-				pulumi.Map{
-					"name": pulumi.String("azure-config-file"),
-					"secret": pulumi.Map{
-						"secretName": pulumi.String("external-dns-azure"),
-					},
-				},
-			},
-			"extraVolumeMounts": pulumi.Array{
-				pulumi.Map{
-					"name":      pulumi.String("azure-config-file"),
-					"mountPath": pulumi.String("/etc/kubernetes"),
-					"readOnly":  pulumi.Bool(true),
-				},
-			},
-			"provider": pulumi.Map{
-				"name": pulumi.String("azure"),
 			},
 		},
 	}, pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{edNS}))
@@ -162,131 +140,18 @@ func buildCharts(
 		RepositoryOpts: helm.RepositoryOptsArgs{
 			Repo: pulumi.String("https://traefik.github.io/charts"),
 		},
+		ValueYamlFiles: pulumi.AssetOrArchiveArray{
+			pulumi.NewFileAsset("./helm/traefik/values.yaml"),
+		},
 		Values: pulumi.Map{
-			"logs": pulumi.Map{
-				"general": pulumi.Map{
-					"level": pulumi.String("INFO"),
-				},
-			},
-
-			"metrics": pulumi.Map{
-				"prometheus": pulumi.Map{
-					"service": pulumi.Map{
-						"enabled": pulumi.Bool(true),
-					},
-					"disableAPICheck": pulumi.Bool(false),
-					"serviceMonitor": pulumi.Map{
-						"enabled": pulumi.Bool(true),
-						"metricRelabelings": pulumi.Array{
-							pulumi.Map{
-								"sourceLabels": pulumi.StringArray{
-									pulumi.String("__name__"),
-								},
-								"separator":   pulumi.String(";"),
-								"regex":       pulumi.String("^fluentd_output_status_buffer_(oldest|newest)_.+"),
-								"replacement": pulumi.String("$1"),
-								"action":      pulumi.String("drop"),
-							},
-						},
-						"relabelings": pulumi.Array{
-							pulumi.Map{
-								"sourceLabels": pulumi.StringArray{
-									pulumi.String("__meta_kubernetes_pod_node_name"),
-								},
-								"separator":   pulumi.String(";"),
-								"regex":       pulumi.String("^(.*)$"),
-								"targetLabel": pulumi.String("nodename"),
-								"replacement": pulumi.String("$1"),
-								"action":      pulumi.String("replace"),
-							},
-						},
-						"jobLabel":    pulumi.String("traefik"),
-						"interval":    pulumi.String("30s"),
-						"honorLabels": pulumi.Bool(true),
-					},
-					"prometheusRule": pulumi.Map{
-						"enabled": pulumi.Bool(true),
-						"rules": pulumi.Array{
-							pulumi.Map{
-								"alert": pulumi.String("TraefikDown"),
-								"expr":  pulumi.String(`up{job="traefik"} == 0`),
-								"for":   pulumi.String("5m"),
-								"labels": pulumi.Map{
-									"context":  pulumi.String("traefik"),
-									"severity": pulumi.String("warning"),
-								},
-								"annotations": pulumi.Map{
-									"summary":     pulumi.String("Traefik Down"),
-									"description": pulumi.String("{{ $labels.pod }} on {{ $labels.nodename }} is down"),
-								},
-							},
-						},
-					},
-				},
-			},
-			"tracing": pulumi.Map{
-				"otlp": pulumi.Map{
-					"http": pulumi.Map{
-						"endpoint": pulumi.String("http://lgtm-distributed-tempo-distributor.monitoring.svc:4318/v1/traces"),
-					},
-				},
-			},
-			"persistence": pulumi.Map{
-				"enabled": pulumi.Bool(true),
-				"size":    pulumi.String("128Mi"),
-			},
 			"serviceAccountAnnotations": pulumi.Map{
 				"azure.workload.identity/tenant-id": pulumi.String(current.TenantId),
 				"azure.workload.identity/client-id": traefikIdentityClientId,
 			},
-			"deployment": pulumi.Map{
-				"annotations": pulumi.Map{
-					"azure.workload.identity/use": pulumi.String("true"),
-				},
-			},
-			"podSecurityContext": pulumi.Map{
-				"fsGroup":             pulumi.Int(65532),
-				"fsGroupChangePolicy": pulumi.String("OnRootMismatch"),
-			},
 			"service": pulumi.Map{
-				"spec": pulumi.Map{
-					"type": pulumi.String("LoadBalancer"),
-				},
 				"annotations": pulumi.Map{
 					"service.beta.kubernetes.io/azure-pip-name": publicIpName,
 					"external-dns.alpha.kubernetes.io/hostname": pulumi.String("traefik.test.cluster2017.fi,grafana.test.cluster2017.fi,peli.test.cluster2017.fi,grcp.peli.test.cluster2017.fi"), // dynamic domain
-				},
-			},
-			"ports": pulumi.Map{
-				"web": pulumi.Map{
-					"redirections": pulumi.Map{
-						"entryPoint": pulumi.Map{
-							"to":        pulumi.String("websecure"),
-							"scheme":    pulumi.String("https"),
-							"permanent": pulumi.Bool(true),
-						},
-					},
-				},
-			},
-			"tlsStore": pulumi.Map{
-				"default": pulumi.Map{
-					"defaultCertificate": pulumi.Map{
-						"secretName": pulumi.String("wildcard-tls"),
-					},
-				},
-			},
-			"ingressRoute": pulumi.Map{
-				"dashboard": pulumi.Map{
-					"enabled":   pulumi.Bool(true),
-					"matchRule": pulumi.String("Host(`traefik.test.cluster2017.fi`)"),
-					"entryPoints": pulumi.StringArray{
-						pulumi.String("websecure"),
-					},
-					"middlewares": pulumi.Array{
-						pulumi.Map{
-							"name": pulumi.String("traefik-dashboard-auth"),
-						},
-					},
 				},
 			},
 			"extraObjects": pulumi.Array{
@@ -369,14 +234,8 @@ func buildCharts(
 		RepositoryOpts: helm.RepositoryOptsArgs{
 			Repo: pulumi.String("https://cloudnative-pg.github.io/charts"),
 		},
-		Values: pulumi.Map{
-			"replicaCount": pulumi.Int(1),
-			"monitoring": pulumi.Map{
-				"podMonitorEnabled": pulumi.Bool(true),
-				"grafanaDashboard": pulumi.Map{
-					"create": pulumi.Bool(true),
-				},
-			},
+		ValueYamlFiles: pulumi.AssetOrArchiveArray{
+			pulumi.NewFileAsset("./helm/cloudnative-pg/values.yaml"),
 		},
 	}, pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{cnpgNS}))
 	if err != nil {

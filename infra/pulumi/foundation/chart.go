@@ -151,7 +151,7 @@ func installMonitoring(ctx *pulumi.Context, k8sProvider *kubernetes.Provider) er
 		Chart:     pulumi.String("opentelemetry-collector"),
 		Name:      pulumi.String("opentelemetry-collector"),
 		Version:   pulumi.String("0.116.0"),
-		Namespace: pulumi.String("kube-system"),
+		Namespace: pulumi.String("monitoring"),
 		RepositoryOpts: helm.RepositoryOptsArgs{
 			Repo: pulumi.String("https://open-telemetry.github.io/opentelemetry-helm-charts"),
 		},
