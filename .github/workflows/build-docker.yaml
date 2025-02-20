@@ -52,7 +52,7 @@ jobs:
           context: ./src/
           file: ./src/frontend/Dockerfile
           push: false
-          tags: ${{ env.acr_name }}/frontend:latest
+          tags: ${{ env.acr_name }}/frontend:latest-${{ matrix.platform }}
 
       - name: Test build backend
         if: github.ref != 'refs/heads/main'
@@ -62,7 +62,7 @@ jobs:
           context: ./src/
           file: ./src/backend/Titeenipeli/Dockerfile
           push: false
-          tags: ${{ env.acr_name }}/backend:latest
+          tags: ${{ env.acr_name }}/backend:latest-${{ matrix.platform }}
 
       - name: Test build titeenipeli bot
         if: github.ref != 'refs/heads/main'
@@ -72,7 +72,7 @@ jobs:
           context: ./src/backend
           file: ./src/backend/Titeenipeli.Bot/Dockerfile
           push: false
-          tags: ${{ env.acr_name }}/bot:latest
+          tags: ${{ env.acr_name }}/bot:latest-${{ matrix.platform }}
 
       - name: Build and push backend
         if: github.ref == 'refs/heads/main'
@@ -82,7 +82,7 @@ jobs:
           context: ./src/
           file: ./src/backend/Titeenipeli/Dockerfile
           push: true
-          tags: ${{ env.acr_name }}/backend:latest
+          tags: ${{ env.acr_name }}/backend:latest-${{ matrix.platform }}
 
       - name: Build and push frontend
         if: github.ref == 'refs/heads/main'
@@ -92,7 +92,7 @@ jobs:
           context: ./src/
           file: ./src/frontend/Dockerfile
           push: true
-          tags: ${{ env.acr_name }}/frontend:latest
+          tags: ${{ env.acr_name }}/frontend:latest-${{ matrix.platform }}
 
       - name: Build and push titeenipeli bot
         if: github.ref == 'refs/heads/main'
@@ -102,4 +102,4 @@ jobs:
           context: ./src/backend
           file: ./src/backend/Titeenipeli.Bot/Dockerfile
           push: true
-          tags: ${{ env.acr_name }}/bot:latest
+          tags: ${{ env.acr_name }}/bot:latest-${{ matrix.platform }}
