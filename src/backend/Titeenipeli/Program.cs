@@ -47,49 +47,16 @@ public static class Program
         builder.Services.AddScoped<SpawnGeneratorService>();
 
         // Adding OpenTelemetry tracing and metrics
-        IOpenTelemetryBuilder openTelemetry = builder.Services.AddOpenTelemetry();
-
-        string openTelemetryEndpoint = builder.Configuration["OpenTelemetryEndpoint"] ?? "localhost:4318";
-
-        openTelemetry.ConfigureResource(resource =>
-            resource.AddService(builder.Environment.ApplicationName));
-
-        openTelemetry.WithMetrics(metrics =>
-        {
-            metrics
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddMeter("Microsoft.AspNetCore.Hosting")
-                .AddMeter("Microsoft.AspNetCore.Server.Kestrel");
-
-            metrics.AddOtlpExporter((exporterOptions, metricReaderOptions) =>
+        builder
+            .Services.AddOpenTelemetry()
+            .ConfigureResource(ResourceBuilder => ResourceBuilder.AddService(serviceName: "Titeeni"))
+            .WithTracing(tracebuilder =>
             {
-                exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
-                exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-                metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
+                tracebuilder
+                    .AddSource("Titeeni.*")
+                    .AddAspNetCoreInstrumentation()
+                    .AddOtlpExporter();
             });
-        });
-
-        openTelemetry.WithTracing(tracing =>
-        {
-            tracing
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddEntityFrameworkCoreInstrumentation();
-
-            tracing.AddOtlpExporter(exporterOptions =>
-            {
-                exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
-                exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-            });
-        });
-
-        // Adding OpenTelemetry logging
-        builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter(exporterOptions =>
-        {
-            exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
-            exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-        }));
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
