@@ -51,7 +51,7 @@ spec:
             - name: ASPNETCORE_Kestrel__Certificates__Default__Path
               value: /https/tls.crt
             - name: OTEL_SERVICE_NAME
-              value: titeeni
+              value: titeenipeli
             - name: OTEL_EXPORTER_OTPL_ENDPOINT
               value: http://opentelemetry-collector.monitoring.svc:4317
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -98,7 +98,7 @@ spec:
               value: {{ include "titeenipeli.name" . }}-cluster-rw.{{ .Release.Namespace }}.svc
             - name: SQLCONNSTR_Database
               value: Server=$(DB_ADDRESS);Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(DB_PASS);
-          image: titeenipelitacr.azurecr.io/backend:v0.1
+          image: titeenipelitacr.azurecr.io/backend@sha256:74654bd71e5e1b6364ea05d1d51e3119ca140e6335426b2c7b87f019260b6ee8
           name: backend
           volumeMounts:
             - name: certs
