@@ -52,9 +52,9 @@ spec:
               value: /https/tls.crt
             - name: OTEL_SERVICE_NAME
               value: titeenipeli
-            - name: OTEL_EXPORTER_OTPL_ENDPOINT
-              value: http://opentelemetry-collector.monitoring.svc:4317
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://opentelemetry-collector.monitoring.svc:4317
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
               value: grcp
             - name: OTEL_RESOURCE_ATTRIBUTES
               value: service.namespace=titeenit
@@ -62,8 +62,6 @@ spec:
               value: b3multi
             - name: OTEL_EXPORTER_OTLP_INSECURE 
               value: "true"
-            - name: OTEL_LOG_LEVEL
-              value: "debug"
             - name: Bot__Token
               valueFrom:
                 secretKeyRef:
