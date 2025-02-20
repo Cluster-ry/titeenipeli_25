@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
+using OpenTelemetry.Extensions.Propagators;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -47,6 +48,7 @@ public static class Program
         builder.Services.AddScoped<SpawnGeneratorService>();
 
         // Adding OpenTelemetry tracing and metrics
+        OpenTelemetry.Sdk.SetDefaultTextMapPropagator(new B3Propagator(false));
         builder
             .Services.AddOpenTelemetry()
             .ConfigureResource(ResourceBuilder => ResourceBuilder.AddService(serviceName: "Titeeni"))
