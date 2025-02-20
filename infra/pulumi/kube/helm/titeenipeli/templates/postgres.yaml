@@ -23,6 +23,6 @@ spec:
   postgresql:
     parameters:
       shared_buffers: "256MB"
-      max_connections: "100"
+      max_connections: "10"
 
   # TODO: backup to cloud

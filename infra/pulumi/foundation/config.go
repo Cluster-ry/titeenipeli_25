@@ -70,12 +70,12 @@ func configure(ctx *pulumi.Context) (Config, error) {
 
 	out.NodeCount = cfg.GetInt("nodeCount")
 	if out.NodeCount == 0 {
-		out.NodeCount = 3
+		out.NodeCount = 1
 	}
 
 	out.NodeSize = cfg.Get("nodeSize")
 	if out.NodeSize == "" {
-		out.NodeSize = "Standard_D2_v2"
+		out.NodeSize = "Standard_D2pds_v6"
 	}
 
 	out.BaseDomain = cfg.Get("domain")

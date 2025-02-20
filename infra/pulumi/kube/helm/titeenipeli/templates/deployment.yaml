@@ -15,7 +15,7 @@ spec:
         {{- include "titeenipeli.frontendSelectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - image: titeenipelitacr.azurecr.io/frontend:v0.1
+        - image: titeenipelitacr.azurecr.io/frontend:latest
           name: frontend
           imagePullPolicy: Always
       restartPolicy: Always
@@ -96,7 +96,7 @@ spec:
               value: {{ include "titeenipeli.name" . }}-cluster-rw.{{ .Release.Namespace }}.svc
             - name: SQLCONNSTR_Database
               value: Server=$(DB_ADDRESS);Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(DB_PASS);
-          image: titeenipelitacr.azurecr.io/backend@sha256:74654bd71e5e1b6364ea05d1d51e3119ca140e6335426b2c7b87f019260b6ee8
+          image: titeenipelitacr.azurecr.io/backend:latest
           name: backend
           volumeMounts:
             - name: certs
