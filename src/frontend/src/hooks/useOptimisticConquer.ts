@@ -70,7 +70,7 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
                 effectHandle.current?.forbiddenEffect(variables);
             }
         },
-        [increaseBucket, setPixel, effectHandle],
+        [increaseBucket, setPixel, effectHandle.current?.forbiddenEffect],
     );
 
     /**
@@ -90,7 +90,7 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
             pushToActions(key, pixel, oldPixel ?? pixel);
             return oldPixel;
         },
-        [decreaseBucket, setPixel, effectHandle, user, map],
+        [decreaseBucket, setPixel, effectHandle, user?.guild, user?.id, map],
     );
     /**
      * @summary

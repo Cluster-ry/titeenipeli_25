@@ -26,7 +26,6 @@ export const useNewMapStore = create<NewMapStore>((set) => ({
             if (oldMap === null) {
                 throw new Error("Tried to set pixel in a null map!");
             }
-
             if (pixel !== null) {
                 return { map: new Map([...oldMap, [JSON.stringify(coordinate), pixel]]) };
             } else {

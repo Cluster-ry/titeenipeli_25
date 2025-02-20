@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json;
+
 using Titeenipeli.Bot.Options;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Inputs;
@@ -11,16 +11,17 @@ namespace Titeenipeli.Bot.BackendApiClient;
 
 public class BackendClient(BackendOptions backendOptions)
 {
-    private static readonly JsonSerializerSettings _serializerSettings = new()
+    private static readonly JsonSerializerOptions _serializerOptions = new()
     {
-        ContractResolver = new CamelCasePropertyNamesContractResolver()
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
+
     private readonly HttpClient _httpClient = new();
 
     public async Task<string?> CreateUserOrLoginRequest(PostUsersInput userInput)
     {
         string url = $"{backendOptions.BackendUrl}/api/v1/users";
-        string json = JsonConvert.SerializeObject(userInput, _serializerSettings);
+        string json = JsonSerializer.Serialize(userInput, _serializerOptions);
 
         try
         {
@@ -31,8 +32,7 @@ public class BackendClient(BackendOptions backendOptions)
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
                 string body = await response.Content.ReadAsStringAsync();
-                ErrorResult? errorResult =
-                    JsonConvert.DeserializeObject<ErrorResult>(body) ?? throw new Exception("Unable to deserialize error results.");
+                ErrorResult errorResult = JsonSerializer.Deserialize<ErrorResult>(body, _serializerOptions) ?? throw new Exception("Unable to deserialize error results.");
 
                 if (errorResult.Code == ErrorCode.InvalidGuild)
                 {
@@ -42,8 +42,7 @@ public class BackendClient(BackendOptions backendOptions)
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            PostUsersResult? postUsersResult =
-                JsonConvert.DeserializeObject<PostUsersResult>(responseBody) ?? throw new Exception("Unable to deserialize results.");
+            PostUsersResult? postUsersResult = JsonSerializer.Deserialize<PostUsersResult>(responseBody, _serializerOptions) ?? throw new Exception("Unable to deserialize results.");
             return postUsersResult.Token;
         }
         catch (Exception e)
