@@ -47,17 +47,26 @@ public static class Program
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<SpawnGeneratorService>();
 
+        var otelEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? "http://localhost:4317";
+
         // Adding OpenTelemetry tracing and metrics
         OpenTelemetry.Sdk.SetDefaultTextMapPropagator(new B3Propagator(false));
         builder
             .Services.AddOpenTelemetry()
-            .ConfigureResource(ResourceBuilder => ResourceBuilder.AddService(serviceName: "Titeeni"))
-            .WithTracing(tracebuilder =>
+            .ConfigureResource(ResourceBuilder => ResourceBuilder.AddService(serviceName: "Titeenipeli"))
+            .WithTracing(tracerProviderBuilder =>
             {
-                tracebuilder
-                    .AddSource("Titeeni.*")
+                tracerProviderBuilder
+                    .AddSource("Titeenipeli.*")
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                    .AddService("Titeenipeli"))
                     .AddAspNetCoreInstrumentation()
-                    .AddOtlpExporter();
+                    .AddHttpClientInstrumentation()
+                    .AddOtlpExporter(options =>
+                    {
+                        options.Endpoint = new Uri(otelEndpoint);
+                        options.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+                    });
             });
 
         // Add services to the container.
