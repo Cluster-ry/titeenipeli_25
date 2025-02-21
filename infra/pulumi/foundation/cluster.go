@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	cs "github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2"
+	cs "github.com/pulumi/pulumi-azure-native-sdk/containerservice/v2/v20241001"
 	managedidentity "github.com/pulumi/pulumi-azure-native-sdk/managedidentity/v2"
 	"github.com/pulumi/pulumi-azure-native-sdk/network/v2"
 	"github.com/pulumi/pulumi-azure-native-sdk/resources/v2"
@@ -99,28 +99,19 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 					MinCount:          pulumi.Int(1),
 					MaxCount:          pulumi.Int(5),
 				},
-				cs.ManagedClusterAgentPoolProfileArgs{
-					Count:             pulumi.Int(1),
-					VmSize:            pulumi.String("Standard_F4s_v2"),
-					MaxPods:           pulumi.Int(110),
-					Name:              pulumi.String("dedicated"),
-					OsType:            pulumi.String("Linux"),
-					Type:              pulumi.String("VirtualMachineScaleSets"),
-					VnetSubnetID:      nodeSubnet.ID(),
-					PodSubnetID:       podSubnet.ID(),
-					EnableAutoScaling: pulumi.Bool(false),
-					NodeTaints: pulumi.StringArray{
-						pulumi.String("dedicated=node:NoSchedule"),
-					},
-					NodeLabels: pulumi.StringMap{
-						"dedicated": pulumi.String("titeenipeli"),
-					},
-				},
 			},
 			DnsPrefix:  entra.ResourceGroup.Name,
 			EnableRBAC: pulumi.Bool(true),
 			OidcIssuerProfile: &cs.ManagedClusterOIDCIssuerProfileArgs{
 				Enabled: pulumi.Bool(true),
+			},
+			ServiceMeshProfile: cs.ServiceMeshProfileArgs{
+				Istio: cs.IstioServiceMeshArgs{
+					Revisions: pulumi.StringArray{
+						pulumi.String("asm-1-23"),
+					},
+				},
+				Mode: pulumi.String("Istio"),
 			},
 			SecurityProfile: &cs.ManagedClusterSecurityProfileArgs{
 				WorkloadIdentity: &cs.ManagedClusterSecurityProfileWorkloadIdentityArgs{
@@ -180,6 +171,27 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 		PublicIPAllocationMethod: pulumi.String("Static"),
 		Sku: &network.PublicIPAddressSkuArgs{
 			Name: pulumi.String("Standard"),
+		},
+	}, pulumi.DependsOn([]pulumi.Resource{k8sCluster}))
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = cs.NewAgentPool(ctx, "dedicatedAgentPool", &cs.AgentPoolArgs{
+		ResourceGroupName: entra.ResourceGroup.Name,
+		ResourceName:      k8sCluster.Name,
+		AgentPoolName:     pulumi.String("dedicated"),
+		Count:             pulumi.Int(1),
+		EnableAutoScaling: pulumi.Bool(false),
+		OsType:            pulumi.String("Linux"),
+		VmSize:            pulumi.String("Standard_F4s_v2"),
+		VnetSubnetID:      nodeSubnet.ID(),
+		PodSubnetID:       podSubnet.ID(),
+		NodeTaints: pulumi.StringArray{
+			pulumi.String("dedicated=node:NoSchedule"),
+		},
+		NodeLabels: pulumi.StringMap{
+			"dedicated": pulumi.String("titeenipeli"),
 		},
 	}, pulumi.DependsOn([]pulumi.Resource{k8sCluster}))
 	if err != nil {

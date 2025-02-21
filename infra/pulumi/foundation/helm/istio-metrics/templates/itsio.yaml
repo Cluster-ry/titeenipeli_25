@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-shared-configmap-asm-1-23
+data:
+  mesh: |-
+    enableTracing: true
+    extensionProviders:
+      - name: otel-tracing
+        opentelemetry:
+          port: 4317
+          service: opentelemetry-collector.monitoring.svc.cluster.local
+          insecure: true
+          resource_detectors:
+            environment: {}
+---
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: otel-istio
+spec:
+  tracing:
+    - providers:
+        - name: otel-tracing
+      randomSamplingPercentage: 100

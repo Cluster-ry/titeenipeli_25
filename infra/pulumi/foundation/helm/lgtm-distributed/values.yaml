@@ -39,16 +39,16 @@ grafana:
     dashboardproviders.yaml:
       apiVersion: 1
       providers:
-        - name: provider-site
+        - name: default
           orgId: 1
           folder: ""
           type: file
           disableDeletion: false
           editable: true
           options:
-            path: "/var/lib/grafana/dashboards/provider-site"
+            path: "/var/lib/grafana/dashboards/default"
   dashboards:
-    provider-site:
+    default:
       cloudnative-pg:
         gnetId: 20417
         revision: 3
@@ -56,10 +56,6 @@ grafana:
       traefik:
         gnetId: 17346
         revision: 9
-        datasource: Mimir
-      mimir-overview:
-        gnetId: 17607
-        revision: 10
         datasource: Mimir
       loki-promtail:
         gnetId: 10880

@@ -18,12 +18,6 @@ spec:
         - image: titeenipelitacr.azurecr.io/frontend:latest
           name: frontend
           imagePullPolicy: Always
-          resources:
-            limits:
-              mem: 200Mi
-            requests:
-              cpu: 100m
-              mem: 100Mi
       restartPolicy: Always
 ---
 apiVersion: apps/v1
@@ -103,6 +97,12 @@ spec:
             - name: SQLCONNSTR_Database
               value: Server=$(DB_ADDRESS);Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(DB_PASS);
           image: titeenipelitacr.azurecr.io/backend:latest
+          resources:
+            limits:
+              memory: 4000Mi
+            requests:
+              cpu: 1500m
+              memory: 2000Mi
           name: backend
           volumeMounts:
             - name: certs
@@ -113,15 +113,8 @@ spec:
               subPath: appsettings.json
       restartPolicy: Always
       imagePullPolicy: Always
-      resources:
-            limits:
-              mem: 4000Mi
-            requests:
-              cpu: 1500m
-              mem: 2000Mi
       tolerations:
       - key: "dedicated"
-        operator: "Exists"
         value: "node"
         effect: "NoSchedule"
       volumes:
@@ -175,12 +168,6 @@ spec:
               mountPath: /usr/local/share/ca-certificates/ca.crt
               subPath: ca.crt
           name: bot
-          resources:
-            limits:
-              mem: 200Mi
-            requests:
-              cpu: 100m
-              mem: 100Mi
           securityContext:
             runAsUser: 0
       restartPolicy: Always

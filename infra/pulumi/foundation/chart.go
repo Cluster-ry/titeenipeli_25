@@ -147,7 +147,7 @@ func installMonitoring(ctx *pulumi.Context, k8sProvider *kubernetes.Provider) er
 		return err
 	}
 
-	_, err = helm.NewRelease(ctx, "opentelemetry-collector", &helm.ReleaseArgs{
+	otel, err := helm.NewRelease(ctx, "opentelemetry-collector", &helm.ReleaseArgs{
 		Chart:     pulumi.String("opentelemetry-collector"),
 		Name:      pulumi.String("opentelemetry-collector"),
 		Version:   pulumi.String("0.116.0"),
@@ -162,6 +162,11 @@ func installMonitoring(ctx *pulumi.Context, k8sProvider *kubernetes.Provider) er
 	if err != nil {
 		return err
 	}
+
+	helm.NewChart(ctx, "istio-metrics", helm.ChartArgs{
+		Path:      pulumi.String("./helm/istio-metrics"),
+		Namespace: pulumi.String("aks-istio-system"),
+	}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{otel}))
 
 	return nil
 }
