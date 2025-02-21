@@ -1,7 +1,6 @@
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Grpc.ChangeEntities;
-using Titeenipeli.Options;
 using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services.BackgroundServices;
@@ -9,7 +8,6 @@ namespace Titeenipeli.Services.BackgroundServices;
 public interface IUpdatePixelBucketsService : IAsynchronousTimedBackgroundService;
 
 public class UpdatePixelBucketsService(
-        GameOptions gameOptions,
         IUserRepositoryService userRepositoryService,
         IGuildRepositoryService guildRepositoryService,
         IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService

@@ -40,19 +40,15 @@ public class UpdateCumulativeScoresService(
 
     private void UpdateRealtimeScores(List<Guild> guilds)
     {
-        foreach (var guild in guilds)
+        foreach (var user in userRepositoryService.GetAll())
         {
-            User[] guildUsers = userRepositoryService.GetByGuild(guild.Name);
-            foreach (User user in guildUsers)
+            GrpcMiscGameStateUpdateInput stateUpdate = new()
             {
-                GrpcMiscGameStateUpdateInput stateUpdate = new()
-                {
-                    User = user,
-                    MaximumPixelBucket = user.Guild.PixelBucketSize,
-                    Guilds = guilds,
-                };
-                miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
-            }
+                User = user,
+                MaximumPixelBucket = user.Guild.PixelBucketSize,
+                Guilds = guilds,
+            };
+            miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
         }
     }
 }
