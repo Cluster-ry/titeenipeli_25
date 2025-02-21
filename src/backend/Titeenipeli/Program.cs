@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
+using OpenTelemetry.Extensions.Propagators;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -47,49 +48,20 @@ public static class Program
         builder.Services.AddScoped<SpawnGeneratorService>();
 
         // Adding OpenTelemetry tracing and metrics
-        IOpenTelemetryBuilder openTelemetry = builder.Services.AddOpenTelemetry();
-
-        string openTelemetryEndpoint = builder.Configuration["OpenTelemetryEndpoint"] ?? "localhost:4318";
-
-        openTelemetry.ConfigureResource(resource =>
-            resource.AddService(builder.Environment.ApplicationName));
-
-        openTelemetry.WithMetrics(metrics =>
-        {
-            metrics
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddMeter("Microsoft.AspNetCore.Hosting")
-                .AddMeter("Microsoft.AspNetCore.Server.Kestrel");
-
-            metrics.AddOtlpExporter((exporterOptions, metricReaderOptions) =>
+        OpenTelemetry.Sdk.SetDefaultTextMapPropagator(new B3Propagator(false));
+        builder
+            .Services.AddOpenTelemetry()
+            .ConfigureResource(ResourceBuilder => ResourceBuilder.AddService(serviceName: "Titeenipeli"))
+            .WithTracing(tracerProviderBuilder =>
             {
-                exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
-                exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-                metricReaderOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 1000;
+                tracerProviderBuilder
+                    .AddSource("Titeenipeli.*")
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                    .AddService("Titeenipeli"))
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddOtlpExporter();
             });
-        });
-
-        openTelemetry.WithTracing(tracing =>
-        {
-            tracing
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddEntityFrameworkCoreInstrumentation();
-
-            tracing.AddOtlpExporter(exporterOptions =>
-            {
-                exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
-                exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-            });
-        });
-
-        // Adding OpenTelemetry logging
-        builder.Logging.AddOpenTelemetry(logging => logging.AddOtlpExporter(exporterOptions =>
-        {
-            exporterOptions.Endpoint = new Uri(openTelemetryEndpoint);
-            exporterOptions.Protocol = OtlpExportProtocol.HttpProtobuf;
-        }));
 
         // Add services to the container.
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
