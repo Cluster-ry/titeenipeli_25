@@ -150,6 +150,42 @@ public class MapUpdaterTest
             yield return new TestCaseData(
                 new[,]
                 {
+                    { Clus, Clus, CLUS },
+                    { Clus, ALGO, None },
+                    { Clus, Clus, Clus }
+                },
+                new[] { (GuildName.Cluster, (3, 2)) },
+                new[,]
+                {
+                    { Clus, Clus, CLUS },
+                    { Clus, ALGO, Clus },
+                    { Clus, Clus, Clus }
+                }
+            ).SetName("Should not fill when attempting to fill only spawn cell");
+            yield return new TestCaseData(
+                new[,]
+                {
+                    { Clus, Clus, CLUS, Algo },
+                    { Clus, ALGO, None, ALGO },
+                    { Clus, Clus, Clus, Clus },
+                    { Clus, TIKI, TiKi, TiKi }
+                },
+                new[]
+                {
+                    (GuildName.Cluster, (3, 2)),
+                    (GuildName.Cluster, (3, 4))
+                },
+                new[,]
+                {
+                    { Clus, Clus, CLUS, Algo },
+                    { Clus, ALGO, Clus, ALGO },
+                    { Clus, Clus, Clus, Clus },
+                    { Clus, TIKI, Clus, None }
+                }
+            ).SetName("Should keep cache consistent when attempting to fill only spawn cell");
+            yield return new TestCaseData(
+                new[,]
+                {
                     { None, None, TiKi, None },
                     { None, None, TiKi, TiKi },
                     { None, CLUS, TiKi, None },
