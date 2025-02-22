@@ -3,7 +3,7 @@ import { Color, Container, FederatedPointerEvent, Graphics, Sprite, Texture } fr
 import MapTileProps from "../../models/MapTileProps";
 import { ColorOverlayFilter, GlowFilter } from "pixi-filters";
 
-const backgroundGraphicSize = 32;
+const highlightFilter = new GlowFilter({ distance: 15, outerStrength: 1, innerStrength: 1, color: 0xfde90d });
 
 const getColor = ({hue, saturation, lightness}: MapTileProps) => {
     if (hue !== undefined && saturation !== undefined && lightness !== undefined) {
@@ -14,9 +14,9 @@ const getColor = ({hue, saturation, lightness}: MapTileProps) => {
     }
 };
 
-const getTexture = ({ backgroundGraphic }: MapTileProps) => {
+const getTexture = ({ backgroundGraphic, width, height }: MapTileProps) => {
     if (backgroundGraphic !== undefined) {
-        return Texture.fromBuffer(backgroundGraphic, backgroundGraphicSize, backgroundGraphicSize);
+        return Texture.fromBuffer(backgroundGraphic, width, height);
     } else {
         return Texture.WHITE;
     }
@@ -51,7 +51,6 @@ const MapTile = PixiComponent("MapTile", {
         instance.filters = [overlay];
 
         if (highlight) {
-            const highlightFilter = new GlowFilter({ distance: 15, outerStrength: 1, innerStrength: 1, color: 0xfde90d });
             instance.filters.push(highlightFilter);
         } else {
             instance.filters.splice(1);
@@ -61,7 +60,7 @@ const MapTile = PixiComponent("MapTile", {
         instance.y = y;
         if (newProps.onClickRef.current) {
             instance.eventMode = "static";
-            instance.on("pointerdown", (event) => handleEvent(event, newProps));
+            instance.on("tap", (event) => handleEvent(event, newProps));
         }
     }
 });
