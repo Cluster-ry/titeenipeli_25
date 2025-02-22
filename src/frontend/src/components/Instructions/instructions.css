@@ -11,3 +11,8 @@ section {
   padding-right: 5vw;
   padding-left: 5vw;
 }
+
+.section-text {
+  padding-left: 2vw;
+  padding-right: 2vw;
+}
