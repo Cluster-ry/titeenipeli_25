@@ -1,15 +1,15 @@
 #instructions {
   background: linear-gradient(0deg, #00000088 30%, #ffffff44 100%);
-  color: white;
   background-color: rgb(0, 0, 0, 0.4);
+  color: white;
   overflow-x: hidden;
   overflow-y: scroll;
-  border-radius: 15px;
-}
 
-section {
-  padding-right: 5vw;
-  padding-left: 5vw;
+  /* Negative margins to close the white space */
+  margin-top: -1vw;
+  margin-bottom: -1vw;
+  margin-left: -2vw;
+  margin-right: -2vw;
 }
 
 .section-text {
@@ -23,3 +23,14 @@ section {
   margin-top: 1vh;
   margin-bottom: 1vh;
 }
+
+@media only screen and (max-width: 600px) {
+  #instructions {
+    margin-top: -4vw;
+    margin-bottom: -4vw;
+    margin-left: -8vw;
+    margin-right: -8vw;
+  }
+}
+
+
