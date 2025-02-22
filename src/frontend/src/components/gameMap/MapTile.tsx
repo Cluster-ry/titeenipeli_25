@@ -1,10 +1,11 @@
 import { PixiComponent } from "@pixi/react";
-import { Color, ColorMatrixFilter, Container, FederatedPointerEvent, Graphics, Sprite, Texture } from "pixi.js";
-import RectangleProps from "../../models/RectangleProps";
+import { Color, Container, FederatedPointerEvent, Graphics, Sprite, Texture } from "pixi.js";
+import MapTileProps from "../../models/MapTileProps";
+import { ColorOverlayFilter, GlowFilter } from "pixi-filters";
 
 const backgroundGraphicSize = 32;
 
-const getColor = ({hue, saturation, lightness}: RectangleProps) => {
+const getColor = ({hue, saturation, lightness}: MapTileProps) => {
     if (hue !== undefined && saturation !== undefined && lightness !== undefined) {
         const pixiColor = new Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
         return [pixiColor.red, pixiColor.green, pixiColor.blue];
@@ -13,7 +14,7 @@ const getColor = ({hue, saturation, lightness}: RectangleProps) => {
     }
 };
 
-const getTexture = ({ backgroundGraphic }: RectangleProps) => {
+const getTexture = ({ backgroundGraphic }: MapTileProps) => {
     if (backgroundGraphic !== undefined) {
         return Texture.fromBuffer(backgroundGraphic, backgroundGraphicSize, backgroundGraphicSize);
     } else {
@@ -21,7 +22,7 @@ const getTexture = ({ backgroundGraphic }: RectangleProps) => {
     }
 }
 
-const handleEvent = (event: FederatedPointerEvent, { onClickRef, highlight, moving, x, y }: RectangleProps) => {
+const handleEvent = (event: FederatedPointerEvent, { onClickRef, highlight, moving, x, y }: MapTileProps) => {
     if ((event.pointerType === "mouse" && event.button !== 0) || moving.current) {
         return;
     }
@@ -30,9 +31,11 @@ const handleEvent = (event: FederatedPointerEvent, { onClickRef, highlight, movi
 };
 
 const MapTile = PixiComponent("MapTile", {
-    create: () => new Container(),
-    applyProps: (instance: Graphics, _oldProps: RectangleProps, newProps: RectangleProps) => {
-        console.log("Perse");
+    create: () => {
+        const container = new Container();
+        return container;
+    },
+    applyProps: (instance: Graphics, _oldProps: MapTileProps, newProps: MapTileProps) => {
         const { x, y, width, height, alpha, highlight } = newProps;
         instance.removeChildren()
 
@@ -42,20 +45,16 @@ const MapTile = PixiComponent("MapTile", {
             height,
         });
 
-        const overlay = new Graphics();
-        overlay.beginFill(getColor(newProps), alpha ?? 0.75)
-        .drawRect(0, 0, newProps.width, newProps.height)
-        .endFill();
+        const overlay = new ColorOverlayFilter(getColor(newProps), alpha ?? 0.75);
 
         instance.addChild(bgSprite);
-        instance.addChild(overlay);
+        instance.filters = [overlay];
 
         if (highlight) {
-            const highlightFilter = new ColorMatrixFilter();
-            highlightFilter.brightness(0.8, true);
-            instance.filters = [highlightFilter];
+            const highlightFilter = new GlowFilter({ distance: 15, outerStrength: 1, innerStrength: 1, color: 0xfde90d });
+            instance.filters.push(highlightFilter);
         } else {
-            instance.filters = null;
+            instance.filters.splice(1);
         }
 
         instance.x = x;
