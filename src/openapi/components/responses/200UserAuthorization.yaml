@@ -1,4 +1,4 @@
-description: Set authorization token and provide user details.
+description: Sets authorization cookie and provides user details.
 headers:
   Set-Cookie:
     schema:
@@ -6,4 +6,4 @@ headers:
 content:
   application/json:
     schema:
-      $ref: "../schemas/guild.yaml"
+      $ref: "../schemas/user.yaml"

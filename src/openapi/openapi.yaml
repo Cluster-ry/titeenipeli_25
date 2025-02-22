@@ -36,12 +36,20 @@ tags:
 paths:
   /ctf:
     $ref: "./paths/ctf.yaml"
-  /map/pixels:
-    $ref: "./paths/map/pixels.yaml"
+  /state/map/pixels:
+    $ref: "./paths/state/map/pixels.yaml"
+  /state/game:
+    $ref: "./paths/state/gameState.yaml"
+  /state/powerups/activate:
+    $ref: "./paths/state/powerups.yaml"
   /users:
-    $ref: "./paths/users.yaml"
+    $ref: "./paths/users/users.yaml"
+  /users/authenticate:
+    $ref: "./paths/users/authenticate.yaml"
 
 components:
   securitySchemes:
     bearerAuth:
       $ref: "./components/securitySchemas/bearerAuth.yaml"
+    botAuth:
+      $ref: "./components/securitySchemas/botAuth.yaml"

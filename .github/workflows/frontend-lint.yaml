@@ -24,7 +24,7 @@ jobs:
           node-version: ${{ env.node-version }}
 
       - name: Install pnpm modules
-        run: npm install -g pnpm
+        run: npm install -g pnpm@9.5.0
 
       - name: Install dev modules
         working-directory: src/frontend/
@@ -33,3 +33,7 @@ jobs:
       - name: Lint check
         working-directory: src/frontend/
         run: pnpm eslint .
+
+      - name: Prettier check
+        working-directory: src/frontend/
+        run: pnpm prettier . --check

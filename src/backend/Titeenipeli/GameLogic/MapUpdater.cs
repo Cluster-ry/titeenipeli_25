@@ -1,10 +1,10 @@
-﻿using Titeenipeli.Enums;
+﻿using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic.MapCalculationDataTypes;
-using Titeenipeli.Models;
 
 namespace Titeenipeli.GameLogic;
 
-using Coordinates = (int x, int y);
 using AreaNodes = Dictionary<int, Node>;
 
 public class MapUpdater
@@ -20,11 +20,14 @@ public class MapUpdater
     /// </summary>
     /// <param name="map">The game map - should include border pixels. Mutated according to the update event.</param>
     /// <param name="pixelCoordinates">The coordinates of the new pixel</param>
-    /// <param name="placingGuild">The guild placing the new pixel</param>
-    public void PlacePixel(Map map, Coordinates pixelCoordinates, GuildName placingGuild)
+    /// <param name="placingUser">The user placing the new pixel</param>
+    public List<MapChange> PlacePixel(PixelWithType[,] map, Coordinate pixelCoordinates, User placingUser)
     {
-        map.Pixels[pixelCoordinates.y, pixelCoordinates.x]
-            = new PixelModel { Owner = placingGuild, Type = PixelType.Normal };
+        List<MapChange> allChangedPixels = [];
+        User? oldOwner = map[pixelCoordinates.X, pixelCoordinates.Y].Owner;
+        allChangedPixels.Add(new() { Coordinate = pixelCoordinates - new Coordinate(1, 1), OldOwner = oldOwner, NewOwner = placingUser });
+        map[pixelCoordinates.X, pixelCoordinates.Y]
+            = new PixelWithType { Location = pixelCoordinates - new Coordinate(1, 1), Type = PixelType.Normal, Owner = placingUser };
 
         var (nodes, justAddedNode) = _cachedData is null
             ? _ConstructMapAdjacencyNodes(map, pixelCoordinates, placingGuild)
@@ -33,13 +36,22 @@ public class MapUpdater
         // Construct a set of all nodes reachable from outside node (index 0)
         var nonHangingNodeIndexes = _GetNonSurroundedNodes(nodes, justAddedNode);
 
-        foreach (var nodeIndex in nodes.Keys.Where(nodeIndex => !nonHangingNodeIndexes.Contains(nodeIndex)))
+        List<MapChange> changedPixels = _CutNodesWithoutSpawn(map, nodes);
+        allChangedPixels = [.. allChangedPixels, .. changedPixels];
+
+        // Fill is applied only for nodes owned by nobody.
+        foreach (var nodeIndex in nodes.Keys.Where(
+            nodeIndex => !nonHangingNodeIndexes.Contains(nodeIndex) &&
+            (nodes[nodeIndex].Guild == null || nodes[nodeIndex].Guild == GuildName.Nobody)))
         {
-            _FillNode(map, nodes[nodeIndex], placingGuild);
+            List<MapChange> changedFillPixels = _FillNode(map, nodes[nodeIndex], placingUser);
+            allChangedPixels = [.. allChangedPixels, .. changedFillPixels];
             nodes.Remove(nodeIndex);
         }
 
-        _CutNodesWithoutSpawn(map, nodes);
+        _cachedNodes = nodes;
+
+        return allChangedPixels;
     }
 
     private HashSet<int> _GetNonSurroundedNodes(AreaNodes nodes, int justAddedNode)
@@ -48,7 +60,7 @@ public class MapUpdater
         _DfsWithBlockingNode(0, nodes, justAddedNode, nonSurroundedNodeIndexes);
         return nonSurroundedNodeIndexes;
     }
-    
+
     /// <summary>
     /// Builds a graph from all nodes (single-color areas) in the given map. Includes ownerless nodes (color = null).
     /// The outside of the map is considered an ownerless node and will always have an index of 0.
@@ -58,57 +70,56 @@ public class MapUpdater
     /// </summary>
     /// <param name="map">The map state to construct a graph of</param>
     /// <param name="pixelCoordinates">The coordinates of the last added pixel</param>
-    /// <param name="placingGuild">The guild that placed the last added pixel</param>
     /// <returns></returns>
-    private (AreaNodes, int) _ConstructMapAdjacencyNodes(Map map, Coordinates pixelCoordinates,
-        GuildName placingGuild)
+    private (AreaNodes, int) _ConstructMapAdjacencyNodes(PixelWithType[,] map, Coordinate pixelCoordinates)
     {
-        var ySize = map.Pixels.GetUpperBound(0) + 1;
-        var xSize = map.Pixels.GetUpperBound(1) + 1;
+        var xSize = map.GetUpperBound(0) + 1;
+        var ySize = map.GetUpperBound(1) + 1;
         var nodes = new AreaNodes();
-        var nodeMap = new int[ySize, xSize];
-        nodes[0] = _CreateOutsideNode(ySize, xSize);
+        var nodeMap = new int[xSize, ySize];
+        nodes[0] = _CreateOutsideNode(xSize, ySize);
         var nextNode = 1;
         for (var y = 1; y < ySize; y++)
         {
             for (var x = 1; x < xSize; x++)
             {
-                var currentPixelGuild = map.Pixels[y, x].Owner;
+                var currentPixelGuild = map[x, y].Owner?.Guild?.Name;
                 var (leftNode, aboveNode) = TryMerge(currentPixelGuild, nodeMap, y, x, nodes);
 
-                var isSpawnNode = map.Pixels[y, x].Type == PixelType.Spawn;
+                var isSpawnNode = map[x, y].Type == PixelType.Spawn;
 
                 if (nodes[leftNode].Guild == currentPixelGuild)
                 {
-                    AddPixelToNodeWithNeighbour(nodes, leftNode, (x, y), isSpawnNode, aboveNode, nodeMap);
+                    AddPixelToNodeWithNeighbour(nodes, leftNode, new(x, y), isSpawnNode, aboveNode, nodeMap);
                 }
                 else if (nodes[aboveNode].Guild == currentPixelGuild)
                 {
-                    AddPixelToNodeWithNeighbour(nodes, aboveNode, (x, y), isSpawnNode, leftNode, nodeMap);
+                    AddPixelToNodeWithNeighbour(nodes, aboveNode, new(x, y), isSpawnNode, leftNode, nodeMap);
                 }
                 else
                 {
                     nodes[nextNode] = new Node
                     {
-                        Pixels = { (x, y) },
+                        Pixels = { new(x, y) },
                         Guild = currentPixelGuild,
                         Neighbours = { aboveNode, leftNode },
                         HasSpawn = isSpawnNode
                     };
                     nodes[leftNode].Neighbours.Add(nextNode);
                     nodes[aboveNode].Neighbours.Add(nextNode);
-                    nodeMap[y, x] = nextNode;
+                    nodeMap[x, y] = nextNode;
                     nextNode++;
                 }
             }
         }
 
-        var justAddedNode = nodeMap[pixelCoordinates.y, pixelCoordinates.x];
+        var justAddedNode = nodeMap[pixelCoordinates.X, pixelCoordinates.Y];
         _cachedData = new CalculationCachedData { Nodes = nodes, NodeMap = nodeMap, NextNodeId = nextNode };
+
         return (nodes, justAddedNode);
     }
 
-    private static void AddPixelToNodeWithNeighbour(AreaNodes nodes, int destinationNode, Coordinates coordinates,
+    private static void AddPixelToNodeWithNeighbour(AreaNodes nodes, int destinationNode, Coordinate coordinates,
         bool isSpawnNode,
         int neighbourNode, int[,] nodeMap)
     {
@@ -116,13 +127,13 @@ public class MapUpdater
         nodes[destinationNode].HasSpawn = nodes[destinationNode].HasSpawn || isSpawnNode;
         nodes[destinationNode].Neighbours.Add(neighbourNode);
         nodes[neighbourNode].Neighbours.Add(destinationNode);
-        nodeMap[coordinates.y, coordinates.x] = destinationNode;
+        nodeMap[coordinates.X, coordinates.Y] = destinationNode;
     }
 
     private (int, int) TryMerge(GuildName? mergingGuild, int[,] nodeMap, int y, int x, AreaNodes nodes)
     {
-        var leftNode = nodeMap[y, x - 1];
-        var aboveNode = nodeMap[y - 1, x];
+        var leftNode = nodeMap[x - 1, y];
+        var aboveNode = nodeMap[x, y - 1];
 
         if (leftNode == aboveNode)
         {
@@ -148,14 +159,14 @@ public class MapUpdater
         var outsideNode = new Node { Guild = null };
         for (var x = 0; x < xSize; x++)
         {
-            outsideNode.Pixels.Add((x, 0));
-            outsideNode.Pixels.Add((x, ySize - 1));
+            outsideNode.Pixels.Add(new(x, 0));
+            outsideNode.Pixels.Add(new(x, ySize - 1));
         }
 
         for (var y = 0; y < xSize; y++)
         {
-            outsideNode.Pixels.Add((0, y));
-            outsideNode.Pixels.Add((xSize - 1, y));
+            outsideNode.Pixels.Add(new(0, y));
+            outsideNode.Pixels.Add(new(xSize - 1, y));
         }
 
         return outsideNode;
@@ -174,11 +185,12 @@ public class MapUpdater
 
         foreach (var (x, y) in nodes[largerNodeIndex].Pixels)
         {
-            nodeMap[y, x] = smallerNodeIndex;
+            nodeMap[x, y] = smallerNodeIndex;
         }
 
         nodes[smallerNodeIndex].Pixels.UnionWith(nodes[largerNodeIndex].Pixels);
         nodes[smallerNodeIndex].Neighbours.UnionWith(nodes[largerNodeIndex].Neighbours);
+        nodes[smallerNodeIndex].HasSpawn = nodes[smallerNodeIndex].HasSpawn || nodes[largerNodeIndex].HasSpawn;
         nodes.Remove(largerNodeIndex);
         return smallerNodeIndex;
     }
@@ -231,7 +243,7 @@ public class MapUpdater
         }
     }
 
-    private void _FillNode(Map map, Node node, GuildName? newGuild)
+    private List<MapChange> _FillNode(PixelWithType[,] map, Node node, User? placingUser)
     {
         if (_cachedData is null)
         {
@@ -256,19 +268,24 @@ public class MapUpdater
         }
 
         List<PixelModel> filledSpawns = [];
+        // TODO
+        // List<MapChange> changedPixels = [];
+
         foreach (var (x, y) in node.Pixels)
         {
-            if (map.Pixels[y, x].Type == PixelType.Spawn)
+            if (map[x, y].Type == PixelType.Spawn)
             {
                 filledSpawns.Add(map.Pixels[y, x]);
             }
 
-            map.Pixels[y, x].Owner = newGuild;
-            map.Pixels[y, x].Type = PixelType.Normal;
+            map.Pixels[x, y].Owner = newGuild;
+            map.Pixels[x, y].Type = PixelType.Normal;
             node.Pixels.Remove((x, y));
 
-            _cachedData.NodeMap[y, x] = nodeAfterFillId;
+            _cachedData.NodeMap[x, y] = nodeAfterFillId;
             nodeAfterFill.Pixels.Add((x, y));
+            MapChange change = new() { Coordinate = new Coordinate(x - 1, y - 1), OldOwner = map[x, y].Owner, NewOwner = placingUser };
+                        changedPixels.Add(change);
         }
 
         // Only filled spawn nodes
@@ -286,13 +303,18 @@ public class MapUpdater
         {
             nodeAfterFillId = _MergeNodes(nodeAfterFillId, nodeId, _cachedData.Nodes, _cachedData.NodeMap);
         }
+        return changedPixels;
     }
 
-    private void _CutNodesWithoutSpawn(Map map, AreaNodes nodes)
+    private List<MapChange> _CutNodesWithoutSpawn(PixelWithType[,] map, AreaNodes nodes)
     {
+        List<MapChange> allChangedPixels = [];
         foreach (var node in nodes.Values.Where(node => node is { HasSpawn: false, Guild: not null }))
         {
-            _FillNode(map, node, null);
+            node.Guild = null;
+            List<MapChange> changedPixels = _FillNode(map, node, null);
+            allChangedPixels = [.. allChangedPixels, .. changedPixels];
         }
+        return allChangedPixels;
     }
 }

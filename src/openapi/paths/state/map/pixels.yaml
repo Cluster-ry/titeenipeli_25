@@ -1,0 +1,36 @@
+get:
+  tags:
+    - "state"
+    - "pixels"
+  summary: "Receives whole map for the player."
+  operationId: "getPixels"
+  responses:
+    "200":
+      $ref: "../../../components/responses/200GetPixels.yaml"
+    "401":
+      $ref: "../../../components/responses/401Unauthorized.yaml"
+  security:
+    - bearerAuth: []
+
+post:
+  tags:
+    - "state"
+    - "pixels"
+  summary: "Conquers pixel for the guild."
+  operationId: "conquerPixel"
+  requestBody:
+    description: "Pixel details."
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../../components/schemas/relativeCoordinate.yaml"
+  responses:
+    "200":
+      description: Pixel conquered!
+    "400":
+      $ref: "../../../components/responses/400ClientError.yaml"
+    "401":
+      $ref: "../../../components/responses/401Unauthorized.yaml"
+  security:
+    - bearerAuth: []

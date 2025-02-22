@@ -1,0 +1,19 @@
+post:
+  tags:
+    - users
+  summary: "Creates or logs in user."
+  operationId: "postUsers"
+  requestBody:
+    description: "User details received from Telegram."
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/telegramAuthorizationData.yaml"
+  responses:
+    "200":
+      $ref: "../../components/responses/200TelegramAuthorization.yaml"
+    "403":
+      $ref: "../../components/responses/403AuthorizationError.yaml"
+  security:
+    - botAuth: []

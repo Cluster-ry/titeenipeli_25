@@ -1,0 +1,95 @@
+logs:
+  general:
+    level: INFO
+
+metrics:
+  prometheus:
+    service:
+      enabled: true
+    disableAPICheck: false
+    serviceMonitor:
+      enabled: true
+      metricRelabelings:
+        - sourceLabels: ["__name__"]
+          separator: ";"
+          regex: "^fluentd_output_status_buffer_(oldest|newest)_.+"
+          replacement: "$1"
+          action: "drop"
+      relabelings:
+        - sourceLabels: ["__meta_kubernetes_pod_node_name"]
+          separator: ";"
+          regex: "^(.*)$"
+          targetLabel: "nodename"
+          replacement: "$1"
+          action: "replace"
+      jobLabel: "traefik"
+      interval: "30s"
+      honorLabels: true
+    prometheusRule:
+      enabled: true
+      rules:
+        - alert: "TraefikDown"
+          expr: 'up{job="traefik"} == 0'
+          for: "5m"
+          labels:
+            context: "traefik"
+            severity: "warning"
+          annotations:
+            summary: "Traefik Down"
+            description: "{{ $labels.pod }} on {{ $labels.nodename }} is down"
+
+tracing:
+  addInternals: true
+  serviceName: traefik
+  sampleRate: 1
+  otlp:
+    enabled: true
+    grpc:
+      enabled: true
+      endpoint: opentelemetry-collector.monitoring.svc:4317
+      insecure: true
+
+persistence:
+  enabled: true
+  size: "128Mi"
+
+serviceAccountAnnotations:
+  azure.workload.identity/tenant-id: "<current.TenantId>" # this is replaced in pulumi values
+  azure.workload.identity/client-id: "<traefikIdentityClientId>" # this is replaced in pulumi values
+
+deployment:
+  annotations:
+    azure.workload.identity/use: "true"
+
+podSecurityContext:
+  fsGroup: 65532
+  fsGroupChangePolicy: "OnRootMismatch"
+
+service:
+  spec:
+    type: "LoadBalancer"
+  annotations:
+    service.beta.kubernetes.io/azure-pip-name: "<publicIpName>" # this is replaced in pulumi values
+    external-dns.alpha.kubernetes.io/hostname: "traefik.test.cluster2017.fi,grafana.test.cluster2017.fi,peli.test.cluster2017.fi,grcp.peli.test.cluster2017.fi" # this is replaced in pulumi values
+
+ports:
+  web:
+    redirections:
+      entryPoint:
+        to: "websecure"
+        scheme: "https"
+        permanent: true
+
+tlsStore:
+  default:
+    defaultCertificate:
+      secretName: "wildcard-tls"
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    matchRule: "Host(`traefik.test.cluster2017.fi`)"
+    entryPoints:
+      - "websecure"
+    middlewares:
+      - name: "traefik-dashboard-auth"

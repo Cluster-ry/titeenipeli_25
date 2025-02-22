@@ -1,0 +1,7 @@
+replicaCount: 1
+
+monitoring:
+  podMonitorEnabled: true
+  grafanaDashboard:
+    namespace: monitoring
+    create: true

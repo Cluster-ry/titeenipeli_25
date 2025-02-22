@@ -1,0 +1,26 @@
+.ctf-input {
+    display: block;
+    margin: auto;
+    padding: 8px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    text-align: center;
+    color: white;
+    font-family: "Press Start 2p";
+    border-radius: 8px;
+    background-color: #000000;
+}
+
+.ctf-input::after {
+    display: none;
+    content: "#TÄLLÄ_EI_SAA_POWER_UPIA";
+}
+
+.ctf-button {
+    display: block;
+    margin: auto;
+    padding: 8px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    width: 100%;
+}

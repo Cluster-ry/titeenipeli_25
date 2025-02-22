@@ -1,0 +1,28 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "titeenipeli.name" . }}-cluster
+  labels: {{- include "titeenipeli.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "-5"
+spec:
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgresql:16
+  primaryUpdateStrategy: unsupervised
+  monitoring:
+    enablePodMonitor: true
+  storage:
+    size: 10Gi
+  managed:
+    roles:
+    - name: app
+      createdb: true
+      login: true
+  enableSuperuserAccess: true
+  postgresql:
+    parameters:
+      shared_buffers: "256MB"
+      max_connections: "10"
+
+  # TODO: backup to cloud

@@ -1,0 +1,9 @@
+type: object
+properties:
+  id:
+    description: "Unique identifier for the powerUp"
+    type: int
+  location:
+    $ref: "./relativeCoordinate.yaml"
+  direction:
+    $ref: "../enums/powerupDirection.yaml"

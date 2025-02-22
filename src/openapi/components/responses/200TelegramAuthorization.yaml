@@ -1,0 +1,5 @@
+description: Provides token that can be used to authenticate user.
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/telegramToken.yaml"

@@ -1,0 +1,5 @@
+description: "Current game state excluding map"
+content:
+  application/json:
+    schema:
+      $ref: "../schemas/gameState.yaml"

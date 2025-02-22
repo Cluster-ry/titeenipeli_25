@@ -1,4 +1,6 @@
+syntax = "proto3";
+
 message RelativeCoordinate {
-    required int32 x = 1;
-    required int32 y = 2;
+    int32 x = 1;
+    int32 y = 2;
 }

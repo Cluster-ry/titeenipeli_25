@@ -1,15 +1,16 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
+EXPOSE 80 443
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Titeenipeli/Titeenipeli.csproj", "Titeenipeli/"]
-RUN dotnet restore "Titeenipeli/Titeenipeli.csproj"
+COPY ["backend/Titeenipeli/Titeenipeli.csproj", "backend/Titeenipeli/"]
+COPY ["protobuf/", "protobuf/"]
+RUN dotnet restore "backend/Titeenipeli/Titeenipeli.csproj"
 COPY . .
-WORKDIR "/src/Titeenipeli"
+WORKDIR "/src/backend/Titeenipeli"
 RUN dotnet build "Titeenipeli.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
