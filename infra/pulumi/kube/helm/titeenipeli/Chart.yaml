@@ -1,0 +1,9 @@
+apiVersion: v2
+name: titeenipeli
+description: titeenipeli chart for full deployment
+
+type: application
+
+version: 0.1.0
+
+appVersion: "0.1.0"

@@ -1,0 +1,1 @@
+pulumi stack output kubeconfig --show-secrets > ~\.kube\config

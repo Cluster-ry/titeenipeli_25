@@ -90,6 +90,7 @@ func main() {
 		}
 
 		ctx.Export("registryLoginServer", registry.LoginServer)
+		ctx.Export("registryID", registry.ID())
 		ctx.Export("servicePrincipalClientId", servicePrincipal.ClientId)
 		ctx.Export("servicePrincipalPassword", password.Value)
 
