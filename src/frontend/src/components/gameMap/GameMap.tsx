@@ -9,9 +9,9 @@ import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.ts";
 import { usePowerUpStore } from "../../stores/powerupStore.ts";
 import { useIsMoving } from "../../hooks/useIsMoving.ts";
-import Rectangle from "./Rectangle.tsx";
 import { Coordinate } from "../../models/Coordinate.ts";
 import { usePowerUps } from "../../hooks/usePowerUps.ts";
+import MapTile from "./MapTile.tsx";
 
 /**
  * @component GameMap
@@ -72,8 +72,8 @@ const GameMap: FC = () => {
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
             result.push(
-                <Rectangle
-                    key={`rectangle-${coordinate}`}
+                <MapTile
+                    key={`map-tile-${coordinate}`}
                     x={rectangleX}
                     y={rectangleY}
                     width={mapConfig.PixelSize}
