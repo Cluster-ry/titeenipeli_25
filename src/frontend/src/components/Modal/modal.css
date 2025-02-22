@@ -93,5 +93,6 @@
 }
 
 .modal-body {
+  overflow: hidden;
     padding: 16px 32px;
 }

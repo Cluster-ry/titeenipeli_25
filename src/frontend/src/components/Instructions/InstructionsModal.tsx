@@ -11,7 +11,7 @@ const instructionsData: Instructions[] = [
       "Help your guild win by clicking and conquering pixels!",
       "Devastate your rivals by severing their pixels from their spawn points!",
       "Keep an eye on your bucket points! Your guild needs momentum!",
-      "Manipulate destiny with special effects!"
+      "Manipulate destiny with game-changing special effects!"
     ]
   }
 ];

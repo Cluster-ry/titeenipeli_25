@@ -2,14 +2,21 @@
   background: linear-gradient(0deg, #00000088 30%, #ffffff44 100%);
   background-color: rgb(0, 0, 0, 0.4);
   color: white;
+  
+
+  overflow-x: hidden;
+  overflow-y: scroll;
+  padding: 0;
+
   overflow-x: hidden;
   overflow-y: scroll;
 
   /* Negative margins to close the white space */
-  margin-top: -1vw;
-  margin-bottom: -1vw;
-  margin-left: -2vw;
-  margin-right: -2vw;
+  
+  margin-top: -1.5vw;
+  margin-bottom: -1.5vw;
+  margin-left: -3vw;
+  margin-right: -3vw;
 }
 
 .section-text {
@@ -17,6 +24,8 @@
   text-align: left;
   padding-left: 2vw;
   padding-right: 2vw;
+  max-height: 60vh;
+  max-width: 60vw;
 }
 
 .entry-text {
@@ -26,10 +35,15 @@
 
 @media only screen and (max-width: 600px) {
   #instructions {
+    max-width: 80vw;
+    max-height: 80vh;
     margin-top: -4vw;
     margin-bottom: -4vw;
     margin-left: -8vw;
     margin-right: -8vw;
+  }
+  .section-text {
+    font-size: 12px;
   }
 }
 
