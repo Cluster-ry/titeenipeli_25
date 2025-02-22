@@ -2,6 +2,10 @@ import "./instructions.css"
 import { instructionsStore } from "../../stores/instructionsStore"
 import Modal from "../Modal/Modal";
 
+const instructionsData = [
+
+];
+
 const InstructionsModal = () => {
   const { setInstructionsOn } = instructionsStore();
   
