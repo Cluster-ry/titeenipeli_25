@@ -1,6 +1,6 @@
-name: test
+name: titeenipelikube
 runtime: go
-description: A minimal Azure Native Go Pulumi program
+description: Titeenipeli kubernetes configs
 config:
   pulumi:tags:
     value:

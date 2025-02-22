@@ -1,0 +1,177 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "titeenipeli.frontendName" . }}
+  labels:
+    {{- include "titeenipeli.frontendLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "titeenipeli.frontendSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "titeenipeli.frontendSelectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - image: titeenipelitacr.azurecr.io/frontend:latest
+          name: frontend
+          imagePullPolicy: Always
+      restartPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "titeenipeli.backendName" . }}
+  labels:
+    {{- include "titeenipeli.backendLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "titeenipeli.backendSelectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "titeenipeli.backendLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ASPNETCORE_HTTPS_PORTS
+              value: "8443"
+            - name: ASPNETCORE_HTTP_PORTS
+              value: "8080"
+            - name: ASPNETCORE_Kestrel__Certificates__Default__KeyPath
+              value: /https/tls.key
+            - name: ASPNETCORE_Kestrel__Certificates__Default__Path
+              value: /https/tls.crt
+            - name: OTEL_SERVICE_NAME
+              value: titeenipeli
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://opentelemetry-collector.monitoring.svc:4317
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: grcp
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: service.namespace=titeenit
+            - name: OTEL_PROPAGATOR
+              value: b3multi
+            - name: OTEL_EXPORTER_OTLP_INSECURE 
+              value: "true"
+            - name: Bot__Token
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-secret
+                  key: bot-token
+            - name: JWT__Encryption
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-secret
+                  key: jwt-encryption
+            - name: JWT__Secret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-secret
+                  key: jwt-secert
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-cluster-app
+                  key: dbname
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-cluster-app
+                  key: username
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-cluster-app
+                  key: password
+            - name: DB_ADDRESS
+              value: {{ include "titeenipeli.name" . }}-cluster-rw.{{ .Release.Namespace }}.svc
+            - name: SQLCONNSTR_Database
+              value: Server=$(DB_ADDRESS);Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(DB_PASS);
+          image: titeenipelitacr.azurecr.io/backend:latest
+          resources:
+            limits:
+              memory: 4000Mi
+            requests:
+              cpu: 1500m
+              memory: 2000Mi
+          name: backend
+          volumeMounts:
+            - name: certs
+              mountPath: /https
+              readOnly: true
+            - name: config-volume
+              mountPath: /app/appsettings.json
+              subPath: appsettings.json
+      restartPolicy: Always
+      imagePullPolicy: Always
+      tolerations:
+      - key: "dedicated"
+        value: "node"
+        effect: "NoSchedule"
+      volumes:
+        - name: certs
+          secret:
+            secretName: {{ include "titeenipeli.name" . }}-cert-self-sign
+        - name: config-volume
+          configMap:
+            name: {{ include "titeenipeli.name" . }}-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "titeenipeli.botName" . }}
+  labels:
+    {{- include "titeenipeli.botLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "titeenipeli.botSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "titeenipeli.botLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: Backend__AuthorizationHeaderName
+              value: X-BOT-KEY
+            - name: Backend__BackendUrl
+              value: https://{{ include "titeenipeli.backendName" . }}.{{ .Release.Namespace }}.svc.cluster.local:8443
+            - name: Backend__FrontendUrl
+              value: https://{{ .Values.gameUrl }}
+            - name: Backend__Token
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-secret
+                  key: bot-token
+            - name: Telegram__Token
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "titeenipeli.name" . }}-secret
+                  key: tg-token
+          image: titeenipelitacr.azurecr.io/bot:latest
+          command: ['sh', '-c', 'update-ca-certificates && dotnet Titeenipeli.Bot.dll']
+          volumeMounts:
+            - name: ca-cert-volume
+              mountPath: /usr/local/share/ca-certificates/ca.crt
+              subPath: ca.crt
+          name: bot
+          securityContext:
+            runAsUser: 0
+      restartPolicy: Always
+      volumes:
+      - name: ca-cert-volume
+        secret:
+          secretName: {{ include "titeenipeli.name" . }}-cert-self-sign

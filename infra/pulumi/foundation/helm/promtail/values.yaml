@@ -1,0 +1,3 @@
+config:
+  clients:
+    - url: http://lgtm-distributed-loki-distributor.monitoring.svc:3100/loki/api/v1/push

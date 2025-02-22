@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
@@ -51,13 +52,54 @@ public sealed class PowerController(
         userRepositoryService.Update(user);
         await userRepositoryService.SaveChangesAsync();
 
+        SendPowerupMessage(user, userPower);
+        SendPowerupUpdate(user);
+
+        return Ok();
+    }
+
+    private void SendPowerupUpdate(User user)
+    {
         GrpcMiscGameStateUpdateInput stateUpdate = new()
         {
             User = user,
             PowerUps = [.. user.PowerUps]
         };
-        miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
 
-        return Ok();
+        miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
+    }
+
+
+    private void SendPowerupMessage(User user, PowerUp powerup)
+    {
+        foreach (var sendUser in userRepositoryService.GetAll())
+        {
+            GrpcMiscGameStateUpdateInput stateUpdate = new()
+            {
+                User = sendUser,
+                Message = SelectPowerupMessage(user, powerup)
+            };
+
+            miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
+        }
+    }
+
+    private string SelectPowerupMessage(User user, PowerUp powerup)
+    {
+        string[] messages = new[]
+        {
+            $"Holy moly, {user.Guild.Name} just used {powerup.Name}!",
+            $"{user.Guild.Name} activated {powerup.Name}!",
+            $"{user.Guild.Name} just went Super Saiyan with {powerup.Name}!",
+            $"{user.Guild.Name} just pulled a 360 no-scope with {powerup.Name}!",
+            $"{user.Guild.Name} activated {powerup.Name}!",
+            $"{user.Guild.Name} just unleashed {powerup.Name}!",
+            $"{user.Guild.Name} used {powerup.Name}!",
+            $"{user.Guild.Name} just summoned {powerup.Name}!",
+            $"{user.Guild.Name} deployed {powerup.Name}!",
+            $"{user.Guild.Name} just destroyed the competition with {powerup.Name}!",
+        };
+
+        return Random.Shared.GetItems(messages, 1)[0];
     }
 }

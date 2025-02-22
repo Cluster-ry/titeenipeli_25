@@ -1,6 +1,7 @@
 import { MiscStateUpdateResponse } from "./../generated/grpc/services/StateUpdate";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
+import { useNotificationStore } from "../stores/notificationStore.ts";
 import GrpcClients from "../core/grpc/grpcClients.ts";
 import { useGameStateStore } from "../stores/gameStateStore.ts";
 import { getGameState } from "../api/gameState.ts";
@@ -11,6 +12,7 @@ const stateQueryKey = "gameState";
 
 export const useGameState = () => {
     const queryClient = useQueryClient();
+    const  { triggerNotification } = useNotificationStore();
     const grpcClient = useRef<GrpcClients>(GrpcClients.getGrpcClients());
 
     const setPixelBucket = useGameStateStore((state) => state.setPixelBucket);
@@ -42,8 +44,12 @@ export const useGameState = () => {
                 setPowerUps(powerups);
             }
             
+            if(update.notification !== undefined){
+                triggerNotification(update.notification.message, "neutral")
+            }
+            
         },
-        [setPixelBucket, setScores, setPowerUps],
+        [setPixelBucket, setScores, setPowerUps, triggerNotification],
     );
 
     const onIncrementalUpdate = useCallback(

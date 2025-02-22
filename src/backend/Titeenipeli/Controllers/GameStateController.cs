@@ -4,7 +4,6 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
-using Titeenipeli.Options;
 using Titeenipeli.Services;
 
 namespace Titeenipeli.Controllers;
@@ -13,7 +12,6 @@ namespace Titeenipeli.Controllers;
 [Route("state")]
 [Authorize]
 public class GameStateController(
-        GameOptions gameOptions,
         IUserRepositoryService userRepositoryService,
         IGuildRepositoryService guildRepositoryService,
         IPowerupService powerupService,
