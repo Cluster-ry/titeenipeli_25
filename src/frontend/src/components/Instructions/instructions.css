@@ -13,6 +13,13 @@ section {
 }
 
 .section-text {
+  display: flex;
+  text-align: left;
   padding-left: 2vw;
   padding-right: 2vw;
+}
+
+.entry-text {
+  margin-top: 1vh;
+  margin-bottom: 1vh;
 }

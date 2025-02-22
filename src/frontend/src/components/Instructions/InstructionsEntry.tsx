@@ -1,15 +1,17 @@
+import "./instructions.css"
 import Instructions from "../../models/ComponentData/Instructions";
+
 
 const InstructionsEntry = (instructions: Instructions) => {
   return (
-    <div>
+    <ul>
       <h2>{instructions.header}</h2>
       {
         instructions.instructions.map((entry: string) => (
-          <p>{entry}</p>
+          <li className="entry-text">{entry}</li>
         ))
       }
-    </div>
+    </ul>
   );
 }
 
