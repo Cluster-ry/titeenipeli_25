@@ -33,6 +33,7 @@ const handleEvent = (event: FederatedPointerEvent, { onClickRef, highlight, movi
 const MapTile = PixiComponent("MapTile", {
     create: () => {
         const container = new Container();
+        container.cullable = true;
         return container;
     },
     applyProps: (instance: Graphics, _oldProps: MapTileProps, newProps: MapTileProps) => {
@@ -60,7 +61,7 @@ const MapTile = PixiComponent("MapTile", {
         instance.y = y;
         if (newProps.onClickRef.current) {
             instance.eventMode = "static";
-            instance.on("tap", (event) => handleEvent(event, newProps));
+            instance.on("pointertap", (event) => handleEvent(event, newProps));
         }
     }
 });

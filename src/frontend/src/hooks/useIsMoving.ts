@@ -10,10 +10,11 @@ export const useIsMoving = () => {
     };
 
     const stopMoving = async () => {
-        if (delay.current) return;
         delay.current = new Promise((resolve) => {
             const toggle = () => {
-                isMoving.current = false;
+                if (delay.current) {
+                    isMoving.current = false;
+                };
                 resolve();
             };
             setTimeout(toggle, 300);
