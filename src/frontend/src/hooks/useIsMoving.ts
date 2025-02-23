@@ -2,26 +2,24 @@ import { useRef } from "react";
 
 export const useIsMoving = () => {
     const isMoving = useRef(false);
-    const delay = useRef<Promise<void> | null>(null);
+    const cancelRef = useRef<(() => void) | null>(null);
     
+    const toggle = () => {
+        console.log(false)
+        isMoving.current = false;
+        cancelRef.current = null;
+    };
+    const cancel = (timeoutId: NodeJS.Timeout) => {
+        console.log("cancel")
+        clearTimeout(timeoutId);
+    }
     const startMoving = () => {
-        delay.current = null;
+        console.log(true)
         isMoving.current = true;
+        cancelRef.current && cancelRef.current();
+        const timeout = setTimeout(toggle, 300);
+        cancelRef.current = (() => cancel(timeout));
     };
 
-    const stopMoving = async () => {
-        delay.current = new Promise((resolve) => {
-            const toggle = () => {
-                if (delay.current) {
-                    isMoving.current = false;
-                };
-                resolve();
-            };
-            setTimeout(toggle, 300);
-        });
-        await delay.current;
-        delay.current = null;
-    };
-
-    return { isMoving, startMoving, stopMoving };
+    return { isMoving, startMoving };
 };

@@ -30,7 +30,7 @@ const GameMap: FC = () => {
     const map = useNewMapStore((state) => state.map);
     const { usePowerUp } = usePowerUps();
     const target = usePowerUpStore((state) => state.target);
-    const { isMoving, startMoving, stopMoving } = useIsMoving();
+    const { isMoving, startMoving } = useIsMoving();
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
@@ -107,7 +107,6 @@ const GameMap: FC = () => {
                 height={window.innerHeight}
                 boundingBox={mappedBoundingBox}
                 onMoveStart={startMoving}
-                onMoveEnd={stopMoving}
             >
                 <Container>{pixelElements}</Container>
                 <EffectContainer ref={effectRef} />

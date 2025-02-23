@@ -51,7 +51,6 @@ const PixiComponentViewport = PixiComponent("Viewport", {
         viewport.options.stopPropagation = true;
 
         viewport.addEventListener("moved", props.onMoveStart);
-        viewport.addEventListener("moved-end", props.onMoveEnd);
 
         return viewport;
     },
