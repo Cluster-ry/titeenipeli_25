@@ -15,7 +15,7 @@ export async function withRetry<T>(method: () => Promise<T>, settings: RetrySett
         try {
             return await method();
         } catch (error) {
-            console.log(error);
+            console.debug(error);
         }
         sleep(settings.standardRetryWaitInMilliseconds);
     }
@@ -28,7 +28,7 @@ export async function withRetry<T>(method: () => Promise<T>, settings: RetrySett
         try {
             return await method();
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
         const sleepTime = settings.backoutMethod(attempt);
         sleep(sleepTime);
