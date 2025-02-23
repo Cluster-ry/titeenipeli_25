@@ -1,7 +1,7 @@
 import { MutableRefObject } from "react";
 import { Coordinate } from "./Coordinate";
 
-interface RectangleProps {
+interface MapTileProps {
     x: number;
     y: number;
     width: number;
@@ -16,4 +16,4 @@ interface RectangleProps {
     onClickRef: MutableRefObject<((coordinate: Coordinate, highlight: boolean) => void) | null>;
 }
 
-export default RectangleProps;
+export default MapTileProps;
