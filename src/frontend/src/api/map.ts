@@ -12,7 +12,7 @@ export async function getPixels() {
 export async function postPixels(postPixelsInput: PostPixelsInput): Promise<boolean> {
     try {
         await axios.post<ClientApiOk>(PIXELS_URL, postPixelsInput);
-        console.log("Success.");
+        console.debug("Success.");
         return true;
     } catch (error) {
         console.error(error);

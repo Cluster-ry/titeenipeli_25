@@ -8,7 +8,7 @@ export async function getGameState(): Promise<AxiosResponse<GetGameState> | Clie
     try {
         const response = await axios.get<GetGameState>(PIXELS_URL);
 
-        console.log("Success.");
+        console.debug("Success.");
         return response;
     } catch (error) {
         console.error(error);

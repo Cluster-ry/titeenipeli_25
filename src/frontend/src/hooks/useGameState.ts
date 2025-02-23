@@ -64,7 +64,7 @@ export const useGameState = () => {
     }, []);
 
     useEffect(() => {
-        console.log("Rendering useGameState hook. Success:", isSuccess);
+        console.debug("Rendering useGameState hook. Success:", isSuccess);
         if (isSuccess) {
             const stateResponse = data as AxiosResponse<GetGameState>;
             setState(stateResponse.data);
@@ -72,7 +72,7 @@ export const useGameState = () => {
     }, [isSuccess, setState]);
 
     useEffect(() => {
-        console.log("Registering GRPC client");
+        console.debug("Registering GRPC client");
         grpcClient.current.miscStateUpdateClient.registerOnResponseListener(onIncrementalUpdate);
         return () => {
             grpcClient.current.miscStateUpdateClient.unRegisterOnResponseListener(onIncrementalUpdate);
