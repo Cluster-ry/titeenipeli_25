@@ -42,8 +42,8 @@ const MapTile = PixiComponent("MapTile", {
 
         const bgSprite = new Sprite(getTexture(newProps));
         Object.assign(bgSprite, {
-            width: width + 0.5,
-            height: height + 0.5,
+            width: width + 0.05,
+            height: height + 0.05,
         });
 
         const overlay = new ColorOverlayFilter(getColor(newProps), alpha ?? 0.75);
