@@ -1,8 +1,6 @@
-using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Grpc.ChangeEntities;
-using Titeenipeli.Options;
 using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services.BackgroundServices;
@@ -10,7 +8,6 @@ namespace Titeenipeli.Services.BackgroundServices;
 public interface IUpdateCumulativeScoresService : IAsynchronousTimedBackgroundService;
 
 public class UpdateCumulativeScoresService(
-    GameOptions gameOptions,
     IUserRepositoryService userRepositoryService,
     IGuildRepositoryService guildRepositoryService,
     IMapRepositoryService mapRepositoryService,
@@ -26,12 +23,16 @@ public class UpdateCumulativeScoresService(
 
         Pixel[] pixels = [.. mapRepositoryService.GetAll()];
 
-        foreach (Pixel pixel in pixels)
-            if (pixel.User is { Guild: not null })
+        foreach (var pixel in pixels)
+        {
+            if (pixel.User is null)
             {
-                pixel.User.Guild.CurrentScore++;
-                pixel.User.Guild.CumulativeScore++;
+                continue;
             }
+
+            pixel.User.Guild.CurrentScore++;
+            pixel.User.Guild.CumulativeScore++;
+        }
 
         await guildRepositoryService.SaveChangesAsync();
 
