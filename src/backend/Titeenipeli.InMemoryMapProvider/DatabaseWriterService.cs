@@ -24,6 +24,13 @@ public class DatabaseWriterService : IDisposable
         {
             var scope = _scopeFactory.CreateScope();
             var mapRepositoryService = scope.ServiceProvider.GetRequiredService<IMapRepositoryService>();
+            var userRepositoryService = scope.ServiceProvider.GetRequiredService<IUserRepositoryService>();
+
+            if (pixel.User is not null)
+            {
+                pixel.User = userRepositoryService.GetById(pixel.User.Id);
+            }
+
             mapRepositoryService.Update(pixel);
             await mapRepositoryService.SaveChangesAsync();
         }
