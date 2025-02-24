@@ -28,11 +28,11 @@ public class MapUpdaterTest
         NewPixel[] placedPixels,
         GuildPixel[,] resultingMap)
     {
-        Map map = MapUtils.BuildMapFromOwnerMatrix(initialMap);
+        var map = MapUtils.BuildMapFromOwnerMatrix(initialMap);
 
-        foreach (NewPixel placedPixel in placedPixels)
+        foreach (var (guild, coordinates) in placedPixels)
         {
-            _mapUpdater.PlacePixel(map, placedPixel.coordinates, MapUtils.GuildNameToUser(placedPixel.guild));
+            _mapUpdater.PlacePixel(map, coordinates, MapUtils.GuildNameToUser(guild));
             Console.WriteLine("--------------");
             Console.WriteLine(MapUtils.MapAsNumbers(map));
         }

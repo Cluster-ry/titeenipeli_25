@@ -1,11 +1,14 @@
-using Titeenipeli.Context;
+using Microsoft.Extensions.Hosting.Internal;
+using Moq;
+using Titeenipeli.Common.Database;
+using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services;
+using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Enums;
+using Titeenipeli.Common.Inputs;
 using Titeenipeli.Controllers;
-using Titeenipeli.Inputs;
-using Titeenipeli.Models;
 using Titeenipeli.Options;
-using Titeenipeli.Schema;
 using Titeenipeli.Services;
-using Titeenipeli.Services.RepositoryServices;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
@@ -29,7 +32,7 @@ public class UserControllerIntegrationTest : BaseFixture
 
     private const string ClaimName = "jwt-claim";
 
-    private readonly JwtService _jwtService = new JwtService(new JwtOptions
+    private readonly JwtService _jwtService = new(new JwtOptions
     {
         ClaimName = ClaimName,
         CookieName = "Auth",
@@ -43,11 +46,13 @@ public class UserControllerIntegrationTest : BaseFixture
     [TestCase("9A81A0A0-1502-42B3-862E-50C2FF8B038F", 200, TestName = "Should return success for existing user")]
     public void PostUserTest(string telegramId, int statusCode)
     {
-        UserRepositoryService userRepositoryService = new UserRepositoryService(_dbContext);
+        var botOptions = new BotOptions();
+        var gameOptions = new GameOptions();
+        var userRepositoryService = new UserRepositoryService(_dbContext);
 
         userRepositoryService.Add(new User
         {
-            Guild = null,
+            Guild = new Guild { Name = GuildName.Tietokilta },
             Code = "",
 
             SpawnX = 0,
@@ -56,19 +61,22 @@ public class UserControllerIntegrationTest : BaseFixture
             TelegramId = "9A81A0A0-1502-42B3-862E-50C2FF8B038F",
             FirstName = "",
             LastName = "",
-            Username = "",
-            PhotoUrl = "",
-            AuthDate = "",
-            Hash = ""
+            Username = ""
         });
 
+        userRepositoryService.SaveChanges();
 
-        GuildRepositoryService guildRepositoryService = new GuildRepositoryService(_dbContext);
+
+        var guildRepositoryService = new GuildRepositoryService(_dbContext);
+
+        var mockMapUpdaterService = new Mock<IMapUpdaterService>();
+        mockMapUpdaterService.Setup(service => service.PlaceSpawn(userRepositoryService, It.IsAny<User>()))
+                             .Returns<IUserRepositoryService, User>((_, user) => new Task<User>(() => user));
 
 
-        UserController controller = new UserController(_jwtService,
-            userRepositoryService,
-            guildRepositoryService)
+        var controller = new UserController(new HostingEnvironment(),
+            botOptions,
+            gameOptions, userRepositoryService, guildRepositoryService, _jwtService, mockMapUpdaterService.Object)
         {
             ControllerContext =
             {
@@ -76,96 +84,16 @@ public class UserControllerIntegrationTest : BaseFixture
             }
         };
 
-        PostUsersInput input = new PostUsersInput
+        var input = new PostUsersInput
         {
-            Id = telegramId,
-            AuthDate = "",
-            Hash = "",
+            TelegramId = telegramId,
             Username = "",
             FirstName = "",
-            LastName = "",
-            PhotoUrl = ""
+            LastName = ""
         };
 
-        IStatusCodeActionResult? result = controller.PostUsers(input) as IStatusCodeActionResult;
-        result?.StatusCode.Should().Be(statusCode);
-    }
-
-
-    [TestCase("9A1367B1-1C7C-448E-88DA-DCAD275669FE", "1", 200, TestName = "Should return success with valid guild")]
-    [TestCase("9A1367B1-1C7C-448E-88DA-DCAD275669FE", "2", 400, TestName = "Should return failure with invalid guild")]
-    [TestCase("9A1367B1-1C7C-448E-88DA-DCAD275669FE", null, 400, TestName = "Should return failure without guild")]
-    [TestCase("71E8F4BC-1B08-4DA8-B411-88F4BA1B3238", "1", 400,
-        TestName = "Should return failure if user already has a guild")]
-    public void PutUserTest(string telegramId, string guild, int statusCode)
-    {
-        UserRepositoryService userRepositoryService = new UserRepositoryService(_dbContext);
-        userRepositoryService.Add(new User
-        {
-            Guild = null,
-            Code = "",
-
-            SpawnX = 0,
-            SpawnY = 0,
-
-            TelegramId = "9A1367B1-1C7C-448E-88DA-DCAD275669FE",
-            FirstName = "",
-            LastName = "",
-            Username = "",
-            PhotoUrl = "",
-            AuthDate = "",
-            Hash = ""
-        });
-
-        userRepositoryService.Add(new User
-        {
-            Guild = new Guild { Color = 1 },
-            Code = "",
-
-            SpawnX = 0,
-            SpawnY = 0,
-
-            TelegramId = "71E8F4BC-1B08-4DA8-B411-88F4BA1B3238",
-            FirstName = "",
-            LastName = "",
-            Username = "",
-            PhotoUrl = "",
-            AuthDate = "",
-            Hash = ""
-        });
-
-        GuildRepositoryService guildRepositoryService = new GuildRepositoryService(_dbContext);
-        guildRepositoryService.Add(new Guild { Color = 1 });
-
-        User? user = userRepositoryService.GetByTelegramId(telegramId);
-
-        UserController controller =
-            new UserController(_jwtService,
-                userRepositoryService,
-                guildRepositoryService)
-            {
-                ControllerContext =
-                {
-                    HttpContext = new DefaultHttpContext
-                    {
-                        Items = new Dictionary<object, object>
-                        {
-                            {
-                                ClaimName,
-                                new JwtClaim
-                                {
-                                    CoordinateOffset = new Coordinate { X = 0, Y = 0 },
-                                    GuildId = null,
-                                    Id = user!.Id
-                                }
-                            }
-                        }!
-                    }
-                }
-            };
-
-        PutUsersInput input = new PutUsersInput { Guild = guild };
-        IStatusCodeActionResult? result = controller.PutUsers(input) as IStatusCodeActionResult;
+        // ReSharper disable once SuspiciousTypeConversion.Global
+        var result = controller.PostUsers(input) as IStatusCodeActionResult;
         result?.StatusCode.Should().Be(statusCode);
     }
 }
