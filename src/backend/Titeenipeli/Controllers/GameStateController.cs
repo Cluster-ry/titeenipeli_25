@@ -4,7 +4,6 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
-using Titeenipeli.Options;
 using Titeenipeli.Services;
 
 namespace Titeenipeli.Controllers;
@@ -13,7 +12,6 @@ namespace Titeenipeli.Controllers;
 [Route("state")]
 [Authorize]
 public class GameStateController(
-        GameOptions gameOptions,
         IUserRepositoryService userRepositoryService,
         IGuildRepositoryService guildRepositoryService,
         IPowerupService powerupService,
@@ -49,7 +47,7 @@ public class GameStateController(
             PixelBucket = new PixelBucket
             {
                 Amount = (int)user.PixelBucket,
-                MaxAmount = gameOptions.MaximumPixelBucket,
+                MaxAmount = user.Guild.PixelBucketSize,
                 IncreasePerMinute = user.Guild.RateLimitPerPlayer,
             },
             Scores = scores,

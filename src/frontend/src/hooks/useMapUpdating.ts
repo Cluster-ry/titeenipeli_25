@@ -1,5 +1,10 @@
 import { IncrementalMapUpdateResponse } from "./../generated/grpc/services/StateUpdate";
-import { useNewMapStore } from "../stores/newMapStore.ts";
+import {
+    deleteBackgroundGraphic,
+    setBackgroundGraphic,
+    updateBackgroundGraphic,
+    useNewMapStore,
+} from "../stores/newMapStore.ts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getPixels, postPixels } from "../api/map.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -67,27 +72,22 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
                     y: updatedPixel.spawnRelativeCoordinate?.y ?? 0,
                 };
                 if (pixelType !== PixelType.FogOfWar) {
-                    // Background graphic is provided only ones.
-                    // Use old background graphic during owner updates.
-                    const oldBackgroundGraphic = getPixel(pixelCoordinates)?.backgroundGraphic;
                     const pixel = {
                         type: pixelType,
                         guild: updatedPixel.guild ? Number(updatedPixel.guild) : undefined,
                         owner: updatedPixel.owner?.id,
-                        backgroundGraphic:
-                            updatedPixel.backgroundGraphic.length !== 0
-                                ? updatedPixel.backgroundGraphic
-                                : oldBackgroundGraphic,
                         ...pixelCoordinates,
                     };
                     events.onPixelUpdated && events.onPixelUpdated(pixelCoordinates, pixel);
                     setPixel(pixelCoordinates, pixel);
+                    updateBackgroundGraphic(JSON.stringify(pixelCoordinates), updatedPixel.backgroundGraphic);
                 } else {
                     setPixel(pixelCoordinates, null);
+                    deleteBackgroundGraphic(JSON.stringify(pixelCoordinates));
                 }
             }
         },
-        [setPixel, getPixel],
+        [setPixel, getPixel, events.onPixelUpdated],
     );
     const consumeUpdates = useCallback(() => {
         while (incrementalUpdateBuffer.current.length > 0) {
@@ -105,23 +105,24 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
         results.pixels.map((layer, y) => {
             layer.map((pixel, x) => {
                 if (pixel.type !== PixelType.FogOfWar) {
-                    const decodedPixel = decodePixel(pixel);
-                    pixels.set(JSON.stringify({ x: x - playerX, y: y - playerY }), decodedPixel);
+                    const coordinate = JSON.stringify({ x: x - playerX, y: y - playerY });
+                    const decodedPixel = decodePixel(coordinate, pixel);
+                    pixels.set(coordinate, decodedPixel);
                 }
             });
         });
         return pixels;
     }, []);
 
-    const decodePixel = (encodedPixel: EncodedPixel) => {
+    const decodePixel = (coordinate: string, encodedPixel: EncodedPixel) => {
         const decodedGraphics = encodedPixel.backgroundGraphic
             ? Uint8Array.from(atob(encodedPixel.backgroundGraphic), (c) => c.charCodeAt(0))
             : undefined;
+        setBackgroundGraphic(coordinate, decodedGraphics);
         const decodePixel: Pixel = {
             type: encodedPixel.type,
             guild: encodedPixel.guild,
             owner: encodedPixel.owner,
-            backgroundGraphic: decodedGraphics,
         };
         return decodePixel;
     };
@@ -153,12 +154,12 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
     const onIncrementalUpdate = useCallback(
         (incrementalUpdateResponse: IncrementalMapUpdateResponse) => {
             if (!isSuccess || incrementalUpdateBuffer.current.length > 0) {
-                console.log("Storing update, success:", isSuccess, status);
-                console.log("Update buffer:", incrementalUpdateBuffer);
+                console.debug("Storing update, success:", isSuccess, status);
+                console.debug("Update buffer:", incrementalUpdateBuffer);
                 incrementalUpdateBuffer.current.push(incrementalUpdateResponse);
                 // Technically this else-branch is not fully parallel-safe. Return here if race conditions occur!
             } else {
-                console.log("Consuming separate update:", incrementalUpdateResponse);
+                console.debug("Consuming separate update:", incrementalUpdateResponse);
                 consumeUpdate(incrementalUpdateResponse);
             }
         },
@@ -185,21 +186,21 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
     }, [setMap]);
 
     useEffect(() => {
-        console.log("Rendering useMapUpdating hook. Success:", isSuccess);
+        console.debug("Rendering useMapUpdating hook. Success:", isSuccess);
         if (isSuccess) {
             if (map === null) {
                 const mappedPixels = mapMatrixToMapDictionary(data.data);
-                console.log("Fetched map:", mappedPixels);
+                console.debug("Fetched map:", mappedPixels);
                 setMap(mappedPixels);
                 setPixelsBoundingBox(computeBoundingBox(mappedPixels));
             }
-            console.log("Consuming updates as part of the rendering process");
+            console.debug("Consuming updates as part of the rendering process");
             consumeUpdates();
         }
     }, [map, isSuccess, setMap, setPixelsBoundingBox]);
 
     useEffect(() => {
-        console.log("Registering GRPC client");
+        console.debug("Registering GRPC client");
         grpcClient.current.incrementalMapUpdateClient.registerOnResponseListener(onIncrementalUpdate);
         return () => {
             grpcClient.current.incrementalMapUpdateClient.unRegisterOnResponseListener(onIncrementalUpdate);

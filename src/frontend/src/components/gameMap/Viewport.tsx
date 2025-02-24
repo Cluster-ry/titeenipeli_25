@@ -43,16 +43,14 @@ const PixiComponentViewport = PixiComponent("Viewport", {
                 bounceBox: bounceRectangle,
             })
             .clampZoom({
-                minScale: 0.5,
+                minScale: 0.1,
                 maxScale: 2,
             })
             .moveCenter(centerX, centerY);
         viewport.options.disableOnContextMenu = true;
         viewport.options.stopPropagation = true;
 
-        viewport.addEventListener("pinch-start", props.onMoveStart);
-        viewport.addEventListener("drag-start", props.onMoveStart);
-        viewport.addEventListener("moved-end", props.onMoveEnd);
+        viewport.addEventListener("moved", props.onMoveStart);
 
         return viewport;
     },

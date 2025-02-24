@@ -31,7 +31,7 @@ export const Welcome = () => {
             }
         } catch (error) {
             setSearchParams({});
-            console.log(error);
+            console.error(error);
         }
         return false;
     }, [navigate]);

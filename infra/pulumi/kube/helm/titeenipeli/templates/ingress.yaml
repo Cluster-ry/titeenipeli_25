@@ -1,0 +1,42 @@
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: custom-ca-transport
+spec:
+  serverName: {{ include "titeenipeli.backendName" . }}.{{ .Release.Namespace }}.svc
+  rootCAsSecrets:
+    - titeenipeli-cert-self-sign
+  
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "titeenipeli.name" . }}-ingress
+  labels: {{- include "titeenipeli.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+  - websecure
+  routes:
+  - kind: Rule
+    match: Host(`{{ .Values.gameUrl }}`)
+    services:
+    - name: {{ include "titeenipeli.frontendName" . }}
+      port: 80
+      scheme: http
+
+  - kind: Rule
+    match: Host(`{{ .Values.gameUrl }}`) && PathPrefix(`/api`)
+    services:
+    - name: {{ include "titeenipeli.backendName" . }}
+      port: 8443
+      scheme: https
+      serversTransport: "custom-ca-transport"
+
+  - kind: Rule
+    match: Host(`{{ .Values.gameUrl }}`) && PathPrefix(`/Game.StateUpdate`)
+    services:
+    - name: {{ include "titeenipeli.backendName" . }}
+      port: 8443
+      scheme: https
+      serversTransport: "custom-ca-transport"
+  

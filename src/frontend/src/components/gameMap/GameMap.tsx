@@ -1,16 +1,17 @@
-import { FC, useMemo, useRef } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef } from "react";
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
-import ForegroundRectangle from "./ForegroundRectangle.tsx";
 import { pixelColor } from "./Colors.ts";
 import { mapConfig } from "./MapConfig";
-import PixelType from "../../models/enum/PixelType.ts";
-import { useNewMapStore } from "../../stores/newMapStore.ts";
+import { getBackgroundGraphic, useNewMapStore } from "../../stores/newMapStore.ts";
 import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.ts";
-import BackgroundRectangle from "./BackgroundRectangle.tsx";
-import { useInputEventStore } from "../../stores/inputEventStore.ts";
+import { usePowerUpStore } from "../../stores/powerupStore.ts";
+import { useIsMoving } from "../../hooks/useIsMoving.ts";
+import { Coordinate } from "../../models/Coordinate.ts";
+import { usePowerUps } from "../../hooks/usePowerUps.ts";
+import MapTile from "./MapTile.tsx";
 
 /**
  * @component GameMap
@@ -27,10 +28,32 @@ import { useInputEventStore } from "../../stores/inputEventStore.ts";
 const GameMap: FC = () => {
     const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
     const map = useNewMapStore((state) => state.map);
-    const inputEventStore = useInputEventStore();
+    const { usePowerUp } = usePowerUps();
+    const target = usePowerUpStore((state) => state.target);
+    const { isMoving, startMoving } = useIsMoving();
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
+    const onMapClickRef = useRef<((coordinate: Coordinate, targeted: boolean) => void) | null>(null);
+
+    const onMapClick = useCallback((coordinate: Coordinate, targeted: boolean) => {
+        const viewportX = coordinate.x / mapConfig.PixelSize;
+        const viewportY = coordinate.y / mapConfig.PixelSize;
+        const viewportCoordinate = { x: viewportX, y: viewportY }
+        const powerUpClick = usePowerUp(viewportCoordinate, targeted);
+        if (powerUpClick) return;
+        conquer(viewportCoordinate);
+    }, [usePowerUp, conquer])
+
+    /**
+     * onMapClick needs to be passed as a reference to the canvas elements in order to
+     * avoid unnecessary renders caused by the changing function dependencies.
+     * Without this, we will rerender every single element on the map every time any
+     * tile changes, leading to huge performance problems.
+     */
+    useEffect(() => {
+        onMapClickRef.current = onMapClick
+    }, [onMapClick, onMapClickRef]);
 
     const mappedBoundingBox = {
         minY: pixelsBoundingBox.min.y,
@@ -44,62 +67,51 @@ const GameMap: FC = () => {
         if (map == null) return result;
         for (const [coordinate, pixel] of map) {
             const parsedCoordinate = JSON.parse(coordinate);
+            const highlight = parsedCoordinate.x === target?.x || parsedCoordinate.y === target?.y;
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
-            if (pixel && pixel.backgroundGraphic) {
-                result.push(
-                    <BackgroundRectangle
-                        key={`background-${coordinate}-${result.length}-${Date.now()}`}
-                        x={rectangleX}
-                        y={rectangleY}
-                        width={mapConfig.PixelSize}
-                        height={mapConfig.PixelSize}
-                        backgroundGraphic={pixel?.backgroundGraphic}
-                        onClick={() => conquer(parsedCoordinate)}
-                    />,
-                );
-            }
-            if (pixel?.owner || pixel?.guild || pixel?.type == PixelType.MapBorder) {
-                result.push(
-                    <ForegroundRectangle
-                        key={`foreground-${coordinate}-${result.length}-${Date.now()}`}
-                        x={rectangleX}
-                        y={rectangleY}
-                        width={mapConfig.PixelSize}
-                        height={mapConfig.PixelSize}
-                        color={color}
-                    />,
-                );
-            }
+            result.push(
+                <MapTile
+                    key={`map-tile-${coordinate}`}
+                    x={rectangleX}
+                    y={rectangleY}
+                    width={mapConfig.PixelSize}
+                    height={mapConfig.PixelSize}
+                    backgroundGraphic={getBackgroundGraphic(coordinate)}
+                    hue={color?.hue}
+                    saturation={color?.saturation}
+                    lightness={color?.lightness}
+                    alpha={color?.alpha}
+                    highlight={highlight}
+                    moving={isMoving}
+                    onClickRef={onMapClickRef}
+                />,
+            );
         }
         return result;
-    }, [map]);
+    }, [map, target, isMoving, onMapClick]);
 
     if (map === null) {
         return <span>Loading...</span>;
     }
-
     return (
-        <>
-            <Stage
+        <Stage
+            width={window.innerWidth}
+            height={window.innerHeight}
+            options={{ background: 0xffffff, resizeTo: window, antialias: false, premultipliedAlpha: false }}
+            onContextMenu={(e) => e.preventDefault()}
+        >
+            <Viewport
                 width={window.innerWidth}
                 height={window.innerHeight}
-                options={{ background: 0xffffff, resizeTo: window }}
-                onContextMenu={(e) => e.preventDefault()}
+                boundingBox={mappedBoundingBox}
+                onMoveStart={startMoving}
             >
-                <Viewport
-                    width={window.innerWidth}
-                    height={window.innerHeight}
-                    boundingBox={mappedBoundingBox}
-                    onMoveStart={() => inputEventStore.setMoving(true)}
-                    onMoveEnd={() => inputEventStore.setMoving(false)}
-                >
-                    <Container>{pixelElements}</Container>
-                    <EffectContainer ref={effectRef} />
-                </Viewport>
-            </Stage>
-        </>
+                <Container>{pixelElements}</Container>
+                <EffectContainer ref={effectRef} />
+            </Viewport>
+        </Stage>
     );
 };
 

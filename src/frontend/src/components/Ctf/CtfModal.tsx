@@ -38,7 +38,7 @@ const CtfModal = () => {
             const result = await postCtf(ctfToken);
             if ("msg" in result && result.msg === "Request unsuccessful.") {
                 triggerNotification(NOTIFICATION_FAIL, "error");
-                console.log("Request unsuccessful.");
+                console.debug("Request unsuccessful.");
                 return;
             } else if ("data" in result) {
                 triggerNotification(createSuccessNotificationText(result.data), "success");

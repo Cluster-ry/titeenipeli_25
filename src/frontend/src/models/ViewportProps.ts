@@ -6,7 +6,6 @@ interface ViewportProps {
     boundingBox: ViewportBoundingBox;
     children?: React.ReactNode;
     onMoveStart: () => void;
-    onMoveEnd: () => void;
 }
 
 export default ViewportProps;
