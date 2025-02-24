@@ -39,7 +39,7 @@ export const useGameStateStore = create<GameStateStore>((set) => ({
         const state = {
             pixelBucket: { ...newState.pixelBucket },
             scores: newState.scores,
-            powerUps: newState.powerUps
+            powerUps: newState.powerUps,
         };
         set(state);
     },

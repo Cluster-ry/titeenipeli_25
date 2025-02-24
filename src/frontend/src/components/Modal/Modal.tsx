@@ -19,7 +19,7 @@ export const Modal: FC<ModalProps> = ({ title, children, onClose }) => {
     };
     return (
         <div className="modal" onClick={onCloseClick}>
-            <div ref={modalRef} className="modal-content opening" onClick={e => e.stopPropagation()}>
+            <div ref={modalRef} className="modal-content opening" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <button className="close" onClick={onCloseClick}>
                         &times;

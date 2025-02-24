@@ -15,13 +15,12 @@
 }
 
 .closing {
-    animation: animateclose 0.4s ease;  /* Needs to match js animation! */
+    animation: animateclose 0.4s ease; /* Needs to match js animation! */
 }
 
 .modal-content {
     background-color: #fefefe;
     margin: auto;
-    padding: 0;
     border: 1px solid #888;
     width: fit-content;
     box-shadow:
@@ -51,7 +50,7 @@
     }
 }
 
-@-webkit-keyframes animateclose{
+@-webkit-keyframes animateclose {
     from {
         transform: translateY(0px);
         filter: opacity(100%) blur(0px);
@@ -93,5 +92,5 @@
 }
 
 .modal-body {
-    padding: 16px 32px;
+    overflow: hidden;
 }
