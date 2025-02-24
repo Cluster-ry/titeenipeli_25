@@ -19,7 +19,7 @@ public static class DbFiller
         if (!dbContext.Guilds.Any())
         {
             List<Guild> guilds = [];
-            var guildNames = Enum.GetValues(typeof(GuildName)).Cast<GuildName>().ToList();
+            var guildNames = Enum.GetValues<GuildName>().ToList();
             // Skip Nobody.
             guildNames = guildNames.Skip(1).ToList();
             guilds.AddRange(from GuildName name in guildNames
@@ -28,6 +28,7 @@ public static class DbFiller
                                 Name = name,
                                 ActiveCtfFlags = [],
                                 BaseRateLimit = gameOptions.PixelsPerMinutePerGuild,
+                                PixelBucketSize = gameOptions.InitialPixelBucketSize,
                                 FogOfWarDistance = gameOptions.FogOfWarDistance
                             });
 
