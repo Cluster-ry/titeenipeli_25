@@ -1,8 +1,6 @@
 #instructions {
-  background: linear-gradient(0deg, #00000088 30%, #ffffff44 100%);
-  background-color: rgb(0, 0, 0, 0.4);
+  background-color: #333333;
   color: white;
-  
 
   overflow-x: hidden;
   overflow-y: scroll;
@@ -11,12 +9,6 @@
   overflow-x: hidden;
   overflow-y: scroll;
 
-  /* Negative margins to close the white space */
-  
-  margin-top: -1.5vw;
-  margin-bottom: -1.5vw;
-  margin-left: -3vw;
-  margin-right: -3vw;
 }
 
 .section-text {
