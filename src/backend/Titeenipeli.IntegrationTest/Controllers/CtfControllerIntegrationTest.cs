@@ -25,9 +25,9 @@ public class CtfControllerIntegrationTest : BaseFixture
     }
 
     [TearDown]
-    public async Task AfterAll()
+    public void AfterAll()
     {
-        await _dbContext.DisposeAsync();
+        _dbContext.Dispose();
     }
 
     private ApiDbContext _dbContext;
