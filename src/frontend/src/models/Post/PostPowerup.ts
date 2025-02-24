@@ -4,4 +4,4 @@ export interface PostPowerup {
     id: number;
     direction: number;
     location: Coordinate;
-};
+}

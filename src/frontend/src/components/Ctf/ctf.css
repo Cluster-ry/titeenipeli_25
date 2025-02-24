@@ -24,3 +24,12 @@
     margin-bottom: 8px;
     width: 100%;
 }
+
+.instructions {
+    border-top: 3px solid black;
+    padding-top: 2.5%;
+}
+
+.ctf-input-wrapper {
+    padding: 16px 32px;
+}

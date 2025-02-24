@@ -1,1 +1,1 @@
-export { SpecialEffect } from './SpecialEffect';
+export { SpecialEffect } from "./SpecialEffect";

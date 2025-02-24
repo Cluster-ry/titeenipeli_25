@@ -15,6 +15,8 @@ export const setRandomInterval = (intervalFunction: () => void, minDelay: number
     runInterval();
 
     return {
-        clear() { clearTimeout(timeout) },
+        clear() {
+            clearTimeout(timeout);
+        },
     };
 };

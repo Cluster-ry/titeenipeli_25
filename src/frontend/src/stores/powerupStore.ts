@@ -13,19 +13,19 @@ export const usePowerUpStore = create<PowerUpStore>((set) => ({
     powerUp: null,
     target: null,
     setPowerUp: (value: number | null) => {
-        set(state => {
+        set((state) => {
             const cancel = value === state.powerUp;
             return { ...state, powerUp: cancel ? null : value, target: cancel ? null : state.target  };
         })
     },
     setTarget: (value: Coordinate) => {
-        set(state => {
-            return { ...state, target: value  };
-        })
+        set((state) => {
+            return { ...state, target: value };
+        });
     },
     resetPowerUp: () => {
-        set(state => {
-            return { ...state, powerUp: null, target: null  };
-        })
+        set((state) => {
+            return { ...state, powerUp: null, target: null };
+        });
     },
 }));

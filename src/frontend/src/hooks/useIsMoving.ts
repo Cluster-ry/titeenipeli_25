@@ -11,12 +11,13 @@ export const useIsMoving = () => {
     const cancel = (timeoutId: NodeJS.Timeout) => {
         clearTimeout(timeoutId);
     }
+
     const startMoving = () => {
         isMoving.current = true;
         cancelRef.current && cancelRef.current();
         const timeout = setTimeout(toggle, 300);
         cancelRef.current = (() => cancel(timeout));
     };
-
+  
     return { isMoving, startMoving };
 };

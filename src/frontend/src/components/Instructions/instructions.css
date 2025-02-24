@@ -1,0 +1,36 @@
+#instructions {
+    background-color: #333333;
+    color: white;
+
+    overflow-x: hidden;
+    overflow-y: scroll;
+    padding: 0;
+
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.section-text {
+    display: flex;
+    flex-flow: column;
+    text-align: left;
+    padding-left: 2vw;
+    padding-right: 2vw;
+    max-height: 60vh;
+    max-width: 60vw;
+}
+
+.entry-text {
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+}
+
+@media only screen and (max-width: 600px) {
+    #instructions {
+        max-width: 80vw;
+        max-height: 80vh;
+    }
+    .section-text {
+        font-size: 12px;
+    }
+}
