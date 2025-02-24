@@ -15,4 +15,3 @@ export async function postCtf(postCtfInput: PostCtfInput): Promise<AxiosResponse
         return { msg: "Request unsuccessful." } as ClientApiError;
     }
 }
-

@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
-import './style.css';
-import defaultEffect from '../../../../assets/special_effect.png';
+import "./style.css";
+import defaultEffect from "../../../../assets/special_effect.png";
 import { PowerUp } from "../../../../models/Get/GetGameState";
 
 type Props = {
@@ -8,9 +8,9 @@ type Props = {
     onClick: (effectId: number) => void;
 };
 
-const SpecialEffectIcon: {[key: number]: string} = {
+const SpecialEffectIcon: { [key: number]: string } = {
     1: defaultEffect,
-}
+};
 
 const getEffectIcon = (index: number) => {
     return SpecialEffectIcon[index] ?? SpecialEffectIcon[1];

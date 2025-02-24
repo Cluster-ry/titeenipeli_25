@@ -17,7 +17,7 @@ export const useGameState = () => {
     const setScores = useGameStateStore((state) => state.setScores);
     const setState = useGameStateStore((state) => state.setMiscGameState);
     const setPowerUps = useGameStateStore((state) => state.setPowerUps);
-    
+
     const { data, isSuccess, status } = useQuery({
         queryKey: [stateQueryKey],
         queryFn: getGameState,
@@ -36,12 +36,16 @@ export const useGameState = () => {
                 const scores = update.scores.map((score) => ({ guild: Number(score.guild), amount: score.amount }));
                 setScores(scores);
             }
-            
-            if(update.powerupUpdate) {
-                const powerups = update.powerUps.map((powerup) => ({ powerUpId: powerup.powerUpId,  name: powerup.name, description : powerup.description, directed: powerup.directed }));
+
+            if (update.powerupUpdate) {
+                const powerups = update.powerUps.map((powerup) => ({
+                    powerUpId: powerup.powerUpId,
+                    name: powerup.name,
+                    description: powerup.description,
+                    directed: powerup.directed,
+                }));
                 setPowerUps(powerups);
             }
-            
         },
         [setPixelBucket, setScores, setPowerUps],
     );

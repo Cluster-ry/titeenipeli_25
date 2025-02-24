@@ -9,8 +9,8 @@ export const activatePowerUp = async (powerup: PostPowerup) => {
         await axios.post<ClientApiOk>(`${POWERUPS_URL}/activate`, powerup);
         console.log("Success.");
         return true;
-    } catch(err) {
-        console.error(`Failed to activate powerup ${powerup.id}\n${err}`)
+    } catch (err) {
+        console.error(`Failed to activate powerup ${powerup.id}\n${err}`);
         return false;
     }
 };

@@ -15,7 +15,7 @@
 }
 
 .closing {
-    animation: animateclose 0.4s ease;  /* Needs to match js animation! */
+    animation: animateclose 0.4s ease; /* Needs to match js animation! */
 }
 
 .modal-content {
@@ -50,7 +50,7 @@
     }
 }
 
-@-webkit-keyframes animateclose{
+@-webkit-keyframes animateclose {
     from {
         transform: translateY(0px);
         filter: opacity(100%) blur(0px);
@@ -92,5 +92,5 @@
 }
 
 .modal-body {
-  overflow: hidden;
+    overflow: hidden;
 }

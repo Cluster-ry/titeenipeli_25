@@ -3,7 +3,7 @@ import { useRef } from "react";
 export const useIsMoving = () => {
     const isMoving = useRef(false);
     const delay = useRef<Promise<void> | null>(null);
-    
+
     const startMoving = () => {
         delay.current = null;
         isMoving.current = true;
