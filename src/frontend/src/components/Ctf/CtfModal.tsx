@@ -53,22 +53,24 @@ const CtfModal = () => {
 
   return (
     <Modal title="CTF input" onClose={() => setCtfModelOpenState(false)}>
-      <input
-        className="ctf-input"
-        type="text"
-        placeholder="Enter Token"
-        value={token}
-        onChange={handleTokenChange}
-        style={{ pointerEvents: "all" }}
-      />
-      <button className="ctf-button" onClick={handleSubmit}>
-        {CTF_DISCLAIMER}
-      </button>
-
-      <div className="instructions">
-        <button className="instructions-button" onClick={() => setInstructionsOn(true)}>
-          Check instructions
+      <div className="ctf-input-wrapper">
+        <input
+          className="ctf-input"
+          type="text"
+          placeholder="Enter Token"
+          value={token}
+          onChange={handleTokenChange}
+          style={{ pointerEvents: "all" }}
+        />
+        <button className="ctf-button" onClick={handleSubmit}>
+          {CTF_DISCLAIMER}
         </button>
+
+        <div className="instructions">
+          <button className="instructions-button" onClick={() => setInstructionsOn(true)}>
+            Check instructions
+          </button>
+        </div>
       </div>
     </Modal>
   );

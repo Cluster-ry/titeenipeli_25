@@ -21,7 +21,6 @@
 .modal-content {
     background-color: #fefefe;
     margin: auto;
-    padding: 0;
     border: 1px solid #888;
     width: fit-content;
     box-shadow:
@@ -94,5 +93,4 @@
 
 .modal-body {
   overflow: hidden;
-    padding: 16px 32px;
 }
