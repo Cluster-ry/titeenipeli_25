@@ -15,9 +15,8 @@ export const usePowerUpStore = create<PowerUpStore>((set) => ({
     setPowerUp: (value: number | null) => {
         set((state) => {
             const cancel = value === state.powerUp;
-            console.log(value);
-            return { ...state, powerUp: cancel ? null : value, target: cancel ? null : state.target };
-        });
+            return { ...state, powerUp: cancel ? null : value, target: cancel ? null : state.target  };
+        })
     },
     setTarget: (value: Coordinate) => {
         set((state) => {

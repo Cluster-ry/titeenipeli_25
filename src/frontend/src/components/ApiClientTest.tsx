@@ -36,7 +36,7 @@ export function ApiTestClient() {
     const getGameState = async (event: { preventDefault: () => void }) => {
         event.preventDefault();
         const results = (await api.gameState.getGameState()) as AxiosResponse<GetGameState>;
-        console.log(results.data);
+        console.debug(results.data);
     };
 
     return (

@@ -16,10 +16,10 @@ const Fov = () => {
 
     // For testing whether the boundaries work
     useEffect(() => {
-        console.log(upperX);
-        console.log(upperY);
-        console.log(lowerX);
-        console.log(lowerY);
+        console.debug(upperX);
+        console.debug(upperY);
+        console.debug(lowerX);
+        console.debug(lowerY);
     }, [upperX, upperY, lowerX, lowerY]);
 
     const updatePlayerBoundaries = () => {

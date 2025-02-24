@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo, useRef } from "react";
+import { FC, useCallback, useEffect, useMemo, useRef } from "react";
 import { Container, Stage } from "@pixi/react";
 import Viewport from "./Viewport";
 import { pixelColor } from "./Colors.ts";
@@ -7,11 +7,11 @@ import { getBackgroundGraphic, useNewMapStore } from "../../stores/newMapStore.t
 import { useUser } from "../../hooks/useUser.ts";
 import { EffectContainer, EffectContainerHandle } from "./particleEffects";
 import { useOptimisticConquer } from "../../hooks/useOptimisticConquer.ts";
-import { Coordinate } from "../../models/Coordinate.ts";
-import { usePowerUps } from "../../hooks/usePowerUps.ts";
 import { usePowerUpStore } from "../../stores/powerupStore.ts";
 import { useIsMoving } from "../../hooks/useIsMoving.ts";
-import Rectangle from "./Rectangle.tsx";
+import { Coordinate } from "../../models/Coordinate.ts";
+import { usePowerUps } from "../../hooks/usePowerUps.ts";
+import MapTile from "./MapTile.tsx";
 
 /**
  * @component GameMap
@@ -30,19 +30,30 @@ const GameMap: FC = () => {
     const map = useNewMapStore((state) => state.map);
     const { usePowerUp } = usePowerUps();
     const target = usePowerUpStore((state) => state.target);
-    const { isMoving, startMoving, stopMoving } = useIsMoving();
+    const { isMoving, startMoving } = useIsMoving();
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
+    const onMapClickRef = useRef<((coordinate: Coordinate, targeted: boolean) => void) | null>(null);
 
-    const handleMapClick = useCallback(
-        (coordinate: Coordinate, targeted: boolean) => {
-            const powerUpClick = usePowerUp(coordinate, targeted);
-            if (powerUpClick) return;
-            conquer(coordinate);
-        },
-        [usePowerUp, conquer],
-    );
+    const onMapClick = useCallback((coordinate: Coordinate, targeted: boolean) => {
+        const viewportX = coordinate.x / mapConfig.PixelSize;
+        const viewportY = coordinate.y / mapConfig.PixelSize;
+        const viewportCoordinate = { x: viewportX, y: viewportY }
+        const powerUpClick = usePowerUp(viewportCoordinate, targeted);
+        if (powerUpClick) return;
+        conquer(viewportCoordinate);
+    }, [usePowerUp, conquer])
+
+    /**
+     * onMapClick needs to be passed as a reference to the canvas elements in order to
+     * avoid unnecessary renders caused by the changing function dependencies.
+     * Without this, we will rerender every single element on the map every time any
+     * tile changes, leading to huge performance problems.
+     */
+    useEffect(() => {
+        onMapClickRef.current = onMapClick
+    }, [onMapClick, onMapClickRef]);
 
     const mappedBoundingBox = {
         minY: pixelsBoundingBox.min.y,
@@ -61,32 +72,34 @@ const GameMap: FC = () => {
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
             result.push(
-                <Rectangle
-                    key={`rectangle-${coordinate}-${result.length}-${Date.now()}`}
+                <MapTile
+                    key={`map-tile-${coordinate}`}
                     x={rectangleX}
                     y={rectangleY}
                     width={mapConfig.PixelSize}
                     height={mapConfig.PixelSize}
                     backgroundGraphic={getBackgroundGraphic(coordinate)}
-                    color={color}
+                    hue={color?.hue}
+                    saturation={color?.saturation}
+                    lightness={color?.lightness}
+                    alpha={color?.alpha}
                     highlight={highlight}
                     moving={isMoving}
-                    onClick={() => handleMapClick(parsedCoordinate, highlight)}
+                    onClickRef={onMapClickRef}
                 />,
             );
         }
         return result;
-    }, [map, target]);
+    }, [map, target, isMoving, onMapClick]);
 
     if (map === null) {
         return <span>Loading...</span>;
     }
-    //console.log(isMoving);
     return (
         <Stage
             width={window.innerWidth}
             height={window.innerHeight}
-            options={{ background: 0xffffff, resizeTo: window }}
+            options={{ background: 0xffffff, resizeTo: window, antialias: false, premultipliedAlpha: false }}
             onContextMenu={(e) => e.preventDefault()}
         >
             <Viewport
@@ -94,7 +107,6 @@ const GameMap: FC = () => {
                 height={window.innerHeight}
                 boundingBox={mappedBoundingBox}
                 onMoveStart={startMoving}
-                onMoveEnd={stopMoving}
             >
                 <Container>{pixelElements}</Container>
                 <EffectContainer ref={effectRef} />

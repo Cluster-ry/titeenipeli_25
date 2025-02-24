@@ -1,7 +1,6 @@
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Grpc.ChangeEntities;
-using Titeenipeli.Options;
 using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services.BackgroundServices;
@@ -9,7 +8,6 @@ namespace Titeenipeli.Services.BackgroundServices;
 public interface IUpdatePixelBucketsService : IAsynchronousTimedBackgroundService;
 
 public class UpdatePixelBucketsService(
-        GameOptions gameOptions,
         IUserRepositoryService userRepositoryService,
         IGuildRepositoryService guildRepositoryService,
         IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService
@@ -42,13 +40,13 @@ public class UpdatePixelBucketsService(
         foreach (var user in guildUsers)
         {
             float newBucket = user.PixelBucket + guildPerPlayerIncrease;
-            if (newBucket < gameOptions.MaximumPixelBucket)
+            if (newBucket < guild.PixelBucketSize)
             {
                 user.PixelBucket = newBucket;
             }
             else
             {
-                user.PixelBucket = gameOptions.MaximumPixelBucket;
+                user.PixelBucket = guild.PixelBucketSize;
             }
             userRepositoryService.Update(user);
             await userRepositoryService.SaveChangesAsync();
@@ -56,7 +54,7 @@ public class UpdatePixelBucketsService(
             GrpcMiscGameStateUpdateInput stateUpdate = new()
             {
                 User = user,
-                MaximumPixelBucket = gameOptions.MaximumPixelBucket
+                MaximumPixelBucket = user.Guild.PixelBucketSize,
             };
             miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
         }

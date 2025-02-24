@@ -37,6 +37,6 @@ export const useNotificationStore = create<NotificationStore>()((set) => ({
                     type: "",
                     text: "",
                 }));
-            }, 5000);
+            }, 10000);
     },
 }));

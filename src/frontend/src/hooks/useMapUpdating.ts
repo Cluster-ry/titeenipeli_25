@@ -87,7 +87,7 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
                 }
             }
         },
-        [setPixel, getPixel],
+        [setPixel, getPixel, events.onPixelUpdated],
     );
     const consumeUpdates = useCallback(() => {
         while (incrementalUpdateBuffer.current.length > 0) {
@@ -154,12 +154,12 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
     const onIncrementalUpdate = useCallback(
         (incrementalUpdateResponse: IncrementalMapUpdateResponse) => {
             if (!isSuccess || incrementalUpdateBuffer.current.length > 0) {
-                console.log("Storing update, success:", isSuccess, status);
-                console.log("Update buffer:", incrementalUpdateBuffer);
+                console.debug("Storing update, success:", isSuccess, status);
+                console.debug("Update buffer:", incrementalUpdateBuffer);
                 incrementalUpdateBuffer.current.push(incrementalUpdateResponse);
                 // Technically this else-branch is not fully parallel-safe. Return here if race conditions occur!
             } else {
-                console.log("Consuming separate update:", incrementalUpdateResponse);
+                console.debug("Consuming separate update:", incrementalUpdateResponse);
                 consumeUpdate(incrementalUpdateResponse);
             }
         },
@@ -186,21 +186,21 @@ export const useMapUpdating = ({ optimisticConquer, onConquerSettled, events = {
     }, [setMap]);
 
     useEffect(() => {
-        console.log("Rendering useMapUpdating hook. Success:", isSuccess);
+        console.debug("Rendering useMapUpdating hook. Success:", isSuccess);
         if (isSuccess) {
             if (map === null) {
                 const mappedPixels = mapMatrixToMapDictionary(data.data);
-                console.log("Fetched map:", mappedPixels);
+                console.debug("Fetched map:", mappedPixels);
                 setMap(mappedPixels);
                 setPixelsBoundingBox(computeBoundingBox(mappedPixels));
             }
-            console.log("Consuming updates as part of the rendering process");
+            console.debug("Consuming updates as part of the rendering process");
             consumeUpdates();
         }
     }, [map, isSuccess, setMap, setPixelsBoundingBox]);
 
     useEffect(() => {
-        console.log("Registering GRPC client");
+        console.debug("Registering GRPC client");
         grpcClient.current.incrementalMapUpdateClient.registerOnResponseListener(onIncrementalUpdate);
         return () => {
             grpcClient.current.incrementalMapUpdateClient.unRegisterOnResponseListener(onIncrementalUpdate);

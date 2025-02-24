@@ -1,7 +1,7 @@
 /* Top Overlay */
 
 .top-gradient {
-    background: linear-gradient(rgb(255 255 255) 0%, rgb(241 241 241 / 0%) 30%);
+    background: linear-gradient(rgba(255, 255, 255, 0.5) 0%, rgb(241 241 241 / 0%) 20%);
 }
 
 .top-overlay {
@@ -108,7 +108,7 @@
 /* Bottom Overlay */
 
 .bottom-gradient {
-    background: linear-gradient(0deg, rgb(255, 255, 255) 0%, rgba(1, 1, 1, 0) 70%);
+    background: linear-gradient(0deg, rgb(255, 255, 255, 0.5) 0%, rgba(1, 1, 1, 0) 50%);
 }
 
 .bottom-overlay {

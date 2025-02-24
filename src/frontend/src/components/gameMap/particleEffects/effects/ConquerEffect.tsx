@@ -7,7 +7,7 @@ import bucket from "../../../../assets/bucket.png";
 
 const sprite = bucket;
 const duration = 3;
-const count = 10;
+const count = 7;
 
 const startEffect = (coordinate: Coordinate): EffectItem => ({
     speed: (40 + Math.random() * 2) * 0.2,
