@@ -13,6 +13,7 @@
 
 .section-text {
   display: flex;
+  flex-flow: column;
   text-align: left;
   padding-left: 2vw;
   padding-right: 2vw;
