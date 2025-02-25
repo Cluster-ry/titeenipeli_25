@@ -17,8 +17,8 @@ public class BackgroundGraphicsService : IBackgroundGraphicsService
         var bitmap = SKBitmap.FromImage(image);
         byte[]? allBytes = bitmap.Bytes;
 
-        _splitBitmapWidth = bitmap.Width / 32;
-        _splitBitmapHeight = bitmap.Height / 32;
+        _splitBitmapWidth = bitmap.Width / ImageChunkSize;
+        _splitBitmapHeight = bitmap.Height / ImageChunkSize;
         _splitBitmaps = new byte[_splitBitmapWidth, _splitBitmapHeight][];
         int bytesPerPixel = bitmap.BytesPerPixel;
         int rowSize = bitmap.Width * bytesPerPixel;
