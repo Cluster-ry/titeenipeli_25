@@ -1,5 +1,5 @@
 import { PixiComponent } from "@pixi/react";
-import { Container, FederatedPointerEvent, Graphics, Sprite, Texture } from "pixi.js";
+import { FederatedPointerEvent, Sprite, Texture } from "pixi.js";
 import MapTileProps from "../../models/MapTileProps";
 import { ColorOverlayFilter, GlowFilter } from "pixi-filters";
 import colourPicker from "../../utils/ColourPicker";
@@ -24,23 +24,19 @@ const handleEvent = (event: FederatedPointerEvent, { onClickRef, highlight, movi
 
 const MapTile = PixiComponent("MapTile", {
     create: () => {
-        const container = new Container();
-        container.cullable = true;
-        return container;
+        const mapTile = new Sprite();
+        mapTile.cullable = true;
+        return mapTile;
     },
-    applyProps: (instance: Graphics, _oldProps: MapTileProps, newProps: MapTileProps) => {
+    applyProps: (instance: Sprite, _oldProps: MapTileProps, newProps: MapTileProps) => {
         const { x, y, width, height, alpha, highlight, hue, saturation, lightness } = newProps;
-        instance.removeChildren()
 
-        const bgSprite = new Sprite(getTexture(newProps));
-        Object.assign(bgSprite, {
-            width: width + 0.05,
-            height: height + 0.05,
-        });
+        instance.texture = getTexture(newProps);
+        instance.width = width + 0.05;
+        instance.height = height + 0.05;
 
         const overlay: ColorOverlayFilter = colourPicker.getColourOverlay(hue, saturation, lightness, alpha);
 
-        instance.addChild(bgSprite);
         instance.filters = [overlay];
 
         if (highlight) {
