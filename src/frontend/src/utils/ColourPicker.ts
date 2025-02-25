@@ -9,7 +9,7 @@ interface IColourPicker {
 class ColourPicker implements IColourPicker {
     constructor(){}
     colours = new Map();
-    getColourOverlay = (hue: number = 0, saturation: number = 0, lightness: number = 0, alpha: number = 0.75) => {
+    getColourOverlay = (hue: number = 0, saturation: number = 0, lightness: number = 0, alpha: number = 0.5) => {
         const colourId: string = `${hue}-${saturation}-${lightness}-${alpha}`;
         if (this.colours.has(colourId)) return this.colours.get(colourId);
         const colourValue: Color = new Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
