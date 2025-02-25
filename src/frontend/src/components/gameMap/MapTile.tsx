@@ -1,18 +1,10 @@
 import { PixiComponent } from "@pixi/react";
-import { Color, Container, FederatedPointerEvent, Graphics, Sprite, Texture } from "pixi.js";
+import { Container, FederatedPointerEvent, Graphics, Sprite, Texture } from "pixi.js";
 import MapTileProps from "../../models/MapTileProps";
 import { ColorOverlayFilter, GlowFilter } from "pixi-filters";
+import colourPicker from "../../utils/ColourPicker";
 
 const highlightFilter = new GlowFilter({ distance: 15, outerStrength: 1, innerStrength: 1, color: 0xfde90d });
-
-const getColor = ({hue, saturation, lightness}: MapTileProps) => {
-    if (hue !== undefined && saturation !== undefined && lightness !== undefined) {
-        const pixiColor = new Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
-        return [pixiColor.red, pixiColor.green, pixiColor.blue];
-    } else {
-        return [0, 0, 0];
-    }
-};
 
 const getTexture = ({ backgroundGraphic, width, height }: MapTileProps) => {
     if (backgroundGraphic !== undefined) {
@@ -37,7 +29,7 @@ const MapTile = PixiComponent("MapTile", {
         return container;
     },
     applyProps: (instance: Graphics, _oldProps: MapTileProps, newProps: MapTileProps) => {
-        const { x, y, width, height, alpha, highlight } = newProps;
+        const { x, y, width, height, alpha, highlight, hue, saturation, lightness } = newProps;
         instance.removeChildren()
 
         const bgSprite = new Sprite(getTexture(newProps));
@@ -46,7 +38,7 @@ const MapTile = PixiComponent("MapTile", {
             height: height + 0.05,
         });
 
-        const overlay = new ColorOverlayFilter(getColor(newProps), alpha ?? 0.75);
+        const overlay: ColorOverlayFilter = colourPicker.getColourOverlay(hue, saturation, lightness, alpha);
 
         instance.addChild(bgSprite);
         instance.filters = [overlay];
