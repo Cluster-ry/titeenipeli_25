@@ -3,8 +3,8 @@ import { SpecialEffect } from "./specialEffect";
 import { useGameStateStore } from "../../../stores/gameStateStore";
 import { usePowerUpStore } from "../../../stores/powerupStore";
 
-import helpIcon from "../../../assets/help.png"
 import BottomOverlayRight from "./BottomOverlayRight";
+import BottomOverlayMiddle from "./BottomOverlayMiddle";
 
 const BottomOverlay = () => {
     const specialEffects = useGameStateStore((state) => state.powerUps);
@@ -21,6 +21,8 @@ const BottomOverlay = () => {
                     onClick={setPowerUp}
                 />
             ))}
+          <div className="bottom-overlay__left"></div>
+          <BottomOverlayMiddle />
           <BottomOverlayRight />  
       </div>
     );
