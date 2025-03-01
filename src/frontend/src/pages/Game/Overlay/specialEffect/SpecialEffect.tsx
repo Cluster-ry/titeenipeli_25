@@ -2,8 +2,11 @@ import { FC, useMemo } from "react";
 import "./style.css";
 import defaultEffect from "../../../../assets/special_effect.png";
 import { PowerUp } from "../../../../models/Get/GetGameState";
-import titeeniKirvesEffect from "../../../../assets/powerup-axe.png";
-import mFilesEffect from "../../../../assets/powerup-mfiles.png";
+//TODO nää vois olla massa import ja filenamella variable
+import titeeniKirvesEffect from "../../../../assets/powerups/powerup-axe.png";
+import ruusuEffect2 from "../../../../assets/powerups/powerup-ruusu-2.png";
+import isoLEffect from "../../../../assets/powerups/powerup-L.png";
+import mFilesEffect from "../../../../assets/powerups/powerup-mfiles.png";
 
 type Props = {
     selected: number | null;
@@ -11,11 +14,11 @@ type Props = {
 };
 
 const SpecialEffectIcon: { [key: number]: string } = {
-    99: defaultEffect, //TODO default should be what?
+    1: defaultEffect, 
     0: titeeniKirvesEffect,
-    1: mFilesEffect, 
-    //2: isoLEffect, //TODO ico missing
-    //3: ruusuEffect, //TODO ico missing
+    2: mFilesEffect, 
+    3: isoLEffect, 
+    4: ruusuEffect2, 
     //4, binaryEffect //TODO ico missing
     //5: glitchEffect, //TOODO ico missing
 };
