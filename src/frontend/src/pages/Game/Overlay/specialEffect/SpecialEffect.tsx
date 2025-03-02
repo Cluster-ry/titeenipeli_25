@@ -7,6 +7,8 @@ import titeeniKirvesEffect from "../../../../assets/powerups/powerup-axe.png";
 import ruusuEffect2 from "../../../../assets/powerups/powerup-ruusu-2.png";
 import isoLEffect from "../../../../assets/powerups/powerup-L.png";
 import mFilesEffect from "../../../../assets/powerups/powerup-mfiles.png";
+import siikaEffect from "../../../../assets/powerups/powerup-siika.png";
+import binaryEffect from "../../../../assets/powerups/powerup-binary.png";
 
 type Props = {
     selected: number | null;
@@ -19,8 +21,8 @@ const SpecialEffectIcon: { [key: number]: string } = {
     2: mFilesEffect, 
     3: isoLEffect, 
     4: ruusuEffect2, 
-    //4, binaryEffect //TODO ico missing
-    //5: glitchEffect, //TOODO ico missing
+    5: binaryEffect,
+    6: siikaEffect,
 };
 
 const getEffectIcon = (index: number) => {
