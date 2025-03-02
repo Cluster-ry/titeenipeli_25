@@ -19,7 +19,7 @@ public sealed class PowerupService(GameOptions gameOptions) : IPowerupService
         PowerUps.Titeenikirves => new TiteenikirvesEffect(gameOptions.Height, gameOptions.Width),
         PowerUps.MFiles => new MFilesEffect(),
         PowerUps.IsoL => new IsoLEffect(),
-        PowerUps.Glitch => new GlitchEffect(),
+        //PowerUps.Glitch => new GlitchEffect(),
         PowerUps.Binary => new BinaryEffect(),
         PowerUps.Siika => new SiikaEffect(),
         PowerUps.Ruusu => new RuusuEffect(),
