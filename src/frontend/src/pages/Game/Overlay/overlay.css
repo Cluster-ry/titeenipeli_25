@@ -116,7 +116,7 @@
     overflow-x: auto;
     transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.5s;
     display: flex;
-    justify-content: center;
+    justify-content: space-evenly;
     align-items: flex-end;
     font-size: small;
 }
@@ -145,7 +145,6 @@
     justify-content: center;
   align-items: end;
     gap: 8px;
-    flex-direction: column;
     position: relative;
     height: 80%;
     font-size: large;
@@ -153,7 +152,7 @@
 
 .bottom-overlay__middle__powerup {
     position: absolute;
-  bottom: 0;
+    bottom: 10px;
     margin: auto;
     max-height: 115%;
     max-width: 100%;
@@ -179,6 +178,8 @@
   height: 100%;
   z-index: 1;
   pointer-events: none;
+
+  /*background-image: url("../../../assets/sprites/background.png");*/
 }
 
 /* CTF */
