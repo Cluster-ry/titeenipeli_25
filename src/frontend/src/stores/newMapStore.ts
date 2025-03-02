@@ -13,6 +13,7 @@ export interface NewMapStore {
     setMap: (map: Map<string, Pixel> | null) => void;
     pixelsBoundingBox: { min: Coordinate; max: Coordinate };
     setPixelsBoundingBox: ({ min, max }: { min: Coordinate; max: Coordinate }) => void;
+    updatePixelsBoundingBox: (bounds: Coordinate[]) => void;
 }
 
 export const useNewMapStore = create<NewMapStore>((set) => ({
@@ -47,8 +48,35 @@ export const useNewMapStore = create<NewMapStore>((set) => ({
         set({ map });
     },
     pixelsBoundingBox: { min: { x: 0, y: 0 }, max: { x: 0, y: 0 } },
-    setPixelsBoundingBox: ({ min, max }: { min: Coordinate; max: Coordinate }) =>
-        set({ pixelsBoundingBox: { min, max } }),
+    setPixelsBoundingBox: (props: { min: Coordinate; max: Coordinate }) =>{
+        set(() => ({ pixelsBoundingBox: props }))},
+    updatePixelsBoundingBox: (bounds: Coordinate[]) => {
+        set(state => {
+            const { min, max } = state.pixelsBoundingBox;
+            let minX = min.x;
+            let minY = min.y;
+            let maxX = max.x;
+            let maxY = max.y;
+            for (const { x, y } of bounds) {
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+                if (x > maxX) maxX = x;
+                if (y > maxY) maxY = y;
+            }
+            return {
+                pixelsBoundingBox: {
+                    min: {
+                        x: minX,
+                        y: minY,
+                    },
+                    max: {
+                        x: maxX,
+                        y: maxY,
+                    },
+                }
+            };
+        })
+    }
 }));
 
 const backgroundGraphics: Map<string, Uint8Array | undefined> = new Map();

@@ -11,12 +11,33 @@ export interface PixiComponentViewportProps extends ViewportProps {
     app: PIXI.Application;
 }
 
-const extraPadding = 100;
+const bounceRectangle = new Rectangle();
+const padding = 300;
+
+const computeDimensions = (boundingBox: ViewportBoundingBox, screenWidth: number, screenHeight: number) => {
+    const tempWidth = Math.abs(boundingBox.maxX - boundingBox.minX) * mapConfig.PixelSize + padding;
+    const tempHeight = Math.abs(boundingBox.maxY - boundingBox.minY) * mapConfig.PixelSize + padding;
+    const maxWidth = Math.max(tempWidth, screenWidth);
+    const maxHeight = Math.max(tempHeight, screenHeight);
+    const startX = boundingBox.minX - (maxWidth / 2);
+    const startY = boundingBox.minY - (maxHeight / 2);
+    const result = {
+        maxWidth, maxHeight, startX, startY
+    }
+    return result;
+};
+
+const setBounceRectangle = (width: number, height: number, startX: number, startY: number) => {
+    bounceRectangle.width = width
+    bounceRectangle.height = height,
+    bounceRectangle.x = startX
+    bounceRectangle.y = startY;
+    return bounceRectangle;
+};
 
 const PixiComponentViewport = PixiComponent("Viewport", {
     create: (props: PixiComponentViewportProps) => {
-        const { maxWidth, maxHeight } = computeDimensions(props.boundingBox);
-
+        const { maxWidth, maxHeight, startX, startY } = computeDimensions(props.boundingBox, props.width, props.height);
         const viewport = new PixiViewport({
             screenWidth: props.width,
             screenHeight: props.height,
@@ -24,9 +45,9 @@ const PixiComponentViewport = PixiComponent("Viewport", {
             worldHeight: maxHeight,
             events: props.app.renderer.events,
         });
-        const bounceRectangle = computeBounceRectangle(props.boundingBox);
-        const centerX = (bounceRectangle.x + bounceRectangle.width) / 2;
-        const centerY = (bounceRectangle.y + bounceRectangle.width) / 2;
+        const bounceRectangle = setBounceRectangle(maxWidth, maxHeight, startX, startY);
+        const centerX = bounceRectangle.x + (bounceRectangle.width / 2);
+        const centerY = bounceRectangle.y + (bounceRectangle.height / 2);
         viewport
             .drag({
                 underflow: "center",
@@ -46,7 +67,8 @@ const PixiComponentViewport = PixiComponent("Viewport", {
                 minScale: 0.1,
                 maxScale: 15,
             })
-            .moveCenter(centerX, centerY);
+            .moveCenter(centerX, centerY)
+            .fit();
         viewport.options.disableOnContextMenu = true;
         viewport.options.stopPropagation = true;
 
@@ -55,33 +77,13 @@ const PixiComponentViewport = PixiComponent("Viewport", {
         return viewport;
     },
 
-    applyProps(viewport: PixiViewport, _: PixiComponentViewportProps, newProps: PixiComponentViewportProps) {
-        const { maxWidth, maxHeight } = computeDimensions(newProps.boundingBox);
-        const bounceRectangle = computeBounceRectangle(newProps.boundingBox);
+    applyProps(viewport: PixiViewport, _oldProps: PixiComponentViewportProps, newProps: PixiComponentViewportProps) {
+        const { maxWidth, maxHeight, startX, startY } = computeDimensions(newProps.boundingBox, newProps.width, newProps.height);
+        setBounceRectangle(maxWidth, maxHeight, startX, startY);
         viewport.worldWidth = maxWidth;
         viewport.worldHeight = maxHeight;
-        viewport.bounce({
-            friction: 0.5,
-            time: 500,
-            bounceBox: bounceRectangle,
-        });
     },
 });
-
-const computeDimensions = (boundingBox: ViewportBoundingBox) => {
-    const maxWidth = (boundingBox.minX / 2 + boundingBox.maxX) * mapConfig.PixelSize;
-    const maxHeight = (boundingBox.minY / 2 + boundingBox.maxY) * mapConfig.PixelSize;
-    return { maxWidth, maxHeight };
-};
-
-const computeBounceRectangle = (boundingBox: ViewportBoundingBox) => {
-    const bounceRectangle = new Rectangle();
-    bounceRectangle.x = (boundingBox.minX - extraPadding) * mapConfig.PixelSize;
-    bounceRectangle.y = (boundingBox.minY - extraPadding) * mapConfig.PixelSize;
-    bounceRectangle.width = (Math.abs(boundingBox.minX) + boundingBox.maxX + extraPadding) * mapConfig.PixelSize;
-    bounceRectangle.height = (Math.abs(boundingBox.minY) + boundingBox.maxY + extraPadding) * mapConfig.PixelSize;
-    return bounceRectangle;
-};
 
 const Viewport = (props: ViewportProps) => {
     const app = useApp();

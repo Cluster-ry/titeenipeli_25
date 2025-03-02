@@ -13,6 +13,10 @@ import { Coordinate } from "../../models/Coordinate.ts";
 import { usePowerUps } from "../../hooks/usePowerUps.ts";
 import MapTile from "./MapTile.tsx";
 
+const mapOptions = {
+    background: 0xffffff, resizeTo: window, antialias: false, premultipliedAlpha: false
+}
+
 /**
  * @component GameMap
  * ==================
@@ -55,12 +59,12 @@ const GameMap: FC = () => {
         onMapClickRef.current = onMapClick
     }, [onMapClick, onMapClickRef]);
 
-    const mappedBoundingBox = {
+    const mappedBoundingBox = useMemo(() => ({
         minY: pixelsBoundingBox.min.y,
         minX: pixelsBoundingBox.min.x,
         maxY: pixelsBoundingBox.max.y,
         maxX: pixelsBoundingBox.max.x,
-    };
+    }), [pixelsBoundingBox]);
 
     const pixelElements = useMemo(() => {
         const result: JSX.Element[] = [];
@@ -99,12 +103,12 @@ const GameMap: FC = () => {
         <Stage
             width={window.innerWidth}
             height={window.innerHeight}
-            options={{ background: 0xffffff, resizeTo: window, antialias: false, premultipliedAlpha: false }}
+            options={mapOptions}
             onContextMenu={(e) => e.preventDefault()}
         >
             <Viewport
-                width={window.innerWidth}
-                height={window.innerHeight}
+                width={window.outerWidth}
+                height={window.outerHeight}
                 boundingBox={mappedBoundingBox}
                 onMoveStart={startMoving}
             >
