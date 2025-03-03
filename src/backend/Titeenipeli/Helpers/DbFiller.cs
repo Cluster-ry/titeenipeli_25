@@ -37,6 +37,74 @@ public static class DbFiller
             dbContext.SaveChanges();
         }
 
+        var guildNames2 = Enum.GetValues<GuildName>().ToList();
+        guildNames2 = guildNames2.Skip(1).ToList();
+        var id = 1;
+        List<User> testUsers = [];
+        foreach (var guildName in guildNames2)
+        {
+            for (int i = 1; i < 40; i = i + 2)
+            {
+                var x = 0;
+                var y = 1;
+                if ((int)guildName <= 5)
+                {
+                    x = i + ((int)guildName - 1) * 40;
+                }
+                else
+                {
+                    x = i + ((int)guildName - 6) * 40;
+                    y = 199;
+                }
+                var user = new User
+                {
+                    Code = "test_" + id.ToString(),
+                    Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == guildName) ?? throw new InvalidOperationException(),
+                    SpawnX = x,
+                    SpawnY = y,
+                    PixelBucket = gameOptions.InitialPixelBucket,
+                    PowerUps = [],
+                    TelegramId = id.ToString(),
+                    FirstName = "",
+                    LastName = "",
+                    Username = "",
+                };
+                testUsers.Add(user);
+                id = ++id;
+            }
+            for (int i = 2; i < 40; i = i + 2)
+            {
+                var x = 0;
+                var y = 0;
+                if ((int)guildName <= 5)
+                {
+                    x = i + ((int)guildName - 1) * 40;
+                    y = 3;
+                }
+                else
+                {
+                    x = i + ((int)guildName - 6) * 40;
+                    y = 197;
+                }
+                var user = new User
+                {
+                    Code = "test_" + id.ToString(),
+                    Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == guildName) ?? throw new InvalidOperationException(),
+                    SpawnX = x,
+                    SpawnY = y,
+                    PixelBucket = gameOptions.InitialPixelBucket,
+                    PowerUps = [],
+                    TelegramId = id.ToString(),
+                    FirstName = "",
+                    LastName = "",
+                    Username = "",
+                };
+                testUsers.Add(user);
+                id = ++id;
+            }
+        }
+
+        /*
         var testUser = new User
         {
             Code = "test",
@@ -60,11 +128,12 @@ public static class DbFiller
             SpawnY = 2,
             PixelBucket = gameOptions.InitialPixelBucket,
             PowerUps = [],
-            TelegramId = "1",
+            TelegramId = "1001",
             FirstName = "",
             LastName = "",
             Username = ""
         };
+        */
 
         var god = new User
         {
@@ -77,7 +146,7 @@ public static class DbFiller
             SpawnY = -10,
             PowerUps = [],
             AuthenticationToken = "puE0g4NkCQlfIQFnrs5xPr0aRQZ9STCv",
-            TelegramId = "99",
+            TelegramId = "1099",
             FirstName = "God",
             LastName = "",
             Username = "God",
@@ -85,9 +154,14 @@ public static class DbFiller
         };
 
 
+
         if (!dbContext.Users.Any())
         {
-            dbContext.Users.AddRange(testUser, testOpponent, god);
+            dbContext.Users.AddRange(god);
+            foreach (var user in testUsers)
+            {
+                dbContext.Users.Add(user);
+            }
             dbContext.SaveChanges();
         }
 
@@ -122,21 +196,33 @@ public static class DbFiller
             }
 
             dbContext.SaveChanges();
+            /*
+                        Pixel? testUserSpawn =
+                            dbContext.Map.FirstOrDefault(pixel => pixel.X == testUser.SpawnX && pixel.Y == testUser.SpawnY);
 
-            Pixel? testUserSpawn =
-                dbContext.Map.FirstOrDefault(pixel => pixel.X == testUser.SpawnX && pixel.Y == testUser.SpawnY);
+                        Pixel? testOpponentSpawn = dbContext.Map.FirstOrDefault(pixel =>
+                            pixel.X == testOpponent.SpawnX && pixel.Y == testOpponent.SpawnY);
 
-            Pixel? testOpponentSpawn = dbContext.Map.FirstOrDefault(pixel =>
-                pixel.X == testOpponent.SpawnX && pixel.Y == testOpponent.SpawnY);
+                        if (testUserSpawn != null)
+                        {
+                            testUserSpawn.User = testUser;
+                        }
 
-            if (testUserSpawn != null)
+                        if (testOpponentSpawn != null)
+                        {
+                            testOpponentSpawn.User = testOpponent;
+                        }
+                        */
+            var users = dbContext.Users.ToList();
+
+            foreach (var user in users)
             {
-                testUserSpawn.User = testUser;
-            }
+                var spawn = dbContext.Map.FirstOrDefault(pixel => pixel.X == user.SpawnX && pixel.Y == user.SpawnY);
 
-            if (testOpponentSpawn != null)
-            {
-                testOpponentSpawn.User = testOpponent;
+                if (spawn != null)
+                {
+                    spawn.User = user;
+                }
             }
 
             dbContext.SaveChanges();

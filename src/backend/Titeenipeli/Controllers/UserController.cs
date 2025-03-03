@@ -76,9 +76,9 @@ public class UserController(
     public async Task<IActionResult> PostAuthenticate([FromBody] PostAuthenticateInput loginInput)
     {
         // TODO: Should be removed before production!
+        return DebugLogin(loginInput.Token);
         if (webHostEnvironment.IsDevelopment() && loginInput.Token.Length < 32)
         {
-            return DebugLogin(loginInput.Token);
         }
         // ------------------------------------------
 
