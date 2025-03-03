@@ -95,7 +95,7 @@ spec:
             - name: DB_ADDRESS
               value: {{ include "titeenipeli.name" . }}-cluster-rw.{{ .Release.Namespace }}.svc
             - name: SQLCONNSTR_Database
-              value: Server=$(DB_ADDRESS);Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(DB_PASS);
+              value: Server=$(DB_ADDRESS);Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(DB_PASS);Pooling=true;Minimum Pool Size=0;Maximum Pool Size=1000;
           image: titeenipelitacr.azurecr.io/backend:latest
           resources:
             limits:

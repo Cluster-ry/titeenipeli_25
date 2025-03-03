@@ -50,7 +50,7 @@ tracing:
       insecure: true
 
 persistence:
-  enabled: true
+  enabled: false
   size: "128Mi"
 
 serviceAccountAnnotations:
@@ -58,6 +58,7 @@ serviceAccountAnnotations:
   azure.workload.identity/client-id: "<traefikIdentityClientId>" # this is replaced in pulumi values
 
 deployment:
+  replicas: 2
   annotations:
     azure.workload.identity/use: "true"
 

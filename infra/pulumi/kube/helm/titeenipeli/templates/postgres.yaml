@@ -22,7 +22,7 @@ spec:
   enableSuperuserAccess: true
   postgresql:
     parameters:
-      shared_buffers: "256MB"
-      max_connections: "10"
+      shared_buffers: "512MB"
+      max_connections: "1000"
 
   # TODO: backup to cloud
