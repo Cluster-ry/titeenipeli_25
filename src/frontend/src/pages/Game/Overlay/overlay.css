@@ -178,8 +178,6 @@
   height: 100%;
   z-index: 1;
   pointer-events: none;
-
-  /*background-image: url("../../../assets/sprites/background.png");*/
 }
 
 /* CTF */
