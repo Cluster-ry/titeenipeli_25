@@ -99,7 +99,7 @@ const GameMap: FC = () => {
         <Stage
             width={window.innerWidth}
             height={window.innerHeight}
-            options={{ background: 0xffffff, resizeTo: window, antialias: false, premultipliedAlpha: false }}
+            options={{ background: 0x4B0082, resizeTo: window, antialias: false, premultipliedAlpha: false }}
             onContextMenu={(e) => e.preventDefault()}
         >
             <Viewport
