@@ -168,5 +168,9 @@ func installMonitoring(ctx *pulumi.Context, k8sProvider *kubernetes.Provider) er
 		Namespace: pulumi.String("aks-istio-system"),
 	}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{otel}))
 
+	helm.NewChart(ctx, "storage-class", helm.ChartArgs{
+		Path: pulumi.String("./helm/storage-class"),
+	}, pulumi.Provider(k8sProvider))
+
 	return nil
 }
