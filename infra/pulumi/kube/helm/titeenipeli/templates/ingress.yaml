@@ -11,7 +11,7 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
-  name: {{ include "titeenipeli.name" . }}-ingress
+  name: {{ include "titeenipeli.name" . }}-ingress-front
   labels: {{- include "titeenipeli.labels" . | nindent 4 }}
 spec:
   entryPoints:
@@ -24,6 +24,16 @@ spec:
       port: 80
       scheme: http
 
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "titeenipeli.name" . }}-ingress-back
+  labels: {{- include "titeenipeli.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+  - websecure
+  routes:
   - kind: Rule
     match: Host(`{{ .Values.gameUrl }}`) && PathPrefix(`/api`)
     services:
@@ -31,7 +41,16 @@ spec:
       port: 8443
       scheme: https
       serversTransport: "custom-ca-transport"
-
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "titeenipeli.name" . }}-ingress-back-grpc
+  labels: {{- include "titeenipeli.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+  - websecure
+  routes:
   - kind: Rule
     match: Host(`{{ .Values.gameUrl }}`) && PathPrefix(`/Game.StateUpdate`)
     services:

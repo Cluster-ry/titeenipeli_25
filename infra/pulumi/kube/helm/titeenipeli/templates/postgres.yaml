@@ -14,7 +14,7 @@ spec:
     enablePodMonitor: true
   storage:
     size: 10Gi
-    storageClass: ultra-disk-sc
+    #storageClass: ultra-disk-sc
   managed:
     roles:
     - name: app

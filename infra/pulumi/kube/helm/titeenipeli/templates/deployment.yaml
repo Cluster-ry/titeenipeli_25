@@ -97,12 +97,6 @@ spec:
             - name: SQLCONNSTR_Database
               value: Server=$(DB_ADDRESS);Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(DB_PASS);Pooling=true;Minimum Pool Size=0;Maximum Pool Size=1000;
           image: titeenipelitacr.azurecr.io/backend@sha256:98b0bdc9ea5defdd269b917a229ed229bab2a4153e2a687a0251526fa6916cd9
-          resources:
-            limits:
-              memory: 4000Mi
-            requests:
-              cpu: 1500m
-              memory: 2000Mi
           name: backend
           volumeMounts:
             - name: certs
