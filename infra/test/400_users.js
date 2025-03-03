@@ -5,9 +5,9 @@ export const options = {
   scenarios: {
     contacts: {
       executor: "per-vu-iterations",
-      vus: 400,
+      vus: 390,
       iterations: 1,
-      maxDuration: "180s",
+      maxDuration: "500s",
     },
   },
 };
@@ -28,41 +28,22 @@ export default function () {
     "Authentication succeeded": (res) => res.status === 200,
   });
 
-  const authCookie = authRes.cookies["X-Authorization"]
-    ? authRes.cookies["X-Authorization"][0].value
-    : null;
-
-  if (!authCookie) {
-    console.error(`VU ${userId} failed to get authentication cookie`);
-    return;
-  }
-
-  const x = 0;
-  const authHeaders = {
-    "Content-Type": "application/json",
-    Cookie: `X-Authorization=${authCookie}`,
-  };
-
   const currentRes = http.get(
-    "https://peli.test.cluster2017.fi/api/v1/users/current",
-    {
-      headers: authHeaders,
-    }
+    "https://peli.test.cluster2017.fi/api/v1/users/current"
   );
 
-  sleep(30);
+  sleep(1);
 
-  const guild = authRes.body.guild;
+  const guild = currentRes.json().guild;
+  const x = 0;
 
   if (guild < 6) {
-    for (let i = 0; i < 200; i++) {
-      const pixelPayload = JSON.stringify({ x: x, y: i });
-
+    for (let i = 1; i < 200; i++) {
       const pixelRes = http.post(
         "https://peli.test.cluster2017.fi/api/v1/state/map/pixels",
-        pixelPayload,
+        JSON.stringify({ x: x, y: i }),
         {
-          headers: authHeaders,
+          headers: { "Content-Type": "application/json" },
         }
       );
 
@@ -70,24 +51,24 @@ export default function () {
         "Pixel post succeeded": (res) => res.status === 200,
       });
 
-      sleep(10);
+      let number = Math.floor(Math.random() * 5);
+      sleep(number);
     }
   } else {
-    for (let i = 0; i > -200; i--) {
-      const pixelPayload = JSON.stringify({ x: x, y: i });
-
+    for (let i = -1; i > -200; i--) {
       const pixelRes = http.post(
         "https://peli.test.cluster2017.fi/api/v1/state/map/pixels",
-        pixelPayload,
+        JSON.stringify({ x: x, y: i }),
         {
-          headers: authHeaders,
+          headers: { "Content-Type": "application/json" },
         }
       );
-      if (pixelRes.status !== 200) {
-        i++;
-      }
+      check(pixelRes, {
+        "Pixel post succeeded": (res) => res.status === 200,
+      });
 
-      sleep(10);
+      let number = Math.floor(Math.random() * 5);
+      sleep(number);
     }
   }
 }
