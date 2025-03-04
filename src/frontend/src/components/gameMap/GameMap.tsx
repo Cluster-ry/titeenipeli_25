@@ -35,16 +35,19 @@ const GameMap: FC = () => {
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
     const onMapClickRef = useRef<((coordinate: Coordinate, targeted: boolean) => void) | null>(null);
-    const { graphicsEnabled } = graphicsStore(); 
+    const { graphicsEnabled } = graphicsStore();
 
-    const onMapClick = useCallback((coordinate: Coordinate, targeted: boolean) => {
-        const viewportX = coordinate.x / mapConfig.PixelSize;
-        const viewportY = coordinate.y / mapConfig.PixelSize;
-        const viewportCoordinate = { x: viewportX, y: viewportY }
-        const powerUpClick = usePowerUp(viewportCoordinate, targeted);
-        if (powerUpClick) return;
-        conquer(viewportCoordinate);
-    }, [usePowerUp, conquer])
+    const onMapClick = useCallback(
+        (coordinate: Coordinate, targeted: boolean) => {
+            const viewportX = coordinate.x / mapConfig.PixelSize;
+            const viewportY = coordinate.y / mapConfig.PixelSize;
+            const viewportCoordinate = { x: viewportX, y: viewportY };
+            const powerUpClick = usePowerUp(viewportCoordinate, targeted);
+            if (powerUpClick) return;
+            conquer(viewportCoordinate);
+        },
+        [usePowerUp, conquer],
+    );
 
     /**
      * onMapClick needs to be passed as a reference to the canvas elements in order to
@@ -53,7 +56,7 @@ const GameMap: FC = () => {
      * tile changes, leading to huge performance problems.
      */
     useEffect(() => {
-        onMapClickRef.current = onMapClick
+        onMapClickRef.current = onMapClick;
     }, [onMapClick, onMapClickRef]);
 
     const mappedBoundingBox = {
@@ -72,12 +75,12 @@ const GameMap: FC = () => {
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
-           
+
             let backgroundGraphic = undefined;
             if (graphicsEnabled) {
-              backgroundGraphic = getBackgroundGraphic(coordinate);
+                backgroundGraphic = getBackgroundGraphic(coordinate);
             }
-            
+
             result.push(
                 <MapTile
                     key={`map-tile-${coordinate}`}

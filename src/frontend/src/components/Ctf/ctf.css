@@ -16,7 +16,8 @@
     content: "#TÄLLÄ_EI_SAA_POWER_UPIA";
 }
 
-.ctf-button, .modal-button {
+.ctf-button,
+.modal-button {
     display: block;
     margin: auto;
     padding: 8px;
