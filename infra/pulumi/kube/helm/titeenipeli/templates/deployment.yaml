@@ -96,7 +96,21 @@ spec:
               value: {{ include "titeenipeli.name" . }}-cluster-rw.{{ .Release.Namespace }}.svc
             - name: SQLCONNSTR_Database
               value: Server=$(DB_ADDRESS);Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(DB_PASS);Pooling=true;Minimum Pool Size=0;Maximum Pool Size=1000;
-          image: titeenipelitacr.azurecr.io/backend@sha256:98b0bdc9ea5defdd269b917a229ed229bab2a4153e2a687a0251526fa6916cd9
+            - name: CORECLR_ENABLE_PROFILING
+              value: "1"
+            - name: CORECLR_PROFILER
+              value: "{BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}"
+            - name: CORECLR_PROFILER_PATH
+              value: "/dotnet/Pyroscope.Profiler.Native.so"
+            - name: LD_PRELOAD
+              value: "/dotnet/Pyroscope.Linux.ApiWrapper.x64.so"
+            - name: PYROSCOPE_PROFILING_ENABLED
+              value: "1"
+            - name: PYROSCOPE_APPLICATION_NAME
+              value: titeenipeli.dotnet.app
+            - name: PYROSCOPE_SERVER_ADDRESS
+              value: http://pyroscope.pyroscope.svc.cluster.local.:4040/
+          image: titeenipelitacr.azurecr.io/backend@sha256:b93403d6567c6ee46aac31538017c417684fee97f3ac4265385b8857cd09590c
           name: backend
           volumeMounts:
             - name: certs

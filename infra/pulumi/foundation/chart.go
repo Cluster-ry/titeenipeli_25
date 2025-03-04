@@ -172,5 +172,19 @@ func installMonitoring(ctx *pulumi.Context, k8sProvider *kubernetes.Provider) er
 		Path: pulumi.String("./helm/storage-class"),
 	}, pulumi.Provider(k8sProvider))
 
+	_, err = helm.NewRelease(ctx, "pyroscope", &helm.ReleaseArgs{
+		Chart:           pulumi.String("pyroscope"),
+		Name:            pulumi.String("pyroscope"),
+		Version:         pulumi.String("1.12.0"),
+		Namespace:       pulumi.String("pyroscope"),
+		CreateNamespace: pulumi.Bool(true),
+		RepositoryOpts: helm.RepositoryOptsArgs{
+			Repo: pulumi.String("https://grafana.github.io/helm-charts"),
+		},
+	}, pulumi.Providers(k8sProvider))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
