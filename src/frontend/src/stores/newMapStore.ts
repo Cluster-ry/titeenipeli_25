@@ -1,6 +1,5 @@
 import { Pixel } from "../models/Pixel.ts";
 import { create } from "zustand";
-
 export interface Coordinate {
     x: number;
     y: number;
@@ -14,6 +13,7 @@ export interface NewMapStore {
     pixelsBoundingBox: { min: Coordinate; max: Coordinate };
     setPixelsBoundingBox: ({ min, max }: { min: Coordinate; max: Coordinate }) => void;
 }
+
 
 export const useNewMapStore = create<NewMapStore>((set) => ({
     map: null,

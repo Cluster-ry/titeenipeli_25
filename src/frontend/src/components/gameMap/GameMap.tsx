@@ -12,7 +12,7 @@ import { useIsMoving } from "../../hooks/useIsMoving.ts";
 import { Coordinate } from "../../models/Coordinate.ts";
 import { usePowerUps } from "../../hooks/usePowerUps.ts";
 import MapTile from "./MapTile.tsx";
-
+import { graphicsStore } from "../../stores/graphicsStore.ts";
 /**
  * @component GameMap
  * ==================
@@ -35,6 +35,7 @@ const GameMap: FC = () => {
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
     const onMapClickRef = useRef<((coordinate: Coordinate, targeted: boolean) => void) | null>(null);
+    const { graphicsEnabled } = graphicsStore(); 
 
     const onMapClick = useCallback((coordinate: Coordinate, targeted: boolean) => {
         const viewportX = coordinate.x / mapConfig.PixelSize;
@@ -71,6 +72,12 @@ const GameMap: FC = () => {
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
+           
+            let backgroundGraphic = undefined;
+            if (graphicsEnabled) {
+              backgroundGraphic = getBackgroundGraphic(coordinate);
+            }
+            
             result.push(
                 <MapTile
                     key={`map-tile-${coordinate}`}
@@ -78,7 +85,7 @@ const GameMap: FC = () => {
                     y={rectangleY}
                     width={mapConfig.PixelSize}
                     height={mapConfig.PixelSize}
-                    backgroundGraphic={getBackgroundGraphic(coordinate)}
+                    backgroundGraphic={backgroundGraphic}
                     hue={color.hue}
                     saturation={color.saturation}
                     lightness={color.lightness}
