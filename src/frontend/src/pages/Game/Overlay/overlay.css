@@ -1,25 +1,25 @@
 /* Top Overlay */
 
 .top-gradient {
-    background: linear-gradient(rgba(255, 255, 255, 0.5) 0%, rgb(241 241 241 / 0%) 20%);
+  background: linear-gradient(rgba(255, 255, 255, 0.5) 0%, rgb(241 241 241 / 0%) 20%);
 }
 
 .top-overlay {
-    flex: 1;
-    display: flex;
-    padding-bottom: 30px;
-    padding-inline: 16px;
-    padding-top: 24px;
+  flex: 1;
+  display: flex;
+  padding-bottom: 30px;
+  padding-inline: 16px;
+  padding-top: 24px;
 }
 
 .top-overlay__left {
-    transition: all 0.5s;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: left;
-    font-size: x-small;
-    color: #ffffff;
+  transition: all 0.5s;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  font-size: x-small;
+  color: #ffffff;
   text-shadow:
     -2px 2px #000000,
     2px 2px #000000,
@@ -28,59 +28,36 @@
 }
 
 .top-overlay__score-title {
-    text-align: left;
-    color: #00fff0;
+  text-align: left;
+  color: #00fff0;
 }
 
 .top-overlay__scores-container {
-    padding-bottom: 8px;
+  padding-bottom: 8px;
 }
 
 .top-overlay__score-container {
-    transition: all 0.5s;
-    display: flex;
-    gap: 4px;
+  transition: all 0.5s;
+  display: flex;
+  gap: 4px;
 }
 
 .top-overlay__score-button {
-    width: fit-content;
-    font-size: xx-small;
-    padding: 8px;
-    pointer-events: all;
+  width: fit-content;
+  font-size: xx-small;
+  padding: 8px;
+  pointer-events: all;
 }
 
 .top-overlay__middle {
-    flex: 1;
-    display: flex;
-    justify-content: right;
-    gap: 8px;
-    flex-direction: column;
-    position: relative;
-    height: 100%;
-    font-size: large;
-}
-
-.top-overlay__middle__bucket {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 8px;
-    bottom: 0;
-    margin: auto;
-    max-height: 115%;
-    max-width: 100%;
-}
-
-.top-overlay__middle__cooldown {
-    flex: 1;
-    color: #00fff0;
-}
-
-.top-overlay__middle__bucket-points-container {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: start;
+  flex: 1;
+  display: flex;
+  justify-content: right;
+  gap: 8px;
+  flex-direction: column;
+  position: relative;
+  height: 100%;
+  font-size: large;
 }
 
 .top-overlay__right {
@@ -110,14 +87,6 @@
     2px 2px #000000,
     2px -2px #000000,
     -2px -2px #000000;
-}
-
-
-.top-overlay__right__help {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  pointer-events: all;
 }
 
 /* Bottom Overlay */
