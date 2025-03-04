@@ -19,6 +19,12 @@
     flex-direction: column;
     justify-content: left;
     font-size: x-small;
+    color: #ffffff;
+  text-shadow:
+    -2px 2px #000000,
+    2px 2px #000000,
+    2px -2px #000000,
+    -2px -2px #000000;
 }
 
 .top-overlay__score-title {
