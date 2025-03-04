@@ -75,7 +75,12 @@ const CtfModal = () => {
                 </div>
                 
                 <div className="graphics">
-                    <button className="modal-button" onClick={() => setGraphicsEnabled(!graphicsEnabled)}>
+                    <button className="modal-button" onClick={() =>  {
+                      setGraphicsEnabled(!graphicsEnabled)
+                      graphicsEnabled
+                        ? triggerNotification("Graphics enabled", "success")
+                        : triggerNotification("Graphics disabled", "success")
+                    }}>
                         Switch graphics on/off
                     </button>
                 </div>
