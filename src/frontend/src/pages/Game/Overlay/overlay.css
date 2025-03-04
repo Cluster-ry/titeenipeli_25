@@ -139,6 +139,10 @@
   pointer-events: all;
 }
 
+.bottom-overlay__right__help:hover {
+  cursor: pointer;
+}
+
 .bottom-overlay__middle {
     flex: 1;
     display: flex;
