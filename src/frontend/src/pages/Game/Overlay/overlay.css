@@ -181,3 +181,15 @@
 .ctf-container {
   display: grid;
 }
+
+@media only screen and (max-width: 600px) {
+  .bottom-overlay__right {
+    height: 65%;
+  }
+  .bottom-overlay__middle__powerup {
+    max-height: 24%;
+  }
+  .top-overlay__right__bucket {
+    visibility: hidden;
+  }
+}
