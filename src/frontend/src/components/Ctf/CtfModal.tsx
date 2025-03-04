@@ -67,8 +67,14 @@ const CtfModal = () => {
                 </button>
 
                 <div className="instructions">
-                    <button className="instructions-button" onClick={() => setInstructionsOn(true)}>
+                    <button className="modal-button" onClick={() => setInstructionsOn(true)}>
                         Check instructions
+                    </button>
+                </div>
+                
+                <div className="graphics">
+                    <button className="modal-button" onClick={() => setInstructionsOn(true)}>
+                        Switch graphics on/off
                     </button>
                 </div>
             </div>
