@@ -21,10 +21,10 @@ const BottomOverlay = () => {
                     onClick={setPowerUp}
                 />
             ))}
-          <div className="bottom-overlay__left"></div>
-          <BottomOverlayMiddle />
-          <BottomOverlayRight />  
-      </div>
+            <div className="bottom-overlay__left"></div>
+            <BottomOverlayMiddle />
+            <BottomOverlayRight />
+        </div>
     );
 };
 

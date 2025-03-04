@@ -15,7 +15,7 @@ const Scores: FC = () => {
         const result = visibleScores.map((score, index) => {
             const guild = score.guild;
             const guildName = shortGuildName(guild);
-            return <Score key={guildName} guild={guildName} score={score.amount} place={index}/>;
+            return <Score key={guildName} guild={guildName} score={score.amount} place={index} />;
         });
         return result;
     }, [scores]);
