@@ -14,7 +14,6 @@ export interface NewMapStore {
     setPixelsBoundingBox: ({ min, max }: { min: Coordinate; max: Coordinate }) => void;
 }
 
-
 export const useNewMapStore = create<NewMapStore>((set) => ({
     map: null,
     setPixel: (coordinate: Coordinate, pixel: Pixel | null) => {

@@ -72,7 +72,7 @@ const HelpModal = () => {
                         Check instructions
                     </button>
                 </div>
-              <GraphicsSwitch /> 
+                <GraphicsSwitch />
             </div>
         </Modal>
     );
