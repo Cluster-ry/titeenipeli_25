@@ -76,7 +76,7 @@ const GameMap: FC = () => {
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
 
-            let backgroundGraphic = undefined;
+            let backgroundGraphic: Uint8Array | undefined = new Uint8Array([0, 0, 0, 255]);
             if (graphicsEnabled) {
                 backgroundGraphic = getBackgroundGraphic(coordinate);
             }
