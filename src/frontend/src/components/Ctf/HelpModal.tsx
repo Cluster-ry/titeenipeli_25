@@ -9,14 +9,13 @@ import { helpModalStore } from "../../stores/helpModalStore.ts";
 import { CtfOk } from "../../models/CtfOk.ts";
 import { setRandomInterval } from "../../utils/setRandomInterval.ts";
 import { instructionsStore } from "../../stores/instructionsStore.ts";
-import { graphicsStore } from "../../stores/graphicsStore.ts";
+import GraphicsSwitch from "../GraphicsSwitch/GraphicsSwitch.tsx";
 
 const HelpModal = () => {
     const [token, setToken] = useState("");
     const { setHelpModalOpenState } = helpModalStore();
     const { triggerNotification } = useNotificationStore();
     const { setInstructionsOn } = instructionsStore();
-    const { graphicsEnabled, setGraphicsEnabled } = graphicsStore();
 
     const CTF_DISCLAIMER: string = "Activate CTF";
     const NOTIFICATION_FAIL: string = "CTF activation failed.";
@@ -73,17 +72,7 @@ const HelpModal = () => {
                         Check instructions
                     </button>
                 </div>
-                
-                <div className="graphics">
-                    <button className="modal-button" onClick={() =>  {
-                      setGraphicsEnabled(!graphicsEnabled)
-                      graphicsEnabled
-                        ? triggerNotification("Graphics enabled", "success")
-                        : triggerNotification("Graphics disabled", "success")
-                    }}>
-                        Switch graphics on/off
-                    </button>
-                </div>
+              <GraphicsSwitch /> 
             </div>
         </Modal>
     );
