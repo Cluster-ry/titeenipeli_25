@@ -76,10 +76,7 @@ const GameMap: FC = () => {
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
 
-            let backgroundGraphic: Uint8Array | undefined = new Uint8Array([0, 0, 0, 255]);
-            if (graphicsEnabled) {
-                backgroundGraphic = getBackgroundGraphic(coordinate);
-            }
+            const backgroundGraphic: Uint8Array | undefined = graphicsEnabled ? getBackgroundGraphic(coordinate) : new Uint8Array([0, 0, 0, 255]);
 
             result.push(
                 <MapTile
@@ -100,7 +97,7 @@ const GameMap: FC = () => {
             );
         }
         return result;
-    }, [map, target, isMoving, onMapClick]);
+    }, [map, target, isMoving, onMapClick, graphicsEnabled]);
 
     if (map === null) {
         return <span>Loading...</span>;
