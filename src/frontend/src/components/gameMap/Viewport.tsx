@@ -13,8 +13,8 @@ export interface PixiComponentViewportProps extends ViewportProps {
 
 const bounceRectangle = new Rectangle();
 const padding = 500;
-const test = new PIXI.Graphics();
-test.alpha = 0.5;
+// const test = new PIXI.Graphics();
+// test.alpha = 0.5;
 
 const computeDimensions = (boundingBox: ViewportBoundingBox, screenWidth: number, screenHeight: number) => {
     const worldMinX = boundingBox.minX * mapConfig.PixelSize;
@@ -32,10 +32,10 @@ const computeDimensions = (boundingBox: ViewportBoundingBox, screenWidth: number
 };
 
 const setBounceRectangle = (width: number, height: number, startX: number, startY: number) => {
-    bounceRectangle.width = width
-    bounceRectangle.height = height,
-    bounceRectangle.x = startX
-    bounceRectangle.y = startY;
+    bounceRectangle.width = width;
+    bounceRectangle.height = height;
+    bounceRectangle.x = startX + (startX / 2);
+    bounceRectangle.y = startY + (startY / 2);
     return bounceRectangle;
 };
 
@@ -76,13 +76,10 @@ const PixiComponentViewport = PixiComponent("Viewport", {
         viewport.options.disableOnContextMenu = true;
         viewport.options.stopPropagation = true;
 
-        test.beginFill(0xFFFF00);
-
-        // set the line style to have a width of 5 and set the color to red
-        test.lineStyle(5, 0xFF0000);
-        // draw a rectangle
-        test.drawRect(boundaryX, boundaryY, boundaryWidth, boundaryHeight);
-        viewport.addChild(test);
+        // test.beginFill(0xFFFF00);
+        // test.lineStyle(5, 0xFF0000);
+        // test.drawRect(boundaryX + (boundaryX / 2), boundaryY + (boundaryY / 2), boundaryWidth, boundaryHeight);
+        // viewport.addChild(test);
 
         viewport.addEventListener("moved", props.onMoveStart);
 
@@ -94,12 +91,10 @@ const PixiComponentViewport = PixiComponent("Viewport", {
         setBounceRectangle(boundaryWidth, boundaryHeight, boundaryX, boundaryY);
         viewport.worldWidth = boundaryWidth;
         viewport.worldHeight = boundaryHeight;
-        test.clear();
-        test.beginFill(0xFFFF00);
-        // set the line style to have a width of 5 and set the color to red
-        test.lineStyle(5, 0xFF0000);
-        // draw a rectangle
-        test.drawRect(boundaryX, boundaryY, boundaryWidth, boundaryHeight);
+        // test.clear();
+        // test.beginFill(0xFFFF00);
+        // test.lineStyle(5, 0xFF0000);
+        // test.drawRect(boundaryX + (boundaryX / 2), boundaryY + (boundaryY / 2), boundaryWidth, boundaryHeight);
     },
 });
 
