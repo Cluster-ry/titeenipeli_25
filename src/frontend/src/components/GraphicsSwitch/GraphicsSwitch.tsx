@@ -1,37 +1,24 @@
 import "./graphicsSwitch.css";
-import { graphicsStore } from "../../stores/graphicsStore.ts";
-import { useNotificationStore } from "../../stores/notificationStore.ts";
+import { useSetGraphicsEnabled } from "../../hooks/graphicsHooks/useSetGraphicsEnabled.ts";
+import { useGraphicsIndicator } from "../../hooks/graphicsHooks/useDisplayIndicator.ts";
 
 const GraphicsSwitch = () => {
-    const { graphicsEnabled, setGraphicsEnabled } = graphicsStore();
-    const { triggerNotification } = useNotificationStore();
-
-    return (
-        <div className="graphics">
-            <span>Switch graphics</span>
-            <div
-                className="graphics-button"
-                onClick={() => {
-                    setGraphicsEnabled(!graphicsEnabled);
-                    !graphicsEnabled
-                        ? triggerNotification("Graphics enabled", "success")
-                        : triggerNotification("Graphics disabled", "success");
-                }}
-            >
-                {graphicsEnabled ? (
-                    <>
-                        <div className="indicator-on"></div>
-                        <div className="indicator-off indicator-disabled"></div>
-                    </>
-                ) : (
-                    <>
-                        <div className="indicator-on indicator-disabled"></div>
-                        <div className="indicator-off"></div>
-                    </>
-                )}
-            </div>
-        </div>
-    );
+  const graphicsEnabledCallback = useSetGraphicsEnabled();
+  const { getIndicatorClasses } = useGraphicsIndicator();
+  const { onClass, offClass } = getIndicatorClasses();
+  
+  return (
+    <div className="graphics">
+      <span>Switch graphics</span>
+      <div
+        className="graphics-button"
+        onClick={graphicsEnabledCallback}
+      >
+        <div className={onClass}></div>
+        <div className={offClass}></div>
+      </div>
+    </div>
+  );
 };
 
 export default GraphicsSwitch;
