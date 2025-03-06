@@ -107,8 +107,8 @@ const GameMap: FC = () => {
             onContextMenu={(e) => e.preventDefault()}
         >
             <Viewport
-                width={window.outerWidth}
-                height={window.outerHeight}
+                width={window.innerWidth}
+                height={window.innerHeight}
                 boundingBox={mappedBoundingBox}
                 onMoveStart={startMoving}
             >

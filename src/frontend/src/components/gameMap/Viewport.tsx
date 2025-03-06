@@ -12,19 +12,23 @@ export interface PixiComponentViewportProps extends ViewportProps {
 }
 
 const bounceRectangle = new Rectangle();
-const padding = 300;
+const padding = 500;
+const test = new PIXI.Graphics();
+test.alpha = 0.5;
 
 const computeDimensions = (boundingBox: ViewportBoundingBox, screenWidth: number, screenHeight: number) => {
-    const tempWidth = Math.abs(boundingBox.maxX - boundingBox.minX) * mapConfig.PixelSize + padding;
-    const tempHeight = Math.abs(boundingBox.maxY - boundingBox.minY) * mapConfig.PixelSize + padding;
-    const maxWidth = Math.max(tempWidth, screenWidth);
-    const maxHeight = Math.max(tempHeight, screenHeight);
-    const startX = boundingBox.minX - (maxWidth / 2);
-    const startY = boundingBox.minY - (maxHeight / 2);
-    const result = {
-        maxWidth, maxHeight, startX, startY
-    }
-    return result;
+    const worldMinX = boundingBox.minX * mapConfig.PixelSize;
+    const worldMinY = boundingBox.minY * mapConfig.PixelSize;
+
+    const worldWidth = Math.abs(boundingBox.maxX * mapConfig.PixelSize - worldMinX);
+    const worldHeight = Math.abs(boundingBox.maxY * mapConfig.PixelSize - worldMinY);
+
+    const boundaryWidth = Math.max(worldWidth + padding, screenWidth);
+    const boundaryHeight = Math.max(worldHeight + padding, screenHeight);
+    const boundaryX = worldMinX - (boundaryWidth > screenWidth ? (padding / 2) : (screenWidth - worldWidth) / 2);
+    const boundaryY = worldMinY - (boundaryHeight > screenHeight ? (padding / 2) : (screenHeight - worldHeight) / 2);
+
+    return { worldWidth, worldHeight, boundaryWidth, boundaryHeight, worldMinX, worldMinY, boundaryX, boundaryY };
 };
 
 const setBounceRectangle = (width: number, height: number, startX: number, startY: number) => {
@@ -37,17 +41,18 @@ const setBounceRectangle = (width: number, height: number, startX: number, start
 
 const PixiComponentViewport = PixiComponent("Viewport", {
     create: (props: PixiComponentViewportProps) => {
-        const { maxWidth, maxHeight, startX, startY } = computeDimensions(props.boundingBox, props.width, props.height);
+        const { boundaryWidth, boundaryHeight, boundaryX, boundaryY } = computeDimensions(props.boundingBox, props.width, props.height);
         const viewport = new PixiViewport({
             screenWidth: props.width,
             screenHeight: props.height,
-            worldWidth: maxWidth,
-            worldHeight: maxHeight,
+            worldWidth: boundaryWidth,
+            worldHeight: boundaryHeight,
             events: props.app.renderer.events,
         });
-        const bounceRectangle = setBounceRectangle(maxWidth, maxHeight, startX, startY);
-        const centerX = bounceRectangle.x + (bounceRectangle.width / 2);
-        const centerY = bounceRectangle.y + (bounceRectangle.height / 2);
+        const bounceRectangle = setBounceRectangle(boundaryWidth, boundaryHeight, boundaryX, boundaryY);
+        const centerX = boundaryX + (boundaryWidth / 2);
+        const centerY = boundaryY + (boundaryHeight / 2);
+
         viewport
             .drag({
                 underflow: "center",
@@ -64,13 +69,20 @@ const PixiComponentViewport = PixiComponent("Viewport", {
                 bounceBox: bounceRectangle,
             })
             .clampZoom({
-                minScale: 0.1,
+                minScale: 0.3,
                 maxScale: 15,
             })
             .moveCenter(centerX, centerY)
-            .fit();
         viewport.options.disableOnContextMenu = true;
         viewport.options.stopPropagation = true;
+
+        test.beginFill(0xFFFF00);
+
+        // set the line style to have a width of 5 and set the color to red
+        test.lineStyle(5, 0xFF0000);
+        // draw a rectangle
+        test.drawRect(boundaryX, boundaryY, boundaryWidth, boundaryHeight);
+        viewport.addChild(test);
 
         viewport.addEventListener("moved", props.onMoveStart);
 
@@ -78,10 +90,16 @@ const PixiComponentViewport = PixiComponent("Viewport", {
     },
 
     applyProps(viewport: PixiViewport, _oldProps: PixiComponentViewportProps, newProps: PixiComponentViewportProps) {
-        const { maxWidth, maxHeight, startX, startY } = computeDimensions(newProps.boundingBox, newProps.width, newProps.height);
-        setBounceRectangle(maxWidth, maxHeight, startX, startY);
-        viewport.worldWidth = maxWidth;
-        viewport.worldHeight = maxHeight;
+        const { boundaryX, boundaryY, boundaryWidth, boundaryHeight } = computeDimensions(newProps.boundingBox, newProps.width, newProps.height);
+        setBounceRectangle(boundaryWidth, boundaryHeight, boundaryX, boundaryY);
+        viewport.worldWidth = boundaryWidth;
+        viewport.worldHeight = boundaryHeight;
+        test.clear();
+        test.beginFill(0xFFFF00);
+        // set the line style to have a width of 5 and set the color to red
+        test.lineStyle(5, 0xFF0000);
+        // draw a rectangle
+        test.drawRect(boundaryX, boundaryY, boundaryWidth, boundaryHeight);
     },
 });
 

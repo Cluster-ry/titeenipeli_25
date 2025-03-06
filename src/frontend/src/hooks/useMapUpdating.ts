@@ -14,6 +14,7 @@ import { EncodedPixel, Pixel } from "../models/Pixel.ts";
 import GrpcClients from "../core/grpc/grpcClients.ts";
 import { PostPixelsInput } from "../models/Post/PostPixelsInput.ts";
 import { Coordinate } from "../models/Coordinate.ts";
+import { getBoundaries } from "../utils/getBoundaries.ts";
 
 type Events = {
     onPixelUpdated?: (coordinates: Coordinate, value: Pixel) => void;
@@ -131,27 +132,7 @@ export const useMapUpdating = (
     );
 
     const computeBoundingBox = useCallback((pixels: Map<string, Pixel>) => {
-        let minX = Number.MAX_SAFE_INTEGER;
-        let minY = Number.MAX_SAFE_INTEGER;
-        let maxX = Number.MIN_SAFE_INTEGER;
-        let maxY = Number.MIN_SAFE_INTEGER;
-        for (const [pixel] of pixels) {
-            const parsedPixel = JSON.parse(pixel);
-            if (parsedPixel.x < minX) minX = parsedPixel.x;
-            if (parsedPixel.y < minY) minY = parsedPixel.y;
-            if (parsedPixel.x > maxX) maxX = parsedPixel.x;
-            if (parsedPixel.y > maxY) maxY = parsedPixel.y;
-        }
-        return {
-            min: {
-                x: minX,
-                y: minY,
-            },
-            max: {
-                x: maxX,
-                y: maxY,
-            },
-        };
+        return getBoundaries(Array.from(pixels.keys()).map(x => JSON.parse(x)));
     }, []);
 
     const onIncrementalUpdate = useCallback(
