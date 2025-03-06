@@ -34,8 +34,8 @@ const computeDimensions = (boundingBox: ViewportBoundingBox, screenWidth: number
 const setBounceRectangle = (width: number, height: number, startX: number, startY: number) => {
     bounceRectangle.width = width;
     bounceRectangle.height = height;
-    bounceRectangle.x = startX + (startX / 2);
-    bounceRectangle.y = startY + (startY / 2);
+    bounceRectangle.x = startX - (width / 2);
+    bounceRectangle.y = startY - (height / 2);
     return bounceRectangle;
 };
 
@@ -96,7 +96,7 @@ const PixiComponentViewport = PixiComponent("Viewport", {
         // test.clear();
         // test.beginFill(0xFFFF00);
         // test.lineStyle(5, 0xFF0000);
-        // test.drawRect(boundaryX + (boundaryX / 2), boundaryY + (boundaryY / 2), boundaryWidth, boundaryHeight);
+        // test.drawRect(boundaryX - (boundaryWidth / 2), boundaryY - (boundaryHeight / 2), boundaryWidth, boundaryHeight);
     },
 });
 
