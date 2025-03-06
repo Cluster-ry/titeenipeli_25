@@ -89,6 +89,8 @@ const PixiComponentViewport = PixiComponent("Viewport", {
     applyProps(viewport: PixiViewport, _oldProps: PixiComponentViewportProps, newProps: PixiComponentViewportProps) {
         const { boundaryX, boundaryY, boundaryWidth, boundaryHeight } = computeDimensions(newProps.boundingBox, newProps.width, newProps.height);
         setBounceRectangle(boundaryWidth, boundaryHeight, boundaryX, boundaryY);
+        viewport.screenWidth = newProps.width;
+        viewport.screenHeight = newProps.height;
         viewport.worldWidth = boundaryWidth;
         viewport.worldHeight = boundaryHeight;
         // test.clear();

@@ -12,6 +12,7 @@ import { useIsMoving } from "../../hooks/useIsMoving.ts";
 import { Coordinate } from "../../models/Coordinate.ts";
 import { usePowerUps } from "../../hooks/usePowerUps.ts";
 import MapTile from "./MapTile.tsx";
+import { useDynamicWindowSize } from "../../hooks/useDynamicWindowSize.tsx";
 
 const mapOptions = {
     background: 0xffffff, resizeTo: window, antialias: false, premultipliedAlpha: false
@@ -39,6 +40,7 @@ const GameMap: FC = () => {
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
     const onMapClickRef = useRef<((coordinate: Coordinate, targeted: boolean) => void) | null>(null);
+    const windowSize = useDynamicWindowSize();
 
     const onMapClick = useCallback((coordinate: Coordinate, targeted: boolean) => {
         const viewportX = coordinate.x / mapConfig.PixelSize;
@@ -101,14 +103,14 @@ const GameMap: FC = () => {
     }
     return (
         <Stage
-            width={window.innerWidth}
-            height={window.innerHeight}
+            width={windowSize.width}
+            height={windowSize.height}
             options={mapOptions}
             onContextMenu={(e) => e.preventDefault()}
         >
             <Viewport
-                width={window.innerWidth}
-                height={window.innerHeight}
+                width={windowSize.width}
+                height={windowSize.height}
                 boundingBox={mappedBoundingBox}
                 onMoveStart={startMoving}
             >
