@@ -5,8 +5,8 @@ const InstructionsEntry = (instructions: Instructions) => {
     return (
         <ul>
             <h2>{instructions.header}</h2>
-            {instructions.instructions.map((entry: string) => (
-                <li className="entry-text">{entry}</li>
+            {instructions.instructions.map((entry: string, index: number) => (
+                <li key={index} className="entry-text">{entry}</li>
             ))}
         </ul>
     );

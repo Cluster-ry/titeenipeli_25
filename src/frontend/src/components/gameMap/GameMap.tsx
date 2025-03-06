@@ -79,10 +79,10 @@ const GameMap: FC = () => {
                     width={mapConfig.PixelSize}
                     height={mapConfig.PixelSize}
                     backgroundGraphic={getBackgroundGraphic(coordinate)}
-                    hue={color?.hue}
-                    saturation={color?.saturation}
-                    lightness={color?.lightness}
-                    alpha={color?.alpha}
+                    hue={color.hue}
+                    saturation={color.saturation}
+                    lightness={color.lightness}
+                    alpha={color.alpha}
                     highlight={highlight}
                     moving={isMoving}
                     onClickRef={onMapClickRef}

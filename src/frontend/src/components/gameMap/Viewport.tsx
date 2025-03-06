@@ -44,7 +44,7 @@ const PixiComponentViewport = PixiComponent("Viewport", {
             })
             .clampZoom({
                 minScale: 0.1,
-                maxScale: 2,
+                maxScale: 15,
             })
             .moveCenter(centerX, centerY);
         viewport.options.disableOnContextMenu = true;

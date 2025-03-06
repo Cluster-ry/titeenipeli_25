@@ -1,18 +1,10 @@
 import { PixiComponent } from "@pixi/react";
-import { Color, Container, FederatedPointerEvent, Graphics, Sprite, Texture } from "pixi.js";
+import { FederatedPointerEvent, Sprite, Texture } from "pixi.js";
 import MapTileProps from "../../models/MapTileProps";
 import { ColorOverlayFilter, GlowFilter } from "pixi-filters";
+import colourPicker from "../../utils/ColourPicker";
 
 const highlightFilter = new GlowFilter({ distance: 15, outerStrength: 1, innerStrength: 1, color: 0xfde90d });
-
-const getColor = ({hue, saturation, lightness}: MapTileProps) => {
-    if (hue !== undefined && saturation !== undefined && lightness !== undefined) {
-        const pixiColor = new Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
-        return [pixiColor.red, pixiColor.green, pixiColor.blue];
-    } else {
-        return [0, 0, 0];
-    }
-};
 
 const getTexture = ({ backgroundGraphic, width, height }: MapTileProps) => {
     if (backgroundGraphic !== undefined) {
@@ -32,23 +24,19 @@ const handleEvent = (event: FederatedPointerEvent, { onClickRef, highlight, movi
 
 const MapTile = PixiComponent("MapTile", {
     create: () => {
-        const container = new Container();
-        container.cullable = true;
-        return container;
+        const mapTile = new Sprite();
+        mapTile.cullable = true;
+        return mapTile;
     },
-    applyProps: (instance: Graphics, _oldProps: MapTileProps, newProps: MapTileProps) => {
-        const { x, y, width, height, alpha, highlight } = newProps;
-        instance.removeChildren()
+    applyProps: (instance: Sprite, _oldProps: MapTileProps, newProps: MapTileProps) => {
+        const { x, y, width, height, alpha, highlight, hue, saturation, lightness } = newProps;
 
-        const bgSprite = new Sprite(getTexture(newProps));
-        Object.assign(bgSprite, {
-            width: width + 0.05,
-            height: height + 0.05,
-        });
+        instance.texture = getTexture(newProps);
+        instance.width = width + 0.05;
+        instance.height = height + 0.05;
 
-        const overlay = new ColorOverlayFilter(getColor(newProps), alpha ?? 0.75);
+        const overlay: ColorOverlayFilter = colourPicker.getColourOverlay(hue, saturation, lightness, alpha);
 
-        instance.addChild(bgSprite);
         instance.filters = [overlay];
 
         if (highlight) {

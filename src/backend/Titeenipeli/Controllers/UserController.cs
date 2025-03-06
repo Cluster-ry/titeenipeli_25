@@ -18,11 +18,11 @@ namespace Titeenipeli.Controllers;
 public class UserController(
     IHostEnvironment webHostEnvironment,
     BotOptions botOptions,
+    GameOptions gameOptions,
     IUserRepositoryService userRepositoryService,
     IGuildRepositoryService guildRepositoryService,
     IJwtService jwtService,
-    IMapUpdaterService mapUpdaterService,
-    GameOptions gameOptions) : ControllerBase
+    IMapUpdaterService mapUpdaterService) : ControllerBase
 {
     private const int LoginTokenLength = 32;
 

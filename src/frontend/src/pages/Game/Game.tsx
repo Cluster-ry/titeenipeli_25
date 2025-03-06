@@ -12,13 +12,13 @@ type GameProps = {
 };
 
 const Game = ({ slot }: GameProps) => {
-    const { ctfModelOpen: hamburgerMenuOpen } = useCtfStore();
+    const { ctfModelOpen } = useCtfStore();
     const { instructionsOn } = instructionsStore();
     return (
         <div className="game-container">
             <div className="slot-container">{slot}</div>
             <GameOverlay />
-            {hamburgerMenuOpen && <CtfModal />}
+            {ctfModelOpen && <CtfModal />}
             {instructionsOn && <InstructionsModal />}
             <Notification />
         </div>
