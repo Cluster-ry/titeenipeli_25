@@ -36,8 +36,8 @@ spec:
   routes:
   - kind: Rule
     match: Host(`{{ .Values.gameUrl }}`) && PathPrefix(`/api`)
-    middlewares:
-    - name: ratelimit-player
+    #middlewares:
+    #- name: ratelimit-player
     services:
     - name: {{ include "titeenipeli.backendName" . }}
       port: 8443
@@ -55,8 +55,8 @@ spec:
   routes:
   - kind: Rule
     match: Host(`{{ .Values.gameUrl }}`) && PathPrefix(`/Game.StateUpdate`)
-    middlewares:
-    - name: ratelimit-player
+    #middlewares:
+    #- name: ratelimit-player
     services:
     - name: {{ include "titeenipeli.backendName" . }}
       port: 8443
