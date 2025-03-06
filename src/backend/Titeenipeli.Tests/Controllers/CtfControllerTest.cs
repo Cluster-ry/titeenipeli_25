@@ -16,15 +16,13 @@ using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Tests.Controllers;
 
-
-
 [TestSubject(typeof(CtfController))]
 public class CtfControllerTest
 {
     private static readonly Guild OwnGuild = new()
     {
         Name = GuildName.Cluster,
-        ActiveCtfFlags = new(),
+        ActiveCtfFlags = []
     };
 
     private static readonly User CurrentUser = new()
@@ -45,7 +43,7 @@ public class CtfControllerTest
     {
         Id = 0,
         Guild = OwnGuild.Name,
-        CoordinateOffset = new(0, 0),
+        CoordinateOffset = new Coordinate(0, 0)
     };
 
 
@@ -54,14 +52,14 @@ public class CtfControllerTest
     [TestCase(null, 400, TestName = "Should return failure code for null flag")]
     public void PostCtfTest(string token, int statusCode)
     {
-        Mock<ICtfFlagRepositoryService> mockCtfFlagRepositoryService = new Mock<ICtfFlagRepositoryService>();
-        Mock<IUserRepositoryService> mockUserRepositoryService = new Mock<IUserRepositoryService>();
-        Mock<IGuildRepositoryService> mockGuildRepositoryService = new Mock<IGuildRepositoryService>();
-        Mock<IJwtService> mockJwtService = new Mock<IJwtService>();
-        Mock<IMiscGameStateUpdateCoreService> mockMiscGameStateUpdateCoreService = new Mock<IMiscGameStateUpdateCoreService>();
+        var mockCtfFlagRepositoryService = new Mock<ICtfFlagRepositoryService>();
+        var mockUserRepositoryService = new Mock<IUserRepositoryService>();
+        var mockGuildRepositoryService = new Mock<IGuildRepositoryService>();
+        var mockJwtService = new Mock<IJwtService>();
+        var mockMiscGameStateUpdateCoreService = new Mock<IMiscGameStateUpdateCoreService>();
 
         //Setup jwt
-        var jwtClaimName = "JwtClaim";
+        const string jwtClaimName = "JwtClaim";
         mockJwtService
             .Setup(service => service.GetJwtClaimName())
             .Returns(jwtClaimName);
@@ -77,20 +75,29 @@ public class CtfControllerTest
         .Setup(repo => repo.GetById(It.IsAny<int>()))
         .Returns(CurrentUser);
 
-        var httpcontext = new DefaultHttpContext();
-        httpcontext.Items[jwtClaimName] = CurrentClaim;
-
-        CtfController controller = new CtfController(mockCtfFlagRepositoryService.Object, mockUserRepositoryService.Object, mockGuildRepositoryService.Object, mockJwtService.Object, mockMiscGameStateUpdateCoreService.Object);
-        controller.ControllerContext = new ControllerContext
+        var httpContext = new DefaultHttpContext
         {
-            HttpContext = httpcontext
+            Items =
+            {
+                [jwtClaimName] = CurrentClaim
+            }
         };
 
-        PostCtfInput input = new PostCtfInput
+        var controller = new CtfController(mockCtfFlagRepositoryService.Object, mockUserRepositoryService.Object,
+            mockGuildRepositoryService.Object, mockJwtService.Object, mockMiscGameStateUpdateCoreService.Object)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            }
+        };
+
+        var input = new PostCtfInput
         {
             Token = token
         };
 
+        // ReSharper disable once SuspiciousTypeConversion.Global
         var result = controller.PostCtf(input) as IStatusCodeActionResult;
 
         result?.StatusCode.Should().Be(statusCode);
