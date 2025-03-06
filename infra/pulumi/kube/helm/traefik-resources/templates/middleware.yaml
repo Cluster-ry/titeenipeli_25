@@ -9,10 +9,12 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: ratelimit
+  name: ratelimit-player
+  namespace: titeenipeli
 spec:
   rateLimit:
-    average: 100
-    burst: 200
+    average: 10
+    burst: 15
+    period: 10s
     sourceCriterion:
-      requestHeaderName: Cookie
+      requestHeaderName: "cookie"
