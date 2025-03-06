@@ -127,6 +127,17 @@
     cursor: pointer;
 }
 
+.bottom-overlay__imgwrapper {
+  pointer-events: all;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+}
+
+.bottom-overlay__imgwrapper:hover {
+  cursor: pointer;
+}
+
 .bottom-overlay__middle {
     flex: 1;
     display: flex;
