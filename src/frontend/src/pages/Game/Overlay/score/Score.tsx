@@ -1,9 +1,9 @@
 import { FC, useEffect, useState } from "react";
-import "./overlay.css";
+import "../overlay.css";
 
-import goldMedal from "../../../assets/sprites/medal-gold.png";
-import silverMedal from "../../../assets/sprites/medal-silver.png";
-import bronzeMedal from "../../../assets/sprites/medal-bronze.png";
+import goldMedal from "../../../../assets/sprites/medal-gold.png";
+import silverMedal from "../../../../assets/sprites/medal-silver.png";
+import bronzeMedal from "../../../../assets/sprites/medal-bronze.png";
 
 type ScoreProps = {
     guild: string;
@@ -28,7 +28,7 @@ const Score: FC<ScoreProps> = ({ guild, score, place }) => {
             default:
                 break;
         }
-    }, []);
+    }, [place]);
 
     return (
         <div key={guild} className="top-overlay__score-container">

@@ -1,7 +1,7 @@
 import { FC, useMemo } from "react";
-import { shortGuildName } from "../../../models/enum/Guild";
-import { useGameStateStore } from "../../../stores/gameStateStore";
-import "./overlay.css";
+import { shortGuildName } from "../../../../models/enum/Guild";
+import { useGameStateStore } from "../../../../stores/gameStateStore";
+import "../overlay.css";
 import { Score } from "./Score";
 
 const topXScores = 3;

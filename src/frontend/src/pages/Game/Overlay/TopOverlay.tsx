@@ -1,5 +1,5 @@
 import { FC, PropsWithChildren } from "react";
-import { Scores } from "./Scores";
+import { Scores } from "./score/Scores";
 import "./overlay.css";
 import { TopOverlayRight } from "./TopOverlayRight";
 
