@@ -7,6 +7,7 @@ using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.InMemoryMapProvider;
 using Titeenipeli.Options;
+using Titeenipeli.Services.BackgroundServices;
 using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services;
@@ -15,7 +16,8 @@ public class MapUpdaterService(
     IServiceScopeFactory scopeFactory,
     GameOptions gameOptions,
     IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
-    IMapProvider mapProvider
+    IMapProvider mapProvider,
+    ChannelProcessorBackgroundService channelProcessorBackgroundService
 ) : IMapUpdaterService
 {
     private const int BorderWidth = 1;
@@ -28,7 +30,8 @@ public class MapUpdaterService(
     {
         var borderfiedCoordinate = pixelCoordinate + new Coordinate(1, 1);
 
-        return Task.Run(() =>
+        return channelProcessorBackgroundService.Enqueue(() =>
+        //return Task.Run(() =>
         {
             lock (_mapUpdater)
             {
@@ -52,7 +55,8 @@ public class MapUpdaterService(
                                   List<Coordinate> pixelCoordinates,
                                   User newOwner)
     {
-        return Task.Run(() =>
+        return channelProcessorBackgroundService.Enqueue(() =>
+        //return Task.Run(() =>
         {
             lock (_mapUpdater)
             {
@@ -66,7 +70,9 @@ public class MapUpdaterService(
 
     public Task<User> PlaceSpawn(IUserRepositoryService userRepositoryService, User user)
     {
-        return Task.Run(() =>
+        
+        return channelProcessorBackgroundService.Enqueue(() =>
+        //return Task.Run(() =>
         {
             var spawnGeneratorService = scopeFactory.CreateScope()
                                                     .ServiceProvider

@@ -227,6 +227,10 @@ public static class Program
                     GetNonNullService<ILogger<UpdatePixelBucketsService>>(
                         serviceProvider),
                     updatePixelBucketsServicePeriod));
+
+        services.AddSingleton<ChannelProcessorBackgroundService>();
+        
+        services.AddHostedService<ChannelProcessorBackgroundService>();
     }
 
     private static void AddRepositoryServices(IServiceCollection services)
