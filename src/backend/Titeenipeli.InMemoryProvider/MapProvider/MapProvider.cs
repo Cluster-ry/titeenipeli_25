@@ -50,7 +50,7 @@ public class MapProvider : IMapProvider
             pixelToUpdate.User = pixel.User;
         }
 
-        _mapDatabaseWriterService.PixelChannel.Writer.TryWrite(pixelToUpdate);
+        _mapDatabaseWriterService.PixelChannel.Writer.TryWrite(pixelToUpdate.Clone());
     }
 
     public bool IsValid(Coordinate pixelCoordinate)
