@@ -5,7 +5,7 @@ namespace Titeenipeli.Services;
 
 public class BackgroundGraphicsService : IBackgroundGraphicsService
 {
-    private const int ImageChunkSize = 32;
+    private const int ImageChunkSize = 16;
 
     private readonly int _splitBitmapWidth;
     private readonly int _splitBitmapHeight;
@@ -15,13 +15,18 @@ public class BackgroundGraphicsService : IBackgroundGraphicsService
     {
         var image = SKImage.FromEncodedData("Resources/Images/Background.webp");
         var bitmap = SKBitmap.FromImage(image);
-        byte[]? allBytes = bitmap.Bytes;
 
-        _splitBitmapWidth = bitmap.Width / 32;
-        _splitBitmapHeight = bitmap.Height / 32;
+        // Ensure bitmap is in RGBA format
+        var rgbaBitmap = new SKBitmap(bitmap.Width, bitmap.Height, SKColorType.Rgba8888, bitmap.AlphaType);
+        bitmap.CopyTo(rgbaBitmap, SKColorType.Rgba8888);
+
+        byte[]? allBytes = rgbaBitmap.Bytes;
+
+        _splitBitmapWidth = rgbaBitmap.Width / ImageChunkSize;
+        _splitBitmapHeight = rgbaBitmap.Height / ImageChunkSize;
         _splitBitmaps = new byte[_splitBitmapWidth, _splitBitmapHeight][];
-        int bytesPerPixel = bitmap.BytesPerPixel;
-        int rowSize = bitmap.Width * bytesPerPixel;
+        int bytesPerPixel = rgbaBitmap.BytesPerPixel;
+        int rowSize = rgbaBitmap.Width * bytesPerPixel;
         int sliceSize = ImageChunkSize * bytesPerPixel;
         int chunkSize = ImageChunkSize * ImageChunkSize * bytesPerPixel;
 

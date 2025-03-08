@@ -3,6 +3,7 @@ import { instructionsStore } from "../../stores/instructionsStore";
 import Modal from "../Modal/Modal";
 import Instructions from "../../models/ComponentData/Instructions";
 import InstructionsEntry from "./InstructionsEntry";
+import { FC } from "react";
 
 const instructionsData: Instructions[] = [
     {
@@ -20,15 +21,14 @@ const instructionsData: Instructions[] = [
     },
 ];
 
-const InstructionsModal = () => {
+const InstructionsModal: FC = () => {
     const { setInstructionsOn } = instructionsStore();
-
     return (
         <Modal title="Instructions" onClose={() => setInstructionsOn(false)}>
             <div id="instructions">
                 <div className="section-text">
-                    {instructionsData.map((instructionsEntry: Instructions) => (
-                        <InstructionsEntry {...instructionsEntry} />
+                    {instructionsData.map((instructionsEntry: Instructions, index: number) => (
+                        <InstructionsEntry key={index} {...instructionsEntry} />
                     ))}
                 </div>
             </div>
