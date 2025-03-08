@@ -90,33 +90,13 @@ public class MapUpdaterService(
 
     private List<MapChange> PlacePixelsWithRetry(List<Coordinate> pixelCoordinates, User newOwner)
     {
-        int lastFailedCount;
-        List<Coordinate> failedPlacements = [];
-        List<MapChange> grpcBatch = [];
-
-        do
-        {
-            lastFailedCount = failedPlacements.Count;
-            failedPlacements = [];
-
-            foreach (var pixelCoordinate in pixelCoordinates)
-            {
-                if (!IsValidPlacement(pixelCoordinate, newOwner))
-                {
-                    failedPlacements.Add(pixelCoordinate);
-                    continue;
-                }
-
-                if (mapProvider.IsSpawn(pixelCoordinate))
-                {
-                    continue;
-                }
-
-                var pixelCoordinateWithBorder = pixelCoordinate + new Coordinate(1, 1);
-                var map = GetMap();
-                var changedPixels = _mapUpdater.PlacePixel(map, pixelCoordinateWithBorder, newOwner);
-
-                grpcBatch = [.. grpcBatch, .. changedPixels];
+        var map = GetMap();
+        // I hope C# would not reallocate an object every time inside the select LINQ method even if we were to create
+        // this inside the select, but I am too lazy to profile this and not taking any risks
+        var addOneCoordinate = new Coordinate(1, 1);
+        var changedPixels = _mapUpdater.PlacePixels(map,
+            pixelCoordinates.Select(coordinate => coordinate + addOneCoordinate).ToArray(),
+            newOwner);
 
         DoDatabaseUpdate(changedPixels, newOwner);
 
