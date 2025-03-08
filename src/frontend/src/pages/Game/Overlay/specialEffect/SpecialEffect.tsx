@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import "./style.css";
 import defaultEffect from "../../../../assets/special_effect.png";
 import { PowerUp } from "../../../../models/Get/GetGameState";
@@ -19,8 +19,11 @@ const getEffectIcon = (index: number) => {
 export const SpecialEffect: FC<PowerUp & Props> = ({ selected, powerUpId, name, onClick }) => {
     const isSelected = useMemo(() => selected === powerUpId, [powerUpId, selected]);
     const icon = useMemo(() => getEffectIcon(powerUpId), [powerUpId]);
+    const handleClick = useCallback(() => {
+        onClick(powerUpId);
+    }, [onClick, powerUpId]);
     return (
-        <div key={powerUpId} className={"special-effect"} onClick={() => onClick(powerUpId)}>
+        <div key={powerUpId} className={"special-effect"} onClick={handleClick}>
             <div className={`button ${isSelected ? "selected" : ""}`}>
                 <img className="icon" src={icon} />
             </div>
