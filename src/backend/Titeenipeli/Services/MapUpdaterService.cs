@@ -78,17 +78,8 @@ public class MapUpdaterService(
                 user.SpawnX = spawnPoint.X;
                 user.SpawnY = spawnPoint.Y;
 
-                List<MapChange> changedPixels =
-                [
-                    new()
-                    {
-                        Coordinate = new Coordinate(spawnPoint.X, spawnPoint.Y),
-                        OldOwner = null,
-                        NewOwner = user
-                    }
-                ];
+                var changedPixels = _mapUpdater.PlacePixel(map, spawnPoint + new Coordinate(1, 1), user, PixelType.Spawn);
 
-                // TODO: This should use _mapUpdater.PlacePixel, but it doesn't support it
                 DoGrpcUpdate(map, changedPixels);
                 DoDatabaseUpdate(changedPixels, user);
             }
@@ -99,41 +90,16 @@ public class MapUpdaterService(
 
     private List<MapChange> PlacePixelsWithRetry(List<Coordinate> pixelCoordinates, User newOwner)
     {
-        int lastFailedCount;
-        List<Coordinate> failedPlacements = [];
-        List<MapChange> grpcBatch = [];
+        var map = GetMap(userRepositoryService);
+        // I hope C# would not reallocate an object every time inside the select LINQ method even if we were to create
+        // this inside the select, but I am too lazy to profile this and not taking any risks
+        var addOneCoordinate = new Coordinate(1, 1);
+        var changedPixels = _mapUpdater.PlacePixels(map,
+            pixelCoordinates.Select(coordinate => coordinate + addOneCoordinate).ToArray(), newOwner);
 
-        do
-        {
-            lastFailedCount = failedPlacements.Count;
-            failedPlacements = [];
+        DoDatabaseUpdate(changedPixels, newOwner);
 
-            foreach (var pixelCoordinate in pixelCoordinates)
-            {
-                if (!IsValidPlacement(pixelCoordinate, newOwner))
-                {
-                    failedPlacements.Add(pixelCoordinate);
-                    continue;
-                }
-
-                if (mapProvider.IsSpawn(pixelCoordinate))
-                {
-                    continue;
-                }
-
-                var pixelCoordinateWithBorder = pixelCoordinate + new Coordinate(1, 1);
-                var map = GetMap();
-                var changedPixels = _mapUpdater.PlacePixel(map, pixelCoordinateWithBorder, newOwner);
-
-                grpcBatch = [.. grpcBatch, .. changedPixels];
-
-                DoDatabaseUpdate(changedPixels, newOwner);
-            }
-
-            pixelCoordinates = failedPlacements;
-        } while (failedPlacements.Count > 0 && failedPlacements.Count != lastFailedCount);
-
-        return grpcBatch;
+        return changedPixels;
     }
 
     private PixelWithType[,] GetMap()
