@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Common.Database.Schema;
-using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Common.Results.CustomStatusCodes;
 using Titeenipeli.Extensions;
-using Titeenipeli.InMemoryMapProvider;
+using Titeenipeli.InMemoryProvider.MapProvider;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
@@ -23,24 +23,24 @@ public class MapController : ControllerBase
 
     private readonly GameOptions _gameOptions;
 
-    private readonly IUserRepositoryService _userRepositoryService;
     private readonly IBackgroundGraphicsService _backgroundGraphicsService;
 
     private readonly IMapUpdaterService _mapUpdaterService;
     private readonly IMapProvider _mapProvider;
+    private readonly IUserProvider _userProvider;
 
     private readonly IJwtService _jwtService;
 
     public MapController(GameOptions gameOptions,
                          IJwtService jwtService,
-                         IUserRepositoryService userRepositoryService,
                          IMapProvider mapProvider,
+                         IUserProvider userProvider,
                          IMapUpdaterService mapUpdaterService,
                          IBackgroundGraphicsService backgroundGraphicsService)
     {
         _gameOptions = gameOptions;
-        _userRepositoryService = userRepositoryService;
         _mapProvider = mapProvider;
+        _userProvider = userProvider;
         _jwtService = jwtService;
         _mapUpdaterService = mapUpdaterService;
         _backgroundGraphicsService = backgroundGraphicsService;
@@ -49,9 +49,9 @@ public class MapController : ControllerBase
     [HttpGet]
     public IActionResult GetPixels()
     {
-        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
+        var user = HttpContext.GetUser(_jwtService, _userProvider);
 
-        var users = _userRepositoryService.GetAll().ToArray();
+        var users = _userProvider.GetAll().ToArray();
         var pixels = _mapProvider.GetAll().ToArray();
 
         // +2 to account for the borders
@@ -88,7 +88,7 @@ public class MapController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> PostPixels([FromBody] PostPixelsInput pixelsInput)
     {
-        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
+        var user = HttpContext.GetUser(_jwtService, _userProvider);
 
         if (user.PixelBucket < 1)
         {
@@ -101,7 +101,7 @@ public class MapController : ControllerBase
             Y = user.SpawnY + pixelsInput.Y
         };
 
-        if (!await _mapUpdaterService.PlacePixel(_userRepositoryService, globalCoordinate, user))
+        if (!await _mapUpdaterService.PlacePixel(globalCoordinate, user))
         {
             string description = new Random().NextInt64(100) == 69
                 ? "Have a token #I_DONT_KNOW_THE_RULES"
@@ -118,8 +118,7 @@ public class MapController : ControllerBase
         }
 
         user.PixelBucket--;
-        _userRepositoryService.Update(user);
-        await _userRepositoryService.SaveChangesAsync();
+        _userProvider.Update(user);
 
         return Ok();
     }

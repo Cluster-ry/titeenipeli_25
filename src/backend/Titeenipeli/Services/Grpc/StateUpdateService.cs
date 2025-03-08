@@ -1,15 +1,15 @@
 ﻿using Grpc.Core;
 using GrpcGeneratedServices;
 using Titeenipeli.Common.Database.Schema;
-using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Extensions;
 using Titeenipeli.Grpc.Common;
+using Titeenipeli.InMemoryProvider.UserProvider;
 
 namespace Titeenipeli.Services.Grpc;
 
 public class StateUpdateService(
     IJwtService jwtService,
-    IUserRepositoryService userRepositoryService,
+    IUserProvider userProvider,
     IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
     IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService
 ) : StateUpdate.StateUpdateBase
@@ -53,14 +53,14 @@ public class StateUpdateService(
     private User GetUserFromHttpContext(ServerCallContext context)
     {
         var httpContext = context.GetHttpContext();
-        var jwtClaim = httpContext.GetUser(jwtService, userRepositoryService);
+        var jwtClaim = httpContext.GetUser(jwtService, userProvider);
         if (jwtClaim == null)
         {
             throw new RpcException(new Status(StatusCode.PermissionDenied,
                 "Missing or invalid authentication cookie."));
         }
 
-        var user = userRepositoryService.GetById(jwtClaim.Id);
+        var user = userProvider.GetById(jwtClaim.Id);
         if (user == null)
         {
             throw new RpcException(new Status(StatusCode.PermissionDenied, "User couldn't be found."));

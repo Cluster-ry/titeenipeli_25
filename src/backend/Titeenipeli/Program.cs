@@ -5,10 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using OpenTelemetry;
-using OpenTelemetry.Exporter;
 using OpenTelemetry.Extensions.Propagators;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Pyroscope;
@@ -16,7 +13,8 @@ using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Services;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Helpers;
-using Titeenipeli.InMemoryMapProvider;
+using Titeenipeli.InMemoryProvider.MapProvider;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Middleware;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
@@ -50,7 +48,7 @@ public static class Program
         builder.Services.AddScoped<SpawnGeneratorService>();
 
         // Adding OpenTelemetry tracing and metrics
-        OpenTelemetry.Sdk.SetDefaultTextMapPropagator(new B3Propagator(false));
+        Sdk.SetDefaultTextMapPropagator(new B3Propagator(false));
         builder
             .Services.AddOpenTelemetry()
             .ConfigureResource(ResourceBuilder =>
@@ -172,8 +170,10 @@ public static class Program
         AddBackgroundServices(builder.Services);
         AddRepositoryServices(builder.Services);
 
-        builder.Services.AddSingleton<DatabaseWriterService>();
+        builder.Services.AddSingleton<MapDatabaseWriterService>();
+        builder.Services.AddSingleton<UserDatabaseWriterService>();
         builder.Services.AddSingleton<IMapProvider, MapProvider>();
+        builder.Services.AddSingleton<IUserProvider, UserProvider>();
         builder.Services.AddSingleton<IMapUpdaterService, MapUpdaterService>();
         builder.Services.AddSingleton<IBackgroundGraphicsService, BackgroundGraphicsService>();
         builder.Services.AddSingleton<IPowerupService, PowerupService>();
@@ -185,13 +185,14 @@ public static class Program
             var services = scope.ServiceProvider;
             var dbContext = services.GetRequiredService<ApiDbContext>();
             var mapProvider = services.GetRequiredService<IMapProvider>();
+            var userProvider = services.GetRequiredService<IUserProvider>();
 
             if (app.Environment.IsDevelopment())
             {
                 DbFiller.Clear(dbContext);
             }
 
-            var newDatabase = dbContext.Database.EnsureCreated();
+            bool newDatabase = dbContext.Database.EnsureCreated();
             if (newDatabase)
             {
                 DbFiller.Initialize(dbContext, gameOptions);
@@ -203,6 +204,10 @@ public static class Program
                     .Include(pixel => pixel.User)
                     .ThenInclude(user => user!.Guild)
                     .ToList()
+            );
+
+            userProvider.Initialize(
+                dbContext.Users.Select(user => user).Include(user => user.Guild).ToList()
             );
         }
 

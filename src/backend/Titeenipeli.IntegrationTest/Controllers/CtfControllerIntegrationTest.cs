@@ -40,6 +40,7 @@ public class CtfControllerIntegrationTest : BaseFixture
         var ctfFlagRepositoryService = new CtfFlagRepositoryService(_dbContext);
         var userRepositoryService = new UserRepositoryService(_dbContext);
         var guildRepositoryService = new GuildRepositoryService(_dbContext);
+        var userProvider = new UserProviderStub();
         var powerUpService = new PowerupService(new GameOptions());
         var jwtService = new JwtService(new JwtOptions());
         var miscGameStateUpdateCoreService = new MiscGameStateUpdateCoreService(powerUpService, new Logger<StateUpdateService>(new LoggerFactory()));
@@ -51,6 +52,8 @@ public class CtfControllerIntegrationTest : BaseFixture
         guildRepositoryService.SaveChanges();
         userRepositoryService.Add(user);
         userRepositoryService.SaveChanges();
+
+        userProvider.Initialize(userRepositoryService.GetAll());
         jwtService.CreateJwtClaim(user);
 
         ctfFlagRepositoryService.Add(new CtfFlag { Token = "#TEST_FLAG" });
@@ -65,8 +68,11 @@ public class CtfControllerIntegrationTest : BaseFixture
             }
         };
 
-        var ctfController = new CtfController(ctfFlagRepositoryService, userRepositoryService, guildRepositoryService,
-            jwtService, miscGameStateUpdateCoreService)
+        var ctfController = new CtfController(ctfFlagRepositoryService,
+            guildRepositoryService,
+            userProvider,
+            jwtService,
+            miscGameStateUpdateCoreService)
         {
             ControllerContext = new ControllerContext
             {

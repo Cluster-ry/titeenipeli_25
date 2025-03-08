@@ -13,7 +13,7 @@ public class User : Entity
 
     public required int SpawnX { get; set; }
     public required int SpawnY { get; set; }
-    public float PixelBucket { get; set; } = 10;
+    public float PixelBucket { get; set; }
     [StringLength(32)]
     public string? AuthenticationToken { get; set; }
     public DateTime? AuthenticationTokenExpiryTime { get; set; }
@@ -35,4 +35,26 @@ public class User : Entity
     [StringLength(64)]
     public required string Username { get; init; }
     #endregion
+
+    public User Clone()
+    {
+        return new User
+        {
+            Id = Id,
+            Guild = Guild,
+            Code = Code,
+            SpawnX = SpawnX,
+            SpawnY = SpawnY,
+            PixelBucket = PixelBucket,
+            AuthenticationToken = AuthenticationToken,
+            AuthenticationTokenExpiryTime = AuthenticationTokenExpiryTime,
+            PowerUps = PowerUps,
+            IsGod = IsGod,
+
+            TelegramId = TelegramId,
+            FirstName = FirstName,
+            LastName = LastName,
+            Username = Username
+        };
+    }
 }

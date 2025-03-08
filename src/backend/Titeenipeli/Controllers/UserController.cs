@@ -7,6 +7,7 @@ using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Inputs;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
@@ -19,6 +20,7 @@ public class UserController(
     IHostEnvironment webHostEnvironment,
     BotOptions botOptions,
     GameOptions gameOptions,
+    IUserProvider userProvider,
     IUserRepositoryService userRepositoryService,
     IGuildRepositoryService guildRepositoryService,
     IJwtService jwtService,
@@ -33,7 +35,7 @@ public class UserController(
     [Authorize]
     public IActionResult CurrentUser()
     {
-        var user = HttpContext.GetUser(jwtService, userRepositoryService);
+        var user = HttpContext.GetUser(jwtService, userProvider);
 
         return Ok(new GetCurrentUserResult(user));
     }
@@ -47,7 +49,7 @@ public class UserController(
             return botTokenError;
         }
 
-        var user = userRepositoryService.GetByTelegramId(usersInput.TelegramId);
+        var user = userProvider.GetByTelegramId(usersInput.TelegramId);
 
         if (user == null)
         {
@@ -63,7 +65,7 @@ public class UserController(
             }
         }
 
-        string token = await CreateNewLoginTokenForUser(user);
+        string token = CreateNewLoginTokenForUser(user);
         PostUsersResult postUsersResult = new()
         {
             Token = token
@@ -82,7 +84,7 @@ public class UserController(
         }
         // ------------------------------------------
 
-        var user = userRepositoryService.GetByAuthenticationToken(loginInput.Token);
+        var user = userProvider.GetByAuthenticationToken(loginInput.Token);
         if (user == null)
         {
             return Unauthorized();
@@ -99,8 +101,7 @@ public class UserController(
             user.AuthenticationTokenExpiryTime = null;
         }
 
-        userRepositoryService.Update(user);
-        await userRepositoryService.SaveChangesAsync();
+        userProvider.Update(user);
 
         Response.Cookies.AppendJwtCookie(jwtService, user);
         return Ok();
@@ -108,7 +109,7 @@ public class UserController(
 
     private IActionResult DebugLogin(string telegramId)
     {
-        var user = userRepositoryService.GetByTelegramId(telegramId);
+        var user = userProvider.GetByTelegramId(telegramId);
         if (user == null)
         {
             return Unauthorized();
@@ -164,25 +165,28 @@ public class UserController(
             Username = usersInput.Username
         };
 
+        // Add user to database before adding it to UserProvider.
+        // This is done to get correct id for the user in UserProvider.
         userRepositoryService.Add(user);
         await userRepositoryService.SaveChangesAsync();
 
-        user = await mapUpdaterService.PlaceSpawn(userRepositoryService, user);
-        userRepositoryService.Update(user);
-        await userRepositoryService.SaveChangesAsync();
+        user = userRepositoryService.GetByTelegramId(user.TelegramId)!;
+        userProvider.Add(user);
+
+        user = await mapUpdaterService.PlaceSpawn(user);
+        userProvider.Update(user);
 
         return user;
     }
 
-    private async Task<string> CreateNewLoginTokenForUser(User user)
+    private string CreateNewLoginTokenForUser(User user)
     {
         const string characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         string token = RandomNumberGenerator.GetString(characters, LoginTokenLength);
 
         user.AuthenticationToken = token;
         user.AuthenticationTokenExpiryTime = DateTime.UtcNow + _loginTokenExpiryTime;
-        userRepositoryService.Update(user);
-        await userRepositoryService.SaveChangesAsync();
+        userProvider.Update(user);
 
         return token;
     }
