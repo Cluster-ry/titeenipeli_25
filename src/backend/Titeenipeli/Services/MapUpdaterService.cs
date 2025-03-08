@@ -81,7 +81,7 @@ public class MapUpdaterService(
                 user.SpawnY = spawnPoint.Y;
 
                 var changedPixels = _mapUpdater.PlacePixel(map, spawnPoint + new Coordinate(1, 1), user, PixelType.Spawn);
-                
+
                 DoGrpcUpdate(map, changedPixels);
                 DoDatabaseUpdate(changedPixels, user);
             }
