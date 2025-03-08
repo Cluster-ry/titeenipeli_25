@@ -132,7 +132,7 @@ func buildCharts(
 	}
 	ctx.Export("traefikPass", pulumi.ToSecret(pw.Result))
 
-	_, err = helm.NewRelease(ctx, "traefik", &helm.ReleaseArgs{
+	traefik, err := helm.NewRelease(ctx, "traefik", &helm.ReleaseArgs{
 		Chart:     pulumi.String("traefik"),
 		Name:      pulumi.String("traefik"),
 		Version:   pulumi.String("34.3.0"),
@@ -154,62 +154,19 @@ func buildCharts(
 					"external-dns.alpha.kubernetes.io/hostname": pulumi.String("traefik.test.cluster2017.fi,grafana.test.cluster2017.fi,peli.test.cluster2017.fi,grcp.peli.test.cluster2017.fi"), // dynamic domain
 				},
 			},
-			"extraObjects": pulumi.Array{
-				pulumi.Map{
-					"apiVersion": pulumi.String("v1"),
-					"kind":       pulumi.String("Secret"),
-					"metadata": pulumi.Map{
-						"name": pulumi.String("traefik-dashboard-auth-secret"),
-					},
-					"type": pulumi.String("kubernetes.io/basic-auth"),
-					"stringData": pulumi.Map{
-						"username": pulumi.String("admin"),
-						"password": pw.Result,
-					},
-				},
-				pulumi.Map{
-					"apiVersion": pulumi.String("traefik.io/v1alpha1"),
-					"kind":       pulumi.String("Middleware"),
-					"metadata": pulumi.Map{
-						"name": pulumi.String("traefik-dashboard-auth"),
-					},
-					"spec": pulumi.Map{
-						"basicAuth": pulumi.Map{
-							"secret": pulumi.String("traefik-dashboard-auth-secret"),
-						},
-					},
-				},
-				pulumi.Map{
-					"apiVersion": pulumi.String("traefik.io/v1alpha1"),
-					"kind":       pulumi.String("IngressRoute"),
-					"metadata": pulumi.Map{
-						"labels": pulumi.Map{
-							"app.kubernetes.io/name": pulumi.String("grafana"),
-						},
-						"name":      pulumi.String("grafana-dashboard"),
-						"namespace": pulumi.String("monitoring"),
-					},
-					"spec": pulumi.Map{
-						"entryPoints": pulumi.Array{
-							pulumi.String("websecure"),
-						},
-						"routes": pulumi.Array{
-							pulumi.Map{
-								"kind":  pulumi.String("Rule"),
-								"match": pulumi.String("Host(`grafana.test.cluster2017.fi`)"),
-								"services": pulumi.Array{
-									pulumi.Map{
-										"name": pulumi.String("lgtm-distributed-grafana"),
-										"port": pulumi.Int(80),
-									},
-								},
-							},
-						},
-					},
-				},
-			},
 		},
 	}, pulumi.Providers(k8sProvider), pulumi.DependsOn([]pulumi.Resource{traefikNS, certs}))
+	if err != nil {
+		return err
+	}
+
+	_, err = helm.NewChart(ctx, "traefik-resources", helm.ChartArgs{
+		Path:      pulumi.String("./helm/traefik-resources"),
+		Namespace: pulumi.String("traefik"),
+		Values: pulumi.Map{
+			"password": pw.Result,
+		},
+	}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{traefikNS, traefik}))
 	if err != nil {
 		return err
 	}

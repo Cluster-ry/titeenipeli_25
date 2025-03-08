@@ -6,7 +6,7 @@ metadata:
 spec:
   secretName: wildcard-tls
   issuerRef:
-    name: letsencrypt-staging
+    name: letsencrypt-production
     kind: ClusterIssuer
   commonName: "{{ .Values.hostedZoneName }}"
   dnsNames:
