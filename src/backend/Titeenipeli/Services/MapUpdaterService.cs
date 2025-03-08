@@ -90,7 +90,7 @@ public class MapUpdaterService(
 
     private List<MapChange> PlacePixelsWithRetry(List<Coordinate> pixelCoordinates, User newOwner)
     {
-        var map = GetMap(userRepositoryService);
+        var map = GetMap();
         // I hope C# would not reallocate an object every time inside the select LINQ method even if we were to create
         // this inside the select, but I am too lazy to profile this and not taking any risks
         var addOneCoordinate = new Coordinate(1, 1);
