@@ -18,6 +18,17 @@ public sealed class PowerupService(GameOptions gameOptions) : IPowerupService
         PowerUps.TestEffect => new TestEffect(),
         PowerUps.Titeenikirves => new TiteenikirvesEffect(gameOptions.Height, gameOptions.Width),
         PowerUps.MFiles => new MFilesEffect(),
+        PowerUps.IsoL => new IsoLEffect(),
+        //PowerUps.Glitch => new GlitchEffect(),
+        PowerUps.Binary => new BinaryEffect(),
+        PowerUps.Siika => new SiikaEffect(),
+        PowerUps.Ruusu => new RuusuEffect(),
+        PowerUps.Star => new StarEffect(),
+        PowerUps.Bottle => new BottleEffect(),
+        PowerUps.Dino => new DinoEffect(),
+        PowerUps.Gem => new GemEffect(),
+        PowerUps.Heart => new HeartEffect(),
+        PowerUps.SpaceInvader => new SpaceInvaderEffect(),
         _ => null
     };
 
