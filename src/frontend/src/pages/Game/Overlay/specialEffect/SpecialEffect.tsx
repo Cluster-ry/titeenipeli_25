@@ -15,6 +15,8 @@ type Props = {
     onClick: (effectId: number) => void;
 };
 
+const cancelLabel = "Cancel";
+
 const SpecialEffectIcon: { [key: number]: string } = {
     1: defaultEffect, 
     0: titeeniKirvesEffect,
@@ -40,7 +42,7 @@ export const SpecialEffect: FC<PowerUp & Props> = ({ selected, powerUpId, name, 
             <div className={`button ${isSelected ? "selected" : ""}`}>
                 <img className="icon" src={icon} />
             </div>
-            <span className="label">{name}</span>
+            <span className={`label${isSelected ? " cancel" : ""}`}>{isSelected ? cancelLabel : name}</span>
             {isSelected ? <img className="overlay-effect" src={icon} /> : null}
         </div>
     );
