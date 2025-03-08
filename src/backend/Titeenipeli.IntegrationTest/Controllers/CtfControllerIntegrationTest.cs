@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Titeenipeli.Common.Database;
@@ -11,6 +10,8 @@ using Titeenipeli.Options;
 using Titeenipeli.Services;
 using Titeenipeli.Services.Grpc;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
 namespace Titeenipeli.IntegrationTest.Controllers;
 
 [TestFixture]
@@ -19,23 +20,22 @@ public class CtfControllerIntegrationTest : BaseFixture
     [SetUp]
     public async Task BeforeEach()
     {
+        _dbContext = new ApiDbContext(new DbContextOptionsBuilder().UseNpgsql(Postgres.GetConnectionString()).Options);
         await _dbContext.Database.EnsureCreatedAsync();
     }
 
-    [OneTimeTearDown]
-    public async Task AfterAll()
+    [TearDown]
+    public void AfterAll()
     {
-        await _dbContext.Database.EnsureDeletedAsync();
-        await _dbContext.DisposeAsync();
+        _dbContext.Dispose();
     }
 
-    private readonly ApiDbContext _dbContext =
-        new ApiDbContext(new DbContextOptionsBuilder().UseNpgsql(Postgres.GetConnectionString()).Options);
+    private ApiDbContext _dbContext;
 
     [TestCase("#TEST_FLAG", 200, TestName = "Should return success code for valid flag")]
     [TestCase("#INVALID_FLAG", 400, TestName = "Should return failure code for invalid flag")]
     [TestCase(null, 400, TestName = "Should return failure code for null flag")]
-    public void Test1(string? token, int statusCode)
+    public void PostFlagTest(string? token, int statusCode)
     {
         var ctfFlagRepositoryService = new CtfFlagRepositoryService(_dbContext);
         var userRepositoryService = new UserRepositoryService(_dbContext);
@@ -57,24 +57,33 @@ public class CtfControllerIntegrationTest : BaseFixture
         ctfFlagRepositoryService.SaveChanges();
 
         var jwtClaim = jwtService.CreateJwtClaim(user);
-        var httpcontext = new DefaultHttpContext();
-        httpcontext.Items[jwtService.GetJwtClaimName()] = jwtClaim;
-
-        CtfController ctfController = new CtfController(ctfFlagRepositoryService, userRepositoryService, guildRepositoryService, jwtService, miscGameStateUpdateCoreService);
-        ctfController.ControllerContext = new ControllerContext
+        var httpContext = new DefaultHttpContext
         {
-            HttpContext = httpcontext
+            Items =
+            {
+                [jwtService.GetJwtClaimName()] = jwtClaim
+            }
         };
 
-        PostCtfInput input = new PostCtfInput { Token = token! };
+        var ctfController = new CtfController(ctfFlagRepositoryService, userRepositoryService, guildRepositoryService,
+            jwtService, miscGameStateUpdateCoreService)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            }
+        };
+
+        var input = new PostCtfInput { Token = token! };
 
 
-        IStatusCodeActionResult? result = ctfController.PostCtf(input) as IStatusCodeActionResult;
+        // ReSharper disable once SuspiciousTypeConversion.Global
+        var result = ctfController.PostCtf(input) as IStatusCodeActionResult;
         result?.StatusCode.Should().Be(statusCode);
     }
 
 
-    private Guild GenerateGuild()
+    private static Guild GenerateGuild()
     {
         return new Guild
         {
@@ -82,7 +91,7 @@ public class CtfControllerIntegrationTest : BaseFixture
         };
     }
 
-    private User GenerateUser(Guild guild)
+    private static User GenerateUser(Guild guild)
     {
         return new User
         {

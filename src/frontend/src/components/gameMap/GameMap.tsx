@@ -12,6 +12,11 @@ import { useIsMoving } from "../../hooks/useIsMoving.ts";
 import { Coordinate } from "../../models/Coordinate.ts";
 import { usePowerUps } from "../../hooks/usePowerUps.ts";
 import MapTile from "./MapTile.tsx";
+import { useDynamicWindowSize } from "../../hooks/useDynamicWindowSize.tsx";
+
+const mapOptions = {
+    background: 0xffffff, resizeTo: window, antialias: false, premultipliedAlpha: false
+}
 
 /**
  * @component GameMap
@@ -35,6 +40,7 @@ const GameMap: FC = () => {
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
     const onMapClickRef = useRef<((coordinate: Coordinate, targeted: boolean) => void) | null>(null);
+    const windowSize = useDynamicWindowSize();
 
     const onMapClick = useCallback((coordinate: Coordinate, targeted: boolean) => {
         const viewportX = coordinate.x / mapConfig.PixelSize;
@@ -55,12 +61,12 @@ const GameMap: FC = () => {
         onMapClickRef.current = onMapClick
     }, [onMapClick, onMapClickRef]);
 
-    const mappedBoundingBox = {
+    const mappedBoundingBox = useMemo(() => ({
         minY: pixelsBoundingBox.min.y,
         minX: pixelsBoundingBox.min.x,
         maxY: pixelsBoundingBox.max.y,
         maxX: pixelsBoundingBox.max.x,
-    };
+    }), [pixelsBoundingBox]);
 
     const pixelElements = useMemo(() => {
         const result: JSX.Element[] = [];
@@ -97,14 +103,14 @@ const GameMap: FC = () => {
     }
     return (
         <Stage
-            width={window.innerWidth}
-            height={window.innerHeight}
-            options={{ background: 0xffffff, resizeTo: window, antialias: false, premultipliedAlpha: false }}
+            width={windowSize.width}
+            height={windowSize.height}
+            options={mapOptions}
             onContextMenu={(e) => e.preventDefault()}
         >
             <Viewport
-                width={window.innerWidth}
-                height={window.innerHeight}
+                width={windowSize.width}
+                height={windowSize.height}
                 boundingBox={mappedBoundingBox}
                 onMoveStart={startMoving}
             >

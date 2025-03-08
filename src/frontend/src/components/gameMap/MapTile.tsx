@@ -30,7 +30,6 @@ const MapTile = PixiComponent("MapTile", {
     },
     applyProps: (instance: Sprite, _oldProps: MapTileProps, newProps: MapTileProps) => {
         const { x, y, width, height, alpha, highlight, hue, saturation, lightness } = newProps;
-
         instance.texture = getTexture(newProps);
         instance.width = width + 0.05;
         instance.height = height + 0.05;
@@ -49,6 +48,7 @@ const MapTile = PixiComponent("MapTile", {
         instance.y = y;
         if (newProps.onClickRef.current) {
             instance.eventMode = "static";
+            instance.removeAllListeners("pointertap");
             instance.on("pointertap", (event) => handleEvent(event, newProps));
         }
     }

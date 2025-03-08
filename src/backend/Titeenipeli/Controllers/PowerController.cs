@@ -51,12 +51,25 @@ public sealed class PowerController(
             direction = Direction.Undefined;
         }
 
-        var pixelsToPlace = specialEffect.HandleSpecialEffect(new Coordinate(user.SpawnX + body.Location.X, user.SpawnY + body.Location.Y), direction);
-        await mapUpdaterService.PlacePixels(userRepositoryService, pixelsToPlace, user);
-
         user.PowerUps.Remove(userPower);
         userRepositoryService.Update(user);
         await userRepositoryService.SaveChangesAsync();
+
+        try
+        {
+            var pixelsToPlace = specialEffect.HandleSpecialEffect(
+                new Coordinate(user.SpawnX + body.Location.X, user.SpawnY + body.Location.Y), direction);
+
+            await mapUpdaterService.PlacePixels(userRepositoryService, pixelsToPlace, user);
+        }
+        catch (Exception)
+        {
+            user.PowerUps.Add(userPower);
+            userRepositoryService.Update(user);
+            await userRepositoryService.SaveChangesAsync();
+            throw;
+        }
+
 
         SendPowerupMessage(user, userPower);
         SendPowerupUpdate(user);
