@@ -1,16 +1,16 @@
 ﻿using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Models;
 
-namespace Titeenipeli.InMemoryMapProvider;
+namespace Titeenipeli.InMemoryProvider.MapProvider;
 
 public class MapProvider : IMapProvider
 {
     private List<Pixel> _map = [];
-    private readonly DatabaseWriterService _databaseWriterService;
+    private readonly MapDatabaseWriterService _mapDatabaseWriterService;
 
-    public MapProvider(DatabaseWriterService databaseWriterService)
+    public MapProvider(MapDatabaseWriterService mapDatabaseWriterService)
     {
-        _databaseWriterService = databaseWriterService;
+        _mapDatabaseWriterService = mapDatabaseWriterService;
     }
 
     public void Initialize(List<Pixel> pixels)
@@ -22,7 +22,7 @@ public class MapProvider : IMapProvider
     {
         lock (_map)
         {
-            return _map.FirstOrDefault(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
+            return _map.Find(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
         }
     }
 
@@ -30,7 +30,7 @@ public class MapProvider : IMapProvider
     {
         lock (_map)
         {
-            return _map.ToList();
+            return _map;
         }
     }
 
@@ -50,7 +50,7 @@ public class MapProvider : IMapProvider
             pixelToUpdate.User = pixel.User;
         }
 
-        _databaseWriterService.PixelChannel.Writer.TryWrite(pixelToUpdate);
+        _mapDatabaseWriterService.PixelChannel.Writer.TryWrite(pixelToUpdate);
     }
 
     public bool IsValid(Coordinate pixelCoordinate)

@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Common.Database.Schema;
-using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Common.Results.CustomStatusCodes;
 using Titeenipeli.Extensions;
-using Titeenipeli.InMemoryMapProvider;
+using Titeenipeli.InMemoryProvider.MapProvider;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
 using Titeenipeli.Services;

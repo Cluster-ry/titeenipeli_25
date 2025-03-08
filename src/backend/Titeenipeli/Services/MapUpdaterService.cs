@@ -5,7 +5,8 @@ using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
-using Titeenipeli.InMemoryMapProvider;
+using Titeenipeli.InMemoryProvider.MapProvider;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Options;
 using Titeenipeli.Services.Grpc;
 
