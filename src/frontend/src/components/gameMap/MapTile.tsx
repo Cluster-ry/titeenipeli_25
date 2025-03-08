@@ -31,10 +31,9 @@ const MapTile = PixiComponent("MapTile", {
     },
     applyProps: (instance: Sprite, _oldProps: MapTileProps, newProps: MapTileProps) => {
         const { x, y, width, height, alpha, highlight, hue, saturation, lightness } = newProps;
-
         instance.texture = getTexture(newProps);
-        instance.width = width + 1;
-        instance.height = height + 1;
+        instance.width = width + 0.05;
+        instance.height = height + 0.05;
 
         const overlay: ColorOverlayFilter = colourPicker.getColourOverlay(hue, saturation, lightness, alpha);
 
@@ -50,6 +49,7 @@ const MapTile = PixiComponent("MapTile", {
         instance.y = y - 0.5;
         if (newProps.onClickRef.current) {
             instance.eventMode = "static";
+            instance.removeAllListeners("pointertap");
             instance.on("pointertap", (event) => handleEvent(event, newProps));
         }
     }

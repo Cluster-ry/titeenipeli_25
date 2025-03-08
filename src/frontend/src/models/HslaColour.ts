@@ -10,7 +10,7 @@ export interface IHslaColour {
     saturation: number;
     lightness: number;
     alpha: number;
-    getColorWithModifiers: (pixel?: Pixel | null, user?: User | null) => IHslaColour;
+    getColourWithModifiers: (pixel?: Pixel | null, user?: User | null) => IHslaColour;
 }
 
 export class HslaColour implements IHslaColour { 
@@ -24,7 +24,7 @@ export class HslaColour implements IHslaColour {
     saturation: number;
     lightness: number;
     alpha: number;
-    getColorWithModifiers(pixel: Pixel | null = null, user: User | null = null) {
+    getColourWithModifiers(pixel: Pixel | null = null, user: User | null = null) {
         if (pixel == null && user == null) return this;
         const result: HslaColour = new HslaColour(this.hue, this.saturation, this.lightness, this.alpha);
         return result.saturatePixelOwner(pixel, user).lightenSpawn(pixel);

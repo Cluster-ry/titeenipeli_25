@@ -1,5 +1,7 @@
 import { Pixel } from "../models/Pixel.ts";
 import { create } from "zustand";
+import { getBoundaries } from "../utils/getBoundaries.ts";
+
 export interface Coordinate {
     x: number;
     y: number;
@@ -12,6 +14,7 @@ export interface NewMapStore {
     setMap: (map: Map<string, Pixel> | null) => void;
     pixelsBoundingBox: { min: Coordinate; max: Coordinate };
     setPixelsBoundingBox: ({ min, max }: { min: Coordinate; max: Coordinate }) => void;
+    updatePixelsBoundingBox: (bounds: Coordinate[]) => void;
 }
 
 export const useNewMapStore = create<NewMapStore>((set) => ({
@@ -46,8 +49,17 @@ export const useNewMapStore = create<NewMapStore>((set) => ({
         set({ map });
     },
     pixelsBoundingBox: { min: { x: 0, y: 0 }, max: { x: 0, y: 0 } },
-    setPixelsBoundingBox: ({ min, max }: { min: Coordinate; max: Coordinate }) =>
-        set({ pixelsBoundingBox: { min, max } }),
+    setPixelsBoundingBox: (props: { min: Coordinate; max: Coordinate }) =>{
+        set(() => ({ pixelsBoundingBox: props }))},
+    updatePixelsBoundingBox: (bounds: Coordinate[]) => {
+        set(state => {
+            const { min, max } = state.pixelsBoundingBox;
+            const result = getBoundaries(bounds, { minX: min.x, minY: min.y, maxX: max.x, maxY: max.y });
+            return {
+                pixelsBoundingBox: result
+            };
+        })
+    }
 }));
 
 const backgroundGraphics: Map<string, Uint8Array | undefined> = new Map();
