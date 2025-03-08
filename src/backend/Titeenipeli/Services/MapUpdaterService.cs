@@ -16,16 +16,15 @@ public class MapUpdaterService(
     IServiceScopeFactory scopeFactory,
     GameOptions gameOptions,
     IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
-    IMapProvider mapProvider
+    IMapProvider mapProvider,
+    IUserProvider userProvider
 ) : IMapUpdaterService
 {
     private const int BorderWidth = 1;
 
     private readonly MapUpdater _mapUpdater = new();
 
-    public Task<bool> PlacePixel(IUserRepositoryService userRepositoryService,
-                                 Coordinate pixelCoordinate,
-                                 User newOwner)
+    public Task<bool> PlacePixel(Coordinate pixelCoordinate, User newOwner)
     {
         var borderfiedCoordinate = pixelCoordinate + new Coordinate(1, 1);
 
@@ -38,7 +37,7 @@ public class MapUpdaterService(
                     return false;
                 }
 
-                var map = GetMap(userRepositoryService);
+                var map = GetMap();
                 var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
 
                 DoGrpcUpdate(map, changedPixels);
@@ -49,23 +48,21 @@ public class MapUpdaterService(
         });
     }
 
-    public Task<bool> PlacePixels(IUserRepositoryService userRepositoryService,
-                                  List<Coordinate> pixelCoordinates,
-                                  User newOwner)
+    public Task<bool> PlacePixels(List<Coordinate> pixelCoordinates, User newOwner)
     {
         return Task.Run(() =>
         {
             lock (_mapUpdater)
             {
-                var grpcBatch = PlacePixelsWithRetry(userRepositoryService, pixelCoordinates, newOwner);
-                DoGrpcUpdate(GetMap(userRepositoryService), grpcBatch);
+                var grpcBatch = PlacePixelsWithRetry(pixelCoordinates, newOwner);
+                DoGrpcUpdate(GetMap(), grpcBatch);
             }
 
             return true;
         });
     }
 
-    public Task<User> PlaceSpawn(IUserRepositoryService userRepositoryService, User user)
+    public Task<User> PlaceSpawn(User user)
     {
         return Task.Run(() =>
         {
@@ -75,7 +72,7 @@ public class MapUpdaterService(
 
             lock (_mapUpdater)
             {
-                var map = GetMap(userRepositoryService);
+                var map = GetMap();
                 var spawnPoint = spawnGeneratorService.GetSpawnPoint(user.Guild.Name);
 
                 user.SpawnX = spawnPoint.X;
@@ -100,9 +97,7 @@ public class MapUpdaterService(
         });
     }
 
-    private List<MapChange> PlacePixelsWithRetry(IUserRepositoryService userRepositoryService,
-                                                 List<Coordinate> pixelCoordinates,
-                                                 User newOwner)
+    private List<MapChange> PlacePixelsWithRetry(List<Coordinate> pixelCoordinates, User newOwner)
     {
         int lastFailedCount;
         List<Coordinate> failedPlacements = [];
@@ -127,7 +122,7 @@ public class MapUpdaterService(
                 }
 
                 var pixelCoordinateWithBorder = pixelCoordinate + new Coordinate(1, 1);
-                var map = GetMap(userRepositoryService);
+                var map = GetMap();
                 var changedPixels = _mapUpdater.PlacePixel(map, pixelCoordinateWithBorder, newOwner);
 
                 grpcBatch = [.. grpcBatch, .. changedPixels];
@@ -141,9 +136,9 @@ public class MapUpdaterService(
         return grpcBatch;
     }
 
-    private PixelWithType[,] GetMap(IUserRepositoryService userRepositoryService)
+    private PixelWithType[,] GetMap()
     {
-        var users = userRepositoryService.GetAll().ToArray();
+        var users = userProvider.GetAll().ToArray();
         var pixels = mapProvider.GetAll().ToArray();
 
         int width = gameOptions.Width + 2 * BorderWidth;
