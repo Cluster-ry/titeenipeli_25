@@ -45,7 +45,13 @@ public sealed class PowerController(
             return BadRequest();
         }
 
-        var pixelsToPlace = specialEffect.HandleSpecialEffect(new Coordinate(user.SpawnX + body.Location.X, user.SpawnY + body.Location.Y), body.Direction);
+        var direction = body.Direction;
+        if (!userPower.Directed)
+        {
+            direction = Direction.Undefined;
+        }
+
+        var pixelsToPlace = specialEffect.HandleSpecialEffect(new Coordinate(user.SpawnX + body.Location.X, user.SpawnY + body.Location.Y), direction);
         await mapUpdaterService.PlacePixels(userRepositoryService, pixelsToPlace, user);
 
         user.PowerUps.Remove(userPower);

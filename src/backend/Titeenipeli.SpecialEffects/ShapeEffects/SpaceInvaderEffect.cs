@@ -6,7 +6,7 @@ namespace Titeenipeli.SpecialEffects;
 public class SpaceInvaderEffect : BaseSpecialEffect
 {
     public override string Description { get; } = "";
-    
+
     protected override byte[,] Template { get; } =
     {
         { 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0 },
