@@ -10,6 +10,7 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Controllers;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Services;
 using Titeenipeli.Services.Grpc;
@@ -53,8 +54,8 @@ public class CtfControllerTest
     public void PostCtfTest(string token, int statusCode)
     {
         var mockCtfFlagRepositoryService = new Mock<ICtfFlagRepositoryService>();
-        var mockUserRepositoryService = new Mock<IUserRepositoryService>();
         var mockGuildRepositoryService = new Mock<IGuildRepositoryService>();
+        var mockUserProvider = new Mock<IUserProvider>();
         var mockJwtService = new Mock<IJwtService>();
         var mockMiscGameStateUpdateCoreService = new Mock<IMiscGameStateUpdateCoreService>();
 
@@ -69,11 +70,11 @@ public class CtfControllerTest
             .Returns(new CtfFlag { Token = "#TEST_FLAG" });
 
         mockGuildRepositoryService
-        .Setup(repo => repo.Update(It.IsAny<Guild>()));
+            .Setup(repo => repo.Update(It.IsAny<Guild>()));
 
-        mockUserRepositoryService
-        .Setup(repo => repo.GetById(It.IsAny<int>()))
-        .Returns(CurrentUser);
+        mockUserProvider
+            .Setup(repo => repo.GetById(It.IsAny<int>()))
+            .Returns(CurrentUser);
 
         var httpContext = new DefaultHttpContext
         {
@@ -83,8 +84,11 @@ public class CtfControllerTest
             }
         };
 
-        var controller = new CtfController(mockCtfFlagRepositoryService.Object, mockUserRepositoryService.Object,
-            mockGuildRepositoryService.Object, mockJwtService.Object, mockMiscGameStateUpdateCoreService.Object)
+        var controller = new CtfController(mockCtfFlagRepositoryService.Object,
+            mockGuildRepositoryService.Object,
+            mockUserProvider.Object,
+            mockJwtService.Object,
+            mockMiscGameStateUpdateCoreService.Object)
         {
             ControllerContext = new ControllerContext
             {

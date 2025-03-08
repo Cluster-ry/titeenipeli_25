@@ -12,6 +12,7 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Inputs;
 using Titeenipeli.Controllers;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
 
@@ -38,6 +39,29 @@ public class UserControllerTest
         var botOptions = new BotOptions();
         var gameOptions = new GameOptions();
 
+        var existingUser = new User
+        {
+            Guild = new Guild { Name = GuildName.Tietokilta },
+            Code = "",
+
+            SpawnX = 0,
+            SpawnY = 0,
+
+            TelegramId = "",
+            FirstName = "",
+            LastName = "",
+            Username = ""
+        };
+
+        var mockUserProvider = new Mock<IUserProvider>();
+        mockUserProvider
+            .Setup(userProvider => userProvider.GetByTelegramId("1"))
+            .Returns(null as User);
+
+        mockUserProvider
+            .Setup(repositoryService => repositoryService.GetByTelegramId("2"))
+            .Returns(existingUser);
+
         var mockUserRepositoryService = new Mock<IUserRepositoryService>();
         mockUserRepositoryService
             .Setup(repositoryService => repositoryService.GetByTelegramId("1"))
@@ -45,29 +69,21 @@ public class UserControllerTest
 
         mockUserRepositoryService
             .Setup(repositoryService => repositoryService.GetByTelegramId("2"))
-            .Returns(new User
-            {
-                Guild = new Guild { Name = GuildName.Tietokilta },
-                Code = "",
-
-                SpawnX = 0,
-                SpawnY = 0,
-
-                TelegramId = "",
-                FirstName = "",
-                LastName = "",
-                Username = "",
-            });
+            .Returns(existingUser);
 
         var mockGuildRepositoryService = new Mock<IGuildRepositoryService>();
 
         var mockMapUpdaterService = new Mock<IMapUpdaterService>();
-        mockMapUpdaterService.Setup(service => service.PlaceSpawn(mockUserRepositoryService.Object, It.IsAny<User>()))
-                             .Returns<IUserRepositoryService, User>((_, user) => new Task<User>(() => user));
+        mockMapUpdaterService.Setup(service => service.PlaceSpawn(It.IsAny<User>()))
+                             .Returns<User>(user => new Task<User>(() => user));
 
         var controller = new UserController(new HostingEnvironment(),
             botOptions,
-            gameOptions, mockUserRepositoryService.Object, mockGuildRepositoryService.Object, _jwtService,
+            gameOptions,
+            mockUserProvider.Object,
+            mockUserRepositoryService.Object,
+            mockGuildRepositoryService.Object,
+            _jwtService,
             mockMapUpdaterService.Object)
         {
             ControllerContext =

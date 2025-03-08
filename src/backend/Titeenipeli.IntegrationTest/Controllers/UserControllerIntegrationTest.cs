@@ -3,7 +3,6 @@ using Moq;
 using Titeenipeli.Common.Database;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services;
-using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Inputs;
 using Titeenipeli.Controllers;
@@ -69,14 +68,22 @@ public class UserControllerIntegrationTest : BaseFixture
 
         var guildRepositoryService = new GuildRepositoryService(_dbContext);
 
+        var userProvider = new UserProviderStub();
+        userProvider.Initialize(userRepositoryService.GetAll());
+
         var mockMapUpdaterService = new Mock<IMapUpdaterService>();
-        mockMapUpdaterService.Setup(service => service.PlaceSpawn(userRepositoryService, It.IsAny<User>()))
-                             .Returns<IUserRepositoryService, User>((_, user) => new Task<User>(() => user));
+        mockMapUpdaterService.Setup(service => service.PlaceSpawn(It.IsAny<User>()))
+                             .Returns<User>(user => new Task<User>(() => user));
 
 
         var controller = new UserController(new HostingEnvironment(),
             botOptions,
-            gameOptions, userRepositoryService, guildRepositoryService, _jwtService, mockMapUpdaterService.Object)
+            gameOptions,
+            userProvider,
+            userRepositoryService,
+            guildRepositoryService,
+            _jwtService,
+            mockMapUpdaterService.Object)
         {
             ControllerContext =
             {
