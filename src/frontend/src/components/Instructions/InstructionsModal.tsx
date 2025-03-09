@@ -1,9 +1,10 @@
 import "./instructions.css";
-import { instructionsStore } from "../../stores/instructionsStore";
+import { useInstructionsStore } from "../../stores/instructionsStore";
 import Modal from "../Modal/Modal";
 import Instructions from "../../models/ComponentData/Instructions";
 import InstructionsEntry from "./InstructionsEntry";
-import { FC } from "react";
+import { FC, useCallback } from "react";
+import mFilesLogo from "../../assets/M-Files-Logo-With-Tagline-Full-Color-RGB.svg";
 
 const instructionsData: Instructions[] = [
     {
@@ -22,16 +23,23 @@ const instructionsData: Instructions[] = [
 ];
 
 const InstructionsModal: FC = () => {
-    const { setInstructionsOn } = instructionsStore();
+    const setInstructionsOn = useInstructionsStore(state => state.setInstructionsOn);
+    const onClose = useCallback(() => {
+        setInstructionsOn(false)
+    }, [setInstructionsOn]);
     return (
-        <Modal title="Instructions" onClose={() => setInstructionsOn(false)}>
+        <Modal title="Instructions" onClose={onClose}>
             <div id="instructions">
                 <div className="section-text">
-                    {instructionsData.map((instructionsEntry: Instructions, index: number) => (
-                        <InstructionsEntry key={index} {...instructionsEntry} />
+                    {instructionsData.map((instructionsEntry: Instructions) => (
+                        <InstructionsEntry key={instructionsEntry.header} {...instructionsEntry} />
                     ))}
                 </div>
             </div>
+            <h2>Sponsored by:</h2>
+            <img style={{
+                width: '50%',
+            }} src={mFilesLogo}/>
         </Modal>
     );
 };

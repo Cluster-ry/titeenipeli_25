@@ -27,7 +27,7 @@ const mapBorderColor = new HslaColour(44, 98, 50, 1);
 
 export function pixelColor(pixel: Pixel | null = null, user: User | null = null): IHslaColour {
     const color: IHslaColour = pixelBaseColor(pixel);
-    return color.getColorWithModifiers(pixel, user);
+    return color.getColourWithModifiers(pixel, user);
 }
 
 const pixelBaseColor = (pixel?: Pixel | null): IHslaColour => {

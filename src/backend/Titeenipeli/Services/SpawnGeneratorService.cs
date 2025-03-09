@@ -1,7 +1,7 @@
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
-using Titeenipeli.InMemoryMapProvider;
+using Titeenipeli.InMemoryProvider.MapProvider;
 using Titeenipeli.Options;
 
 namespace Titeenipeli.Services;

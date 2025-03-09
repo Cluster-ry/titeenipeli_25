@@ -24,9 +24,19 @@
 }
 
 .special-effect .label {
+    z-index: 5;
     flex: 1 1 4em;
-    width: 8em;
     text-align: center;
+}
+
+.cancel {
+    color: darkred;
+    text-shadow:
+    2px -2px 0px #fff700,
+    -2px 2px 0px #fff700,
+    2px 2px 0px #fff700,
+    -2px -2px 0px #fff700;
+    animation: label-in-out 0.5s ease-in-out infinite alternate-reverse;
 }
 
 .special-effect .button:hover {
@@ -46,6 +56,14 @@
     right: 10vw;
     width: 20em;
     animation: overlay-selected 5s ease-in-out infinite;
+}
+@keyframes label-in-out {
+    from {
+        transform: scale(1.4);
+    }
+    to {
+        transform: scale(1.5);
+    }
 }
 @keyframes selected {
     0% {

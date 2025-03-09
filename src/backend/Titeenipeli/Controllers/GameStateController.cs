@@ -4,6 +4,7 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Services;
 
 namespace Titeenipeli.Controllers;
@@ -12,7 +13,7 @@ namespace Titeenipeli.Controllers;
 [Route("state")]
 [Authorize]
 public class GameStateController(
-        IUserRepositoryService userRepositoryService,
+    IUserProvider userProvider,
         IGuildRepositoryService guildRepositoryService,
         IPowerupService powerupService,
         IJwtService jwtService
@@ -21,7 +22,7 @@ public class GameStateController(
     [HttpGet("game")]
     public IActionResult GetGameState()
     {
-        var user = HttpContext.GetUser(jwtService, userRepositoryService);
+        var user = HttpContext.GetUser(jwtService, userProvider);
         var guilds = guildRepositoryService.GetAll();
 
         var scores = guilds.Where(guild => guild.Name != GuildName.Nobody).Select(guild => new Score

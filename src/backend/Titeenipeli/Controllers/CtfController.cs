@@ -6,6 +6,7 @@ using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
 using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Services;
 using Titeenipeli.Services.Grpc;
@@ -20,15 +21,19 @@ public class CtfController : ControllerBase
 {
     private readonly ICtfFlagRepositoryService _ctfFlagRepositoryService;
     private readonly IGuildRepositoryService _guildRepositoryService;
-    private readonly IUserRepositoryService _userRepositoryService;
+    private readonly IUserProvider _userProvider;
     private readonly IJwtService _jwtService;
     private readonly IMiscGameStateUpdateCoreService _miscGameStateUpdateCoreService;
 
-    public CtfController(ICtfFlagRepositoryService ctfFlagRepositoryService, IUserRepositoryService userRepositoryService, IGuildRepositoryService guildRepositoryService, IJwtService jwtService, IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService)
+    public CtfController(ICtfFlagRepositoryService ctfFlagRepositoryService,
+                         IGuildRepositoryService guildRepositoryService,
+                         IUserProvider userProvider,
+                         IJwtService jwtService,
+                         IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService)
     {
         _ctfFlagRepositoryService = ctfFlagRepositoryService;
-        _userRepositoryService = userRepositoryService;
         _guildRepositoryService = guildRepositoryService;
+        _userProvider = userProvider;
         _jwtService = jwtService;
         _miscGameStateUpdateCoreService = miscGameStateUpdateCoreService;
 
@@ -53,8 +58,8 @@ public class CtfController : ControllerBase
             Description = "Better luck next time"
         });
 
-        var user = HttpContext.GetUser(_jwtService, _userRepositoryService);
-        var guild = user.Guild;
+        var user = HttpContext.GetUser(_jwtService, _userProvider);
+        var guild = _guildRepositoryService.GetById(user.Guild.Id)!;
 
         var match = guild.ActiveCtfFlags.FirstOrDefault(flag => flag.Id == ctfFlag.Id);
         if (match is not null) return BadRequest(new ErrorResult
@@ -74,7 +79,7 @@ public class CtfController : ControllerBase
         }
         else
         {
-            await HandleUserPowerUp(user, ctfFlag.Powerup);
+            HandleUserPowerUp(user, ctfFlag.Powerup);
         }
 
 
@@ -142,11 +147,10 @@ public class CtfController : ControllerBase
         SendGameUpdate(user);
     }
 
-    private async Task HandleUserPowerUp(User user, PowerUp powerUp)
+    private void HandleUserPowerUp(User user, PowerUp powerUp)
     {
         user.PowerUps.Add(powerUp);
-        _userRepositoryService.Update(user);
-        await _userRepositoryService.SaveChangesAsync();
+        _userProvider.Update(user);
 
         SendGameUpdate(user);
     }

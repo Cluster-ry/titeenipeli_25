@@ -12,6 +12,12 @@ import { useIsMoving } from "../../hooks/useIsMoving.ts";
 import { Coordinate } from "../../models/Coordinate.ts";
 import { usePowerUps } from "../../hooks/usePowerUps.ts";
 import MapTile from "./MapTile.tsx";
+import { useGraphicsStore } from "../../stores/graphicsStore.ts";
+import { useDynamicWindowSize } from "../../hooks/useDynamicWindowSize.tsx";
+
+const mapOptions = {
+    background: 0xffffff, resizeTo: window, antialias: false, premultipliedAlpha: false
+}
 
 /**
  * @component GameMap
@@ -28,22 +34,27 @@ import MapTile from "./MapTile.tsx";
 const GameMap: FC = () => {
     const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
     const map = useNewMapStore((state) => state.map);
-    const { usePowerUp } = usePowerUps();
+    const usePowerUp = usePowerUps();
     const target = usePowerUpStore((state) => state.target);
     const { isMoving, startMoving } = useIsMoving();
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
     const onMapClickRef = useRef<((coordinate: Coordinate, targeted: boolean) => void) | null>(null);
+    const graphicsEnabled = useGraphicsStore(state => state.graphicsEnabled);
+    const windowSize = useDynamicWindowSize();
 
-    const onMapClick = useCallback((coordinate: Coordinate, targeted: boolean) => {
-        const viewportX = coordinate.x / mapConfig.PixelSize;
-        const viewportY = coordinate.y / mapConfig.PixelSize;
-        const viewportCoordinate = { x: viewportX, y: viewportY }
-        const powerUpClick = usePowerUp(viewportCoordinate, targeted);
-        if (powerUpClick) return;
-        conquer(viewportCoordinate);
-    }, [usePowerUp, conquer])
+    const onMapClick = useCallback(
+        (coordinate: Coordinate, targeted: boolean) => {
+            const viewportX = coordinate.x / mapConfig.PixelSize;
+            const viewportY = coordinate.y / mapConfig.PixelSize;
+            const viewportCoordinate = { x: viewportX, y: viewportY };
+            const powerUpClick = usePowerUp(viewportCoordinate, targeted);
+            if (powerUpClick) return;
+            conquer(viewportCoordinate);
+        },
+        [usePowerUp, conquer],
+    );
 
     /**
      * onMapClick needs to be passed as a reference to the canvas elements in order to
@@ -52,15 +63,15 @@ const GameMap: FC = () => {
      * tile changes, leading to huge performance problems.
      */
     useEffect(() => {
-        onMapClickRef.current = onMapClick
+        onMapClickRef.current = onMapClick;
     }, [onMapClick, onMapClickRef]);
 
-    const mappedBoundingBox = {
+    const mappedBoundingBox = useMemo(() => ({
         minY: pixelsBoundingBox.min.y,
         minX: pixelsBoundingBox.min.x,
         maxY: pixelsBoundingBox.max.y,
         maxX: pixelsBoundingBox.max.x,
-    };
+    }), [pixelsBoundingBox]);
 
     const pixelElements = useMemo(() => {
         const result: JSX.Element[] = [];
@@ -71,6 +82,9 @@ const GameMap: FC = () => {
             const rectangleX = parsedCoordinate.x * mapConfig.PixelSize;
             const rectangleY = parsedCoordinate.y * mapConfig.PixelSize;
             const color = pixelColor(pixel, user);
+
+            const backgroundGraphic = graphicsEnabled ? getBackgroundGraphic(coordinate) : undefined;
+
             result.push(
                 <MapTile
                     key={`map-tile-${coordinate}`}
@@ -78,7 +92,7 @@ const GameMap: FC = () => {
                     y={rectangleY}
                     width={mapConfig.PixelSize}
                     height={mapConfig.PixelSize}
-                    backgroundGraphic={getBackgroundGraphic(coordinate)}
+                    backgroundGraphic={backgroundGraphic}
                     hue={color.hue}
                     saturation={color.saturation}
                     lightness={color.lightness}
@@ -90,21 +104,21 @@ const GameMap: FC = () => {
             );
         }
         return result;
-    }, [map, target, isMoving, onMapClick]);
+    }, [map, target, isMoving, onMapClick, graphicsEnabled]);
 
     if (map === null) {
         return <span>Loading...</span>;
     }
     return (
         <Stage
-            width={window.innerWidth}
-            height={window.innerHeight}
-            options={{ background: 0x4B0082, resizeTo: window, antialias: false, premultipliedAlpha: false }}
+            width={windowSize.width}
+            height={windowSize.height}
+            options={mapOptions}
             onContextMenu={(e) => e.preventDefault()}
         >
             <Viewport
-                width={window.innerWidth}
-                height={window.innerHeight}
+                width={windowSize.width}
+                height={windowSize.height}
                 boundingBox={mappedBoundingBox}
                 onMoveStart={startMoving}
             >

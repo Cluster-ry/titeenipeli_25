@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useRef } from "react";
+import { RefObject, useCallback, useMemo, useRef } from "react";
 import { useGameStateStore } from "../stores/gameStateStore";
 import { PostPixelsInput } from "../models/Post/PostPixelsInput";
 import { Pixel } from "../models/Pixel";
@@ -30,8 +30,10 @@ type Action = {
  * A function to commence a pixel conquest action
  */
 export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<EffectContainerHandle>) => {
-    const { increaseBucket, decreaseBucket } = useGameStateStore();
-    const { map, setPixel } = useNewMapStore();
+    const increaseBucket = useGameStateStore(state => state.increaseBucket);
+    const decreaseBucket = useGameStateStore(state => state.decreaseBucket);
+    const map = useNewMapStore(state => state.map);
+    const setPixel = useNewMapStore(state => state.setPixel);
     const pendingActions = useRef<{ [key: string]: Action[] }>({});
 
     const pushToActions = (key: string, next: Pixel, previous: Pixel) => {
@@ -70,7 +72,7 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
                 effectHandle.current?.forbiddenEffect(variables);
             }
         },
-        [increaseBucket, setPixel, effectHandle.current?.forbiddenEffect],
+        [increaseBucket, setPixel],
     );
 
     /**
@@ -106,7 +108,11 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
         clearActions(key);
     }, []);
 
-    const { conquerPixel } = useMapUpdating({ optimisticConquer, onConquerSettled, events: { onPixelUpdated } });
+    const events = useMemo(() => ({
+        onPixelUpdated
+    }), [onPixelUpdated]);
+
+    const { conquerPixel } = useMapUpdating(optimisticConquer, onConquerSettled, events);
 
     /**
      * @summary

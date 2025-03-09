@@ -1,0 +1,20 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: traefik-dashboard-auth
+spec:
+  basicAuth:
+    secret: traefik-dashboard-auth-secret
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit-player
+  namespace: titeenipeli
+spec:
+  rateLimit:
+    average: 30
+    burst: 45
+    period: 10s
+    sourceCriterion:
+      requestHeaderName: "cookie"

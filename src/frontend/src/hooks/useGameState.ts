@@ -12,7 +12,7 @@ const stateQueryKey = "gameState";
 
 export const useGameState = () => {
     const queryClient = useQueryClient();
-    const  { triggerNotification } = useNotificationStore();
+    const triggerNotification = useNotificationStore(state => state.triggerNotification);
     const grpcClient = useRef<GrpcClients>(GrpcClients.getGrpcClients());
 
     const setPixelBucket = useGameStateStore((state) => state.setPixelBucket);
@@ -20,11 +20,12 @@ export const useGameState = () => {
     const setState = useGameStateStore((state) => state.setMiscGameState);
     const setPowerUps = useGameStateStore((state) => state.setPowerUps);
 
-    const { data, isSuccess, status } = useQuery({
+    const { data, isSuccess } = useQuery({
         queryKey: [stateQueryKey],
         queryFn: getGameState,
         refetchOnReconnect: "always",
         refetchOnMount: "always",
+        retry: true
     });
 
     const consumeUpdate = useCallback(
@@ -61,7 +62,7 @@ export const useGameState = () => {
         (incrementalUpdateResponse: MiscStateUpdateResponse) => {
             consumeUpdate(incrementalUpdateResponse);
         },
-        [isSuccess, data, status],
+        [consumeUpdate],
     );
 
     const ensureState = useCallback(async () => {
@@ -77,12 +78,12 @@ export const useGameState = () => {
     }, [isSuccess, setState]);
 
     useEffect(() => {
-        console.debug("Registering GRPC client");
+        console.debug("Registering GRPC client for misc state updates");
         grpcClient.current.miscStateUpdateClient.registerOnResponseListener(onIncrementalUpdate);
         return () => {
             grpcClient.current.miscStateUpdateClient.unRegisterOnResponseListener(onIncrementalUpdate);
         };
-    }, [onIncrementalUpdate]);
+    }, [onIncrementalUpdate, grpcClient]);
 
     return { ensureState };
 };

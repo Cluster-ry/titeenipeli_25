@@ -5,8 +5,10 @@ using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
-using Titeenipeli.InMemoryMapProvider;
+using Titeenipeli.InMemoryProvider.MapProvider;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Options;
+using Titeenipeli.Services.BackgroundServices;
 using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services;
@@ -15,134 +17,90 @@ public class MapUpdaterService(
     IServiceScopeFactory scopeFactory,
     GameOptions gameOptions,
     IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
-    IMapProvider mapProvider
+    IMapProvider mapProvider,
+    IUserProvider userProvider,
+    ChannelProcessorBackgroundService channelProcessorBackgroundService
 ) : IMapUpdaterService
 {
     private const int BorderWidth = 1;
 
     private readonly MapUpdater _mapUpdater = new();
 
-    public Task<bool> PlacePixel(IUserRepositoryService userRepositoryService,
-                                 Coordinate pixelCoordinate,
-                                 User newOwner)
+    public Task<bool> PlacePixel(Coordinate pixelCoordinate, User newOwner)
     {
         var borderfiedCoordinate = pixelCoordinate + new Coordinate(1, 1);
 
-        return Task.Run(() =>
+        return channelProcessorBackgroundService.Enqueue(() =>
         {
-            lock (_mapUpdater)
+            if (!IsValidPlacement(pixelCoordinate, newOwner) || mapProvider.IsSpawn(pixelCoordinate))
             {
-                if (!IsValidPlacement(pixelCoordinate, newOwner) || mapProvider.IsSpawn(pixelCoordinate))
-                {
-                    return false;
-                }
-
-                var map = GetMap(userRepositoryService);
-                var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
-
-                DoGrpcUpdate(map, changedPixels);
-                DoDatabaseUpdate(changedPixels, newOwner);
+                return false;
             }
+
+            var map = GetMap();
+            var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
+
+            DoGrpcUpdate(map, changedPixels);
+            DoDatabaseUpdate(changedPixels, newOwner);
+
 
             return true;
         });
     }
 
-    public Task<bool> PlacePixels(IUserRepositoryService userRepositoryService,
-                                  List<Coordinate> pixelCoordinates,
-                                  User newOwner)
+    public Task<bool> PlacePixels(List<Coordinate> pixelCoordinates, User newOwner)
     {
-        return Task.Run(() =>
+        return channelProcessorBackgroundService.Enqueue(() =>
         {
-            lock (_mapUpdater)
-            {
-                var grpcBatch = PlacePixelsWithRetry(userRepositoryService, pixelCoordinates, newOwner);
-                DoGrpcUpdate(GetMap(userRepositoryService), grpcBatch);
-            }
+            var grpcBatch = PlacePixelsWithRetry(pixelCoordinates, newOwner);
+            DoGrpcUpdate(GetMap(), grpcBatch);
+
 
             return true;
         });
     }
 
-    public Task<User> PlaceSpawn(IUserRepositoryService userRepositoryService, User user)
+    public Task<User> PlaceSpawn(User user)
     {
-        return Task.Run(() =>
+        return channelProcessorBackgroundService.Enqueue(() =>
         {
             var spawnGeneratorService = scopeFactory.CreateScope()
                                                     .ServiceProvider
                                                     .GetRequiredService<SpawnGeneratorService>();
 
-            lock (_mapUpdater)
-            {
-                var map = GetMap(userRepositoryService);
-                var spawnPoint = spawnGeneratorService.GetSpawnPoint(user.Guild.Name);
 
-                user.SpawnX = spawnPoint.X;
-                user.SpawnY = spawnPoint.Y;
+            var map = GetMap();
+            var spawnPoint = spawnGeneratorService.GetSpawnPoint(user.Guild.Name);
 
-                List<MapChange> changedPixels =
-                [
-                    new()
-                    {
-                        Coordinate = new Coordinate(spawnPoint.X, spawnPoint.Y),
-                        OldOwner = null,
-                        NewOwner = user
-                    }
-                ];
+            user.SpawnX = spawnPoint.X;
+            user.SpawnY = spawnPoint.Y;
 
-                // TODO: This should use _mapUpdater.PlacePixel, but it doesn't support it
-                DoGrpcUpdate(map, changedPixels);
-                DoDatabaseUpdate(changedPixels, user);
-            }
+            var changedPixels = _mapUpdater.PlacePixel(map, spawnPoint + new Coordinate(1, 1), user, PixelType.Spawn);
+
+            DoGrpcUpdate(map, changedPixels);
+            DoDatabaseUpdate(changedPixels, user);
 
             return user;
         });
     }
 
-    private List<MapChange> PlacePixelsWithRetry(IUserRepositoryService userRepositoryService,
-                                                 List<Coordinate> pixelCoordinates,
-                                                 User newOwner)
+    private List<MapChange> PlacePixelsWithRetry(List<Coordinate> pixelCoordinates, User newOwner)
     {
-        int lastFailedCount;
-        List<Coordinate> failedPlacements = [];
-        List<MapChange> grpcBatch = [];
+        var map = GetMap();
+        // I hope C# would not reallocate an object every time inside the select LINQ method even if we were to create
+        // this inside the select, but I am too lazy to profile this and not taking any risks
+        var addOneCoordinate = new Coordinate(1, 1);
+        var changedPixels = _mapUpdater.PlacePixels(map,
+            pixelCoordinates.Select(coordinate => coordinate + addOneCoordinate).ToArray(), newOwner);
 
-        do
-        {
-            lastFailedCount = failedPlacements.Count;
-            failedPlacements = [];
+        DoDatabaseUpdate(changedPixels, newOwner);
 
-            foreach (var pixelCoordinate in pixelCoordinates)
-            {
-                if (!IsValidPlacement(pixelCoordinate, newOwner))
-                {
-                    failedPlacements.Add(pixelCoordinate);
-                    continue;
-                }
-
-                if (mapProvider.IsSpawn(pixelCoordinate))
-                {
-                    continue;
-                }
-
-                var pixelCoordinateWithBorder = pixelCoordinate + new Coordinate(1, 1);
-                var map = GetMap(userRepositoryService);
-                var changedPixels = _mapUpdater.PlacePixel(map, pixelCoordinateWithBorder, newOwner);
-
-                grpcBatch = [.. grpcBatch, .. changedPixels];
-
-                DoDatabaseUpdate(changedPixels, newOwner);
-            }
-
-            pixelCoordinates = failedPlacements;
-        } while (failedPlacements.Count > 0 && failedPlacements.Count != lastFailedCount);
-
-        return grpcBatch;
+        return changedPixels;
     }
 
-    private PixelWithType[,] GetMap(IUserRepositoryService userRepositoryService)
+    private PixelWithType[,] GetMap()
     {
-        var users = userRepositoryService.GetAll().ToArray();
+        var users = userProvider.GetAll().ToArray();
         var pixels = mapProvider.GetAll().ToArray();
 
         int width = gameOptions.Width + 2 * BorderWidth;

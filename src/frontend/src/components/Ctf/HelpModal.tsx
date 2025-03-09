@@ -1,20 +1,21 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { postCtf } from "../../api/ctf";
 import { PostCtfInput } from "../../models/Post/PostCtfInput";
 import "../../pages/Game/Overlay/overlay.css";
 import { useNotificationStore } from "../../stores/notificationStore";
 import "./ctf.css";
 import Modal from "../Modal/Modal";
-import { useCtfStore } from "../../stores/ctfModalStore";
+import { useHelpModalStore } from "../../stores/helpModalStore.ts";
 import { CtfOk } from "../../models/CtfOk.ts";
 import { setRandomInterval } from "../../utils/setRandomInterval.ts";
-import { instructionsStore } from "../../stores/instructionsStore.ts";
+import { useInstructionsStore } from "../../stores/instructionsStore.ts";
+import GraphicsSwitch from "../GraphicsSwitch/GraphicsSwitch.tsx";
 
-const CtfModal = () => {
+const HelpModal = () => {
     const [token, setToken] = useState("");
-    const { setCtfModelOpenState } = useCtfStore();
-    const { triggerNotification } = useNotificationStore();
-    const { setInstructionsOn } = instructionsStore();
+    const setHelpModalOpenState = useHelpModalStore(state => state.setHelpModalOpenState);
+    const triggerNotification = useNotificationStore(state => state.triggerNotification);
+    const setInstructionsOn = useInstructionsStore(state => state.setInstructionsOn);
 
     const CTF_DISCLAIMER: string = "Activate CTF";
     const NOTIFICATION_FAIL: string = "CTF activation failed.";
@@ -26,20 +27,21 @@ const CtfModal = () => {
     useEffect(() => {
         "#OH_YOU_FOUND_THIS?";
         setRandomInterval(() => console.log("#ARE_YOU_SURE?"), 120e3, 300e3);
-    }, []);
+    }, [setRandomInterval]);
 
-    const handleTokenChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleTokenChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         setToken(event.target.value);
-    };
+    }, [setToken]);
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
         const ctfToken: PostCtfInput = {
-            token: token,
+            token,
         };
         try {
             const result = await postCtf(ctfToken);
-            if ("msg" in result && result.msg === "Request unsuccessful.") {
-                triggerNotification(NOTIFICATION_FAIL, "error");
+            console.debug(result);
+            if ("msg" in result) {
+                triggerNotification(result.msg, "error");
                 console.debug("Request unsuccessful.");
                 return;
             } else if ("data" in result) {
@@ -49,10 +51,18 @@ const CtfModal = () => {
             triggerNotification(NOTIFICATION_FAIL, "error");
             console.error(error);
         }
-    };
+    }, [triggerNotification, token]);
+
+    const openInstructionsModal = useCallback(() => {
+        setInstructionsOn(true);
+    }, [setInstructionsOn]);
+
+    const closeHelpModal = useCallback(() => {
+        setHelpModalOpenState(false);
+    }, [setHelpModalOpenState]);
 
     return (
-        <Modal title="CTF input" onClose={() => setCtfModelOpenState(false)}>
+        <Modal title="CTF input" onClose={closeHelpModal}>
             <div className="ctf-input-wrapper">
                 <input
                     className="ctf-input"
@@ -67,13 +77,14 @@ const CtfModal = () => {
                 </button>
 
                 <div className="instructions">
-                    <button className="instructions-button" onClick={() => setInstructionsOn(true)}>
+                    <button className="modal-button" onClick={openInstructionsModal}>
                         Check instructions
                     </button>
                 </div>
+                <GraphicsSwitch />
             </div>
         </Modal>
     );
 };
 
-export default CtfModal;
+export default HelpModal;

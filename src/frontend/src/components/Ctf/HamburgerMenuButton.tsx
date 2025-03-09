@@ -1,11 +1,14 @@
 import "./hamburger.css";
-import { useCtfStore } from "../../stores/ctfModalStore";
+import { useHelpModalStore } from "../../stores/helpModalStore";
+import { useCallback } from "react";
 const HamburgerMenuButton = () => {
-    const { setCtfModelOpenState } = useCtfStore();
-
+    const setHelpModalOpenState = useHelpModalStore(state => state.setHelpModalOpenState);
+    const onClick = useCallback(() => {
+        setHelpModalOpenState(true);
+    }, [setHelpModalOpenState]);
     return (
         <div className="hamburger-button-wrapper">
-            <div className="hamburger" onClick={() => setCtfModelOpenState(true)}>
+            <div className="hamburger" onClick={onClick}>
                 <div className="hamburger-bar"></div>
                 <div className="hamburger-bar"></div>
                 <div className="hamburger-bar"></div>
