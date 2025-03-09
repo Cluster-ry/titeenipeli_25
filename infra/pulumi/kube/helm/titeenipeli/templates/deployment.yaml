@@ -110,7 +110,7 @@ spec:
               value: titeenipeli.dotnet.app
             - name: PYROSCOPE_SERVER_ADDRESS
               value: http://pyroscope.pyroscope.svc.cluster.local.:4040/
-          image: titeenipelitacr.azurecr.io/backend@sha256:5e565abb673eaaf4cde318da837f0bd9a446fc06de62297e38241179ed4a1015
+          image: titeenipelitacr.azurecr.io/backend@sha256:b348f2d56a90d80d67cfaefd15ec6f881c0e12bf03b6e7075bc2a36c7b97f034
           name: backend
           volumeMounts:
             - name: certs
