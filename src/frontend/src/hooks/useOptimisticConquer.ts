@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useRef } from "react";
+import { RefObject, useCallback, useMemo, useRef } from "react";
 import { useGameStateStore } from "../stores/gameStateStore";
 import { PostPixelsInput } from "../models/Post/PostPixelsInput";
 import { Pixel } from "../models/Pixel";
@@ -70,7 +70,7 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
                 effectHandle.current?.forbiddenEffect(variables);
             }
         },
-        [increaseBucket, setPixel, effectHandle.current?.forbiddenEffect],
+        [increaseBucket, setPixel],
     );
 
     /**
@@ -106,7 +106,11 @@ export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<
         clearActions(key);
     }, []);
 
-    const { conquerPixel } = useMapUpdating({ optimisticConquer, onConquerSettled, events: { onPixelUpdated } });
+    const events = useMemo(() => ({
+        onPixelUpdated
+    }), [onPixelUpdated]);
+
+    const { conquerPixel } = useMapUpdating(optimisticConquer, onConquerSettled, events);
 
     /**
      * @summary

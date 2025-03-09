@@ -9,9 +9,9 @@ namespace Titeenipeli.Services.BackgroundServices;
 public interface IUpdatePixelBucketsService : IAsynchronousTimedBackgroundService;
 
 public class UpdatePixelBucketsService(
+    IServiceScopeFactory serviceScopeFactory,
     IUserProvider userProvider,
-        IGuildRepositoryService guildRepositoryService,
-        IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService
+    IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService
     ) : IUpdatePixelBucketsService
 {
     public async Task DoWork()
@@ -26,6 +26,9 @@ public class UpdatePixelBucketsService(
 
     private async Task UpdateGuildBuckets(GuildName guildName)
     {
+        var scope = serviceScopeFactory.CreateScope();
+        var guildRepositoryService = scope.ServiceProvider.GetRequiredService<IGuildRepositoryService>();
+
         var guildUsers = userProvider.GetByGuild(guildName);
         if (guildUsers.Count == 0)
         {

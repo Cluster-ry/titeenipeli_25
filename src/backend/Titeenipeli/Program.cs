@@ -237,7 +237,7 @@ public static class Program
 
     private static void AddBackgroundServices(IServiceCollection services)
     {
-        var updateCumulativeScoresServicePeriod = TimeSpan.FromMinutes(1);
+        var updateCumulativeScoresServicePeriod = TimeSpan.FromSeconds(15);
         var updatePixelBucketsServicePeriod = TimeSpan.FromMinutes(1);
 
         services.AddScoped<IUpdateCumulativeScoresService, UpdateCumulativeScoresService>();

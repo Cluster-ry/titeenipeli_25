@@ -13,8 +13,8 @@ metadata:
   namespace: titeenipeli
 spec:
   rateLimit:
-    average: 10
-    burst: 15
+    average: 30
+    burst: 45
     period: 10s
     sourceCriterion:
       requestHeaderName: "cookie"
