@@ -59,7 +59,7 @@ public class CtfController : ControllerBase
         });
 
         var user = HttpContext.GetUser(_jwtService, _userProvider);
-        var guild = user.Guild;
+        var guild = _guildRepositoryService.GetById(user.Guild.Id)!;
 
         var match = guild.ActiveCtfFlags.FirstOrDefault(flag => flag.Id == ctfFlag.Id);
         if (match is not null) return BadRequest(new ErrorResult
