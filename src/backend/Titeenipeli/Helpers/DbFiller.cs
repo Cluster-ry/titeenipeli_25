@@ -8,7 +8,7 @@ namespace Titeenipeli.Helpers;
 
 public static class DbFiller
 {
-    public static void Initialize(ApiDbContext dbContext, GameOptions gameOptions)
+    public static void Initialize(ApiDbContext dbContext, GameOptions gameOptions, bool isDevelopment)
     {
         if (!dbContext.CtfFlags.Any())
         {
@@ -111,19 +111,26 @@ public static class DbFiller
         }
 
         /*
-        var testUser = new User
+        List<User> defaultUsers = [];
+        User? testUser = null;
+        User? testOpponent = null;
+
+        if (isDevelopment)
         {
-            Code = "test",
-            Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
-            SpawnX = 5,
-            SpawnY = 5,
-            PixelBucket = gameOptions.InitialPixelBucket,
-            PowerUps = [],
-            TelegramId = "0",
-            FirstName = "",
-            LastName = "",
-            Username = "",
-        };
+            testUser = new User
+            {
+                Code = "test",
+                Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
+                SpawnX = 5,
+                SpawnY = 5,
+                PixelBucket = gameOptions.InitialPixelBucket,
+                PowerUps = [],
+                TelegramId = "0",
+                FirstName = "",
+                LastName = "",
+                Username = "",
+            };
+            defaultUsers.Add(testUser);
 
         var testOpponent = new User
         {
@@ -233,9 +240,8 @@ public static class DbFiller
 
             dbContext.SaveChanges();
         }
-
-        dbContext.SaveChanges();
     }
+
 
     public static void Clear(ApiDbContext dbContext)
     {

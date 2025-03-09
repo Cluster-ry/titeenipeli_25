@@ -195,7 +195,7 @@ public static class Program
             bool newDatabase = dbContext.Database.EnsureCreated();
             if (newDatabase)
             {
-                DbFiller.Initialize(dbContext, gameOptions);
+                DbFiller.Initialize(dbContext, gameOptions, app.Environment.IsDevelopment());
             }
 
             mapProvider.Initialize(
@@ -210,6 +210,8 @@ public static class Program
                 dbContext.Users.Select(user => user).Include(user => user.Guild).ToList()
             );
         }
+
+        app.Services.GetRequiredService<ChannelProcessorBackgroundService>().StartAsync(CancellationToken.None);
 
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
         app.UsePathBase(new PathString("/api/v1"));
@@ -253,14 +255,18 @@ public static class Program
 
         services.AddScoped<IUpdatePixelBucketsService, UpdatePixelBucketsService>();
 
-        services.AddHostedService(serviceProvider => new AsynchronousTimedBackgroundService<
-            IUpdatePixelBucketsService,
-            UpdatePixelBucketsService
-        >(
-            serviceProvider,
-            GetNonNullService<ILogger<UpdatePixelBucketsService>>(serviceProvider),
-            updatePixelBucketsServicePeriod
-        ));
+        services.AddHostedService(
+            serviceProvider =>
+                new AsynchronousTimedBackgroundService<
+                    IUpdatePixelBucketsService,
+                    UpdatePixelBucketsService>(
+                    serviceProvider,
+                    GetNonNullService<ILogger<UpdatePixelBucketsService>>(
+                        serviceProvider),
+                    updatePixelBucketsServicePeriod));
+
+        services.AddSingleton<ChannelProcessorBackgroundService>();
+        services.AddHostedService<ChannelProcessorBackgroundService>();
     }
 
     private static void AddRepositoryServices(IServiceCollection services)

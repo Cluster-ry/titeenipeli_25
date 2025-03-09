@@ -5,7 +5,7 @@ namespace Titeenipeli.Common.Database.Schema;
 public class Guild : Entity
 {
     public required GuildName Name { get; init; }
-    public int CumulativeScore { get; set; }
+    public long CumulativeScore { get; set; }
     public int CurrentScore { get; set; }
     public float BaseRateLimit { get; set; }
     public int FogOfWarDistance { get; set; }
