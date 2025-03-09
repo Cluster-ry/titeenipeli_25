@@ -271,7 +271,8 @@ public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
         await bot.SendTextMessageAsync(
             user.Id,
             $"Open the following link to enter the game:\n\n" +
-            $"<a href=\"{loginUrl}\">{loginUrl}</a>",
+            $"<a href=\"{loginUrl}\">{loginUrl}</a>\n" +
+            $"Link is single use and only valid for 10 minutes. Use /start or /login to get new link.",
             parseMode: ParseMode.Html
         );
     }
