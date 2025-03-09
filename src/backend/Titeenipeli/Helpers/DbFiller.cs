@@ -8,7 +8,7 @@ namespace Titeenipeli.Helpers;
 
 public static class DbFiller
 {
-    public static void Initialize(ApiDbContext dbContext, GameOptions gameOptions)
+    public static void Initialize(ApiDbContext dbContext, GameOptions gameOptions, bool isDevelopment)
     {
         if (!dbContext.CtfFlags.Any())
         {
@@ -37,34 +37,43 @@ public static class DbFiller
             dbContext.SaveChanges();
         }
 
-        var testUser = new User
-        {
-            Code = "test",
-            Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
-            SpawnX = 5,
-            SpawnY = 5,
-            PixelBucket = gameOptions.InitialPixelBucket,
-            PowerUps = [],
-            TelegramId = "0",
-            FirstName = "",
-            LastName = "",
-            Username = "",
-        };
+        List<User> defaultUsers = [];
+        User? testUser = null;
+        User? testOpponent = null;
 
-        var testOpponent = new User
+        if (isDevelopment)
         {
-            Code = "opponent",
-            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ??
-                    throw new InvalidOperationException(),
-            SpawnX = 3,
-            SpawnY = 2,
-            PixelBucket = gameOptions.InitialPixelBucket,
-            PowerUps = [],
-            TelegramId = "1",
-            FirstName = "",
-            LastName = "",
-            Username = ""
-        };
+            testUser = new User
+            {
+                Code = "test",
+                Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
+                SpawnX = 5,
+                SpawnY = 5,
+                PixelBucket = gameOptions.InitialPixelBucket,
+                PowerUps = [],
+                TelegramId = "0",
+                FirstName = "",
+                LastName = "",
+                Username = "",
+            };
+            defaultUsers.Add(testUser);
+
+            testOpponent = new User
+            {
+                Code = "opponent",
+                Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ??
+                        throw new InvalidOperationException(),
+                SpawnX = 3,
+                SpawnY = 2,
+                PixelBucket = gameOptions.InitialPixelBucket,
+                PowerUps = [],
+                TelegramId = "1",
+                FirstName = "",
+                LastName = "",
+                Username = ""
+            };
+            defaultUsers.Add(testOpponent);
+        }
 
         var god = new User
         {
@@ -83,11 +92,11 @@ public static class DbFiller
             Username = "God",
             IsGod = true
         };
-
+        defaultUsers.Add(god);
 
         if (!dbContext.Users.Any())
         {
-            dbContext.Users.AddRange(testUser, testOpponent, god);
+            dbContext.Users.AddRange(defaultUsers);
             dbContext.SaveChanges();
         }
 
@@ -123,23 +132,26 @@ public static class DbFiller
 
             dbContext.SaveChanges();
 
-            Pixel? testUserSpawn =
-                dbContext.Map.FirstOrDefault(pixel => pixel.X == testUser.SpawnX && pixel.Y == testUser.SpawnY);
-
-            Pixel? testOpponentSpawn = dbContext.Map.FirstOrDefault(pixel =>
-                pixel.X == testOpponent.SpawnX && pixel.Y == testOpponent.SpawnY);
-
-            if (testUserSpawn != null)
+            if (isDevelopment && testUser != null && testOpponent != null)
             {
-                testUserSpawn.User = testUser;
-            }
+                Pixel? testUserSpawn =
+                    dbContext.Map.FirstOrDefault(pixel => pixel.X == testUser.SpawnX && pixel.Y == testUser.SpawnY);
 
-            if (testOpponentSpawn != null)
-            {
-                testOpponentSpawn.User = testOpponent;
-            }
+                Pixel? testOpponentSpawn = dbContext.Map.FirstOrDefault(pixel =>
+                    pixel.X == testOpponent.SpawnX && pixel.Y == testOpponent.SpawnY);
 
-            dbContext.SaveChanges();
+                if (testUserSpawn != null)
+                {
+                    testUserSpawn.User = testUser;
+                }
+
+                if (testOpponentSpawn != null)
+                {
+                    testOpponentSpawn.User = testOpponent;
+                }
+
+                dbContext.SaveChanges();
+            }
         }
 
         dbContext.SaveChanges();

@@ -169,7 +169,7 @@ public static class Program
             bool newDatabase = dbContext.Database.EnsureCreated();
             if (newDatabase)
             {
-                DbFiller.Initialize(dbContext, gameOptions);
+                DbFiller.Initialize(dbContext, gameOptions, app.Environment.IsDevelopment());
             }
 
             mapProvider.Initialize(dbContext.Map.Select(pixel => pixel)
