@@ -69,7 +69,7 @@ public static class DbFiller
                 SpawnY = 2,
                 PixelBucket = gameOptions.InitialPixelBucket,
                 PowerUps = [],
-                TelegramId = "1001",
+                TelegramId = "1",
                 FirstName = "",
                 LastName = "",
                 Username = ""
@@ -103,10 +103,7 @@ public static class DbFiller
 
         if (!dbContext.Users.Any())
         {
-            foreach (var user in defaultUsers)
-            {
-                dbContext.Users.Add(user);
-            }
+            dbContext.Users.AddRange(defaultUsers);
             dbContext.SaveChanges();
         }
 
