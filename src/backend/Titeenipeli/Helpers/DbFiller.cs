@@ -163,7 +163,7 @@ public static class DbFiller
             IsGod = true
         };
 
-        if (!dbContext.Users.Any())
+        if (!dbContext.Users.Any() && isDevelopment)
         {
             dbContext.Users.AddRange(god);
             foreach (var user in testUsers)
@@ -224,17 +224,20 @@ public static class DbFiller
                             testOpponentSpawn.User = testOpponent;
                         }
                         */
-            var users = dbContext.Users.ToList();
-
-            foreach (var user in users)
+            if (isDevelopment)
             {
-                var spawn = dbContext.Map.FirstOrDefault(pixel =>
-                    pixel.X == user.SpawnX && pixel.Y == user.SpawnY
-                );
+                var users = dbContext.Users.ToList();
 
-                if (spawn != null)
+                foreach (var user in users)
                 {
-                    spawn.User = user;
+                    var spawn = dbContext.Map.FirstOrDefault(pixel =>
+                        pixel.X == user.SpawnX && pixel.Y == user.SpawnY
+                    );
+
+                    if (spawn != null)
+                    {
+                        spawn.User = user;
+                    }
                 }
             }
 
