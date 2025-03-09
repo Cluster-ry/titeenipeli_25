@@ -33,5 +33,5 @@ public class BottleEffect : BaseSpecialEffect
         return base.HandleSpecialEffect(location, Direction.East);
     }
 
-    protected override Coordinate Origin { get; } = new(8, 3);
+    protected override Coordinate Origin { get; } = new(0, 3);
 }
