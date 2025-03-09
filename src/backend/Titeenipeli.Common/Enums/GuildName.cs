@@ -9,7 +9,6 @@ public enum GuildName
     OulunTietoteekkarit = 4,
     TietoTeekkarikilta = 5,
     Digit = 6,
-    Datateknologerna = 7,
     Sosa = 8,
     Date = 9,
     Tutti = 10
