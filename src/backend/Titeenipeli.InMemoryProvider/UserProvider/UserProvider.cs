@@ -29,7 +29,7 @@ public class UserProvider : IUserProvider
         {
             var user = _users.FirstOrDefault(user => user.Id == id);
 
-            return user == null ? null : UpdateUserGuild(user);
+            return user == null ? null : UpdateUserGuild(user).Clone();
         }
     }
 
@@ -44,7 +44,7 @@ public class UserProvider : IUserProvider
                 user.Guild = guildRepositoryService.GetById(user.Guild.Id) ??
                              throw new InvalidDataException("Invalid guild.");
 
-            return _users;
+            return _users.Select(user => user.Clone()).ToList();
         }
     }
 
@@ -54,7 +54,7 @@ public class UserProvider : IUserProvider
         {
             var user = _users.FirstOrDefault(user => user.Code == code);
 
-            return user == null ? null : UpdateUserGuild(user);
+            return user == null ? null : UpdateUserGuild(user).Clone();
         }
     }
 
@@ -64,7 +64,7 @@ public class UserProvider : IUserProvider
         {
             var user = _users.FirstOrDefault(user => user.TelegramId == telegramId);
 
-            return user == null ? null : UpdateUserGuild(user);
+            return user == null ? null : UpdateUserGuild(user).Clone();
         }
     }
 
@@ -81,7 +81,7 @@ public class UserProvider : IUserProvider
                 user.Guild = guildRepositoryService.GetById(user.Guild.Id) ??
                              throw new InvalidDataException("Invalid guild.");
 
-            return users;
+            return users.Select(user => user.Clone()).ToList();
         }
     }
 
@@ -91,7 +91,7 @@ public class UserProvider : IUserProvider
         {
             var user = _users.FirstOrDefault(user => user.AuthenticationToken == token);
 
-            return user == null ? null : UpdateUserGuild(user);
+            return user == null ? null : UpdateUserGuild(user).Clone();
         }
     }
 
