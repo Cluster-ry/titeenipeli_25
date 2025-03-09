@@ -163,9 +163,11 @@ public static class DbFiller
             IsGod = true
         };
 
+        dbContext.Users.AddRange(god);
+        dbContext.SaveChanges();
+
         if (!dbContext.Users.Any() && isDevelopment)
         {
-            dbContext.Users.AddRange(god);
             foreach (var user in testUsers)
             {
                 dbContext.Users.Add(user);
