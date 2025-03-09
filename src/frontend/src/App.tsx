@@ -9,6 +9,7 @@ import { Game as GameHolder } from "./pages/Game/Game";
 import "./App.css";
 import "./assets/PressStart2P-Regular.ttf";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Scores from "./pages/Scores.tsx";
 
 const AppShell = ({ children }: PropsWithChildren) => {
     return <div className="app-shell">{children}</div>;
@@ -54,6 +55,7 @@ const AppRouter = () => {
                 />
                 <Route path="/map" element={<GameMap />} />
                 <Route path="/test" element={<ApiTestClient />} />
+                <Route path="/scores" element={<Scores />} />
             </Routes>
         </Router>
     );
