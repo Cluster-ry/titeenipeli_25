@@ -155,17 +155,19 @@ public static class DbFiller
             SpawnX = -10,
             SpawnY = -10,
             PowerUps = [],
-            AuthenticationToken = "puE0g4NkCQlfIQFnrs5xPr0aRQZ9STCv",
-            TelegramId = "1099",
+            AuthenticationToken = "MHrVvoXYtTrSaxfMAYvzaKAmLiXemiLP",
+            TelegramId = "99",
             FirstName = "God",
             LastName = "",
             Username = "God",
             IsGod = true
         };
 
+        dbContext.Users.AddRange(god);
+        dbContext.SaveChanges();
+
         if (!dbContext.Users.Any() && isDevelopment)
         {
-            dbContext.Users.AddRange(god);
             foreach (var user in testUsers)
             {
                 dbContext.Users.Add(user);
