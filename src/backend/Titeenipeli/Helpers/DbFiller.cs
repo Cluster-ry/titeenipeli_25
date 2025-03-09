@@ -261,6 +261,166 @@ public static class DbFiller
             },
             new CtfFlag
             {
+                Token = "#DiYgzPKLRjvJmiWa",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.IsoL,
+                    Name = PowerUps.IsoL.ToString(),
+                    Directed = true,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#oZgaUGMKrSiyNhad",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Bottle,
+                    Name = PowerUps.Bottle.ToString(),
+                    Directed = false,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#LjBFDNbrjKyXGdaN",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Gem,
+                    Name = PowerUps.Gem.ToString(),
+                    Directed = false,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#zRdDdUGrYdtQWnEh",
+                BucketSizeIncrease = 10
+            },
+            new CtfFlag
+            {
+                Token = "#qoEgKzHALknkGRee",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Star,
+                    Name = PowerUps.Star.ToString(),
+                    Directed = true,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#fTrCSPxDPxfajYmq",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Heart,
+                    Name = PowerUps.Heart.ToString(),
+                    Directed = false,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#pyQawhWNuhvhpQCt",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Siika,
+                    Name = PowerUps.Siika.ToString(),
+                    Directed = true,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#JpoHCiDpWKrgzsRL",
+                BaserateMultiplier = 1.1f
+            },
+            new CtfFlag
+            {
+                Token = "#hwGtrdNWVzYvCodV",
+                BaserateMultiplier = 1.1f
+            },
+            new CtfFlag
+            {
+                Token = "#FHZaqUaZCmrNQALU",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Bottle,
+                    Name = PowerUps.Bottle.ToString(),
+                    Directed = true,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#ZKzsxjzXBKgSouSQ",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Dino,
+                    Name = PowerUps.Dino.ToString(),
+                    Directed = false,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#vDyHCnxENDjhJjui",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Gem,
+                    Name = PowerUps.Gem.ToString(),
+                    Directed = false,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#tFUXMdvwVDWckyeA",
+                BucketSizeIncrease = 5
+            },
+            new CtfFlag
+            {
+                Token = "#VjTSYcnUhzbAqwPS",
+                BaserateMultiplier = 1.3f
+            },
+            new CtfFlag
+            {
+                Token = "#gTxnCQCrzPfBpYce",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.SpaceInvader,
+                    Name = PowerUps.SpaceInvader.ToString(),
+                    Directed = false,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#BToASAZDhyQqnLew",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Binary,
+                    Name = PowerUps.Binary.ToString(),
+                    Directed = false,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#itiaapfkGrbvzwtL",
+                Powerup = new PowerUp
+                {
+                    PowerId = (int)PowerUps.Glitch,
+                    Name = PowerUps.Glitch.ToString(),
+                    Directed = true,
+                }
+            },
+            new CtfFlag
+            {
+                Token = "#ZjnJFxkiNwdstvYQ",
+                BucketSizeIncrease = 5
+            },
+            new CtfFlag
+            {
+                Token = "#WbndZQmZGfXAJCMD",
+                BaserateMultiplier = 1.5f
+            },
+            new CtfFlag
+            {
+                Token = "#birktyMvnUAhKrfN",
+                FogOfWarIncrease = 1
+            },
+            new CtfFlag
+            {
                 Token = "#TITYÄÄNIKIRVES",
                 Powerup = new PowerUp
                 {
