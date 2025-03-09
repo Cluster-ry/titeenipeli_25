@@ -12,7 +12,7 @@ namespace Titeenipeli.Bot;
 public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
 {
     // Variables
-    private static readonly Dictionary<GuildName, string> GuildDict = new Dictionary<GuildName, string>
+    private static readonly Dictionary<GuildName, string> GuildDict = new()
     {
         {
             GuildName.Cluster, "Cluster (lappeen Ranta)"
@@ -40,9 +40,6 @@ public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
         },
         {
             GuildName.TietoTeekkarikilta, "TiTe (Tampere)"
-        },
-        {
-            GuildName.Datateknologerna, "Datateknologerna (Åbo)"
         }
     };
 
@@ -62,12 +59,11 @@ public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
     private static readonly KeyboardButton TuttiButton = new(GuildDict[GuildName.Tutti]);
     private static readonly KeyboardButton SosaButton = new(GuildDict[GuildName.Sosa]);
     private static readonly KeyboardButton TiTeButton = new(GuildDict[GuildName.TietoTeekkarikilta]);
-    private static readonly KeyboardButton ÅboButton = new(GuildDict[GuildName.Datateknologerna]);
 
     // Build keyboards
     private static readonly ReplyKeyboardMarkup GuildKeyboard = new ReplyKeyboardMarkup(
     [ // This layout matches with how the keyboard is shown to the user
-        [ClusterButton, ÅboButton],
+        [ClusterButton],
         [OtitButton, DigitButton],
         [DateButton, TikButton],
         [AlgoButton, TuttiButton],
