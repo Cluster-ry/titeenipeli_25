@@ -22,7 +22,7 @@ public class MapProvider : IMapProvider
     {
         lock (_map)
         {
-            return _map.Find(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y);
+            return _map.Find(pixel => pixel.X == pixelCoordinate.X && pixel.Y == pixelCoordinate.Y)?.Clone();
         }
     }
 
@@ -30,7 +30,7 @@ public class MapProvider : IMapProvider
     {
         lock (_map)
         {
-            return _map;
+            return _map.Select(pixel => pixel.Clone()).ToList();
         }
     }
 
