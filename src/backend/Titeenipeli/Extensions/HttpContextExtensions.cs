@@ -1,20 +1,20 @@
 using Titeenipeli.Common.Database.Schema;
-using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Models;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Services;
 
 namespace Titeenipeli.Extensions;
 
 public static class HttpContextExtensions
 {
-    public static User GetUser(this HttpContext context, IJwtService jwtService, IUserRepositoryService userRepositoryService)
+    public static User GetUser(this HttpContext context, IJwtService jwtService, IUserProvider userProvider)
     {
         if (context.Items[jwtService.GetJwtClaimName()] is not JwtClaim jwtClaim)
         {
             throw new Exception("Missing or invalid authentication cookie.");
         }
 
-        var user = userRepositoryService.GetById(jwtClaim.Id);
+        var user = userProvider.GetById(jwtClaim.Id);
         if (user == null)
         {
             throw new Exception("Couldn't extract user information.");

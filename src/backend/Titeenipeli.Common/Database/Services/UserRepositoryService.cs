@@ -35,11 +35,11 @@ public class UserRepositoryService(ApiDbContext dbContext) : EntityRepositorySer
                         .FirstOrDefault(user => user.TelegramId == telegramId);
     }
 
-    public User[] GetByGuild(GuildName guildName)
+    public List<User> GetByGuild(GuildName guildName)
     {
         return DbContext.Users.Include(user => user.Guild)
                         .Include(user => user.PowerUps)
-                        .Where(user => user.Guild.Name == guildName).ToArray();
+                        .Where(user => user.Guild.Name == guildName).ToList();
     }
 
     public User? GetByAuthenticationToken(string token)

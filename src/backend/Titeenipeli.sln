@@ -24,7 +24,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Grpc", "Titeeni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.Bot", "Titeenipeli.Bot\Titeenipeli.Bot.csproj", "{93164875-EFC6-4CB5-BA33-E93CDEE57AA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.InMemoryMapProvider", "Titeenipeli.InMemoryMapProvider\Titeenipeli.InMemoryMapProvider.csproj", "{C96AE099-A2C3-4F25-89D6-C1CB4685D1F2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.InMemoryProvider", "Titeenipeli.InMemoryProvider\Titeenipeli.InMemoryProvider.csproj", "{C96AE099-A2C3-4F25-89D6-C1CB4685D1F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Titeenipeli.SpecialEffects", "Titeenipeli.SpecialEffects\Titeenipeli.SpecialEffects.csproj", "{23617BB6-1663-4E04-AE65-6A10CD1CABB7}"
 EndProject

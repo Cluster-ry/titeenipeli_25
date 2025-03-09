@@ -1,7 +1,7 @@
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Models;
 
-namespace Titeenipeli.InMemoryMapProvider;
+namespace Titeenipeli.InMemoryProvider.MapProvider;
 
 public interface IMapProvider
 {
