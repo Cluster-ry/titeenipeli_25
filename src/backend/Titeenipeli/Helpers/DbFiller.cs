@@ -10,6 +10,8 @@ public static class DbFiller
 {
     public static void Initialize(ApiDbContext dbContext, GameOptions gameOptions, bool isDevelopment)
     {
+        const bool isPerformanceTest = false;
+
         if (!dbContext.CtfFlags.Any())
         {
             dbContext.AddRange(GetCtfFlags());
@@ -39,85 +41,12 @@ public static class DbFiller
             dbContext.SaveChanges();
         }
 
-        var guildNames2 = Enum.GetValues<GuildName>().ToList();
-        guildNames2 = guildNames2.Skip(1).ToList();
-        var id = 1;
-        List<User> testUsers = [];
-        foreach (var guildName in guildNames2)
-        {
-            for (int i = 1; i < 40; i = i + 2)
-            {
-                var x = 0;
-                var y = 1;
-                if ((int)guildName <= 5)
-                {
-                    x = i + ((int)guildName - 1) * 40;
-                }
-                else
-                {
-                    x = i + ((int)guildName - 6) * 40;
-                    y = 199;
-                }
-                var user = new User
-                {
-                    Code = "test_" + id.ToString(),
-                    Guild =
-                        dbContext.Guilds.FirstOrDefault(guild => guild.Name == guildName)
-                        ?? throw new InvalidOperationException(),
-                    SpawnX = x,
-                    SpawnY = y,
-                    PixelBucket = gameOptions.InitialPixelBucket,
-                    PowerUps = [],
-                    TelegramId = id.ToString(),
-                    FirstName = "",
-                    LastName = "",
-                    Username = "",
-                };
-                testUsers.Add(user);
-                id = ++id;
-            }
-            for (int i = 2; i < 40; i = i + 2)
-            {
-                var x = 0;
-                var y = 0;
-                if ((int)guildName <= 5)
-                {
-                    x = i + ((int)guildName - 1) * 40;
-                    y = 3;
-                }
-                else
-                {
-                    x = i + ((int)guildName - 6) * 40;
-                    y = 197;
-                }
-                var user = new User
-                {
-                    Code = "test_" + id.ToString(),
-                    Guild =
-                        dbContext.Guilds.FirstOrDefault(guild => guild.Name == guildName)
-                        ?? throw new InvalidOperationException(),
-                    SpawnX = x,
-                    SpawnY = y,
-                    PixelBucket = gameOptions.InitialPixelBucket,
-                    PowerUps = [],
-                    TelegramId = id.ToString(),
-                    FirstName = "",
-                    LastName = "",
-                    Username = "",
-                };
-                testUsers.Add(user);
-                id = ++id;
-            }
-        }
 
-        /*
         List<User> defaultUsers = [];
-        User? testUser = null;
-        User? testOpponent = null;
 
         if (isDevelopment)
         {
-            testUser = new User
+            var testUser = new User
             {
                 Code = "test",
                 Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
@@ -130,23 +59,30 @@ public static class DbFiller
                 LastName = "",
                 Username = "",
             };
-            defaultUsers.Add(testUser);
 
-        var testOpponent = new User
+            var testOpponent = new User
+            {
+                Code = "opponent",
+                Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ??
+                        throw new InvalidOperationException(),
+                SpawnX = 3,
+                SpawnY = 2,
+                PixelBucket = gameOptions.InitialPixelBucket,
+                PowerUps = [],
+                TelegramId = "1001",
+                FirstName = "",
+                LastName = "",
+                Username = ""
+            };
+
+            defaultUsers.AddRange(testUser, testOpponent);
+        }
+
+        if (isPerformanceTest)
         {
-            Code = "opponent",
-            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ??
-                    throw new InvalidOperationException(),
-            SpawnX = 3,
-            SpawnY = 2,
-            PixelBucket = gameOptions.InitialPixelBucket,
-            PowerUps = [],
-            TelegramId = "1001",
-            FirstName = "",
-            LastName = "",
-            Username = ""
-        };
-        */
+            defaultUsers = GetPerformanceTestUsers(dbContext, gameOptions);
+        }
+
 
         var god = new User
         {
@@ -163,12 +99,11 @@ public static class DbFiller
             IsGod = true
         };
 
-        dbContext.Users.AddRange(god);
-        dbContext.SaveChanges();
+        defaultUsers.Add(god);
 
-        if (!dbContext.Users.Any() && isDevelopment)
+        if (!dbContext.Users.Any())
         {
-            foreach (var user in testUsers)
+            foreach (var user in defaultUsers)
             {
                 dbContext.Users.Add(user);
             }
@@ -191,60 +126,48 @@ public static class DbFiller
             }
         }
 
-        if (!dbContext.Map.Any())
+        if (dbContext.Map.Any())
         {
-            for (int x = 0; x < gameOptions.Width; x++)
-            {
-                for (int y = 0; y < gameOptions.Height; y++)
-                {
-                    dbContext.Map.Add(
-                        new Pixel
-                        {
-                            X = x,
-                            Y = y,
-                            User = null
-                        }
-                    );
-                }
-            }
-
             dbContext.SaveChanges();
-            /*
-                        Pixel? testUserSpawn =
-                            dbContext.Map.FirstOrDefault(pixel => pixel.X == testUser.SpawnX && pixel.Y == testUser.SpawnY);
-
-                        Pixel? testOpponentSpawn = dbContext.Map.FirstOrDefault(pixel =>
-                            pixel.X == testOpponent.SpawnX && pixel.Y == testOpponent.SpawnY);
-
-                        if (testUserSpawn != null)
-                        {
-                            testUserSpawn.User = testUser;
-                        }
-
-                        if (testOpponentSpawn != null)
-                        {
-                            testOpponentSpawn.User = testOpponent;
-                        }
-                        */
-            if (isDevelopment)
-            {
-                var users = dbContext.Users.ToList();
-
-                foreach (var user in users)
-                {
-                    var spawn = dbContext.Map.FirstOrDefault(pixel =>
-                        pixel.X == user.SpawnX && pixel.Y == user.SpawnY
-                    );
-
-                    if (spawn != null)
-                    {
-                        spawn.User = user;
-                    }
-                }
-            }
-
-            dbContext.SaveChanges();
+            return;
         }
+
+
+        for (int x = 0; x < gameOptions.Width; x++)
+        {
+            for (int y = 0; y < gameOptions.Height; y++)
+            {
+                dbContext.Map.Add(
+                    new Pixel
+                    {
+                        X = x,
+                        Y = y,
+                        User = null
+                    }
+                );
+            }
+        }
+
+        dbContext.SaveChanges();
+
+        if (isDevelopment)
+        {
+            var users = dbContext.Users.ToList();
+
+            foreach (var user in users)
+            {
+                var spawn = dbContext.Map.FirstOrDefault(pixel =>
+                    pixel.X == user.SpawnX && pixel.Y == user.SpawnY
+                );
+
+                if (spawn != null)
+                {
+                    spawn.User = user;
+                }
+            }
+        }
+
+        dbContext.SaveChanges();
     }
 
 
@@ -529,5 +452,89 @@ public static class DbFiller
                 }
             },
         ];
+    }
+
+    private static List<User> GetPerformanceTestUsers(ApiDbContext dbContext, GameOptions gameOptions)
+    {
+        var guildNames = Enum.GetValues<GuildName>().ToList();
+        guildNames = guildNames.Skip(1).ToList();
+
+        int id = 1;
+        List<User> testUsers = [];
+        foreach (var guildName in guildNames)
+        {
+            for (int i = 1; i < 40; i += 2)
+            {
+                int x;
+                int y = 1;
+
+                if ((int)guildName <= 5)
+                {
+                    x = i + ((int)guildName - 1) * 40;
+                }
+                else
+                {
+                    x = i + ((int)guildName - 6) * 40;
+                    y = 199;
+                }
+
+                var user = new User
+                {
+                    Code = "test_" + id,
+                    Guild =
+                        dbContext.Guilds.FirstOrDefault(guild => guild.Name == guildName)
+                        ?? throw new InvalidOperationException(),
+                    SpawnX = x,
+                    SpawnY = y,
+                    PixelBucket = gameOptions.InitialPixelBucket,
+                    PowerUps = [],
+                    TelegramId = id.ToString(),
+                    FirstName = "",
+                    LastName = "",
+                    Username = ""
+                };
+
+                testUsers.Add(user);
+                id = ++id;
+            }
+
+            for (int i = 2; i < 40; i += 2)
+            {
+                int x;
+                int y;
+
+                if ((int)guildName <= 5)
+                {
+                    x = i + ((int)guildName - 1) * 40;
+                    y = 3;
+                }
+                else
+                {
+                    x = i + ((int)guildName - 6) * 40;
+                    y = 197;
+                }
+
+                var user = new User
+                {
+                    Code = "test_" + id,
+                    Guild =
+                        dbContext.Guilds.FirstOrDefault(guild => guild.Name == guildName)
+                        ?? throw new InvalidOperationException(),
+                    SpawnX = x,
+                    SpawnY = y,
+                    PixelBucket = gameOptions.InitialPixelBucket,
+                    PowerUps = [],
+                    TelegramId = id.ToString(),
+                    FirstName = "",
+                    LastName = "",
+                    Username = ""
+                };
+
+                testUsers.Add(user);
+                id = ++id;
+            }
+        }
+
+        return testUsers;
     }
 }
