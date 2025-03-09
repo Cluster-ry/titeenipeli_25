@@ -4,6 +4,7 @@ import Modal from "../Modal/Modal";
 import Instructions from "../../models/ComponentData/Instructions";
 import InstructionsEntry from "./InstructionsEntry";
 import { FC } from "react";
+import background_logo from "../../assets/M-Files-Logo-With-Tagline-Full-Color-RGB.svg";
 
 const instructionsData: Instructions[] = [
     {
@@ -27,11 +28,15 @@ const InstructionsModal: FC = () => {
         <Modal title="Instructions" onClose={() => setInstructionsOn(false)}>
             <div id="instructions">
                 <div className="section-text">
-                    {instructionsData.map((instructionsEntry: Instructions, index: number) => (
-                        <InstructionsEntry key={index} {...instructionsEntry} />
+                    {instructionsData.map((instructionsEntry: Instructions) => (
+                        <InstructionsEntry key={instructionsEntry.header} {...instructionsEntry} />
                     ))}
                 </div>
             </div>
+            <h2>Sponsored by:</h2>
+            <img style={{
+                width: '50%',
+            }} src={background_logo}/>
         </Modal>
     );
 };
