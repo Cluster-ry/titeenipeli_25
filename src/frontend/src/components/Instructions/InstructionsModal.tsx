@@ -4,7 +4,7 @@ import Modal from "../Modal/Modal";
 import Instructions from "../../models/ComponentData/Instructions";
 import InstructionsEntry from "./InstructionsEntry";
 import { FC } from "react";
-import background_logo from "../../assets/M-Files-Logo-With-Tagline-Full-Color-RGB.svg";
+import mFilesLogo from "../../assets/M-Files-Logo-With-Tagline-Full-Color-RGB.svg";
 
 const instructionsData: Instructions[] = [
     {
@@ -36,7 +36,7 @@ const InstructionsModal: FC = () => {
             <h2>Sponsored by:</h2>
             <img style={{
                 width: '50%',
-            }} src={background_logo}/>
+            }} src={mFilesLogo}/>
         </Modal>
     );
 };
