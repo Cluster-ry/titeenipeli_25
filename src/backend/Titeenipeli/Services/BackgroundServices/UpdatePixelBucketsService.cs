@@ -1,6 +1,7 @@
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services.BackgroundServices;
@@ -8,14 +9,14 @@ namespace Titeenipeli.Services.BackgroundServices;
 public interface IUpdatePixelBucketsService : IAsynchronousTimedBackgroundService;
 
 public class UpdatePixelBucketsService(
-        IUserRepositoryService userRepositoryService,
-        IGuildRepositoryService guildRepositoryService,
-        IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService
+    IServiceScopeFactory serviceScopeFactory,
+    IUserProvider userProvider,
+    IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService
     ) : IUpdatePixelBucketsService
 {
     public async Task DoWork()
     {
-        foreach (GuildName guildName in Enum.GetValues(typeof(GuildName)))
+        foreach (var guildName in Enum.GetValues<GuildName>())
         {
             await UpdateGuildBuckets(guildName);
         }
@@ -25,14 +26,17 @@ public class UpdatePixelBucketsService(
 
     private async Task UpdateGuildBuckets(GuildName guildName)
     {
-        var guildUsers = userRepositoryService.GetByGuild(guildName);
-        if (guildUsers.Length == 0)
+        var scope = serviceScopeFactory.CreateScope();
+        var guildRepositoryService = scope.ServiceProvider.GetRequiredService<IGuildRepositoryService>();
+
+        var guildUsers = userProvider.GetByGuild(guildName);
+        if (guildUsers.Count == 0)
         {
             return;
         }
 
         var guild = guildUsers[0].Guild;
-        float guildPerPlayerIncrease = guild.BaseRateLimit / guildUsers.Length;
+        float guildPerPlayerIncrease = guild.BaseRateLimit / guildUsers.Count;
         guild.RateLimitPerPlayer = guildPerPlayerIncrease;
         guildRepositoryService.Update(guild);
         await guildRepositoryService.SaveChangesAsync();
@@ -48,8 +52,8 @@ public class UpdatePixelBucketsService(
             {
                 user.PixelBucket = guild.PixelBucketSize;
             }
-            userRepositoryService.Update(user);
-            await userRepositoryService.SaveChangesAsync();
+
+            userProvider.Update(user);
 
             GrpcMiscGameStateUpdateInput stateUpdate = new()
             {

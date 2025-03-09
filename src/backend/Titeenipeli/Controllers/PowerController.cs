@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Common.Database.Schema;
-using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Extensions;
 using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Services;
 using Titeenipeli.Services.Grpc;
@@ -15,7 +15,7 @@ namespace Titeenipeli.Controllers;
 [ApiController]
 [Route("state/powerups")]
 public sealed class PowerController(
-    IUserRepositoryService userRepositoryService,
+    IUserProvider userProvider,
     IMapUpdaterService mapUpdaterService,
     IPowerupService powerupService,
     IJwtService jwtService,
@@ -26,7 +26,7 @@ public sealed class PowerController(
     [Authorize]
     public async Task<IActionResult> ActivatePower([FromBody] PowerInput body)
     {
-        var user = HttpContext.GetUser(jwtService, userRepositoryService);
+        var user = HttpContext.GetUser(jwtService, userProvider);
 
         var userPower = user.PowerUps.FirstOrDefault(power => power.PowerId == body.Id);
         if (userPower is null)
@@ -45,20 +45,37 @@ public sealed class PowerController(
             return BadRequest();
         }
 
-        var pixelsToPlace = specialEffect.HandleSpecialEffect(new Coordinate(user.SpawnX + body.Location.X, user.SpawnY + body.Location.Y), body.Direction);
-        await mapUpdaterService.PlacePixels(userRepositoryService, pixelsToPlace, user);
+        var direction = body.Direction;
+        if (!userPower.Directed)
+        {
+            direction = Direction.Undefined;
+        }
 
         user.PowerUps.Remove(userPower);
-        userRepositoryService.Update(user);
-        await userRepositoryService.SaveChangesAsync();
+        userProvider.Update(user);
 
-        SendPowerupMessage(user, userPower);
-        SendPowerupUpdate(user);
+        try
+        {
+            var pixelsToPlace = specialEffect.HandleSpecialEffect(
+                new Coordinate(user.SpawnX + body.Location.X, user.SpawnY + body.Location.Y), direction);
+
+            await mapUpdaterService.PlacePixels(pixelsToPlace, user);
+        }
+        catch (Exception)
+        {
+            user.PowerUps.Add(userPower);
+            userProvider.Update(user);
+            throw;
+        }
+
+
+        SendPowerUpMessage(user, userPower);
+        SendPowerUpUpdate(user);
 
         return Ok();
     }
 
-    private void SendPowerupUpdate(User user)
+    private void SendPowerUpUpdate(User user)
     {
         GrpcMiscGameStateUpdateInput stateUpdate = new()
         {
@@ -70,24 +87,24 @@ public sealed class PowerController(
     }
 
 
-    private void SendPowerupMessage(User user, PowerUp powerup)
+    private void SendPowerUpMessage(User user, PowerUp powerUp)
     {
-        foreach (var sendUser in userRepositoryService.GetAll())
+        foreach (var sendUser in userProvider.GetAll())
         {
             GrpcMiscGameStateUpdateInput stateUpdate = new()
             {
                 User = sendUser,
-                Message = SelectPowerupMessage(user, powerup)
+                Message = SelectPowerupMessage(user, powerUp)
             };
 
             miscGameStateUpdateCoreService.UpdateMiscGameState(stateUpdate);
         }
     }
 
-    private string SelectPowerupMessage(User user, PowerUp powerup)
+    private static string SelectPowerupMessage(User user, PowerUp powerup)
     {
-        string[] messages = new[]
-        {
+        string[] messages =
+        [
             $"Holy moly, {user.Guild.Name} just used {powerup.Name}!",
             $"{user.Guild.Name} activated {powerup.Name}!",
             $"{user.Guild.Name} just went Super Saiyan with {powerup.Name}!",
@@ -97,8 +114,8 @@ public sealed class PowerController(
             $"{user.Guild.Name} used {powerup.Name}!",
             $"{user.Guild.Name} just summoned {powerup.Name}!",
             $"{user.Guild.Name} deployed {powerup.Name}!",
-            $"{user.Guild.Name} just destroyed the competition with {powerup.Name}!",
-        };
+            $"{user.Guild.Name} just destroyed the competition with {powerup.Name}!"
+        ];
 
         return Random.Shared.GetItems(messages, 1)[0];
     }

@@ -1,0 +1,12 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: ultra-disk-sc
+provisioner: disk.csi.azure.com
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  skuname: UltraSSD_LRS
+  kind: managed
+  cachingMode: None
+  diskIopsReadWrite: "2000"
+  diskMbpsReadWrite: "320"

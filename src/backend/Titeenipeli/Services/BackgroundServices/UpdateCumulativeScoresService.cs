@@ -1,6 +1,8 @@
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.InMemoryProvider.MapProvider;
+using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services.BackgroundServices;
@@ -8,20 +10,23 @@ namespace Titeenipeli.Services.BackgroundServices;
 public interface IUpdateCumulativeScoresService : IAsynchronousTimedBackgroundService;
 
 public class UpdateCumulativeScoresService(
-    IUserRepositoryService userRepositoryService,
-    IGuildRepositoryService guildRepositoryService,
-    IMapRepositoryService mapRepositoryService,
+    IServiceScopeFactory serviceScopeFactory,
+    IUserProvider userProvider,
+    IMapProvider mapProvider,
     IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService) : IUpdateCumulativeScoresService
 {
     public async Task DoWork()
     {
+        var scope = serviceScopeFactory.CreateScope();
+        var guildRepositoryService = scope.ServiceProvider.GetRequiredService<IGuildRepositoryService>();
+
         var guilds = guildRepositoryService.GetAll();
         foreach (var guild in guilds)
         {
             guild.CurrentScore = 0;
         }
 
-        Pixel[] pixels = [.. mapRepositoryService.GetAll()];
+        Pixel[] pixels = [.. mapProvider.GetAll()];
 
         foreach (var pixel in pixels)
         {
@@ -30,8 +35,11 @@ public class UpdateCumulativeScoresService(
                 continue;
             }
 
-            pixel.User.Guild.CurrentScore++;
-            pixel.User.Guild.CumulativeScore++;
+            // This is done to get guild from correct context.
+            var pixelGuild = guilds.FirstOrDefault(g => g.Id == pixel.User.Guild.Id);
+
+            pixelGuild!.CurrentScore++;
+            pixelGuild.CumulativeScore++;
         }
 
         await guildRepositoryService.SaveChangesAsync();
@@ -41,7 +49,7 @@ public class UpdateCumulativeScoresService(
 
     private void UpdateRealtimeScores(List<Guild> guilds)
     {
-        foreach (var user in userRepositoryService.GetAll())
+        foreach (var user in userProvider.GetAll())
         {
             GrpcMiscGameStateUpdateInput stateUpdate = new()
             {

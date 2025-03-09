@@ -29,6 +29,12 @@ public class ApiDbContext : DbContext
         return base.SaveChanges();
     }
 
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        AddTimestamps();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
     private void AddTimestamps()
     {
         IEnumerable<EntityEntry> entities = ChangeTracker.Entries()

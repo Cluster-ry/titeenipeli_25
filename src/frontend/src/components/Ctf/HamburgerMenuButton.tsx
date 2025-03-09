@@ -1,11 +1,11 @@
 import "./hamburger.css";
-import { useCtfStore } from "../../stores/ctfModalStore";
+import { helpModalStore } from "../../stores/helpModalStore";
 const HamburgerMenuButton = () => {
-    const { setCtfModelOpenState } = useCtfStore();
+    const { setHelpModalOpenState } = helpModalStore();
 
     return (
         <div className="hamburger-button-wrapper">
-            <div className="hamburger" onClick={() => setCtfModelOpenState(true)}>
+            <div className="hamburger" onClick={() => setHelpModalOpenState(true)}>
                 <div className="hamburger-bar"></div>
                 <div className="hamburger-bar"></div>
                 <div className="hamburger-bar"></div>

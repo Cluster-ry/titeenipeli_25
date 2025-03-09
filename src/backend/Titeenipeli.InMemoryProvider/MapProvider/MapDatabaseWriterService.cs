@@ -3,16 +3,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 
-namespace Titeenipeli.InMemoryMapProvider;
+namespace Titeenipeli.InMemoryProvider.MapProvider;
 
-public class DatabaseWriterService : IDisposable
+public class MapDatabaseWriterService : IDisposable
 {
-    public Channel<Pixel> PixelChannel { get; init; } = Channel.CreateUnbounded<Pixel>();
+    public Channel<Pixel> PixelChannel { get; } = Channel.CreateUnbounded<Pixel>();
 
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly Task _writePixelsTask;
 
-    public DatabaseWriterService(IServiceScopeFactory scopeFactory)
+    public MapDatabaseWriterService(IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
         _writePixelsTask = Task.Run(Write);

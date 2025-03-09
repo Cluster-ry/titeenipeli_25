@@ -27,21 +27,21 @@ export const useGameStateStore = create<GameStateStore>((set) => ({
     scores: [],
     powerUps: [],
     setPixelBucket: (newPixelBucket: PixelBucket) => {
-        set({ pixelBucket: newPixelBucket });
+        set(() => ({ pixelBucket: newPixelBucket }));
     },
     setScores: (newScores: Score[]) => {
-        set({ scores: newScores });
+        set(() => ({ scores: newScores }));
     },
     setPowerUps: (newPowerups: PowerUp[]) => {
-        set({ powerUps: newPowerups });
+        set(() => ({ powerUps: newPowerups }));
     },
     setMiscGameState: (newState: GetGameState) => {
-        const state = {
+        const processedState = {
             pixelBucket: { ...newState.pixelBucket },
             scores: newState.scores,
             powerUps: newState.powerUps,
         };
-        set(state);
+        set(() => ({ ...processedState }));
     },
     decreaseBucket: () => {
         set((state) => {
@@ -49,7 +49,7 @@ export const useGameStateStore = create<GameStateStore>((set) => ({
                 ...state.pixelBucket,
                 amount: state.pixelBucket.amount - 1,
             };
-            return { ...state, pixelBucket };
+            return { pixelBucket };
         });
     },
     increaseBucket: () => {
@@ -58,7 +58,7 @@ export const useGameStateStore = create<GameStateStore>((set) => ({
                 ...state.pixelBucket,
                 amount: state.pixelBucket.amount + 1,
             };
-            return { ...state, pixelBucket };
+            return { pixelBucket };
         });
     },
 }));

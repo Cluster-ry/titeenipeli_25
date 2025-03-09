@@ -1,45 +1,89 @@
 .notification {
+    flex: 1;
     white-space: pre;
-    justify-self: center;
     z-index: 3;
-    min-width: 25vw;
-    border-width: 0;
-    border-radius: 15px;
-
-    display: grid;
-    align-items: center;
-    justify-content: center;
+    border-radius: 1rem;
     animation: flash 7500ms ease infinite alternate;
-
     position: absolute;
     right: 0;
+    left: 0;
     bottom: 0;
-
-    padding: 15px;
-    margin-right: 15px;
-    margin-bottom: 15px;
+    padding: 1rem;
+    margin: 0 1rem 1rem 0;
+    text-wrap: auto;
+    max-width: 60vw;
+    margin-inline: auto;
+    width: fit-content;
+    transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.5s;
 }
 
 .error {
-    background-color: rgb(221, 114, 114);
+    background-color: rgba(221, 114, 114, 0.8);
     box-shadow:
-        rgba(45, 35, 66, 0.4) 0 2px 4px,
-        rgba(45, 35, 66, 0.3) 0 7px 13px -3px,
-        #925d67 0 -3px 0 inset;
+        0px 2px 4px rgba(45, 35, 66, 0.4) ,
+        0px 7px 13px -3px rgba(45, 35, 66, 0.3) ,
+        inset 0px 3px 0px 0px rgba(146, 93, 103, 1);
 }
 
 .success {
-    background-color: green;
+    background-color: rgba(0, 128, 0, 0.8);
     box-shadow:
-        limegreen 0 2px 4px,
-        limegreen 0 7px 13px -3px,
-        lightgreen 0 -3px 0 inset;
+        0px 2px 4px 0px limegreen,
+        0px 7px 13px -3px limegreen,
+        inset 0px -3px 0px 0px lightgreen;
 }
 
 .neutral {
-    background-color: yellow;
+    background-color: rgba(255, 255, 0, 0.8);
     box-shadow:
-        darkcyan 0 2px 4px,
-        lightyellow 7px 13px -3px,
-        yellowgreen -3px 0 inset;
+        0px 2px 4px rgba(0, 139, 139, 1),
+        7px 13px 3px rgba(255, 255, 224, 1),
+        inset -3px 0px 0px 0px rgba(154, 205, 50, 1);
+}
+
+.move-out {
+    animation: move-out 0.8s ease-in-out 0s;
+    animation-iteration-count: 1;
+}
+
+.move-in {
+    animation: move-in 0.8s ease-in-out 0s;
+    animation-iteration-count: 1;
+}
+
+@keyframes move-out {
+    0% {
+        transform: translateX(0%);
+        opacity: 1;
+    }
+    65% {
+        transform: translateX(-10%);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(200%);
+        opacity: 0.0;
+    }
+}
+
+@keyframes move-in {
+    0% {
+        transform: translateX(200%);
+        opacity: 0.0;
+    }
+    65% {
+        transform: translateX(-10%);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(0%);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 800px) {
+    .notification {
+        max-width: 85vw;
+        font-size: 1rem
+    }
 }

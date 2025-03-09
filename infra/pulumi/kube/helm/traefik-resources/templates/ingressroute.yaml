@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  labels:
+    app.kubernetes.io/name: grafana
+  name: grafana-dashboard
+  namespace: monitoring
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`grafana.test.cluster2017.fi`)
+      services:
+        - name: lgtm-distributed-grafana
+          port: 80
