@@ -52,8 +52,23 @@ public class MapUpdater
         {
             var xSize = map.GetUpperBound(0) + 1;
             var ySize = map.GetUpperBound(1) + 1;
-            if (pixelCoordinate.Y <= 0 || pixelCoordinate.Y >= ySize ||
-                pixelCoordinate.X <= 0 || pixelCoordinate.X >= xSize)
+            // Normally you would see strict greater/less than, but due to border behaviour we can do just a minor
+            // optimization here with greater/less than or equal
+            var coordinateIsOutOfBounds =
+                pixelCoordinate.Y <= 0 || pixelCoordinate.Y >= ySize ||
+                pixelCoordinate.X <= 0 || pixelCoordinate.X >= xSize;
+
+            if (coordinateIsOutOfBounds)
+            {
+                continue;
+            }
+
+            // Due to previous out of bound behaviour MapBorder should never be encountered here but better safe than
+            // sorry. Overriding a border would be rather bad after all...
+            var coordinateIsReadonly =
+                map[pixelCoordinate.X, pixelCoordinate.Y].Type is PixelType.Spawn or PixelType.MapBorder;
+
+            if (coordinateIsReadonly)
             {
                 continue;
             }
