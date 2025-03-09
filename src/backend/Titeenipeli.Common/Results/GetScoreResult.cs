@@ -10,5 +10,5 @@ public class GetScoreResult
 public class GuildScore
 {
     public GuildName Guild { get; set; }
-    public int Score { get; set; }
+    public long Score { get; set; }
 }
