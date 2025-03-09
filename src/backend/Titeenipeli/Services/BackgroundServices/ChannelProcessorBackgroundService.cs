@@ -17,7 +17,7 @@ public class ChannelProcessorBackgroundService : BackgroundService
     {
         var tcs = new TaskCompletionSource<T>();
 
-        _channel.Writer.TryWrite(async () =>
+        _channel.Writer.TryWrite(() =>
         {
             try
             {
@@ -29,6 +29,8 @@ public class ChannelProcessorBackgroundService : BackgroundService
                 _logger.LogError(ex, "Error occurred in {ServiceName}", GetType().Name);
                 tcs.SetException(ex);
             }
+
+            return Task.CompletedTask;
         });
 
         return tcs.Task;
