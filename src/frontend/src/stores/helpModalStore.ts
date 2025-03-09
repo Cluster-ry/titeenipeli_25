@@ -5,7 +5,7 @@ export interface HelpModalStore {
     setHelpModalOpenState: (newOpenState: boolean) => void;
 }
 
-export const helpModalStore = create<HelpModalStore>()((set) => ({
+export const useHelpModalStore = create<HelpModalStore>()((set) => ({
     helpModalOpen: false,
     setHelpModalOpenState: (newOpenState: boolean) =>
         set((state: HelpModalStore) => ({

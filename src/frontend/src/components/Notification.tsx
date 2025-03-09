@@ -3,7 +3,9 @@ import { useNotificationStore } from "../stores/notificationStore";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const Notification = () => {
-    const { text, type, triggerNotification } = useNotificationStore();
+    const triggerNotification = useNotificationStore(state => state.triggerNotification);
+    const text = useNotificationStore(state => state.text);
+    const type = useNotificationStore(state => state.type);
     const [animation, setAnimation] = useState<string>("");
     const cancelRef = useRef<(() => void) | null>(null);
 
