@@ -411,8 +411,8 @@ public static class DbFiller
                 Token = "#itiaapfkGrbvzwtL",
                 Powerup = new PowerUp
                 {
-                    PowerId = (int)PowerUps.Glitch,
-                    Name = PowerUps.Glitch.ToString(),
+                    PowerId = (int)PowerUps.Binary,
+                    Name = PowerUps.Binary.ToString(),
                     Directed = true,
                 }
             },
