@@ -8,6 +8,7 @@ using Titeenipeli.Grpc.ChangeEntities;
 using Titeenipeli.InMemoryProvider.MapProvider;
 using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Options;
+using Titeenipeli.Services.BackgroundServices;
 using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services;
@@ -17,7 +18,8 @@ public class MapUpdaterService(
     GameOptions gameOptions,
     IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
     IMapProvider mapProvider,
-    IUserProvider userProvider
+    IUserProvider userProvider,
+    ChannelProcessorBackgroundService channelProcessorBackgroundService
 ) : IMapUpdaterService
 {
     private const int BorderWidth = 1;
@@ -28,21 +30,19 @@ public class MapUpdaterService(
     {
         var borderfiedCoordinate = pixelCoordinate + new Coordinate(1, 1);
 
-        return Task.Run(() =>
+        return channelProcessorBackgroundService.Enqueue(() =>
         {
-            lock (_mapUpdater)
+            if (!IsValidPlacement(pixelCoordinate, newOwner) || mapProvider.IsSpawn(pixelCoordinate))
             {
-                if (!IsValidPlacement(pixelCoordinate, newOwner) || mapProvider.IsSpawn(pixelCoordinate))
-                {
-                    return false;
-                }
-
-                var map = GetMap();
-                var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
-
-                DoGrpcUpdate(map, changedPixels);
-                DoDatabaseUpdate(changedPixels, newOwner);
+                return false;
             }
+
+            var map = GetMap();
+            var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
+
+            DoGrpcUpdate(map, changedPixels);
+            DoDatabaseUpdate(changedPixels, newOwner);
+
 
             return true;
         });
@@ -50,13 +50,11 @@ public class MapUpdaterService(
 
     public Task<bool> PlacePixels(List<Coordinate> pixelCoordinates, User newOwner)
     {
-        return Task.Run(() =>
+        return channelProcessorBackgroundService.Enqueue(() =>
         {
-            lock (_mapUpdater)
-            {
-                var grpcBatch = PlacePixelsWithRetry(pixelCoordinates, newOwner);
-                DoGrpcUpdate(GetMap(), grpcBatch);
-            }
+            var grpcBatch = PlacePixelsWithRetry(pixelCoordinates, newOwner);
+            DoGrpcUpdate(GetMap(), grpcBatch);
+
 
             return true;
         });
@@ -64,25 +62,23 @@ public class MapUpdaterService(
 
     public Task<User> PlaceSpawn(User user)
     {
-        return Task.Run(() =>
+        return channelProcessorBackgroundService.Enqueue(() =>
         {
             var spawnGeneratorService = scopeFactory.CreateScope()
                                                     .ServiceProvider
                                                     .GetRequiredService<SpawnGeneratorService>();
 
-            lock (_mapUpdater)
-            {
-                var map = GetMap();
-                var spawnPoint = spawnGeneratorService.GetSpawnPoint(user.Guild.Name);
 
-                user.SpawnX = spawnPoint.X;
-                user.SpawnY = spawnPoint.Y;
+            var map = GetMap();
+            var spawnPoint = spawnGeneratorService.GetSpawnPoint(user.Guild.Name);
 
-                var changedPixels = _mapUpdater.PlacePixel(map, spawnPoint + new Coordinate(1, 1), user, PixelType.Spawn);
+            user.SpawnX = spawnPoint.X;
+            user.SpawnY = spawnPoint.Y;
 
-                DoGrpcUpdate(map, changedPixels);
-                DoDatabaseUpdate(changedPixels, user);
-            }
+            var changedPixels = _mapUpdater.PlacePixel(map, spawnPoint + new Coordinate(1, 1), user, PixelType.Spawn);
+
+            DoGrpcUpdate(map, changedPixels);
+            DoDatabaseUpdate(changedPixels, user);
 
             return user;
         });

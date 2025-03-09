@@ -182,6 +182,8 @@ public static class Program
                                              .ToList());
         }
 
+        app.Services.GetRequiredService<ChannelProcessorBackgroundService>().StartAsync(CancellationToken.None);
+
         app.UseMiddleware<GlobalRoutePrefixMiddleware>("/api/v1");
         app.UsePathBase(new PathString("/api/v1"));
 
@@ -232,6 +234,9 @@ public static class Program
                     GetNonNullService<ILogger<UpdatePixelBucketsService>>(
                         serviceProvider),
                     updatePixelBucketsServicePeriod));
+
+        services.AddSingleton<ChannelProcessorBackgroundService>();
+        services.AddHostedService<ChannelProcessorBackgroundService>();
     }
 
     private static void AddRepositoryServices(IServiceCollection services)
