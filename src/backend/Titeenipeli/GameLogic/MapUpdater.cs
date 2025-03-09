@@ -57,11 +57,18 @@ public class MapUpdater
             var coordinateIsOutOfBounds =
                 pixelCoordinate.Y <= 0 || pixelCoordinate.Y >= ySize ||
                 pixelCoordinate.X <= 0 || pixelCoordinate.X >= xSize;
+
+            if (coordinateIsOutOfBounds)
+            {
+                continue;
+            }
+
             // Due to previous out of bound behaviour MapBorder should never be encountered here but better safe than
             // sorry. Overriding a border would be rather bad after all...
             var coordinateIsReadonly =
                 map[pixelCoordinate.X, pixelCoordinate.Y].Type is PixelType.Spawn or PixelType.MapBorder;
-            if (coordinateIsOutOfBounds || coordinateIsReadonly)
+
+            if (coordinateIsReadonly)
             {
                 continue;
             }
