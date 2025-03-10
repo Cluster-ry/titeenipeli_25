@@ -91,7 +91,8 @@ public class MapUpdaterService(
         // this inside the select, but I am too lazy to profile this and not taking any risks
         var addOneCoordinate = new Coordinate(1, 1);
         var changedPixels = _mapUpdater.PlacePixels(map,
-            pixelCoordinates.Select(coordinate => coordinate + addOneCoordinate).ToArray(), newOwner);
+            pixelCoordinates.Select(coordinate => coordinate + addOneCoordinate).ToArray(),
+            newOwner);
 
         DoDatabaseUpdate(changedPixels, newOwner);
 
