@@ -1,7 +1,6 @@
 import infoIcon from "../../../assets/new_assets/info.png";
 import { useHelpModalStore } from "../../../stores/helpModalStore";
 import "./overlay.css";
-import { useHelpModalStore } from "../../../stores/helpModalStore";
 import { useCallback } from "react";
 
 const BottomOverlayRight = () => {
