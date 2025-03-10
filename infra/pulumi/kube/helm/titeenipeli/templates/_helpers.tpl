@@ -45,7 +45,7 @@ Selector labels for frontend
 */}}
 {{- define "titeenipeli.frontendSelectorLabels" -}}
 app.kubernetes.io/instance: {{ include "titeenipeli.frontendName" . }}
-app.kubernetes.io/name: {{ .Release.Name }}
+app.kubernetes.io/name: {{ .Release.Name }}-front
 {{- end }}
 
 {{/*
@@ -70,7 +70,7 @@ Selector labels for backend
 */}}
 {{- define "titeenipeli.backendSelectorLabels" -}}
 app.kubernetes.io/instance: {{ include "titeenipeli.backendName" . }}
-app.kubernetes.io/name: {{ .Release.Name }}
+app.kubernetes.io/name: {{ .Release.Name }}-back
 {{- end }}
 
 {{/*
@@ -95,5 +95,5 @@ Selector labels for bot
 */}}
 {{- define "titeenipeli.botSelectorLabels" -}}
 app.kubernetes.io/instance: {{ include "titeenipeli.botName" . }}
-app.kubernetes.io/name: {{ .Release.Name }}
+app.kubernetes.io/name: {{ .Release.Name }}-bot
 {{- end }}
