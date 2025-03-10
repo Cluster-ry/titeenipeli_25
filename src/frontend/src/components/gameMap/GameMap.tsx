@@ -12,7 +12,8 @@ import { useIsMoving } from "../../hooks/useIsMoving.ts";
 import { Coordinate } from "../../models/Coordinate.ts";
 import { usePowerUps } from "../../hooks/usePowerUps.ts";
 import MapTile from "./MapTile.tsx";
-import { graphicsStore } from "../../stores/graphicsStore.ts";import { useDynamicWindowSize } from "../../hooks/useDynamicWindowSize.tsx";
+import { useGraphicsStore } from "../../stores/graphicsStore.ts";
+import { useDynamicWindowSize } from "../../hooks/useDynamicWindowSize.tsx";
 
 const mapOptions = {
     background: 0x4B0082, resizeTo: window, antialias: false, premultipliedAlpha: false
@@ -33,14 +34,14 @@ const mapOptions = {
 const GameMap: FC = () => {
     const pixelsBoundingBox = useNewMapStore((state) => state.pixelsBoundingBox);
     const map = useNewMapStore((state) => state.map);
-    const { usePowerUp } = usePowerUps();
+    const usePowerUp = usePowerUps();
     const target = usePowerUpStore((state) => state.target);
     const { isMoving, startMoving } = useIsMoving();
     const effectRef = useRef<EffectContainerHandle>(null);
     const user = useUser();
     const conquer = useOptimisticConquer(user, effectRef);
     const onMapClickRef = useRef<((coordinate: Coordinate, targeted: boolean) => void) | null>(null);
-    const { graphicsEnabled } = graphicsStore();
+    const graphicsEnabled = useGraphicsStore(state => state.graphicsEnabled);
     const windowSize = useDynamicWindowSize();
 
     const onMapClick = useCallback(

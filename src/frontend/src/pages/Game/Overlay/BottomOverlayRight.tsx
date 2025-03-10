@@ -1,14 +1,14 @@
 import infoIcon from "../../../assets/new_assets/info.png";
+import { useHelpModalStore } from "../../../stores/helpModalStore";
 import "./overlay.css";
-import { useCtfStore } from "../../../stores/ctfModalStore";
 
 const BottomOverlayRight = () => {
-    const { setCtfModelOpenState } = useCtfStore();
+    const setHelpModalOpenState = useHelpModalStore(state => state.setHelpModalOpenState);
     return (
         <div
             className="bottom-overlay__right"
             onClick={() => {
-                setCtfModelOpenState(true);
+                setHelpModalOpenState(true);
             }}
         >
             <img className="bottom-overlay__right__help" src={infoIcon} />
