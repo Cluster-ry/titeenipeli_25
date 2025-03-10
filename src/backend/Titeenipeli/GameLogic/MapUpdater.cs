@@ -19,18 +19,81 @@ public class MapUpdater
     /// Place one pixel into the given map and calculate the resulting fill and cut operations
     /// </summary>
     /// <param name="map">The game map - should include border pixels. Mutated according to the update event.</param>
-    /// <param name="pixelCoordinates">The coordinates of the new pixel</param>
+    /// <param name="pixelCoordinate">The coordinates of the new pixel</param>
     /// <param name="placingUser">The user placing the new pixel</param>
-    public List<MapChange> PlacePixel(PixelWithType[,] map, Coordinate pixelCoordinates, User placingUser)
+    /// <param name="type">The type of the pixel to place, defaults to PixelType.Normal</param>
+    public List<MapChange> PlacePixel(PixelWithType[,] map, Coordinate pixelCoordinate, User placingUser, PixelType type = PixelType.Normal)
     {
         List<MapChange> allChangedPixels = [];
-        User? oldOwner = map[pixelCoordinates.X, pixelCoordinates.Y].Owner;
-        allChangedPixels.Add(new() { Coordinate = pixelCoordinates - new Coordinate(1, 1), OldOwner = oldOwner, NewOwner = placingUser });
-        map[pixelCoordinates.X, pixelCoordinates.Y]
-            = new PixelWithType { Location = pixelCoordinates - new Coordinate(1, 1), Type = PixelType.Normal, Owner = placingUser };
+        User? oldOwner = map[pixelCoordinate.X, pixelCoordinate.Y].Owner;
+        allChangedPixels.Add(new() { Coordinate = pixelCoordinate - new Coordinate(1, 1), OldOwner = oldOwner, NewOwner = placingUser });
+        map[pixelCoordinate.X, pixelCoordinate.Y]
+            = new PixelWithType { Location = pixelCoordinate - new Coordinate(1, 1), Type = type, Owner = placingUser };
 
+        return UpdateMapAfterPixelChanges(allChangedPixels, map, pixelCoordinate, placingUser);
+    }
+
+    /// <summary>
+    /// Place multiple pixels into the given map and calculate the resulting fill and cut operations
+    /// </summary>
+    /// <param name="map">The game map - should include border pixels. Mutated according to the update event.</param>
+    /// <param name="pixelCoordinates">The coordinates of the new pixels</param>
+    /// <param name="placingUser">The user placing the new pixels</param>
+    public List<MapChange> PlacePixels(PixelWithType[,] map, Coordinate[] pixelCoordinates, User placingUser)
+    {
+        List<MapChange> allChangedPixels = [];
+        if (pixelCoordinates.Length == 0)
+        {
+            return [];
+        }
+
+        var latestCoordinate = pixelCoordinates[0];
+        foreach (var pixelCoordinate in pixelCoordinates)
+        {
+            var xSize = map.GetUpperBound(0) + 1;
+            var ySize = map.GetUpperBound(1) + 1;
+            // Normally you would see strict greater/less than, but due to border behaviour we can do just a minor
+            // optimization here with greater/less than or equal
+            var coordinateIsOutOfBounds =
+                pixelCoordinate.Y <= 0 || pixelCoordinate.Y >= ySize ||
+                pixelCoordinate.X <= 0 || pixelCoordinate.X >= xSize;
+
+            if (coordinateIsOutOfBounds)
+            {
+                continue;
+            }
+
+            // Due to previous out of bound behaviour MapBorder should never be encountered here but better safe than
+            // sorry. Overriding a border would be rather bad after all...
+            var coordinateIsReadonly =
+                map[pixelCoordinate.X, pixelCoordinate.Y].Type is PixelType.Spawn or PixelType.MapBorder;
+
+            if (coordinateIsReadonly)
+            {
+                continue;
+            }
+
+            var oldOwner = map[pixelCoordinate.X, pixelCoordinate.Y].Owner;
+            allChangedPixels.Add(new MapChange { Coordinate = pixelCoordinate - new Coordinate(1, 1), OldOwner = oldOwner, NewOwner = placingUser });
+            map[pixelCoordinate.X, pixelCoordinate.Y]
+                = new PixelWithType { Location = pixelCoordinate - new Coordinate(1, 1), Type = PixelType.Normal, Owner = placingUser };
+            latestCoordinate = pixelCoordinate;
+        }
+
+        return UpdateMapAfterPixelChanges(allChangedPixels, map, latestCoordinate, placingUser);
+    }
+
+    private List<MapChange> UpdateMapAfterPixelChanges(
+        List<MapChange> allChangedPixels,
+        PixelWithType[,] map,
+        Coordinate pixelCoordinate,
+        User placingUser)
+    {
         // TODO uncomment once _PlaceWithCache is implemented
-        // TODO  - this should drop time complexity to O(log n) from O(n) if done right (MIT approved)
+        // this should drop time complexity to O(log n) from O(n) if done right (MIT approved)
+        //
+        // Well shit we don't have time for this after code complexity jumped due to requirement changes
+        // Now this algorithm is just plain worse than simple flood-fill with no fancy data structure. My bad - Eddie
         // if (_cachedNodes is null)
         // {
         //     (nodes, justAddedNode) = _ConstructMapAdjacencyNodes(map, pixelCoordinates, placingGuild);
@@ -39,20 +102,20 @@ public class MapUpdater
         // {
         //     (nodes, justAddedNode) = _PlaceWithCache(map, pixelCoordinates, placingGuild);
         // }
-        var (nodes, justAddedNode) = _ConstructMapAdjacencyNodes(map, pixelCoordinates);
+        var (nodes, justAddedNode) = _ConstructMapAdjacencyNodes(map, pixelCoordinate);
 
         // Construct a set of all nodes reachable from outside node (index 0)
         var nonHangingNodeIndexes = _GetNonSurroundedNodes(nodes, justAddedNode);
 
-        List<MapChange> changedPixels = _CutNodesWithoutSpawn(map, nodes);
+        var changedPixels = _CutNodesWithoutSpawn(map, nodes);
         allChangedPixels = [.. allChangedPixels, .. changedPixels];
 
         // Fill is applied only for nodes owned by nobody.
         foreach (var nodeIndex in nodes.Keys.Where(
-            nodeIndex => !nonHangingNodeIndexes.Contains(nodeIndex) &&
-            (nodes[nodeIndex].Guild == null || nodes[nodeIndex].Guild == GuildName.Nobody)))
+                     nodeIndex => !nonHangingNodeIndexes.Contains(nodeIndex) &&
+                                  (nodes[nodeIndex].Guild == null || nodes[nodeIndex].Guild == GuildName.Nobody)))
         {
-            List<MapChange> changedFillPixels = _FillNode(map, nodes[nodeIndex], placingUser);
+            var changedFillPixels = _FillNode(map, nodes[nodeIndex], placingUser);
             allChangedPixels = [.. allChangedPixels, .. changedFillPixels];
             nodes.Remove(nodeIndex);
         }

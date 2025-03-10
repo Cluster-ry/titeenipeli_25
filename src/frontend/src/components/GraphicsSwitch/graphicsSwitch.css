@@ -1,0 +1,31 @@
+.graphics {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.graphics-button {
+    width: 45%;
+    height: 50px;
+    background: black;
+    display: flex;
+    margin: auto;
+}
+
+.indicator-on {
+    width: 50%;
+    height: 100%;
+    background: green;
+}
+
+.indicator-off {
+    width: 50%;
+    height: 100%;
+    background: red;
+}
+
+.indicator-disabled {
+    visibility: hidden;
+}
