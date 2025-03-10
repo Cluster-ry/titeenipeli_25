@@ -29,16 +29,18 @@ const InstructionsModal: FC = () => {
     }, [setInstructionsOn]);
     return (
         <Modal title="Instructions" onClose={onClose}>
-            <div id="instructions">
-                <div className="section-text">
-                    {instructionsData.map((instructionsEntry: Instructions) => (
-                        <InstructionsEntry key={instructionsEntry.header} {...instructionsEntry} />
-                    ))}
+            <div className="instruction-container">
+                <div id="instructions">
+                    <div className="section-text">
+                        {instructionsData.map((instructionsEntry: Instructions) => (
+                            <InstructionsEntry key={instructionsEntry.header} {...instructionsEntry} />
+                        ))}
+                    </div>
                 </div>
-            </div>
-            <div className="sponsor-container">
-                <h3>Sponsored by:</h3>
-                <img className="icon" src={mFilesLogo}/>
+                <div className="sponsor-container">
+                    <h3>Sponsored by:</h3>
+                    <img className="icon" src={mFilesLogo}/>
+                </div>
             </div>
         </Modal>
     );
