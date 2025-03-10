@@ -18,7 +18,6 @@ const guildColorMapping: Record<Guild, HslaColour> = {
     [Guild.OulunTietoteekkarit]: new HslaColour(94, 100, 50),
     [Guild.TietoTeekkarikilta]: new HslaColour(155, 100, 50),
     [Guild.Digit]: new HslaColour(178, 100, 50),
-    [Guild.Datateknologerna]: new HslaColour(212, 100, 50),
     [Guild.Sosa]: new HslaColour(240, 100, 50),
     [Guild.Date]: new HslaColour(280, 100, 50),
     [Guild.Tutti]: new HslaColour(312, 100, 50),
