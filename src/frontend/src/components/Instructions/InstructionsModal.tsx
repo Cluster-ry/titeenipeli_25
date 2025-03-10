@@ -4,7 +4,7 @@ import Modal from "../Modal/Modal";
 import Instructions from "../../models/ComponentData/Instructions";
 import InstructionsEntry from "./InstructionsEntry";
 import { FC, useCallback } from "react";
-import mFilesLogo from "../../assets/M-Files-Logo-With-Tagline-Full-Color-RGB.svg";
+import mFilesLogo from "../../assets/m_files.svg";
 
 const instructionsData: Instructions[] = [
     {
