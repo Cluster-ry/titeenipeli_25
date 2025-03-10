@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
@@ -171,32 +172,28 @@ public class MapUpdaterService(
 
     private void DoDatabaseUpdate(List<MapChange> changedPixels, User newOwner)
     {
-        List<object> gameEvents = [];
+        List<PixelChangeEvent> gameEvents = [];
         foreach (var changedPixel in changedPixels)
         {
             var computedNewOwner = changedPixel.NewOwner == null ? null : newOwner;
 
-            gameEvents.Add(new
+            gameEvents.Add(new PixelChangeEvent
             {
-                fromUser = new
+                FromUser = new PixelChangeUser
                 {
-                    userId = changedPixel.NewOwner?.Id,
-                    userName = changedPixel.NewOwner?.Username,
-                    guildId = changedPixel.NewOwner?.Guild.Id,
-                    guildName = changedPixel.NewOwner?.Guild.Name
+                    UserId = changedPixel.NewOwner?.Id,
+                    Username = changedPixel.NewOwner?.Username,
+                    GuildId = changedPixel.NewOwner?.Guild.Id,
+                    GuildName = changedPixel.NewOwner?.Guild.Name
                 },
-                toUser = new
+                ToUser = new PixelChangeUser
                 {
-                    userId = computedNewOwner?.Id,
-                    userName = computedNewOwner?.Username,
-                    guildId = computedNewOwner?.Guild.Id,
-                    guildName = computedNewOwner?.Guild.Name
+                    UserId = computedNewOwner?.Id,
+                    Username = computedNewOwner?.Username,
+                    GuildId = computedNewOwner?.Guild.Id,
+                    GuildName = computedNewOwner?.Guild.Name
                 },
-                pixel = new
-                {
-                    x = changedPixel.Coordinate.X,
-                    y = changedPixel.Coordinate.Y
-                }
+                Pixel = changedPixel.Coordinate
             });
 
             Pixel newPixel = new()
