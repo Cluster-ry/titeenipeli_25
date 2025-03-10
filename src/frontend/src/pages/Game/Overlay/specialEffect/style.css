@@ -1,21 +1,22 @@
 .special-effect {
-    margin: 0 1em;
     display: flex;
+    margin: 4em 0.5em 0 0.5em;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    width: 7em;
 }
 .special-effect .button {
     transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.5s;
     width: 6em;
     aspect-ratio: 1;
     display: flex;
-    background: #75757580;
-    border: 5px solid #757575;
-    border-radius: 8px;
+    border-radius: 100%;
     pointer-events: all;
     justify-content: center;
     align-items: center;
+    padding: 0.5em;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.2);
 }
 .special-effect .button .icon {
     width: 4em;
@@ -25,8 +26,9 @@
 
 .special-effect .label {
     z-index: 5;
-    flex: 1 1 4em;
-    text-align: center;
+    height: 4rem;
+    width: inherit;
+    word-wrap: break-word;
 }
 
 .cancel {
@@ -35,11 +37,16 @@
     2px -2px 0px #fff700,
     -2px 2px 0px #fff700,
     2px 2px 0px #fff700,
-    -2px -2px 0px #fff700;
+    -2px -2px 0px #fff700,
+    0px 2px #fff700,
+    0px 2px #fff700,
+    2px 0px #fff700,
+    -2px 0px #fff700;
     animation: label-in-out 0.5s ease-in-out infinite alternate-reverse;
 }
 
 .special-effect .button:hover {
+    cursor: pointer;
     transform: scale(1.1);
 }
 .special-effect .button:active {
@@ -123,5 +130,22 @@
     }
     100% {
         transform: rotate(10deg);
+    }
+}
+
+@media (max-width: 800px) {
+    .special-effect {
+        width: 6em;
+        margin: 4em 0 0 0em;
+    }
+    .special-effect .button {
+        width: 4em;
+    }
+    .special-effect .button .icon {
+        width: 3em;
+    }
+    .special-effect .label {
+        font-size: 0.85em;
+        height: 3em;
     }
 }
