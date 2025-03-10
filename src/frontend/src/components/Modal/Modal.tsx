@@ -1,4 +1,4 @@
-import { FC, ReactNode, useRef } from "react";
+import { FC, ReactNode, useCallback, useRef } from "react";
 import "./modal.css";
 
 interface ModalProps {
@@ -17,9 +17,12 @@ export const Modal: FC<ModalProps> = ({ title, children, onClose }) => {
         };
         setTimeout(onAnimationTimeout, 400); // Needs to match css animation!
     };
+    const stopEventPropagation = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        event.stopPropagation();
+    }, []);
     return (
         <div className="modal" onClick={onCloseClick}>
-            <div ref={modalRef} className="modal-content opening" onClick={(e) => e.stopPropagation()}>
+            <div ref={modalRef} className="modal-content opening" onClick={stopEventPropagation}>
                 <div className="modal-header">
                     <button className="close" onClick={onCloseClick}>
                         &times;

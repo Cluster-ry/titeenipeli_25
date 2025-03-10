@@ -30,6 +30,10 @@ grafana:
               datasourceUid: prom
             serviceMap:
               datasourceUid: prom
+        - name: Pyroscope
+          type: grafana-pyroscope-datasource
+          uid: pyroscope
+          url: http://pyroscope.pyroscope.svc.cluster.local.:4040/
   ingress:
     enabled: true
   sidecar:
@@ -73,7 +77,19 @@ grafana:
         gnetId: 15760
         revision: 36
         datasource: Mimir
-
+  env:
+    GF_INSTALL_PLUGINS: grafana-pyroscope-app
+    GF_DIAGNOSTICS_PROFILING_ENABLED: true
+    GF_DIAGNOSTICS_PROFILING_ADDR: 0.0.0.0
+    GF_DIAGNOSTICS_PROFILING_PORT: 9094
+  podAnnotations:
+    profiles.grafana.com/cpu.scrape: "true"
+    profiles.grafana.com/cpu.port: "9094"
+    profiles.grafana.com/memory.scrape: "true"
+    profiles.grafana.com/memory.port: "9094"
+    profiles.grafana.com/goroutine.scrape: "true"
+    profiles.grafana.com/goroutine.port: "9094"
+    
 mimir:
   enabled: true
   metaMonitoring:

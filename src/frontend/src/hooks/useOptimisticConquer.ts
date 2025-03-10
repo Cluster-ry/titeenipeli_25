@@ -30,8 +30,10 @@ type Action = {
  * A function to commence a pixel conquest action
  */
 export const useOptimisticConquer = (user: User | null, effectHandle: RefObject<EffectContainerHandle>) => {
-    const { increaseBucket, decreaseBucket } = useGameStateStore();
-    const { map, setPixel } = useNewMapStore();
+    const increaseBucket = useGameStateStore(state => state.increaseBucket);
+    const decreaseBucket = useGameStateStore(state => state.decreaseBucket);
+    const map = useNewMapStore(state => state.map);
+    const setPixel = useNewMapStore(state => state.setPixel);
     const pendingActions = useRef<{ [key: string]: Action[] }>({});
 
     const pushToActions = (key: string, next: Pixel, previous: Pixel) => {

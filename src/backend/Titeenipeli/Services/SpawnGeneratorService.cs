@@ -26,8 +26,19 @@ public class SpawnGeneratorService
         do
         {
             spawnCoordinate = _mapCenter + _spawnGenerator.GetSpawnPoint(guildName);
-        } while (!_mapProvider.IsValid(spawnCoordinate) || _mapProvider.IsSpawn(spawnCoordinate));
+        } while (!_mapProvider.IsValid(spawnCoordinate) ||
+                 _mapProvider.IsSpawn(spawnCoordinate) ||
+                 !IsValidSpawnPlacement(spawnCoordinate));
 
         return spawnCoordinate;
+    }
+
+    private bool IsValidSpawnPlacement(Coordinate pixelCoordinate)
+    {
+        return !(from pixel in _mapProvider.GetAll()
+                 where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
+                       Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
+                       pixel.User?.SpawnX == pixel.X && pixel.User?.SpawnY == pixel.Y
+                 select pixel).Any();
     }
 }

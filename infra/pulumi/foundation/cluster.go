@@ -87,7 +87,7 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 			AgentPoolProfiles: cs.ManagedClusterAgentPoolProfileArray{
 				cs.ManagedClusterAgentPoolProfileArgs{
 					Count:             pulumi.Int(2),
-					VmSize:            pulumi.String("Standard_D2ds_v5"),
+					VmSize:            pulumi.String("Standard_D4ads_v5"),
 					MaxPods:           pulumi.Int(110),
 					Mode:              pulumi.String("System"),
 					Name:              pulumi.String("agentpool"),
@@ -95,7 +95,9 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 					Type:              pulumi.String("VirtualMachineScaleSets"),
 					VnetSubnetID:      nodeSubnet.ID(),
 					PodSubnetID:       podSubnet.ID(),
+					AvailabilityZones: pulumi.StringArray{pulumi.String("1")},
 					EnableAutoScaling: pulumi.Bool(true),
+					EnableUltraSSD:    pulumi.Bool(true),
 					MinCount:          pulumi.Int(1),
 					MaxCount:          pulumi.Int(5),
 				},
@@ -185,6 +187,8 @@ func buildCluster(ctx *pulumi.Context, cfg Config, entra EntraInfo) (*ClusterInf
 		EnableAutoScaling: pulumi.Bool(false),
 		OsType:            pulumi.String("Linux"),
 		VmSize:            pulumi.String("Standard_F4s_v2"),
+		EnableUltraSSD:    pulumi.Bool(true),
+		AvailabilityZones: pulumi.StringArray{pulumi.String("1")},
 		VnetSubnetID:      nodeSubnet.ID(),
 		PodSubnetID:       podSubnet.ID(),
 		NodeTaints: pulumi.StringArray{

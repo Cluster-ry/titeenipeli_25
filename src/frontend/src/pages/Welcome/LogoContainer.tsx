@@ -55,7 +55,7 @@ export const LogoContainer = () => {
                 }}
             >
                 <span>Clash of the Titens</span>
-                <span>2024</span>
+                <span>2025</span>
             </div>
         </div>
     );

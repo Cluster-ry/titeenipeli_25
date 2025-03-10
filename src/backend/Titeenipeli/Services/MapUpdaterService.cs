@@ -1,13 +1,16 @@
 using System.Text.Json;
 using Titeenipeli.Common.Database.Schema;
+using Titeenipeli.Common.Database.Services;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.Helpers;
 using Titeenipeli.InMemoryProvider.MapProvider;
 using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Options;
+using Titeenipeli.Services.BackgroundServices;
 using Titeenipeli.Services.Grpc;
 
 namespace Titeenipeli.Services;
@@ -17,7 +20,8 @@ public class MapUpdaterService(
     GameOptions gameOptions,
     IIncrementalMapUpdateCoreService incrementalMapUpdateCoreService,
     IMapProvider mapProvider,
-    IUserProvider userProvider
+    IUserProvider userProvider,
+    ChannelProcessorBackgroundService channelProcessorBackgroundService
 ) : IMapUpdaterService
 {
     private const int BorderWidth = 1;
@@ -28,21 +32,20 @@ public class MapUpdaterService(
     {
         var borderfiedCoordinate = pixelCoordinate + new Coordinate(1, 1);
 
-        return Task.Run(() =>
+        return channelProcessorBackgroundService.Enqueue(() =>
         {
-            lock (_mapUpdater)
+            if (!PixelPlacement.IsValidPlacement(mapProvider, pixelCoordinate, newOwner) ||
+                mapProvider.IsSpawn(pixelCoordinate))
             {
-                if (!IsValidPlacement(pixelCoordinate, newOwner) || mapProvider.IsSpawn(pixelCoordinate))
-                {
-                    return false;
-                }
-
-                var map = GetMap();
-                var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
-
-                DoGrpcUpdate(map, changedPixels);
-                DoDatabaseUpdate(changedPixels, newOwner);
+                return false;
             }
+
+            var map = GetMap();
+            var changedPixels = _mapUpdater.PlacePixel(map, borderfiedCoordinate, newOwner);
+
+            DoGrpcUpdate(map, changedPixels);
+            DoDatabaseUpdate(changedPixels, newOwner);
+
 
             return true;
         });
@@ -50,13 +53,11 @@ public class MapUpdaterService(
 
     public Task<bool> PlacePixels(List<Coordinate> pixelCoordinates, User newOwner)
     {
-        return Task.Run(() =>
+        return channelProcessorBackgroundService.Enqueue(() =>
         {
-            lock (_mapUpdater)
-            {
-                var grpcBatch = PlacePixelsWithRetry(pixelCoordinates, newOwner);
-                DoGrpcUpdate(GetMap(), grpcBatch);
-            }
+            var grpcBatch = PlacePixelsWithRetry(pixelCoordinates, newOwner);
+            DoGrpcUpdate(GetMap(), grpcBatch);
+
 
             return true;
         });
@@ -64,25 +65,23 @@ public class MapUpdaterService(
 
     public Task<User> PlaceSpawn(User user)
     {
-        return Task.Run(() =>
+        return channelProcessorBackgroundService.Enqueue(() =>
         {
             var spawnGeneratorService = scopeFactory.CreateScope()
                                                     .ServiceProvider
                                                     .GetRequiredService<SpawnGeneratorService>();
 
-            lock (_mapUpdater)
-            {
-                var map = GetMap();
-                var spawnPoint = spawnGeneratorService.GetSpawnPoint(user.Guild.Name);
 
-                user.SpawnX = spawnPoint.X;
-                user.SpawnY = spawnPoint.Y;
+            var map = GetMap();
+            var spawnPoint = spawnGeneratorService.GetSpawnPoint(user.Guild.Name);
 
-                var changedPixels = _mapUpdater.PlacePixel(map, spawnPoint + new Coordinate(1, 1), user, PixelType.Spawn);
+            user.SpawnX = spawnPoint.X;
+            user.SpawnY = spawnPoint.Y;
 
-                DoGrpcUpdate(map, changedPixels);
-                DoDatabaseUpdate(changedPixels, user);
-            }
+            var changedPixels = _mapUpdater.PlacePixel(map, spawnPoint + new Coordinate(1, 1), user, PixelType.Spawn);
+
+            DoGrpcUpdate(map, changedPixels);
+            DoDatabaseUpdate(changedPixels, user);
 
             return user;
         });
@@ -95,7 +94,8 @@ public class MapUpdaterService(
         // this inside the select, but I am too lazy to profile this and not taking any risks
         var addOneCoordinate = new Coordinate(1, 1);
         var changedPixels = _mapUpdater.PlacePixels(map,
-            pixelCoordinates.Select(coordinate => coordinate + addOneCoordinate).ToArray(), newOwner);
+            pixelCoordinates.Select(coordinate => coordinate + addOneCoordinate).ToArray(),
+            newOwner);
 
         DoDatabaseUpdate(changedPixels, newOwner);
 
@@ -174,32 +174,28 @@ public class MapUpdaterService(
 
     private void DoDatabaseUpdate(List<MapChange> changedPixels, User newOwner)
     {
-        List<object> gameEvents = [];
+        List<PixelChangeEvent> gameEvents = [];
         foreach (var changedPixel in changedPixels)
         {
             var computedNewOwner = changedPixel.NewOwner == null ? null : newOwner;
 
-            gameEvents.Add(new
+            gameEvents.Add(new PixelChangeEvent
             {
-                fromUser = new
+                FromUser = new PixelChangeUser
                 {
-                    userId = changedPixel.NewOwner?.Id,
-                    userName = changedPixel.NewOwner?.Username,
-                    guildId = changedPixel.NewOwner?.Guild.Id,
-                    guildName = changedPixel.NewOwner?.Guild.Name
+                    UserId = changedPixel.NewOwner?.Id,
+                    Username = changedPixel.NewOwner?.Username,
+                    GuildId = changedPixel.NewOwner?.Guild.Id,
+                    GuildName = changedPixel.NewOwner?.Guild.Name
                 },
-                toUser = new
+                ToUser = new PixelChangeUser
                 {
-                    userId = computedNewOwner?.Id,
-                    userName = computedNewOwner?.Username,
-                    guildId = computedNewOwner?.Guild.Id,
-                    guildName = computedNewOwner?.Guild.Name
+                    UserId = computedNewOwner?.Id,
+                    Username = computedNewOwner?.Username,
+                    GuildId = computedNewOwner?.Guild.Id,
+                    GuildName = computedNewOwner?.Guild.Name
                 },
-                pixel = new
-                {
-                    x = changedPixel.Coordinate.X,
-                    y = changedPixel.Coordinate.Y
-                }
+                Pixel = changedPixel.Coordinate
             });
 
             Pixel newPixel = new()
@@ -241,18 +237,5 @@ public class MapUpdaterService(
                 action(coordinate);
             }
         }
-    }
-
-    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
-    {
-        // Take neighboring pixels for the pixel the user is trying to set,
-        // but remove cornering pixels and only return pixels belonging to
-        // the user
-        return (from pixel in mapProvider.GetAll()
-                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
-                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      pixel.User?.Id == user.Id
-                select pixel).Any();
     }
 }

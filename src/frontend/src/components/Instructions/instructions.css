@@ -1,23 +1,20 @@
 #instructions {
     background-color: #333333;
     color: white;
+    overflow-y: auto;
+}
 
-    overflow-x: hidden;
-    overflow-y: scroll;
-    padding: 0;
-
-    overflow-x: hidden;
-    overflow-y: scroll;
+.instruction-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 60vh;
 }
 
 .section-text {
     display: flex;
     flex-flow: column;
     text-align: left;
-    padding-left: 2vw;
-    padding-right: 2vw;
-    max-height: 60vh;
-    max-width: 60vw;
+    margin-right: 2vw;
 }
 
 .entry-text {
@@ -25,12 +22,20 @@
     margin-bottom: 1vh;
 }
 
-@media only screen and (max-width: 600px) {
-    #instructions {
-        max-width: 80vw;
-        max-height: 80vh;
-    }
+.sponsor-container .icon {
+    margin-bottom: 1em;
+    width: 12em;
+}
+
+@media only screen and (max-width: 800px) {
     .section-text {
-        font-size: 12px;
+        font-size: 0.8em;
+    }
+    .sponsor-container {
+        font-size: small;
+    }
+    .sponsor-container .icon {
+        margin-bottom: 1em;
+        width: 8em;
     }
 }

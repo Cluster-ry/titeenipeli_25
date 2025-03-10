@@ -1,8 +1,9 @@
 import { useCallback } from "react";
-import { graphicsStore } from "../../stores/graphicsStore";
+import { useGraphicsStore } from "../../stores/graphicsStore";
 
 export const useGraphicsIndicator = () => {
-  const { graphicsEnabled, setGraphicsEnabled } = graphicsStore();
+  const graphicsEnabled = useGraphicsStore(state => state.graphicsEnabled);
+  const setGraphicsEnabled = useGraphicsStore(state => state.setGraphicsEnabled);
 
   const toggleGraphics = useCallback(() => {
     setGraphicsEnabled(!graphicsEnabled);
@@ -12,10 +13,10 @@ export const useGraphicsIndicator = () => {
     return graphicsEnabled
       ? {
           onClass: "indicator-on",
-          offClass: "indicator-off indicator-disabled",
+          offClass: "indicator-off hide",
         }
       : {
-          onClass: "indicator-on indicator-disabled",
+          onClass: "indicator-on hide",
           offClass: "indicator-off",
         };
   };
