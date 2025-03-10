@@ -15,6 +15,7 @@
     margin-inline: auto;
     width: fit-content;
     transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.5s;
+    overflow: hidden;
 }
 
 .error {
