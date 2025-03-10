@@ -24,6 +24,7 @@ export const usePowerUps = () => {
     const resetPowerUp = usePowerUpStore((state) => state.resetPowerUp);
     // Returns whether event propagation should be stopped
     const usePowerUp = (coordinate: Coordinate, targeted: boolean) => {
+        console.log("a")
         // Again, for some god knows what reason the state just won't stay up to date without getting it manually
         const { powerUp, target } = usePowerUpStore.getState();
         if (powerUp === null) return false;

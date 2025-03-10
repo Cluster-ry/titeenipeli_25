@@ -7,7 +7,8 @@ const BottomOverlay = () => {
     const specialEffects = useGameStateStore((state) => state.powerUps);
     const powerUp = usePowerUpStore((state) => state.powerUp);
     const setPowerUp = usePowerUpStore((state) => state.setPowerUp);
-
+    const uiPowerUpId  = usePowerUpStore((state) => state.uiPowerUpId);
+    
     return (
         <div className="bottom-overlay bottom-gradient">
             {specialEffects.map((effect, index) => (
@@ -16,6 +17,8 @@ const BottomOverlay = () => {
                     {...effect}
                     selected={powerUp}
                     onClick={setPowerUp}
+                    keyAsId={`${effect.powerUpId}-${index}`}
+                    uiPowerUpId={uiPowerUpId}
                 />
             ))}
         </div>

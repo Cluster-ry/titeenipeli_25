@@ -17,7 +17,9 @@ import spaceInvaderEffect from "../../../../assets/powerups/powerup-invader.png"
 
 type Props = {
     selected: number | null;
-    onClick: (effectId: number) => void;
+    onClick: (effectId: number, keyAsId: string) => void;
+    keyAsId: string;
+    uiPowerUpId: string | null;
 };
 
 const cancelLabel = "Cancel";
@@ -36,17 +38,16 @@ const SpecialEffectIcon: { [key: number]: string } = {
     12: heartEffect,
     13: spaceInvaderEffect
 };
-
 const getEffectIcon = (index: number) => {
     return SpecialEffectIcon[index] ?? SpecialEffectIcon[1];
 };
 
-export const SpecialEffect: FC<PowerUp & Props> = ({ selected, powerUpId, name, onClick }) => {
-    const isSelected = useMemo(() => selected === powerUpId, [powerUpId, selected]);
+export const SpecialEffect: FC<PowerUp & Props> = ({powerUpId, name, onClick, keyAsId, uiPowerUpId}) => {
+    const isSelected = useMemo(() => uiPowerUpId === keyAsId, [keyAsId, uiPowerUpId]);
     const icon = useMemo(() => getEffectIcon(powerUpId), [powerUpId]);
     const handleClick = useCallback(() => {
-        onClick(powerUpId);
-    }, [onClick, powerUpId]);
+        onClick(powerUpId, keyAsId);
+    }, [onClick, powerUpId, keyAsId]);
     return (
         <div key={powerUpId} className={"special-effect"} onClick={handleClick}>
             <div className={`button ${isSelected ? "selected" : ""}`}>
