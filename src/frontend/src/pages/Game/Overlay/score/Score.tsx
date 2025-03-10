@@ -17,7 +17,7 @@ const Score: FC<ScoreProps> = ({ guild, score, place }) => {
 
     const medal = useMemo(() => {
         if (place <= medals.length) {
-            return <img src={medals[place]} />
+            return <img className="low-res" src={medals[place]} />
         }
         return null;
     }, [place]);

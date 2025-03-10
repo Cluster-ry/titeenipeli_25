@@ -36,10 +36,10 @@ const InstructionsModal: FC = () => {
                     ))}
                 </div>
             </div>
-            <h2>Sponsored by:</h2>
-            <img style={{
-                width: '50%',
-            }} src={mFilesLogo}/>
+            <div className="sponsor-container">
+                <h3>Sponsored by:</h3>
+                <img className="icon" src={mFilesLogo}/>
+            </div>
         </Modal>
     );
 };

@@ -6,8 +6,8 @@ import bucketImage from "../../../assets/bucket.png";
 const RatelimitMeter: FC<PropsWithChildren> = () => {
     const bucket = useGameStateStore((state) => state.pixelBucket);
     return (
-        <div className="top-overlay__right">
-            <img className="top-overlay__right__bucket" src={bucketImage} alt="Pixel Bucket" />
+        <div className="top-overlay__right  outlined-text">
+            <img className="top-overlay__right__bucket low-res" src={bucketImage} alt="Pixel Bucket" />
             <div className="top-overlay__right__spans">
                 <span className="top-overlay__right__cooldown">
                     {Math.round(bucket.increasePerMinute * 10) / 10} px / min

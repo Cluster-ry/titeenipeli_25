@@ -28,7 +28,7 @@ const Scores: FC = () => {
     }, [setShowAll]);
 
     return (
-        <div className="top-overlay__left">
+        <div className="top-overlay__left outlined-text">
             <div className="top-overlay__scores-container">{scoreElements}</div>
             <button className="top-overlay__score-button" onClick={toggleShowAll}>
                 {showAll ? hideLabel : showLabel}

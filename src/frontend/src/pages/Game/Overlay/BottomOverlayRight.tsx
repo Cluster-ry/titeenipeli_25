@@ -10,7 +10,7 @@ const BottomOverlayRight = () => {
     }, [setHelpModalOpenState]);
     return (
         <div className="bottom-overlay__right" onClick={openHelpModal}>
-            <img className="bottom-overlay__right__help" src={infoIcon} />
+            <img className="bottom-overlay__right__help low-res" src={infoIcon} />
         </div>
     );
 };

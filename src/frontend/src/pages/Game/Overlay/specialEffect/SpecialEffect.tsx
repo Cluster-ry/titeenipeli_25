@@ -39,12 +39,12 @@ export const SpecialEffect: FC<PowerUp & Props> = ({ selected, powerUpId, name, 
         onClick(powerUpId);
     }, [onClick, powerUpId]);
     return (
-        <div key={powerUpId} className={"special-effect"} onClick={handleClick}>
+        <div key={powerUpId} className="special-effect" onClick={handleClick}>
             <div className={`button ${isSelected ? "selected" : ""}`}>
-                <img className="icon" src={icon} />
+                <img className="icon low-res" src={icon} />
             </div>
             <span className={`label${isSelected ? " cancel" : ""}`}>{isSelected ? cancelLabel : name}</span>
-            {isSelected ? <img className="overlay-effect" src={icon} /> : null}
+            {isSelected ? <img className="overlay-effect low-res" src={icon} /> : null}
         </div>
     );
 };
