@@ -16,7 +16,7 @@ import { useGraphicsStore } from "../../stores/graphicsStore.ts";
 import { useDynamicWindowSize } from "../../hooks/useDynamicWindowSize.tsx";
 
 const mapOptions = {
-    background: 0x4B0082, resizeTo: window, antialias: false, premultipliedAlpha: false
+    background: 0x827389, resizeTo: window, antialias: false, premultipliedAlpha: false
 }
 
 /**

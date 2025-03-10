@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useMemo } from "react";
 import "../overlay.css";
 
 import goldMedal from "../../../../assets/sprites/medal-gold.png";
@@ -11,28 +11,20 @@ type ScoreProps = {
     place: number;
 };
 
-const Score: FC<ScoreProps> = ({ guild, score, place }) => {
-    const [displayMedal, setDisplayMedal] = useState<string>("");
+const medals = [goldMedal, silverMedal, bronzeMedal];
 
-    useEffect(() => {
-        switch (place) {
-            case 0:
-                setDisplayMedal(goldMedal);
-                break;
-            case 1:
-                setDisplayMedal(silverMedal);
-                break;
-            case 2:
-                setDisplayMedal(bronzeMedal);
-                break;
-            default:
-                break;
+const Score: FC<ScoreProps> = ({ guild, score, place }) => {
+
+    const medal = useMemo(() => {
+        if (place <= medals.length) {
+            return <img className="low-res" src={medals[place]} />
         }
+        return null;
     }, [place]);
 
     return (
         <div key={guild} className="top-overlay__score-container">
-            {displayMedal.length > 0 ? <img src={displayMedal} /> : <></>}
+            {medal}
             <span>{guild}:</span>
             <span>{score}</span>
         </div>
