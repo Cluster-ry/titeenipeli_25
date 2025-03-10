@@ -20,4 +20,7 @@ RUN dotnet publish "Titeenipeli.csproj" -c $BUILD_CONFIGURATION -o /app/publish 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY --from=pyroscope/pyroscope-dotnet:0.9.2-glibc /Pyroscope.Profiler.Native.so /dotnet/Pyroscope.Profiler.Native.so
+COPY --from=pyroscope/pyroscope-dotnet:0.9.2-glibc /Pyroscope.Linux.ApiWrapper.x64.so /dotnet/Pyroscope.Linux.ApiWrapper.x64.so
+
 ENTRYPOINT ["dotnet", "Titeenipeli.dll"]

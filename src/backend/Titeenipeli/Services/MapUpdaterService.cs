@@ -5,6 +5,7 @@ using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.GameLogic;
 using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.Helpers;
 using Titeenipeli.InMemoryProvider.MapProvider;
 using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Options;
@@ -32,7 +33,8 @@ public class MapUpdaterService(
 
         return channelProcessorBackgroundService.Enqueue(() =>
         {
-            if (!IsValidPlacement(pixelCoordinate, newOwner) || mapProvider.IsSpawn(pixelCoordinate))
+            if (!PixelPlacement.IsValidPlacement(mapProvider, pixelCoordinate, newOwner) ||
+                mapProvider.IsSpawn(pixelCoordinate))
             {
                 return false;
             }
@@ -91,7 +93,8 @@ public class MapUpdaterService(
         // this inside the select, but I am too lazy to profile this and not taking any risks
         var addOneCoordinate = new Coordinate(1, 1);
         var changedPixels = _mapUpdater.PlacePixels(map,
-            pixelCoordinates.Select(coordinate => coordinate + addOneCoordinate).ToArray(), newOwner);
+            pixelCoordinates.Select(coordinate => coordinate + addOneCoordinate).ToArray(),
+            newOwner);
 
         DoDatabaseUpdate(changedPixels, newOwner);
 
@@ -237,18 +240,5 @@ public class MapUpdaterService(
                 action(coordinate);
             }
         }
-    }
-
-    private bool IsValidPlacement(Coordinate pixelCoordinate, User user)
-    {
-        // Take neighboring pixels for the pixel the user is trying to set,
-        // but remove cornering pixels and only return pixels belonging to
-        // the user
-        return (from pixel in mapProvider.GetAll()
-                where Math.Abs(pixel.X - pixelCoordinate.X) <= 1 &&
-                      Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      Math.Abs(pixel.X - pixelCoordinate.X) + Math.Abs(pixel.Y - pixelCoordinate.Y) <= 1 &&
-                      pixel.User?.Id == user.Id
-                select pixel).Any();
     }
 }

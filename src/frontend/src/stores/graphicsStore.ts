@@ -14,7 +14,7 @@ interface GraphicsStore {
     setGraphicsEnabled: (newGraphicsEnabled: boolean) => void;
 }
 
-export const graphicsStore = create<GraphicsStore>()(
+export const useGraphicsStore = create<GraphicsStore>()(
     persist(
         (set) => ({
             graphicsEnabled: true,

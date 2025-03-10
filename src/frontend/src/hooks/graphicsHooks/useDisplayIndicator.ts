@@ -1,8 +1,9 @@
 import { useCallback } from "react";
-import { graphicsStore } from "../../stores/graphicsStore";
+import { useGraphicsStore } from "../../stores/graphicsStore";
 
 export const useGraphicsIndicator = () => {
-  const { graphicsEnabled, setGraphicsEnabled } = graphicsStore();
+  const graphicsEnabled = useGraphicsStore(state => state.graphicsEnabled);
+  const setGraphicsEnabled = useGraphicsStore(state => state.setGraphicsEnabled);
 
   const toggleGraphics = useCallback(() => {
     setGraphicsEnabled(!graphicsEnabled);

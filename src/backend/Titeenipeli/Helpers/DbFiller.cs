@@ -8,8 +8,10 @@ namespace Titeenipeli.Helpers;
 
 public static class DbFiller
 {
-    public static void Initialize(ApiDbContext dbContext, GameOptions gameOptions)
+    public static void Initialize(ApiDbContext dbContext, GameOptions gameOptions, bool isDevelopment)
     {
+        const bool isPerformanceTest = false;
+
         if (!dbContext.CtfFlags.Any())
         {
             dbContext.AddRange(GetCtfFlags());
@@ -22,57 +24,70 @@ public static class DbFiller
             var guildNames = Enum.GetValues<GuildName>().ToList();
             // Skip Nobody.
             guildNames = guildNames.Skip(1).ToList();
-            guilds.AddRange(from GuildName name in guildNames
-                            select new Guild
-                            {
-                                Name = name,
-                                ActiveCtfFlags = [],
-                                BaseRateLimit = gameOptions.PixelsPerMinutePerGuild,
-                                PixelBucketSize = gameOptions.InitialPixelBucketSize,
-                                FogOfWarDistance = gameOptions.FogOfWarDistance
-                            });
+            guilds.AddRange(
+                from GuildName name in guildNames
+                select new Guild
+                {
+                    Name = name,
+                    ActiveCtfFlags = [],
+                    BaseRateLimit = gameOptions.PixelsPerMinutePerGuild,
+                    PixelBucketSize = gameOptions.InitialPixelBucketSize,
+                    FogOfWarDistance = gameOptions.FogOfWarDistance
+                }
+            );
 
             dbContext.Guilds.AddRange(guilds);
 
             dbContext.SaveChanges();
         }
 
-        var testUser = new User
-        {
-            Code = "test",
-            Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
-            SpawnX = 5,
-            SpawnY = 5,
-            PixelBucket = gameOptions.InitialPixelBucket,
-            PowerUps = [],
-            TelegramId = "0",
-            FirstName = "",
-            LastName = "",
-            Username = "",
-        };
 
-        var testOpponent = new User
+        List<User> defaultUsers = [];
+
+        if (isDevelopment)
         {
-            Code = "opponent",
-            Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ??
-                    throw new InvalidOperationException(),
-            SpawnX = 3,
-            SpawnY = 2,
-            PixelBucket = gameOptions.InitialPixelBucket,
-            PowerUps = [],
-            TelegramId = "1",
-            FirstName = "",
-            LastName = "",
-            Username = ""
-        };
+            var testUser = new User
+            {
+                Code = "test",
+                Guild = dbContext.Guilds.FirstOrDefault() ?? throw new InvalidOperationException(),
+                SpawnX = 5,
+                SpawnY = 5,
+                PixelBucket = gameOptions.InitialPixelBucket,
+                PowerUps = [],
+                TelegramId = "0",
+                FirstName = "",
+                LastName = "",
+                Username = "",
+            };
+
+            var testOpponent = new User
+            {
+                Code = "opponent",
+                Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ??
+                        throw new InvalidOperationException(),
+                SpawnX = 3,
+                SpawnY = 2,
+                PixelBucket = gameOptions.InitialPixelBucket,
+                PowerUps = [],
+                TelegramId = "1",
+                FirstName = "",
+                LastName = "",
+                Username = ""
+            };
+
+            defaultUsers.AddRange(testUser, testOpponent);
+        }
+
+        if (isPerformanceTest)
+        {
+            defaultUsers = GetPerformanceTestUsers(dbContext, gameOptions);
+        }
+
 
         var god = new User
         {
             Code = "God",
-            Guild = new Guild
-            {
-                Name = GuildName.Nobody
-            },
+            Guild = new Guild { Name = GuildName.Nobody },
             SpawnX = -10,
             SpawnY = -10,
             PowerUps = [],
@@ -84,66 +99,74 @@ public static class DbFiller
             IsGod = true
         };
 
+        defaultUsers.Add(god);
 
         if (!dbContext.Users.Any())
         {
-            dbContext.Users.AddRange(testUser, testOpponent, god);
+            dbContext.Users.AddRange(defaultUsers);
             dbContext.SaveChanges();
         }
-
 
         if (!dbContext.PowerUps.Any())
         {
             var powerUpService = new PowerupService(gameOptions);
             foreach (var powerUp in Enum.GetValues<PowerUps>())
             {
-                dbContext.PowerUps.Add(new PowerUp
-                {
-                    PowerId = (int)powerUp,
-                    Name = powerUp.ToString(),
-                    Directed = powerUpService.GetByEnum(powerUp)?.Directed ?? false
-                });
+                dbContext.PowerUps.Add(
+                    new PowerUp
+                    {
+                        PowerId = (int)powerUp,
+                        Name = powerUp.ToString(),
+                        Directed = powerUpService.GetByEnum(powerUp)?.Directed ?? false
+                    }
+                );
             }
         }
 
-        if (!dbContext.Map.Any())
+        if (dbContext.Map.Any())
         {
-            for (int x = 0; x < gameOptions.Width; x++)
+            dbContext.SaveChanges();
+            return;
+        }
+
+
+        for (int x = 0; x < gameOptions.Width; x++)
+        {
+            for (int y = 0; y < gameOptions.Height; y++)
             {
-                for (int y = 0; y < gameOptions.Height; y++)
-                {
-                    dbContext.Map.Add(new Pixel
+                dbContext.Map.Add(
+                    new Pixel
                     {
                         X = x,
                         Y = y,
                         User = null
-                    });
+                    }
+                );
+            }
+        }
+
+        dbContext.SaveChanges();
+
+        if (isDevelopment)
+        {
+            var users = dbContext.Users.ToList();
+
+            foreach (var user in users)
+            {
+                var spawn = dbContext.Map.FirstOrDefault(pixel =>
+                    pixel.X == user.SpawnX && pixel.Y == user.SpawnY
+                );
+
+                if (spawn != null)
+                {
+                    spawn.User = user;
                 }
             }
-
-            dbContext.SaveChanges();
-
-            Pixel? testUserSpawn =
-                dbContext.Map.FirstOrDefault(pixel => pixel.X == testUser.SpawnX && pixel.Y == testUser.SpawnY);
-
-            Pixel? testOpponentSpawn = dbContext.Map.FirstOrDefault(pixel =>
-                pixel.X == testOpponent.SpawnX && pixel.Y == testOpponent.SpawnY);
-
-            if (testUserSpawn != null)
-            {
-                testUserSpawn.User = testUser;
-            }
-
-            if (testOpponentSpawn != null)
-            {
-                testOpponentSpawn.User = testOpponent;
-            }
-
-            dbContext.SaveChanges();
         }
 
         dbContext.SaveChanges();
     }
+
 
     public static void Clear(ApiDbContext dbContext)
     {
@@ -204,11 +227,7 @@ public static class DbFiller
                     Directed = false,
                 }
             },
-            new CtfFlag
-            {
-                Token = "#I_DONT_KNOW_THE_RULES",
-                BaserateMultiplier = 1.2f
-            },
+            new CtfFlag { Token = "#I_DONT_KNOW_THE_RULES", BaserateMultiplier = 1.2f },
             new CtfFlag
             {
                 Token = "#TÄLLÄ_EI_SAA_POWER_UPIA",
@@ -249,16 +268,8 @@ public static class DbFiller
                     Directed = false,
                 }
             },
-            new CtfFlag
-            {
-                Token = "#TITEENIJAMIT2025",
-                FogOfWarIncrease = 1
-            },
-            new CtfFlag
-            {
-                Token = "#muinaistenroomal4istentavo1n",
-                BucketSizeIncrease = 3
-            },
+            new CtfFlag { Token = "#TITEENIJAMIT2025", FogOfWarIncrease = 1 },
+            new CtfFlag { Token = "#muinaistenroomal4istentavo1n", BucketSizeIncrease = 3 },
             new CtfFlag
             {
                 Token = "#DiYgzPKLRjvJmiWa",
@@ -289,11 +300,7 @@ public static class DbFiller
                     Directed = false,
                 }
             },
-            new CtfFlag
-            {
-                Token = "#zRdDdUGrYdtQWnEh",
-                BucketSizeIncrease = 10
-            },
+            new CtfFlag { Token = "#zRdDdUGrYdtQWnEh", BucketSizeIncrease = 10 },
             new CtfFlag
             {
                 Token = "#qoEgKzHALknkGRee",
@@ -324,16 +331,8 @@ public static class DbFiller
                     Directed = true,
                 }
             },
-            new CtfFlag
-            {
-                Token = "#JpoHCiDpWKrgzsRL",
-                BaserateMultiplier = 1.1f
-            },
-            new CtfFlag
-            {
-                Token = "#hwGtrdNWVzYvCodV",
-                BaserateMultiplier = 1.1f
-            },
+            new CtfFlag { Token = "#JpoHCiDpWKrgzsRL", BaserateMultiplier = 1.1f },
+            new CtfFlag { Token = "#hwGtrdNWVzYvCodV", BaserateMultiplier = 1.1f },
             new CtfFlag
             {
                 Token = "#FHZaqUaZCmrNQALU",
@@ -364,16 +363,8 @@ public static class DbFiller
                     Directed = false,
                 }
             },
-            new CtfFlag
-            {
-                Token = "#tFUXMdvwVDWckyeA",
-                BucketSizeIncrease = 5
-            },
-            new CtfFlag
-            {
-                Token = "#VjTSYcnUhzbAqwPS",
-                BaserateMultiplier = 1.3f
-            },
+            new CtfFlag { Token = "#tFUXMdvwVDWckyeA", BucketSizeIncrease = 5 },
+            new CtfFlag { Token = "#VjTSYcnUhzbAqwPS", BaserateMultiplier = 1.3f },
             new CtfFlag
             {
                 Token = "#gTxnCQCrzPfBpYce",
@@ -399,26 +390,14 @@ public static class DbFiller
                 Token = "#itiaapfkGrbvzwtL",
                 Powerup = new PowerUp
                 {
-                    PowerId = (int)PowerUps.Glitch,
-                    Name = PowerUps.Glitch.ToString(),
+                    PowerId = (int)PowerUps.Binary,
+                    Name = PowerUps.Binary.ToString(),
                     Directed = true,
                 }
             },
-            new CtfFlag
-            {
-                Token = "#ZjnJFxkiNwdstvYQ",
-                BucketSizeIncrease = 5
-            },
-            new CtfFlag
-            {
-                Token = "#WbndZQmZGfXAJCMD",
-                BaserateMultiplier = 1.5f
-            },
-            new CtfFlag
-            {
-                Token = "#birktyMvnUAhKrfN",
-                FogOfWarIncrease = 1
-            },
+            new CtfFlag { Token = "#ZjnJFxkiNwdstvYQ", BucketSizeIncrease = 5 },
+            new CtfFlag { Token = "#WbndZQmZGfXAJCMD", BaserateMultiplier = 1.5f },
+            new CtfFlag { Token = "#birktyMvnUAhKrfN", FogOfWarIncrease = 1 },
             new CtfFlag
             {
                 Token = "#TITYÄÄNIKIRVES",
@@ -470,5 +449,89 @@ public static class DbFiller
                 }
             },
         ];
+    }
+
+    private static List<User> GetPerformanceTestUsers(ApiDbContext dbContext, GameOptions gameOptions)
+    {
+        var guildNames = Enum.GetValues<GuildName>().ToList();
+        guildNames = guildNames.Skip(1).ToList();
+
+        int id = 1;
+        List<User> testUsers = [];
+        foreach (var guildName in guildNames)
+        {
+            for (int i = 1; i < 40; i += 2)
+            {
+                int x;
+                int y = 1;
+
+                if ((int)guildName <= 5)
+                {
+                    x = i + ((int)guildName - 1) * 40;
+                }
+                else
+                {
+                    x = i + ((int)guildName - 6) * 40;
+                    y = 199;
+                }
+
+                var user = new User
+                {
+                    Code = "test_" + id,
+                    Guild =
+                        dbContext.Guilds.FirstOrDefault(guild => guild.Name == guildName)
+                        ?? throw new InvalidOperationException(),
+                    SpawnX = x,
+                    SpawnY = y,
+                    PixelBucket = gameOptions.InitialPixelBucket,
+                    PowerUps = [],
+                    TelegramId = id.ToString(),
+                    FirstName = "",
+                    LastName = "",
+                    Username = ""
+                };
+
+                testUsers.Add(user);
+                id = ++id;
+            }
+
+            for (int i = 2; i < 40; i += 2)
+            {
+                int x;
+                int y;
+
+                if ((int)guildName <= 5)
+                {
+                    x = i + ((int)guildName - 1) * 40;
+                    y = 3;
+                }
+                else
+                {
+                    x = i + ((int)guildName - 6) * 40;
+                    y = 197;
+                }
+
+                var user = new User
+                {
+                    Code = "test_" + id,
+                    Guild =
+                        dbContext.Guilds.FirstOrDefault(guild => guild.Name == guildName)
+                        ?? throw new InvalidOperationException(),
+                    SpawnX = x,
+                    SpawnY = y,
+                    PixelBucket = gameOptions.InitialPixelBucket,
+                    PowerUps = [],
+                    TelegramId = id.ToString(),
+                    FirstName = "",
+                    LastName = "",
+                    Username = ""
+                };
+
+                testUsers.Add(user);
+                id = ++id;
+            }
+        }
+
+        return testUsers;
     }
 }

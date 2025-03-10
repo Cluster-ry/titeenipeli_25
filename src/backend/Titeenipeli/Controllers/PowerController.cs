@@ -5,6 +5,8 @@ using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Models;
 using Titeenipeli.Extensions;
 using Titeenipeli.Grpc.ChangeEntities;
+using Titeenipeli.Helpers;
+using Titeenipeli.InMemoryProvider.MapProvider;
 using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Services;
@@ -16,6 +18,7 @@ namespace Titeenipeli.Controllers;
 [Route("state/powerups")]
 public sealed class PowerController(
     IUserProvider userProvider,
+    IMapProvider mapProvider,
     IMapUpdaterService mapUpdaterService,
     IPowerupService powerupService,
     IJwtService jwtService,
@@ -45,6 +48,13 @@ public sealed class PowerController(
             return BadRequest();
         }
 
+        var startCoordinate = new Coordinate(user.SpawnX + body.Location.X, user.SpawnY + body.Location.Y);
+        if (!PixelPlacement.IsValidPlacement(mapProvider, startCoordinate, user))
+        {
+            return BadRequest();
+        }
+
+
         var direction = body.Direction;
         if (!userPower.Directed)
         {
@@ -56,8 +66,7 @@ public sealed class PowerController(
 
         try
         {
-            var pixelsToPlace = specialEffect.HandleSpecialEffect(
-                new Coordinate(user.SpawnX + body.Location.X, user.SpawnY + body.Location.Y), direction);
+            var pixelsToPlace = specialEffect.HandleSpecialEffect(startCoordinate, direction);
 
             await mapUpdaterService.PlacePixels(pixelsToPlace, user);
         }

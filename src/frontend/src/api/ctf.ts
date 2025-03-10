@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse, isAxiosError } from "axios";
 import { PostCtfInput } from "../models/Post/PostCtfInput";
 import { ClientApiError } from "../models/ClientApiError";
 import { CtfOk } from "../models/CtfOk";
@@ -12,6 +12,10 @@ export async function postCtf(postCtfInput: PostCtfInput): Promise<AxiosResponse
         return response as AxiosResponse<CtfOk>;
     } catch (error) {
         console.error(error);
-        return { msg: "Request unsuccessful." } as ClientApiError;
+        if (isAxiosError(error)) {
+            const errorString = `${error.response?.data?.title ?? "Uh oh, I wasn't ready for that :E"}. ${error.response?.data?.description ?? "That's a weird error. Call mommy for help :("}`;
+            return { msg: errorString };
+        };
+        return { msg: "Request unsuccessful." };
     }
 }

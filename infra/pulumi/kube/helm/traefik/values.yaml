@@ -1,7 +1,10 @@
 logs:
+  access:
+    enabled: true
+    format: json
   general:
     level: INFO
-
+    format: json
 metrics:
   prometheus:
     service:
@@ -69,6 +72,7 @@ podSecurityContext:
 service:
   spec:
     type: "LoadBalancer"
+    externalTrafficPolicy: Local
   annotations:
     service.beta.kubernetes.io/azure-pip-name: "<publicIpName>" # this is replaced in pulumi values
     external-dns.alpha.kubernetes.io/hostname: "traefik.test.cluster2017.fi,grafana.test.cluster2017.fi,peli.test.cluster2017.fi,grcp.peli.test.cluster2017.fi" # this is replaced in pulumi values
@@ -80,6 +84,11 @@ ports:
         to: "websecure"
         scheme: "https"
         permanent: true
+  websecure:
+    forwardedHeaders:
+      trustedIPs:
+        - "168.63.129.16"
+        - "10.0.0.0/16"
 
 tlsStore:
   default:

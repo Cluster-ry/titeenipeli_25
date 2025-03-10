@@ -42,5 +42,5 @@ export const usePowerUps = () => {
         }
         return true;
     };
-    return { usePowerUp };
+    return usePowerUp;
 };

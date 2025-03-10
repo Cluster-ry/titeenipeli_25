@@ -12,7 +12,7 @@ const stateQueryKey = "gameState";
 
 export const useGameState = () => {
     const queryClient = useQueryClient();
-    const  { triggerNotification } = useNotificationStore();
+    const triggerNotification = useNotificationStore(state => state.triggerNotification);
     const grpcClient = useRef<GrpcClients>(GrpcClients.getGrpcClients());
 
     const setPixelBucket = useGameStateStore((state) => state.setPixelBucket);
