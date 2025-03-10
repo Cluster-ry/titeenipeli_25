@@ -5,7 +5,7 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-func createStorageBlob(ctx *pulumi.Context, name pulumi.String, entraInfo *EntraInfo) error {
+func createStorageBlob(ctx *pulumi.Context, name pulumi.String, entraInfo *EntraInfo) (pulumi.IDOutput, error) {
 	account, err := storage.NewStorageAccount(ctx, "storageaccount", &storage.StorageAccountArgs{
 		ResourceGroupName: entraInfo.ResourceGroup.Name,
 		Sku: &storage.SkuArgs{
@@ -15,7 +15,7 @@ func createStorageBlob(ctx *pulumi.Context, name pulumi.String, entraInfo *Entra
 		AccountName: name,
 	})
 	if err != nil {
-		return err
+		return pulumi.IDOutput{}, err
 	}
 
 	container, err := storage.NewBlobContainer(ctx, "titeeni-backup", &storage.BlobContainerArgs{
@@ -24,10 +24,10 @@ func createStorageBlob(ctx *pulumi.Context, name pulumi.String, entraInfo *Entra
 		ContainerName:     pulumi.String("titeeni-backup"),
 	})
 	if err != nil {
-		return err
+		return pulumi.IDOutput{}, err
 	}
 
-	ctx.Export("dbBackupContainer", container.Name)
+	ctx.Export("dbBackupContainer", pulumi.Sprintf("https://%s.blob.core.windows.net/%s", account.Name, container.Name))
 
-	return nil
+	return container.ID(), nil
 }

@@ -19,8 +19,9 @@ func buildCharts(
 	certManagerClientId pulumi.StringOutput,
 	externalDnsClientId pulumi.StringOutput,
 	traefikIdentityClientId pulumi.StringOutput,
+	titeenipeliClusterIdentity pulumi.StringOutput,
 	titeenipeliRG pulumi.StringOutput,
-	publicIpName pulumi.StringOutput) error {
+	publicIpName pulumi.StringOutput, dbBackupContainer pulumi.StringOutput) error {
 
 	subscription, err := core.LookupSubscription(ctx, nil)
 	if err != nil {
@@ -246,14 +247,16 @@ func buildCharts(
 	helm.NewChart(ctx, "titeenipeli-chart", helm.ChartArgs{
 		Path: pulumi.String("./helm/titeenipeli"),
 		Values: pulumi.Map{
-			"databaseName":     pulumi.String("titepelidb"),
-			"databaseUserName": pulumi.String("tite"),
-			"hostedZoneName":   pulumi.String("test.cluster2017.fi"),
-			"gameUrl":          pulumi.String("peli.test.cluster2017.fi"),
-			"botToken":         botToken.Result,
-			"jwtSecret":        jwtSecret.Result,
-			"jwtEncryption":    jwtEncryption.Result,
-			"tgToken":          tgToken,
+			"databaseName":      pulumi.String("titepelidb"),
+			"databaseUserName":  pulumi.String("tite"),
+			"hostedZoneName":    pulumi.String("test.cluster2017.fi"),
+			"gameUrl":           pulumi.String("peli.test.cluster2017.fi"),
+			"botToken":          botToken.Result,
+			"jwtSecret":         jwtSecret.Result,
+			"jwtEncryption":     jwtEncryption.Result,
+			"tgToken":           tgToken,
+			"dbBackupContainer": dbBackupContainer,
+			"clientId":          titeenipeliClusterIdentity,
 		},
 		Namespace: pulumi.String("titeenipeli"),
 	}, pulumi.Provider(k8sProvider), pulumi.DependsOn([]pulumi.Resource{gameNS, cloudnativePg}))

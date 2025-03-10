@@ -17,7 +17,7 @@ func main() {
 			return err
 		}
 
-		err = createStorageBlob(ctx, pulumi.String("titeeniDB"), entraInfo)
+		blobID, err := createStorageBlob(ctx, pulumi.String("titeenidbbackup"), entraInfo)
 		if err != nil {
 			return err
 		}
@@ -44,13 +44,20 @@ func main() {
 			return err
 		}
 
+		titeenipeliClusterIdentity, err := createNewIdentity(ctx, k8sCluster, "titeenipeli-cluster", "titeenipeli")
+		if err != nil {
+			return err
+		}
+
 		domain, err := createSubDomainZone(ctx, entraInfo, cfg, "test")
 		if err != nil {
 			return err
 		}
+
 		addDNSZoneContributorRoleToId(ctx, domain, certManagerIdentity, "cert")
 		addDNSZoneContributorRoleToId(ctx, domain, externalDnsIdentity, "dns")
 		addDNSZoneContributorRoleToId(ctx, domain, traefikIdentity, "traefik")
+		addStorageBlobDataContributorToId(ctx, titeenipeliClusterIdentity, "titeenipelicluster", blobID)
 		addResourceGroupReaderRoleToId(ctx, k8sCluster.ResourceGroup, externalDnsIdentity, "dns")
 
 		k8sProvider, err := buildProvider(ctx, kubeconfig)
@@ -65,6 +72,7 @@ func main() {
 		// Exports
 		ctx.Export("domainName", domain.Name)
 		ctx.Export("certManagerIdentityClientId", pulumi.ToSecret(certManagerIdentity.UserAssignedIdentity.ClientId))
+		ctx.Export("titeenipeliClusterIdentity", pulumi.ToSecret(titeenipeliClusterIdentity.UserAssignedIdentity.ClientId))
 		ctx.Export("externalDnsIdentityClientId", pulumi.ToSecret(externalDnsIdentity.UserAssignedIdentity.ClientId))
 		ctx.Export("traefikIdentityClientId", pulumi.ToSecret(traefikIdentity.UserAssignedIdentity.ClientId))
 		ctx.Export("kubeconfig", pulumi.ToSecret(kubeconfig))
