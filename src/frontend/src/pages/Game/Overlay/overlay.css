@@ -3,7 +3,7 @@
 .top-overlay {
     flex: 1;
     display: flex;
-    margin: 0.5rem 1rem 0 1rem;
+    margin: 0.5em 0.5em 0 0.5em;
 }
 
 .top-overlay__left {
@@ -29,6 +29,11 @@
     transition: all 0.5s;
     display: flex;
     gap: 1vh;
+}
+
+.top-overlay__score-icon {
+    aspect-ratio: 1;
+    width: 1.5em;
 }
 
 .top-overlay__score-button {
@@ -69,11 +74,11 @@
     display: flex;
     justify-content: space-evenly;
     align-items: flex-end;
+    margin-right: 0.5em;
 }
 
 .bottom-overlay__right {
     flex: 1;
-    margin: 0.5rem 1rem 0 1rem;
     display: flex;
 }
 
