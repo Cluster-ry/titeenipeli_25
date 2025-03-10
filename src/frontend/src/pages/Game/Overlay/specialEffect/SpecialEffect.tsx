@@ -20,6 +20,11 @@ const SpecialEffectIcon: { [key: number]: () => Promise<typeof import("*.png")> 
     4: imageAssets.ruusuPowerup, 
     5: imageAssets.binaryPowerup,
     6: imageAssets.siikaPowerup,
+    8: imageAssets.starPowerup,
+    10: imageAssets.dinoPowerup,
+    11: imageAssets.gemPowerup,
+    12: imageAssets.heartPowerup,
+    13: imageAssets.spaceInvaderPowerup
 };
 
 const getEffectIcon = async (index: number) => {
