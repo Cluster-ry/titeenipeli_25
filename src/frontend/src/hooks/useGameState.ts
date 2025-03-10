@@ -24,8 +24,7 @@ export const useGameState = () => {
         queryKey: [stateQueryKey],
         queryFn: getGameState,
         refetchOnReconnect: "always",
-        refetchOnMount: "always",
-        retry: true
+        retry: true,
     });
 
     const consumeUpdate = useCallback(
