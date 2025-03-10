@@ -5,7 +5,9 @@ import { imageAssets } from "../../../../assets/powerups";
 
 type Props = {
     selected: number | null;
-    onClick: (effectId: number) => void;
+    onClick: (effectId: number, keyAsId: string) => void;
+    keyAsId: string;
+    uiPowerUpId: string | null;
 };
 
 const cancelLabel = "Cancel";
@@ -18,6 +20,11 @@ const SpecialEffectIcon: { [key: number]: () => Promise<typeof import("*.png")> 
     4: imageAssets.ruusuPowerup, 
     5: imageAssets.binaryPowerup,
     6: imageAssets.siikaPowerup,
+    8: imageAssets.starPowerup,
+    10: imageAssets.dinoPowerup,
+    11: imageAssets.gemPowerup,
+    12: imageAssets.heartPowerup,
+    13: imageAssets.spaceInvaderPowerup
 };
 
 const getEffectIcon = async (index: number) => {
@@ -25,8 +32,8 @@ const getEffectIcon = async (index: number) => {
     return imageModule?.default ?? (await (SpecialEffectIcon[1])?.())?.default ?? null;
 };
 
-export const SpecialEffect: FC<PowerUp & Props> = ({ selected, powerUpId, name, onClick }) => {
-    const isSelected = useMemo(() => selected === powerUpId, [powerUpId, selected]);
+export const SpecialEffect: FC<PowerUp & Props> = ({ powerUpId, name, onClick, keyAsId, uiPowerUpId}) => {
+    const isSelected = useMemo(() => uiPowerUpId === keyAsId, [keyAsId, uiPowerUpId]);
     const [icon, setIcon] = useState<string | null>(null);
 
     useEffect(() => {
@@ -38,9 +45,8 @@ export const SpecialEffect: FC<PowerUp & Props> = ({ selected, powerUpId, name, 
     }, [powerUpId]);
 
     const handleClick = useCallback(() => {
-        onClick(powerUpId);
-    }, [onClick, powerUpId]);
-
+        onClick(powerUpId, keyAsId);
+    }, [onClick, powerUpId, keyAsId]);
     return (
         <div key={powerUpId} className="special-effect" onClick={handleClick}>
             <div className={`button ${isSelected ? "selected" : ""}`}>

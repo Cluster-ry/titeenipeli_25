@@ -10,7 +10,8 @@ const BottomOverlay = () => {
     const specialEffects = useGameStateStore((state) => state.powerUps);
     const powerUp = usePowerUpStore((state) => state.powerUp);
     const setPowerUp = usePowerUpStore((state) => state.setPowerUp);
-
+    const uiPowerUpId  = usePowerUpStore((state) => state.uiPowerUpId);
+    
   const specialEffectItems = useMemo(() =>
     specialEffects.map((effect, index) => (
     <SpecialEffect
@@ -18,6 +19,8 @@ const BottomOverlay = () => {
         {...effect}
         selected={powerUp}
         onClick={setPowerUp}
+        keyAsId={`${effect.powerUpId}-${index}`}
+        uiPowerUpId={uiPowerUpId}
         />
     )),
     [specialEffects, powerUp, setPowerUp]);
