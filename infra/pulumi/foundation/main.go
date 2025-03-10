@@ -17,6 +17,11 @@ func main() {
 			return err
 		}
 
+		err = createStorageBlob(ctx, pulumi.String("titeeniDB"), entraInfo)
+		if err != nil {
+			return err
+		}
+
 		k8sCluster, err := buildCluster(ctx, cfg, *entraInfo)
 		if err != nil {
 			return err

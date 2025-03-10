@@ -8,6 +8,7 @@ require (
 	github.com/pulumi/pulumi-azure-native-sdk/managedidentity/v2 v2.88.0
 	github.com/pulumi/pulumi-azure-native-sdk/network/v2 v2.88.0
 	github.com/pulumi/pulumi-azure-native-sdk/resources/v2 v2.88.0
+	github.com/pulumi/pulumi-azure-native-sdk/storage/v2 v2.89.1
 	github.com/pulumi/pulumi-azure/sdk/v5 v5.89.0
 	github.com/pulumi/pulumi-azuread/sdk/v5 v5.53.5
 	github.com/pulumi/pulumi-kubernetes/sdk/v3 v3.30.2
@@ -15,7 +16,7 @@ require (
 	github.com/pulumi/pulumi-null/sdk v0.0.10
 	github.com/pulumi/pulumi-random/sdk/v4 v4.17.0
 	github.com/pulumi/pulumi-tls/sdk/v5 v5.1.0
-	github.com/pulumi/pulumi/sdk/v3 v3.152.0
+	github.com/pulumi/pulumi/sdk/v3 v3.153.1
 	github.com/pulumiverse/pulumi-time/sdk v0.1.0
 )
 
@@ -71,7 +72,7 @@ require (
 	github.com/pkg/term v1.1.0 // indirect
 	github.com/pulumi/appdash v0.0.0-20231130102222-75f619a67231 // indirect
 	github.com/pulumi/esc v0.12.0 // indirect
-	github.com/pulumi/pulumi-azure-native-sdk/v2 v2.88.0 // indirect
+	github.com/pulumi/pulumi-azure-native-sdk/v2 v2.89.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
