@@ -18,7 +18,7 @@ const instructionsData: Instructions[] = [
     },
     {
         header: "Power-ups",
-        instructions: ["Manipulate destiny with game-changing special effects!", "Receive power-ups via CTF tokens.", "Those markers on the map are only for show, trust me bro ⊂◉‿◉つ"],
+        instructions: ["Manipulate destiny with game-changing special effects!", "Receive power-ups via CTF tokens."],
     },
 ];
 
