@@ -66,6 +66,10 @@ button:focus-visible {
   image-rendering: pixelated;
 }
 
+.hide {
+    visibility: hidden;
+}
+
 @keyframes slide-in {
     from {
         transform: translateX(100%);

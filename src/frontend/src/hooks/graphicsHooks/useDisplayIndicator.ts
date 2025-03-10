@@ -13,10 +13,10 @@ export const useGraphicsIndicator = () => {
     return graphicsEnabled
       ? {
           onClass: "indicator-on",
-          offClass: "indicator-off indicator-disabled",
+          offClass: "indicator-off hide",
         }
       : {
-          onClass: "indicator-on indicator-disabled",
+          onClass: "indicator-on hide",
           offClass: "indicator-off",
         };
   };

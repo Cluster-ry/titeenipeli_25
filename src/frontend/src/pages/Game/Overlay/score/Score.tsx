@@ -16,10 +16,8 @@ const medals = [goldMedal, silverMedal, bronzeMedal];
 const Score: FC<ScoreProps> = ({ guild, score, place }) => {
 
     const medal = useMemo(() => {
-        if (place <= medals.length) {
-            return <img className="low-res" src={medals[place]} />
-        }
-        return null;
+        const icon = place <= medals.length ? medals[place] : undefined;
+        return <img className={`top-overlay__score-icon ${icon ? "low-res" : "hide"}`} src={icon} />
     }, [place]);
 
     return (
