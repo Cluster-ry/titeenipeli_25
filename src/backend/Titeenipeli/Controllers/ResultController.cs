@@ -1,6 +1,9 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Titeenipeli.Common.Database.Services;
 using Titeenipeli.Common.Database.Services.Interfaces;
+using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
 using Titeenipeli.InMemoryProvider.UserProvider;
@@ -13,6 +16,7 @@ namespace Titeenipeli.Controllers;
 [Authorize]
 public class ResultController(
     IGuildRepositoryService guildRepositoryService,
+    IGameEventRepositoryService gameEventRepositoryService,
     IUserProvider userProvider,
     IJwtService jwtService
 ) : ControllerBase
@@ -37,5 +41,27 @@ public class ResultController(
         };
 
         return Ok(guildScores);
+    }
+
+    [HttpGet("events")]
+    public IActionResult GetEvents()
+    {
+        var user = HttpContext.GetUser(jwtService, userProvider);
+
+        if (!user.IsGod)
+        {
+            return Unauthorized();
+        }
+
+        var events = gameEventRepositoryService.GetAll().SelectMany(gameEvent =>
+            JsonSerializer.Deserialize<List<PixelChangeEvent>>(gameEvent.Event)?
+                .Select(pixelChange => new Event
+                {
+                    Guild = pixelChange.ToUser.GuildName ?? GuildName.Nobody,
+                    Pixel = pixelChange.Pixel,
+                    Timestamp = gameEvent.CreatedDateTime
+                }).ToList() ?? []).ToList();
+
+        return Ok(new GetEventsResult { Events = events });
     }
 }

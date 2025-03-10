@@ -18,7 +18,7 @@ public static class MapUtils
         { GuildName.OulunTietoteekkarit, 33 },
         { GuildName.TietoTeekkarikilta, 35 },
         { GuildName.Digit, 36 },
-        { GuildName.Datateknologerna, 37 }
+        { GuildName.Date, 37 }
     };
 
     public static PixelWithType[,] BuildMapFromOwnerMatrix(GuildPixel[,] owners)

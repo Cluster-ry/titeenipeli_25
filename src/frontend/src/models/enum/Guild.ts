@@ -6,7 +6,6 @@ enum Guild {
     OulunTietoteekkarit,
     TietoTeekkarikilta,
     Digit,
-    Datateknologerna,
     Sosa,
     Date,
     Tutti,
@@ -26,8 +25,6 @@ export const shortGuildName = (guild: Guild) => {
             return "TiTe";
         case Guild.Digit:
             return "Digit";
-        case Guild.Datateknologerna:
-            return "Datatekno";
         case Guild.Sosa:
             return "Sosa";
         case Guild.Date:
