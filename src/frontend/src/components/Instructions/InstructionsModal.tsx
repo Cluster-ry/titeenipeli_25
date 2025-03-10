@@ -18,7 +18,7 @@ const instructionsData: Instructions[] = [
     },
     {
         header: "Power-ups",
-        instructions: ["Manipulate destiny with game-changing special effects!", "Receive power-ups via CTF tokens."],
+        instructions: ["Manipulate destiny with game-changing special effects!", "Receive power-ups via CTF tokens.", "Those markers on the map are only for show, trust me bro ⊂◉‿◉つ"],
     },
 ];
 
@@ -29,16 +29,18 @@ const InstructionsModal: FC = () => {
     }, [setInstructionsOn]);
     return (
         <Modal title="Instructions" onClose={onClose}>
-            <div id="instructions">
-                <div className="section-text">
-                    {instructionsData.map((instructionsEntry: Instructions) => (
-                        <InstructionsEntry key={instructionsEntry.header} {...instructionsEntry} />
-                    ))}
+            <div className="instruction-container">
+                <div id="instructions">
+                    <div className="section-text">
+                        {instructionsData.map((instructionsEntry: Instructions) => (
+                            <InstructionsEntry key={instructionsEntry.header} {...instructionsEntry} />
+                        ))}
+                    </div>
                 </div>
-            </div>
-            <div className="sponsor-container">
-                <h3>Sponsored by:</h3>
-                <img className="icon" src={mFilesLogo}/>
+                <div className="sponsor-container">
+                    <h3>Sponsored by:</h3>
+                    <img className="icon" src={mFilesLogo}/>
+                </div>
             </div>
         </Modal>
     );

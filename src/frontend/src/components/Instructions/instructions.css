@@ -1,20 +1,20 @@
 #instructions {
     background-color: #333333;
     color: white;
-
-    overflow-x: hidden;
     overflow-y: auto;
-    padding: 0;
+}
+
+.instruction-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 60vh;
 }
 
 .section-text {
     display: flex;
     flex-flow: column;
     text-align: left;
-    padding-left: 2vw;
-    padding-right: 2vw;
-    max-height: 60vh;
-    max-width: 60vw;
+    margin-right: 2vw;
 }
 
 .entry-text {
