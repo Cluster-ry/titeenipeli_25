@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { shortGuildName } from "../../../models/enum/Guild";
 import { useGameStateStore } from "../../../stores/gameStateStore";
 import "./overlay.css";
@@ -23,11 +23,15 @@ const Scores: FC = () => {
         return result;
     }, [scores, showAll]);
 
+    const toggleShowAll = useCallback(() => {
+        setShowAll(prev => !prev);
+    }, [setShowAll]);
+
     return (
         <div className="top-overlay__left">
             <h2 className="top-overlay__score-title">Ticking scores:</h2>
             <div className="top-overlay__scores-container">{scoreElements}</div>
-            <button className="top-overlay__score-button" onClick={() => setShowAll((prev) => !prev)}>
+            <button className="top-overlay__score-button" onClick={toggleShowAll}>
                 {showAll ? hideLabel : showLabel}
             </button>
         </div>

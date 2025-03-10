@@ -5,7 +5,7 @@ export interface InstrustionsStore {
     setInstructionsOn: (newVisible: boolean) => void;
 }
 
-export const instructionsStore = create<InstrustionsStore>()((set) => ({
+export const useInstructionsStore = create<InstrustionsStore>()((set) => ({
     instructionsOn: false,
     setInstructionsOn: (newInstructionsOn: boolean) =>
         set((state: InstrustionsStore) => ({
