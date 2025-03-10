@@ -7,7 +7,7 @@ metadata:
     "helm.sh/hook": pre-install
     "helm.sh/hook-weight": "-5"
 spec:
-  instances: 2
+  instances: 3
   imageName: ghcr.io/cloudnative-pg/postgresql:16
   primaryUpdateStrategy: unsupervised
   monitoring:
@@ -25,5 +25,11 @@ spec:
     parameters:
       shared_buffers: "512MB"
       max_connections: "1000"
+      log_min_duration_statement: "3500"
+      "pgaudit.log": "all, -misc"
+      "pgaudit.log_catalog": "off"
+      "pgaudit.log_parameter": "on"
+      "pgaudit.log_relation": "on"
+
 
   # TODO: backup to cloud
