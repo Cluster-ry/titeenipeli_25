@@ -23,7 +23,10 @@ export const useGameState = () => {
     const { data, isSuccess } = useQuery({
         queryKey: [stateQueryKey],
         queryFn: getGameState,
+        refetchOnMount: "always",
         refetchOnReconnect: "always",
+        staleTime: 0,
+        gcTime: 0,
         retry: true,
     });
 
