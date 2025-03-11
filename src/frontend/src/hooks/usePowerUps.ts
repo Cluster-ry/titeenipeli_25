@@ -40,11 +40,10 @@ export const usePowerUps = () => {
             if (direction === 0) return true;
             const activate = async (props: PostPowerup) => {
                 const success = await activatePowerUp(props);
-                if (success) {
-                    resetPowerUp();
-                } else {
+                if (!success) {
                     triggerNotification(invalidActivationLabel, "neutral");
                 }
+                resetPowerUp();
             };
             activate({ id: powerUp, location: target, direction });
         }
