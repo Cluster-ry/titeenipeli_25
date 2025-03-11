@@ -163,8 +163,10 @@ github.com/pulumi/pulumi-azure-native-sdk/network/v2 v2.88.0 h1:9evDP53ghSijpJNJ
 github.com/pulumi/pulumi-azure-native-sdk/network/v2 v2.88.0/go.mod h1:E22FxHrz++y4sHUO5t30mhInQcWAdPd/zzcBJneKVQ0=
 github.com/pulumi/pulumi-azure-native-sdk/resources/v2 v2.88.0 h1:cWQ6ddENxG0OPY9XV5e1XaTPehSeqqPrq2GpjBpNEWg=
 github.com/pulumi/pulumi-azure-native-sdk/resources/v2 v2.88.0/go.mod h1:zDrKHsZ+S4ixhNXgdMBRfipvQRF0XGaGUFsVh/k/J08=
-github.com/pulumi/pulumi-azure-native-sdk/v2 v2.88.0 h1:tLgRGAZz8ZUFzBvjI35XHSd/ms0wtfrSiOjBYer1MLw=
-github.com/pulumi/pulumi-azure-native-sdk/v2 v2.88.0/go.mod h1:uyp/HcB8Iv0gZHmQw3YLtcbheJN8OmrqhaQFfU+9BjA=
+github.com/pulumi/pulumi-azure-native-sdk/storage/v2 v2.89.1 h1:d6jeGKino1V97g/lo01BqBNm7/HBNG0jpUxrnqqf4AI=
+github.com/pulumi/pulumi-azure-native-sdk/storage/v2 v2.89.1/go.mod h1:f6svCOFF1MBU8XEwgeXNMst4d6V/Xfs9XbCibrL7ZHs=
+github.com/pulumi/pulumi-azure-native-sdk/v2 v2.89.1 h1:TOddAAvyrbqoHu4qp8PVD59KX1BWth9B9yh4t/6sUFA=
+github.com/pulumi/pulumi-azure-native-sdk/v2 v2.89.1/go.mod h1:wDn4q7Xknj29rL3CW8ZeSj+SxcbFNyixOH4nvwU1HpA=
 github.com/pulumi/pulumi-azure/sdk/v5 v5.89.0 h1:pFvMC1CxlBMyuGfFjkUQa6IOf7gDLdCSlm403mvalSw=
 github.com/pulumi/pulumi-azure/sdk/v5 v5.89.0/go.mod h1:tLdvJc363F0C07LR1BEs24Vh5g/yMno1atVIIjOuZms=
 github.com/pulumi/pulumi-azuread/sdk/v5 v5.53.5 h1:jjZHzOz536u3IhM8vKCcnhizLvJS6pCfclfP/+eeB4A=
@@ -179,8 +181,8 @@ github.com/pulumi/pulumi-random/sdk/v4 v4.17.0 h1:gOZeoD6h1ThtWCS53lqcBvsNNP7aJn
 github.com/pulumi/pulumi-random/sdk/v4 v4.17.0/go.mod h1:yjpOTPppMZXoD7TamsFeV/37QybixMpTJJpzniZPKpg=
 github.com/pulumi/pulumi-tls/sdk/v5 v5.1.0 h1:eLl9zlIWn0APS5ol+jX7rndH3SYH7YtGc6+YKCDpoj0=
 github.com/pulumi/pulumi-tls/sdk/v5 v5.1.0/go.mod h1:4nbc+X3iHeYH/rRFRRluVQedNYWydJY+bDOhHT0hJX0=
-github.com/pulumi/pulumi/sdk/v3 v3.152.0 h1:sPstmYhbf/ArkREjkPYRgFUf+iv1llskLY2/4aASdxc=
-github.com/pulumi/pulumi/sdk/v3 v3.152.0/go.mod h1:+WC9aIDo8fMgd2g0jCHuZU2S/VYNLRAZ3QXt6YVgwaA=
+github.com/pulumi/pulumi/sdk/v3 v3.153.1 h1:qlkttqvoPcuxbMZd1ZfwairuYAZ68izqRnCWmpA9p84=
+github.com/pulumi/pulumi/sdk/v3 v3.153.1/go.mod h1:+WC9aIDo8fMgd2g0jCHuZU2S/VYNLRAZ3QXt6YVgwaA=
 github.com/pulumiverse/pulumi-time/sdk v0.1.0 h1:xfi9HKDgV+GgDxQ23oSv9KxC3DQqViGTcMrJICRgJv0=
 github.com/pulumiverse/pulumi-time/sdk v0.1.0/go.mod h1:NUa1zA74DF002WrM6iF111A6UjX9knPpXufVRvBwNyg=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=

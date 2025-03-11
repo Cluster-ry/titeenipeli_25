@@ -81,3 +81,25 @@ func addAcrPullRoleToId(ctx *pulumi.Context, principalId pulumi.StringOutput, na
 
 	return nil
 }
+
+func addStorageBlobDataContributorToId(ctx *pulumi.Context, id *workloadIdentities, name pulumi.String, scope pulumi.IDOutput) error {
+	primary, err := core.LookupSubscription(ctx, nil, nil)
+	if err != nil {
+		return err
+	}
+
+	// Role for Storage Blob Data Contributor
+	roleDefinitionId := pulumi.String(fmt.Sprintf("%s/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe", primary.Id))
+
+	_, err = authorization.NewRoleAssignment(ctx, fmt.Sprintf("storageBlobAssignment_%s", name), &authorization.RoleAssignmentArgs{
+		PrincipalId:      id.UserAssignedIdentity.PrincipalId,
+		PrincipalType:    pulumi.String("ServicePrincipal"),
+		RoleDefinitionId: roleDefinitionId,
+		Scope:            scope,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

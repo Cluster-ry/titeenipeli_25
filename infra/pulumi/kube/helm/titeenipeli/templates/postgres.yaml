@@ -30,6 +30,27 @@ spec:
       "pgaudit.log_catalog": "off"
       "pgaudit.log_parameter": "on"
       "pgaudit.log_relation": "on"
+  backup:
+    barmanObjectStore:
+      destinationPath: {{ .Values.dbBackupContainer }}
+      azureCredentials:
+        inheritFromAzureAD: true
+  serviceAccountTemplate:
+    metadata:
+      annotations:
+        azure.workload.identity/client-id: {{ .Values.clientId }}
+      labels:
+        azure.workload.identity/use: "true"
 
+---
 
-  # TODO: backup to cloud
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ include "titeenipeli.name" . }}-cluster
+  labels: {{- include "titeenipeli.labels" . | nindent 4 }}
+spec:
+  schedule: "0 * * * * *" # every hour
+  backupOwnerReference: self
+  cluster:
+    name: {{ include "titeenipeli.name" . }}-cluster
