@@ -1,7 +1,6 @@
 get:
   tags:
     - "state"
-    - "pixels"
   summary: "Receives whole map for the player."
   operationId: "getPixels"
   responses:
@@ -15,7 +14,6 @@ get:
 post:
   tags:
     - "state"
-    - "pixels"
   summary: "Conquers pixel for the guild."
   operationId: "conquerPixel"
   requestBody:

@@ -4,7 +4,7 @@ info:
   version: "0.0.1"
   title: "Titeenipeli 25 API"
   contact:
-    email: "roni.juntunen@gmail.com"
+    email: "viesti@roni-juntunen.fi"
   license:
     name: "Unlicense"
     url: "https://unlicense.org/"
@@ -26,10 +26,8 @@ servers:
 tags:
   - name: "ctf"
     description: "Everything related to Capture The Flag (CTF) tokens."
-  - name: "map"
-    description: "Endpoint for interacting with map."
-  - name: "pixels"
-    description: "Endpoint for interacting with map pixels."
+  - name: "state"
+    description: "Endpoint for interacting with game state."
   - name: "users"
     description: "Endpoint for interacting with users"
 
@@ -42,8 +40,6 @@ paths:
     $ref: "./paths/state/gameState.yaml"
   /state/powerups/activate:
     $ref: "./paths/state/powerups.yaml"
-  /users:
-    $ref: "./paths/users/users.yaml"
   /users/authenticate:
     $ref: "./paths/users/authenticate.yaml"
 

@@ -12,7 +12,7 @@ post:
           $ref: "../../components/schemas/telegramToken.yaml"
   responses:
     "200":
-      $ref: "../../components/responses/200UserAuthorization.yaml"
+      description: User authenticated!
     "403":
       $ref: "../../components/responses/403AuthorizationError.yaml"
   security:

@@ -1,4 +1,4 @@
-get:
+post:
   tags:
     - "state"
   summary: "Activate powerup."
