@@ -27,7 +27,7 @@ export const usePowerUpStore = create<PowerUpStore>((set) => ({
     },
     resetPowerUp: () => {
         set((state) => {
-            return { ...state, powerUp: null, target: null };
+            return { ...state, powerUp: null, target: null, uiPowerUpId: null };
         });
     },
 }));
