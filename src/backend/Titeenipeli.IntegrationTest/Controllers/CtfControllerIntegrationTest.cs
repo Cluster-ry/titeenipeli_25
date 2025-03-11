@@ -44,7 +44,8 @@ public class CtfControllerIntegrationTest : BaseFixture
         var powerUpService = new PowerupService(new GameOptions());
         var jwtService = new JwtService(new JwtOptions());
         var miscGameStateUpdateCoreService = new MiscGameStateUpdateCoreService(powerUpService, new Logger<StateUpdateService>(new LoggerFactory()));
-
+        var logger = new Logger<CtfController>(new LoggerFactory());
+        
         var guild = GenerateGuild();
         var user = GenerateUser(guild);
 
@@ -72,7 +73,8 @@ public class CtfControllerIntegrationTest : BaseFixture
             guildRepositoryService,
             userProvider,
             jwtService,
-            miscGameStateUpdateCoreService)
+            miscGameStateUpdateCoreService,
+            logger)
         {
             ControllerContext = new ControllerContext
             {
