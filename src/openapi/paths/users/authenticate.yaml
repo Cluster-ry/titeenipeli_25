@@ -13,7 +13,9 @@ post:
   responses:
     "200":
       description: User authenticated!
+      headers: 
+        Set-Cookie:
+          schema: 
+            type: string
     "403":
       $ref: "../../components/responses/403AuthorizationError.yaml"
-  security:
-    - botAuth: []
