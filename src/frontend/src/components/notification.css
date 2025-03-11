@@ -45,11 +45,13 @@
 .move-out {
     animation: move-out 0.8s ease-in-out 0s;
     animation-iteration-count: 1;
+    animation-fill-mode: forwards;
 }
 
 .move-in {
     animation: move-in 0.8s ease-in-out 0s;
     animation-iteration-count: 1;
+    animation-fill-mode: forwards;
 }
 
 @keyframes move-out {
