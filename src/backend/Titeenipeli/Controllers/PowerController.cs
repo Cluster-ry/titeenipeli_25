@@ -22,14 +22,16 @@ public sealed class PowerController(
     IMapUpdaterService mapUpdaterService,
     IPowerupService powerupService,
     IJwtService jwtService,
-    IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService
-) : ControllerBase
+    IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService,
+    ILogger<PowerController> logger) : ControllerBase
 {
     [HttpPost("activate")]
     [Authorize]
     public async Task<IActionResult> ActivatePower([FromBody] PowerInput body)
     {
         var user = HttpContext.GetUser(jwtService, userProvider);
+        
+        logger.LogInformation("HTTP POST /state/powerups/activate user:{user} guild:{guild} powerup:{powerup} timestamp:{datetime}", user.Id, user.Guild.Id, body.Id, DateTime.Now);
 
         var userPower = user.PowerUps.FirstOrDefault(power => power.PowerId == body.Id);
         if (userPower is null)
