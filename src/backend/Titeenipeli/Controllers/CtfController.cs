@@ -24,18 +24,21 @@ public class CtfController : ControllerBase
     private readonly IUserProvider _userProvider;
     private readonly IJwtService _jwtService;
     private readonly IMiscGameStateUpdateCoreService _miscGameStateUpdateCoreService;
+    private readonly ILogger<CtfController> _logger;
 
     public CtfController(ICtfFlagRepositoryService ctfFlagRepositoryService,
                          IGuildRepositoryService guildRepositoryService,
                          IUserProvider userProvider,
                          IJwtService jwtService,
-                         IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService)
+                         IMiscGameStateUpdateCoreService miscGameStateUpdateCoreService,
+                         ILogger<CtfController> logger)
     {
         _ctfFlagRepositoryService = ctfFlagRepositoryService;
         _guildRepositoryService = guildRepositoryService;
         _userProvider = userProvider;
         _jwtService = jwtService;
         _miscGameStateUpdateCoreService = miscGameStateUpdateCoreService;
+        _logger = logger;
 
     }
 
@@ -49,6 +52,11 @@ public class CtfController : ControllerBase
     [Authorize]
     public async Task<IActionResult> PostCtf([FromBody] PostCtfInput ctfInput)
     {
+        var user = HttpContext.GetUser(_jwtService, _userProvider);
+        var guild = _guildRepositoryService.GetById(user.Guild.Id)!;
+        
+        _logger.LogInformation("HTTP POST /ctf user:{user} guild:{guild} flag:{flag} timestamp:{datetime}", user.Id, guild.Id, ctfInput.Token, DateTime.Now);
+        
         var ctfFlag = _ctfFlagRepositoryService.GetByToken(ctfInput.Token);
 
         if (ctfFlag is null) return BadRequest(new ErrorResult
@@ -57,9 +65,6 @@ public class CtfController : ControllerBase
             Code = ErrorCode.InvalidCtfFlag,
             Description = "Better luck next time"
         });
-
-        var user = HttpContext.GetUser(_jwtService, _userProvider);
-        var guild = _guildRepositoryService.GetById(user.Guild.Id)!;
 
         var match = guild.ActiveCtfFlags.FirstOrDefault(flag => flag.Id == ctfFlag.Id);
         if (match is not null) return BadRequest(new ErrorResult
