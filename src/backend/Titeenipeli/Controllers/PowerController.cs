@@ -30,7 +30,7 @@ public sealed class PowerController(
     public async Task<IActionResult> ActivatePower([FromBody] PowerInput body)
     {
         var user = HttpContext.GetUser(jwtService, userProvider);
-        
+
         logger.LogInformation("HTTP POST /state/powerups/activate user:{user} guild:{guild} powerup:{powerup} timestamp:{datetime}", user.Id, user.Guild.Id, body.Id, DateTime.Now);
 
         var userPower = user.PowerUps.FirstOrDefault(power => power.PowerId == body.Id);

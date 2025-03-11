@@ -54,9 +54,9 @@ public class CtfController : ControllerBase
     {
         var user = HttpContext.GetUser(_jwtService, _userProvider);
         var guild = _guildRepositoryService.GetById(user.Guild.Id)!;
-        
+
         _logger.LogInformation("HTTP POST /ctf user:{user} guild:{guild} flag:{flag} timestamp:{datetime}", user.Id, guild.Id, ctfInput.Token, DateTime.Now);
-        
+
         var ctfFlag = _ctfFlagRepositoryService.GetByToken(ctfInput.Token);
 
         if (ctfFlag is null) return BadRequest(new ErrorResult
