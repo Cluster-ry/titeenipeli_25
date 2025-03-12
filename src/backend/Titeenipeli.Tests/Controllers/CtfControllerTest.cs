@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using Titeenipeli.Common.Database.Schema;
@@ -58,6 +59,7 @@ public class CtfControllerTest
         var mockUserProvider = new Mock<IUserProvider>();
         var mockJwtService = new Mock<IJwtService>();
         var mockMiscGameStateUpdateCoreService = new Mock<IMiscGameStateUpdateCoreService>();
+        var mockLogger = new Mock<ILogger<CtfController>>();
 
         //Setup jwt
         const string jwtClaimName = "JwtClaim";
@@ -88,7 +90,8 @@ public class CtfControllerTest
             mockGuildRepositoryService.Object,
             mockUserProvider.Object,
             mockJwtService.Object,
-            mockMiscGameStateUpdateCoreService.Object)
+            mockMiscGameStateUpdateCoreService.Object,
+            mockLogger.Object)
         {
             ControllerContext = new ControllerContext
             {
