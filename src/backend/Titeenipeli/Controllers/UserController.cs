@@ -75,7 +75,7 @@ public class UserController(
     }
 
     [HttpPost("authenticate")]
-    public async Task<IActionResult> PostAuthenticate([FromBody] PostAuthenticateInput loginInput)
+    public IActionResult PostAuthenticate([FromBody] PostAuthenticateInput loginInput)
     {
         // TODO: Should be removed before production!
         if (webHostEnvironment.IsDevelopment() && loginInput.Token.Length < 32)
@@ -165,16 +165,18 @@ public class UserController(
             Username = usersInput.Username
         };
 
-        // Add user to database before adding it to UserProvider.
-        // This is done to get correct id for the user in UserProvider.
         userRepositoryService.Add(user);
         await userRepositoryService.SaveChangesAsync();
 
-        user = userRepositoryService.GetByTelegramId(user.TelegramId)!;
-        userProvider.Add(user);
-
         user = await mapUpdaterService.PlaceSpawn(user);
-        userProvider.Update(user);
+
+        // Add user to database before adding it to UserProvider.
+        // This is done to get correct id for the user in UserProvider.
+        userRepositoryService.Update(user);
+        await userRepositoryService.SaveChangesAsync();
+
+        user = userRepositoryService.GetByTelegramId(user.TelegramId)!;
+        userProvider.Add(user.Clone());
 
         return user;
     }
