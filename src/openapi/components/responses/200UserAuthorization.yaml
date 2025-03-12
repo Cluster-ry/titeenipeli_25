@@ -1,9 +1,0 @@
-description: Sets authorization cookie and provides user details.
-headers:
-  Set-Cookie:
-    schema:
-      type: string
-content:
-  application/json:
-    schema:
-      $ref: "../schemas/user.yaml"

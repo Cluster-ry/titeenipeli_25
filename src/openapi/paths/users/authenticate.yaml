@@ -12,8 +12,10 @@ post:
           $ref: "../../components/schemas/telegramToken.yaml"
   responses:
     "200":
-      $ref: "../../components/responses/200UserAuthorization.yaml"
+      description: User authenticated!
+      headers: 
+        Set-Cookie:
+          schema: 
+            type: string
     "403":
       $ref: "../../components/responses/403AuthorizationError.yaml"
-  security:
-    - botAuth: []
