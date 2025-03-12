@@ -75,7 +75,7 @@ public static class DbFiller
                 Username = ""
             };
 
-            defaultUsers.AddRange(testUser, testOpponent);
+            defaultUsers.AddRange([testUser, testOpponent]);
         }
 
         if (isPerformanceTest)

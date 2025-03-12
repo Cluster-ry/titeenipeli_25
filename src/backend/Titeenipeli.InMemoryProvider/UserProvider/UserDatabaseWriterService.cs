@@ -32,8 +32,6 @@ public class UserDatabaseWriterService : IDisposable
                 continue;
             }
 
-            existingUser.SpawnX = user.SpawnX;
-            existingUser.SpawnY = user.SpawnY;
             existingUser.AuthenticationToken = user.AuthenticationToken;
             existingUser.AuthenticationTokenExpiryTime = user.AuthenticationTokenExpiryTime;
             existingUser.PixelBucket = user.PixelBucket;
