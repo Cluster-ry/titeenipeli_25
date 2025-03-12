@@ -75,7 +75,7 @@ public class UserController(
     }
 
     [HttpPost("authenticate")]
-    public async Task<IActionResult> PostAuthenticate([FromBody] PostAuthenticateInput loginInput)
+    public IActionResult PostAuthenticate([FromBody] PostAuthenticateInput loginInput)
     {
         // TODO: Should be removed before production!
         if (webHostEnvironment.IsDevelopment() && loginInput.Token.Length < 32)
