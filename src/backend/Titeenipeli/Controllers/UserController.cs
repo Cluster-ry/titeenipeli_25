@@ -165,11 +165,14 @@ public class UserController(
             Username = usersInput.Username
         };
 
+        userRepositoryService.Add(user);
+        await userRepositoryService.SaveChangesAsync();
+
         user = await mapUpdaterService.PlaceSpawn(user);
 
         // Add user to database before adding it to UserProvider.
         // This is done to get correct id for the user in UserProvider.
-        userRepositoryService.Add(user);
+        userRepositoryService.Update(user);
         await userRepositoryService.SaveChangesAsync();
 
         user = userRepositoryService.GetByTelegramId(user.TelegramId)!;
