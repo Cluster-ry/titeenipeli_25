@@ -1,24 +1,24 @@
 import "./instructions.css";
 import { useInstructionsStore } from "../../stores/instructionsStore";
 import Modal from "../Modal/Modal";
-import Instructions from "../../models/ComponentData/Instructions";
+import { Instructions } from "../../models/ComponentData/Instructions";
 import InstructionsEntry from "./InstructionsEntry";
 import { FC, useCallback } from "react";
 import mFilesLogo from "../../assets/m_files.svg";
-
 const instructionsData: Instructions[] = [
     {
         header: "May the best guild win!",
         instructions: [
-            "Help your guild win by clicking and conquering pixels!",
-            "Ticking scores are calculated based on conquered pixels.",
-            "Devastate your rivals by severing their pixels from their spawn points!",
-            "Keep an eye on your bucket points! Your guild needs momentum!",
+            {text: "Help your guild win by clicking and conquering adjacent pixels", img: "src/assets/instructions/instructions_1.webp"},
+            {text: "Conquer swathes of land by encircling areas", img: "src/assets/instructions/instructions_2.webp"},
+            {text: "Devastate your rivals by severing their pixels from their spawn points"},
+            {text: "Keep an eye on your bucket points! Your guild needs momentum!"},
+            {text: "Ticking scores are calculated based on conquered pixels"},
         ],
     },
     {
         header: "Power-ups",
-        instructions: ["Manipulate destiny with game-changing special effects!", "Receive power-ups via CTF tokens."],
+        instructions: [{text: "Manipulate destiny with game-changing special effects!"}, {text: "Receive power-ups via CTF tokens."}],
     },
 ];
 

@@ -7,7 +7,6 @@ const PIXELS_URL = "api/v1/state/game";
 export async function getGameState(): Promise<AxiosResponse<GetGameState> | ClientApiError> {
     try {
         const response = await axios.get<GetGameState>(PIXELS_URL);
-
         console.debug("Success.");
         return response;
     } catch (error) {

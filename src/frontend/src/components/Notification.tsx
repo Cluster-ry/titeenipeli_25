@@ -1,39 +1,38 @@
 import "./notification.css";
 import { useNotificationStore } from "../stores/notificationStore";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+enum Animation {
+    MoveIn = "move-in",
+    MoveOut = "move-out",
+    None = ""
+}
 
 const Notification = () => {
     const triggerNotification = useNotificationStore(state => state.triggerNotification);
     const text = useNotificationStore(state => state.text);
     const type = useNotificationStore(state => state.type);
-    const [animation, setAnimation] = useState<string>("");
-    const cancelRef = useRef<(() => void) | null>(null);
-
+    const [animation, setAnimation] = useState<Animation>(Animation.None);
     const [notification, setNotification] = useState({ text: "", type: "" });
 
     const className = useMemo(() => {
         return `notification ${notification.type} ${animation}`;
     }, [notification.type, animation]);
 
+    const onAnimationEnd = useCallback(() => {
+        setAnimation(prev => {
+            if (prev === Animation.MoveOut) setNotification({ text: "", type: "" });
+            return Animation.None;
+        });
+    }, [setAnimation, setNotification]);
+
     useEffect(() => {
-        cancelRef.current && cancelRef.current();
-        const onTimeout = (clear: boolean = false) => {
-            setAnimation("");
-            cancelRef.current = null;
-            clear && setNotification({ text: "", type: "" });
-        };
         const show = text.length > 0;
         if (show) {
-            setAnimation("move-in");
+            setAnimation(Animation.MoveIn);
             setNotification({ text, type });
         } else {
-            setAnimation("move-out");
-            // Timeout must match css
-            const timeout = setTimeout(() => onTimeout(!show), 800);
-            cancelRef.current = () => {
-                setAnimation("");
-                clearTimeout(timeout);
-            };
+            setAnimation(Animation.MoveOut);
         }
     }, [setAnimation, setNotification, text, type]);
 
@@ -42,7 +41,7 @@ const Notification = () => {
     }, [triggerNotification]);
 
     if (notification.text.length > 0) {
-        return <div className={className} onClick={onClick}>{notification.text}</div>;
+        return <div className={className} onAnimationEnd={onAnimationEnd} onClick={onClick}>{notification.text}</div>;
     }
 };
 

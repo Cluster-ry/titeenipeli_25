@@ -9,20 +9,25 @@ interface ModalProps {
 
 export const Modal: FC<ModalProps> = ({ title, children, onClose }) => {
     const modalRef = useRef<HTMLDivElement>(null);
-    const onCloseClick = () => {
-        modalRef.current && (modalRef.current.className = "modal-content closing");
-        const onAnimationTimeout = () => {
-            modalRef.current && (modalRef.current.className = "modal-content opening");
+
+    const onAnimationEnd = useCallback(() => {
+        if (modalRef.current && modalRef.current.className === "modal-content closing") {
+            modalRef.current.className = "modal-content opening";
             onClose();
-        };
-        setTimeout(onAnimationTimeout, 400); // Needs to match css animation!
-    };
+        }
+    }, [onClose]);
+
+    const onCloseClick = useCallback(() => {
+        modalRef.current && (modalRef.current.className = "modal-content closing");
+    }, []);
+
     const stopEventPropagation = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         event.stopPropagation();
     }, []);
+
     return (
         <div className="modal" onClick={onCloseClick}>
-            <div ref={modalRef} className="modal-content opening" onClick={stopEventPropagation}>
+            <div ref={modalRef} onAnimationEnd={onAnimationEnd} className="modal-content opening" onClick={stopEventPropagation}>
                 <div className="modal-header">
                     <button className="close" onClick={onCloseClick}>
                         &times;

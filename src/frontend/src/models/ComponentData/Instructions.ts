@@ -1,4 +1,8 @@
-export default interface Instructions {
+export interface Instruction {
+    text: string;
+    img?: string;
+};
+export interface Instructions {
     header: string;
-    instructions: string[];
+    instructions: Instruction[];
 }

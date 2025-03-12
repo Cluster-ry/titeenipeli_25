@@ -12,10 +12,12 @@
 
 .opening {
     animation: animatetop 0.4s ease;
+    animation-fill-mode: forwards;
 }
 
 .closing {
-    animation: animateclose 0.4s ease; /* Needs to match js animation! */
+    animation: animateclose 0.4s ease;
+    animation-fill-mode: forwards;
 }
 
 .modal-content {

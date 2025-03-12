@@ -1,13 +1,19 @@
 import "./instructions.css";
-import Instructions from "../../models/ComponentData/Instructions";
+import { Instructions, Instruction } from "../../models/ComponentData/Instructions";
+import { useMemo } from "react";
 
-const InstructionsEntry = (instructions: Instructions) => {
+const InstructionsEntry = ({ header, instructions }: Instructions) => {
+    const entries = useMemo(() =>
+        instructions.map((entry: Instruction, index: number) => (
+            <li key={index} className="entry-text" >
+                {entry.text}
+                {entry.img && <><br/> <img src={entry.img} loading="lazy" className="entry-image" /></>}
+                </li>
+        )), [instructions]);
     return (
         <ul>
-            <h2>{instructions.header}</h2>
-            {instructions.instructions.map((entry: string, index: number) => (
-                <li key={index} className="entry-text">{entry}</li>
-            ))}
+            <h2>{header}</h2>
+            {entries}
         </ul>
     );
 };
