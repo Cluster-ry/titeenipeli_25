@@ -20,7 +20,7 @@ public static class Program
     };
 
     private static VideoSettings? VideoSettings { get; set; }
-    private static readonly string FrameDirectory = "frames";
+    private const string FrameDirectory = "frames";
 
     public static async Task<int> Main(string[] args)
     {
@@ -112,7 +112,10 @@ public static class Program
 
     private static void GenerateFrames(List<Event> events)
     {
+        events = events.OrderBy(@event => @event.Timestamp).ToList();
+
         Directory.CreateDirectory(FrameDirectory);
+
         var image = new Image<Rgba32>(
             VideoSettings!.MapWidth * VideoSettings.PixelSize,
             VideoSettings.MapHeight * VideoSettings.PixelSize);
@@ -125,8 +128,8 @@ public static class Program
         int frameCount = 0;
         int totalFrames = (int)Math.Ceiling(VideoSettings.Duration.TotalSeconds * VideoSettings.FrameRate);
 
-        var startTime = events[0].Timestamp;
-        var endTime = events[^1].Timestamp;
+        var startTime = VideoSettings.StartTime == DateTime.MinValue ? events[0].Timestamp : VideoSettings.StartTime;
+        var endTime = VideoSettings.EndTime == DateTime.MaxValue ? events[^1].Timestamp : VideoSettings.EndTime;
         var frameDuration = (endTime - startTime) / totalFrames;
 
         for (var frameTime = startTime; frameTime <= endTime + frameDuration; frameTime += frameDuration)
@@ -169,7 +172,7 @@ public static class Program
         {
             ffmpeg.StartInfo.FileName = "generate-video.sh";
             ffmpeg.StartInfo.WorkingDirectory = Environment.CurrentDirectory;
-            ffmpeg.StartInfo.Arguments = $"{VideoSettings!.FrameRate} {FrameDirectory} out.mp4";
+            ffmpeg.StartInfo.Arguments = $"{VideoSettings!.FrameRate} {FrameDirectory} {VideoSettings.OutputFile}";
             ffmpeg.StartInfo.CreateNoWindow = true;
             ffmpeg.StartInfo.UseShellExecute = true;
 
