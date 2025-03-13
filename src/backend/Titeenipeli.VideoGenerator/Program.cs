@@ -92,8 +92,7 @@ public static class Program
 
         var clientHandler = new HttpClientHandler
         {
-            CookieContainer = cookieContainer,
-            ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+            CookieContainer = cookieContainer
         };
 
         var httpClient = new HttpClient(clientHandler) { BaseAddress = address };
@@ -106,7 +105,8 @@ public static class Program
 
         var eventsResponse = await httpClient.GetAsync("api/v1/result/events");
 
-        return JsonSerializer.Deserialize<GetEventsResult>(eventsResponse.Content.ReadAsStringAsync().Result,
+        return JsonSerializer.Deserialize<GetEventsResult>(
+            eventsResponse.Content.ReadAsStringAsync().Result,
             JsonSerializerOptions)?.Events;
     }
 
