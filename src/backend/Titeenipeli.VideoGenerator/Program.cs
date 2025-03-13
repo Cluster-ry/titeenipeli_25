@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +20,7 @@ public static class Program
     };
 
     private static VideoSettings? VideoSettings { get; set; }
+    private static readonly string FrameDirectory = "frames";
 
     public static async Task<int> Main(string[] args)
     {
@@ -68,6 +70,8 @@ public static class Program
         var startTime = DateTime.Now;
         GenerateFrames(events);
         Console.WriteLine($"Frame generation completed in {DateTime.Now - startTime}");
+        GenerateVideo();
+        Directory.Delete(FrameDirectory, true);
 
         return 0;
     }
@@ -108,7 +112,7 @@ public static class Program
 
     private static void GenerateFrames(List<Event> events)
     {
-        Directory.CreateDirectory("frames");
+        Directory.CreateDirectory(FrameDirectory);
         var image = new Image<Rgba32>(
             VideoSettings!.MapWidth * VideoSettings.PixelSize,
             VideoSettings.MapHeight * VideoSettings.PixelSize);
@@ -142,12 +146,27 @@ public static class Program
 
             using (var file = File.OpenWrite(Path.Combine(
                        Environment.CurrentDirectory,
-                       $"frames/{frameCount++:0000000}.png")))
+                       $"{FrameDirectory}/{frameCount++:0000000}.png")))
             {
                 image.SaveAsPng(file);
             }
         }
 
         Console.WriteLine();
+    }
+
+    private static void GenerateVideo()
+    {
+        using (var ffmpeg = new Process())
+        {
+            ffmpeg.StartInfo.FileName = "generate-video.sh";
+            ffmpeg.StartInfo.WorkingDirectory = Environment.CurrentDirectory;
+            ffmpeg.StartInfo.Arguments = $"{VideoSettings!.FrameRate} {FrameDirectory} out.mp4";
+            ffmpeg.StartInfo.CreateNoWindow = true;
+            ffmpeg.StartInfo.UseShellExecute = true;
+
+            ffmpeg.Start();
+            ffmpeg.WaitForExit();
+        }
     }
 }
