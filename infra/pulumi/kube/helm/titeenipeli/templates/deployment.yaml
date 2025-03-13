@@ -125,6 +125,15 @@ spec:
       - key: "dedicated"
         value: "node"
         effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: dedicated
+                  operator: In
+                  values:
+                  - titeenipeli
       volumes:
         - name: certs
           secret:

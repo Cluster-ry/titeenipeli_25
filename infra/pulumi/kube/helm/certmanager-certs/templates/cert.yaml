@@ -6,7 +6,7 @@ metadata:
 spec:
   secretName: wildcard-tls
   issuerRef:
-    name: letsencrypt-staging
+    name: letsencrypt-production
     kind: ClusterIssuer
   commonName: "{{ .Values.hostedZoneName }}"
   dnsNames:
@@ -21,7 +21,7 @@ metadata:
 spec:
   secretName: wildcard-tls-ctf
   issuerRef:
-    name: letsencrypt-staging
+    name: letsencrypt-production
     kind: ClusterIssuer
   commonName: "XTF37CVY50TBZGKQVNRT.{{ .Values.hostedZoneName }}"
   dnsNames:
@@ -35,7 +35,7 @@ metadata:
 spec:
   secretName: wildcard-config-tls
   issuerRef:
-    name: letsencrypt-staging-config
+    name: letsencrypt-production-config
     kind: ClusterIssuer
   commonName: "{{ .Values.hostedConfigZoneName }}"
   dnsNames:
