@@ -2,3 +2,13 @@ config:
   clients:
     - url: http://lgtm-distributed-loki-distributor.monitoring.svc:3100/loki/api/v1/push
       tenant_id: 1
+tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+    effect: NoSchedule
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+  - key: "dedicated"
+    value: "node"
+    effect: "NoSchedule"

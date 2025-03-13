@@ -15,6 +15,7 @@ func main() {
 		}
 		kubeconfig := referencedStack.GetOutput(pulumi.String("kubeconfig")).AsStringOutput()
 		domainName := referencedStack.GetOutput(pulumi.String("domainName")).AsStringOutput()
+		configDomainName := referencedStack.GetOutput(pulumi.String("configDomainName")).AsStringOutput()
 		titeenipeliRG := referencedStack.GetOutput(pulumi.String("titeenipeliRG")).AsStringOutput()
 		certManagerIdentityClientId := referencedStack.GetOutput(pulumi.String("certManagerIdentityClientId")).AsStringOutput()
 		externalDnsIdentityClientId := referencedStack.GetOutput(pulumi.String("externalDnsIdentityClientId")).AsStringOutput()
@@ -27,7 +28,7 @@ func main() {
 		if err != nil {
 			return err
 		}
-		buildCharts(ctx, k8sProvider, domainName, certManagerIdentityClientId, externalDnsIdentityClientId, traefikIdentityClientId, titeenipeliClusterIdentity, titeenipeliRG, publicIpName, dbBackupContainer)
+		buildCharts(ctx, k8sProvider, domainName, configDomainName, certManagerIdentityClientId, externalDnsIdentityClientId, traefikIdentityClientId, titeenipeliClusterIdentity, titeenipeliRG, publicIpName, dbBackupContainer)
 
 		return nil
 	})

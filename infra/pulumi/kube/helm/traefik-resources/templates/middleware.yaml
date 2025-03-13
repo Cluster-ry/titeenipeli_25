@@ -18,3 +18,13 @@ spec:
     period: 10s
     sourceCriterion:
       requestHeaderName: "cookie"
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ipwhitelist
+  namespace: titeenipeli
+spec:
+  ipWhiteList:
+    sourceRange:
+      - 192.168.0.1

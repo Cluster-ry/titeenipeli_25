@@ -16,6 +16,7 @@ func buildCharts(
 	ctx *pulumi.Context,
 	k8sProvider *kubernetes.Provider,
 	domainName pulumi.StringOutput,
+	configDomainName pulumi.StringOutput,
 	certManagerClientId pulumi.StringOutput,
 	externalDnsClientId pulumi.StringOutput,
 	traefikIdentityClientId pulumi.StringOutput,
@@ -106,6 +107,7 @@ func buildCharts(
 		Path: pulumi.String("./helm/certmanager-certs"),
 		Values: pulumi.Map{
 			"hostedZoneName":         domainName,
+			"hostedConfigZoneName":   configDomainName,
 			"clientID":               certManagerClientId,
 			"subscriptionID":         pulumi.String(subscription.SubscriptionId),
 			"titeenipeliRG":          titeenipeliRG,
@@ -152,7 +154,12 @@ func buildCharts(
 			"service": pulumi.Map{
 				"annotations": pulumi.Map{
 					"service.beta.kubernetes.io/azure-pip-name": publicIpName,
-					"external-dns.alpha.kubernetes.io/hostname": pulumi.String("traefik.test.cluster2017.fi,grafana.test.cluster2017.fi,peli.test.cluster2017.fi"),
+					"external-dns.alpha.kubernetes.io/hostname": pulumi.String("traefik.peli.cluster2017.fi,grafana.peli.cluster2017.fi,peli.titeen.it"),
+				},
+			},
+			"ingressRoute": pulumi.Map{
+				"dashboard": pulumi.Map{
+					"matchRule": pulumi.String("Host(`traefik.peli.cluster2017.fi`)"),
 				},
 			},
 		},
@@ -249,8 +256,8 @@ func buildCharts(
 		Values: pulumi.Map{
 			"databaseName":      pulumi.String("titepelidb"),
 			"databaseUserName":  pulumi.String("tite"),
-			"hostedZoneName":    pulumi.String("test.cluster2017.fi"),
-			"gameUrl":           pulumi.String("peli.test.cluster2017.fi"),
+			"hostedZoneName":    pulumi.String("peli.titeen.it"),
+			"gameUrl":           pulumi.String("peli.titeen.it"),
 			"botToken":          botToken.Result,
 			"jwtSecret":         jwtSecret.Result,
 			"jwtEncryption":     jwtEncryption.Result,

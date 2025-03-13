@@ -75,7 +75,7 @@ service:
     externalTrafficPolicy: Local
   annotations:
     service.beta.kubernetes.io/azure-pip-name: "<publicIpName>" # this is replaced in pulumi values
-    external-dns.alpha.kubernetes.io/hostname: "traefik.test.cluster2017.fi,grafana.test.cluster2017.fi,peli.test.cluster2017.fi,grcp.peli.test.cluster2017.fi" # this is replaced in pulumi values
+    external-dns.alpha.kubernetes.io/hostname: "<dns-domain>" # this is replaced in pulumi values
 
 ports:
   web:
@@ -98,8 +98,10 @@ tlsStore:
 ingressRoute:
   dashboard:
     enabled: true
-    matchRule: "Host(`traefik.test.cluster2017.fi`)"
+    matchRule: "Host(`dns-domain`)" # this is replaced in pulumi values
     entryPoints:
       - "websecure"
     middlewares:
       - name: "traefik-dashboard-auth"
+    tls:
+      secretName: supersecret

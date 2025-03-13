@@ -6,12 +6,41 @@ metadata:
 spec:
   secretName: wildcard-tls
   issuerRef:
-    name: letsencrypt-production
+    name: letsencrypt-staging
     kind: ClusterIssuer
   commonName: "{{ .Values.hostedZoneName }}"
   dnsNames:
     - "{{ .Values.hostedZoneName }}"
-    - "*.{{ .Values.hostedZoneName }}"
+    - "43EHAJBKPOAH3GKAJ53C.{{ .Values.hostedZoneName }}"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-tls-ctf
+  namespace: traefik
+spec:
+  secretName: wildcard-tls-ctf
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: "XTF37CVY50TBZGKQVNRT.{{ .Values.hostedZoneName }}"
+  dnsNames:
+    - "XTF37CVY50TBZGKQVNRT.{{ .Values.hostedZoneName }}"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-config-tls
+  namespace: traefik
+spec:
+  secretName: wildcard-config-tls
+  issuerRef:
+    name: letsencrypt-staging-config
+    kind: ClusterIssuer
+  commonName: "{{ .Values.hostedConfigZoneName }}"
+  dnsNames:
+    - "{{ .Values.hostedConfigZoneName }}"
+    - "*.{{ .Values.hostedConfigZoneName }}"
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer

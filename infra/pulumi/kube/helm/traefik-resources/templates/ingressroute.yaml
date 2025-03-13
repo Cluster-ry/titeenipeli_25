@@ -10,7 +10,7 @@ spec:
     - websecure
   routes:
     - kind: Rule
-      match: Host(`grafana.test.cluster2017.fi`)
+      match: Host(`grafana.peli.cluster2017.fi`)
       services:
         - name: lgtm-distributed-grafana
           port: 80
