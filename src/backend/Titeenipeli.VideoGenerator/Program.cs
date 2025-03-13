@@ -117,6 +117,11 @@ public static class Program
             VideoSettings!.MapWidth * VideoSettings.PixelSize,
             VideoSettings.MapHeight * VideoSettings.PixelSize);
 
+        var backgroundImage = Image.Load("Background.webp");
+        backgroundImage.Mutate(x => x.Resize(
+            VideoSettings.MapWidth * VideoSettings.PixelSize,
+            VideoSettings.MapHeight * VideoSettings.PixelSize));
+
         int frameCount = 0;
         int totalFrames = (int)Math.Ceiling(VideoSettings.Duration.TotalSeconds * VideoSettings.FrameRate);
 
@@ -144,11 +149,14 @@ public static class Program
                 image.Mutate(context => context.Clear(GuildColor.GetGuildColor(@event.Guild), rectangle));
             }
 
+            var frameImage = backgroundImage.CloneAs<Rgba32>();
+            frameImage.Mutate(context => context.DrawImage(image, 1f));
+
             using (var file = File.OpenWrite(Path.Combine(
                        Environment.CurrentDirectory,
                        $"{FrameDirectory}/{frameCount++:0000000}.png")))
             {
-                image.SaveAsPng(file);
+                frameImage.SaveAsPng(file);
             }
         }
 
