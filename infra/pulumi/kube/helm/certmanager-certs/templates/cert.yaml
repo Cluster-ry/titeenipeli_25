@@ -41,6 +41,12 @@ spec:
   dnsNames:
     - "{{ .Values.hostedConfigZoneName }}"
     - "*.{{ .Values.hostedConfigZoneName }}"
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "monitoring"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "monitoring"
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer

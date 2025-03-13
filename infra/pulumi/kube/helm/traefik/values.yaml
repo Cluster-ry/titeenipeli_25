@@ -104,4 +104,4 @@ ingressRoute:
     middlewares:
       - name: "traefik-dashboard-auth"
     tls:
-      secretName: supersecret
+      secretName: wildcard-config-tls

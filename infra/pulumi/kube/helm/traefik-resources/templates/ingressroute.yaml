@@ -8,6 +8,8 @@ metadata:
 spec:
   entryPoints:
     - websecure
+  tls:
+    secretName: wildcard-config-tls
   routes:
     - kind: Rule
       match: Host(`grafana.peli.cluster2017.fi`)
