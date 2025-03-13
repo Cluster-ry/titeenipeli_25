@@ -7,4 +7,7 @@ public class VideoSettings
     public int PixelSize { get; init; }
     public int MapWidth { get; init; }
     public int MapHeight { get; init; }
+    public string OutputFile { get; init; } = "output.mp4";
+    public DateTime StartTime { get; init; } = DateTime.MinValue;
+    public DateTime EndTime { get; init; } = DateTime.MaxValue;
 }
