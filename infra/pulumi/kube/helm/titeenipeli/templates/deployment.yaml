@@ -178,7 +178,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "titeenipeli.name" . }}-secret
                   key: tg-token
-          image: titeenipelitacr.azurecr.io/bot:latest
+          image: titeenipelitacr.azurecr.io/bot@sha256:c367a5a085b18a7512966e7cecce85b907d4af84b00f08a41f12198d7a93be4a
           command: ['sh', '-c', 'update-ca-certificates && dotnet Titeenipeli.Bot.dll']
           volumeMounts:
             - name: ca-cert-volume
