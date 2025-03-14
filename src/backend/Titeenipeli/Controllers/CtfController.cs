@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Titeenipeli.Common.Database.Schema;
@@ -66,7 +67,18 @@ public class CtfController : ControllerBase
             Description = "Better luck next time"
         });
 
-        var match = guild.ActiveCtfFlags.FirstOrDefault(flag => flag.Id == ctfFlag.Id);
+
+        List<CtfFlag> activeCtfFlags;
+        if (guild.ActiveCtfFlags != null)
+        {
+            activeCtfFlags = JsonSerializer.Deserialize<List<CtfFlag>>(guild.ActiveCtfFlags) ?? [];
+        }
+        else
+        {
+            activeCtfFlags = [];
+        }
+
+        var match = activeCtfFlags?.FirstOrDefault(flag => flag.Id == ctfFlag.Id);
         if (match is not null) return BadRequest(new ErrorResult
         {
             Title = "Flag already used",
@@ -74,7 +86,9 @@ public class CtfController : ControllerBase
             Description = "Good try"
         });
 
-        guild.ActiveCtfFlags.Add(ctfFlag);
+        activeCtfFlags?.Add(ctfFlag);
+        var newFlags = JsonSerializer.Serialize(activeCtfFlags);
+        guild.ActiveCtfFlags = newFlags;
         _guildRepositoryService.Update(guild);
         await _guildRepositoryService.SaveChangesAsync();
 
