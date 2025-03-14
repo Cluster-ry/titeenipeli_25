@@ -105,3 +105,11 @@ ingressRoute:
       - name: "traefik-dashboard-auth"
     tls:
       secretName: wildcard-config-tls
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: traefik
+        topologyKey: "kubernetes.io/hostname"
