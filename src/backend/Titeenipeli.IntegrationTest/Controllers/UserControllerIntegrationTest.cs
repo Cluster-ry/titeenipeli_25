@@ -6,6 +6,7 @@ using Titeenipeli.Common.Database.Services;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Inputs;
 using Titeenipeli.Controllers;
+using Titeenipeli.InMemoryProvider.MapProvider;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
 
@@ -68,6 +69,8 @@ public class UserControllerIntegrationTest : BaseFixture
 
         var guildRepositoryService = new GuildRepositoryService(_dbContext);
 
+        var mockMapProviderService = new Mock<IMapProvider>();
+
         var userProvider = new UserProviderStub();
         userProvider.Initialize(userRepositoryService.GetAll());
 
@@ -80,6 +83,7 @@ public class UserControllerIntegrationTest : BaseFixture
             botOptions,
             gameOptions,
             userProvider,
+            mockMapProviderService.Object,
             userRepositoryService,
             guildRepositoryService,
             _jwtService,
