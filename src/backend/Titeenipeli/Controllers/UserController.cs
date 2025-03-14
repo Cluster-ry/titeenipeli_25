@@ -173,7 +173,8 @@ public class UserController(
 
         user = await mapUpdaterService.PlaceSpawn(user);
         var spawnPixel = mapProvider.GetByCoordinate(new Coordinate(user.SpawnX, user.SpawnY));
-        if (spawnPixel?.User != user) {
+        if (spawnPixel?.User?.Id != user.Id)
+        {
             throw new Exception("User creation failed.");
         }
 
