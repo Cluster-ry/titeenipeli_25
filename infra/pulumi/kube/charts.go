@@ -249,7 +249,7 @@ func buildCharts(
 		return err
 	}
 
-	tgToken := conf.RequireSecret("tgToken")
+	tgToken := conf.RequireSecret("prodTgToken")
 
 	helm.NewChart(ctx, "titeenipeli-chart", helm.ChartArgs{
 		Path: pulumi.String("./helm/titeenipeli"),
