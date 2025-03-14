@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Titeenipeli.Common.Enums;
 
 namespace Titeenipeli.Common.Database.Schema;
@@ -11,5 +13,7 @@ public class Guild : Entity
     public int FogOfWarDistance { get; set; }
     public int PixelBucketSize { get; set; }
     public float RateLimitPerPlayer { get; set; }
-    public List<CtfFlag> ActiveCtfFlags { get; init; } = [];
+    [Column(TypeName = "jsonb")]
+    [MaxLength(10024)]
+    public string? ActiveCtfFlags { get; set; }
 }

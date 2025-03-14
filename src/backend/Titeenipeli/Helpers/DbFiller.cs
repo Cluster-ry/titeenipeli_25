@@ -29,7 +29,7 @@ public static class DbFiller
                 select new Guild
                 {
                     Name = name,
-                    ActiveCtfFlags = [],
+                    ActiveCtfFlags = null,
                     BaseRateLimit = gameOptions.PixelsPerMinutePerGuild,
                     PixelBucketSize = gameOptions.InitialPixelBucketSize,
                     FogOfWarDistance = gameOptions.FogOfWarDistance
@@ -63,7 +63,7 @@ public static class DbFiller
             var testOpponent = new User
             {
                 Code = "opponent",
-                Guild = dbContext.Guilds.FirstOrDefault(guild => guild.Name == GuildName.TietoTeekkarikilta) ??
+                Guild = dbContext.Guilds.FirstOrDefault() ??
                         throw new InvalidOperationException(),
                 SpawnX = 3,
                 SpawnY = 2,
