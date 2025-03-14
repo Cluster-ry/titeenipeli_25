@@ -96,7 +96,6 @@ public class Handlers(TelegramBotClient bot, BackendOptions backendOptions)
     public async Task HandleError(ITelegramBotClient _, Exception exception, CancellationToken __)
     {
         await Console.Error.WriteLineAsync($"Exception at the bot: '{exception.Message}'");
-        throw new Exception();
     }
 
     private async Task HandleMessage(Message msg)
