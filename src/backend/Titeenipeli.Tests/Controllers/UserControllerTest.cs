@@ -12,6 +12,7 @@ using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Inputs;
 using Titeenipeli.Controllers;
+using Titeenipeli.InMemoryProvider.MapProvider;
 using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Options;
 using Titeenipeli.Services;
@@ -62,6 +63,8 @@ public class UserControllerTest
             .Setup(repositoryService => repositoryService.GetByTelegramId("2"))
             .Returns(existingUser);
 
+        var mockMapProviderService = new Mock<IMapProvider>();
+
         var mockUserRepositoryService = new Mock<IUserRepositoryService>();
         mockUserRepositoryService
             .Setup(repositoryService => repositoryService.GetByTelegramId("1"))
@@ -81,6 +84,7 @@ public class UserControllerTest
             botOptions,
             gameOptions,
             mockUserProvider.Object,
+            mockMapProviderService.Object,
             mockUserRepositoryService.Object,
             mockGuildRepositoryService.Object,
             _jwtService,
