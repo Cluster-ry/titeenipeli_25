@@ -5,8 +5,10 @@ using Titeenipeli.Common.Database.Schema;
 using Titeenipeli.Common.Database.Services.Interfaces;
 using Titeenipeli.Common.Enums;
 using Titeenipeli.Common.Inputs;
+using Titeenipeli.Common.Models;
 using Titeenipeli.Common.Results;
 using Titeenipeli.Extensions;
+using Titeenipeli.InMemoryProvider.MapProvider;
 using Titeenipeli.InMemoryProvider.UserProvider;
 using Titeenipeli.Inputs;
 using Titeenipeli.Options;
@@ -21,6 +23,7 @@ public class UserController(
     BotOptions botOptions,
     GameOptions gameOptions,
     IUserProvider userProvider,
+    IMapProvider mapProvider,
     IUserRepositoryService userRepositoryService,
     IGuildRepositoryService guildRepositoryService,
     IJwtService jwtService,
@@ -169,6 +172,11 @@ public class UserController(
         await userRepositoryService.SaveChangesAsync();
 
         user = await mapUpdaterService.PlaceSpawn(user);
+        var spawnPixel = mapProvider.GetByCoordinate(new Coordinate(user.SpawnX, user.SpawnY));
+        if (spawnPixel?.User?.Id != user.Id)
+        {
+            throw new Exception("User creation failed.");
+        }
 
         // Add user to database before adding it to UserProvider.
         // This is done to get correct id for the user in UserProvider.
