@@ -43,6 +43,15 @@ spec:
       port: 8443
       scheme: https
       serversTransport: "custom-ca-transport"
+#  - kind: Rule
+#    match: Host(`{{ .Values.gameUrl }}`) && PathPrefix(`/api/v1/state/powerups/activate`)
+#    middlewares:
+#    - name: ipwhitelist
+#    services:
+#    - name: {{ include "titeenipeli.backendName" . }}
+#      port: 8443
+#      scheme: https
+#      serversTransport: "custom-ca-transport"
 ---
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
