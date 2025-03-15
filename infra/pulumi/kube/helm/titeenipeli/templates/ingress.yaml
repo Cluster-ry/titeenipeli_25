@@ -59,9 +59,6 @@ spec:
   routes:
   - kind: Rule
     match: Host(`{{ .Values.gameUrl }}`) && PathPrefix(`/Game.StateUpdate`)
-    middlewares:
-    - name: ratelimit-player
-    - name: ipwhitelist
     services:
     - name: {{ include "titeenipeli.backendName" . }}
       port: 8443
