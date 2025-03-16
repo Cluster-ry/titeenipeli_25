@@ -40,12 +40,10 @@ spec:
 ---
 
 apiVersion: postgresql.cnpg.io/v1
-kind: ScheduledBackup
+kind: Backup
 metadata:
-  name: {{ include "titeenipeli.name" . }}-cluster
+  name: {{ include "titeenipeli.name" . }}-cluster-final
   labels: {{- include "titeenipeli.labels" . | nindent 4 }}
 spec:
-  schedule: "0 * * * * *" # every hour
-  backupOwnerReference: self
   cluster:
     name: {{ include "titeenipeli.name" . }}-cluster
