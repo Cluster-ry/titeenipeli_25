@@ -1,3 +1,3 @@
-# Github
+# Titeenipeli 2025
 
-Github configurations.
+See [wiki](https://github.com/Cluster-ry/titeenipeli_25/wiki) for the documentation.
