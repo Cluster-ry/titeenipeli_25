@@ -49,14 +49,22 @@ func main() {
 			return err
 		}
 
-		domain, err := createSubDomainZone(ctx, entraInfo, cfg, "test")
+		baseDomain, err := createSubDomainZone(ctx, entraInfo, cfg.BaseDomain, "peli")
 		if err != nil {
 			return err
 		}
 
-		addDNSZoneContributorRoleToId(ctx, domain, certManagerIdentity, "cert")
-		addDNSZoneContributorRoleToId(ctx, domain, externalDnsIdentity, "dns")
-		addDNSZoneContributorRoleToId(ctx, domain, traefikIdentity, "traefik")
+		configDomain, err := createSubDomainZone(ctx, entraInfo, cfg.BaseConfigDomain, "peli")
+		if err != nil {
+			return err
+		}
+
+		addDNSZoneContributorRoleToId(ctx, baseDomain, certManagerIdentity, "cert", "1")
+		addDNSZoneContributorRoleToId(ctx, baseDomain, externalDnsIdentity, "dns", "1")
+		addDNSZoneContributorRoleToId(ctx, baseDomain, traefikIdentity, "traefik", "1")
+		addDNSZoneContributorRoleToId(ctx, configDomain, certManagerIdentity, "cert", "2")
+		addDNSZoneContributorRoleToId(ctx, configDomain, externalDnsIdentity, "dns", "2")
+		addDNSZoneContributorRoleToId(ctx, configDomain, traefikIdentity, "traefik", "2")
 		addStorageBlobDataContributorToId(ctx, titeenipeliClusterIdentity, "titeenipelicluster", blobID)
 		addResourceGroupReaderRoleToId(ctx, k8sCluster.ResourceGroup, externalDnsIdentity, "dns")
 
@@ -70,7 +78,8 @@ func main() {
 		installMonitoring(ctx, k8sProvider)
 
 		// Exports
-		ctx.Export("domainName", domain.Name)
+		ctx.Export("domainName", baseDomain.Name)
+		ctx.Export("configDomainName", configDomain.Name)
 		ctx.Export("certManagerIdentityClientId", pulumi.ToSecret(certManagerIdentity.UserAssignedIdentity.ClientId))
 		ctx.Export("titeenipeliClusterIdentity", pulumi.ToSecret(titeenipeliClusterIdentity.UserAssignedIdentity.ClientId))
 		ctx.Export("externalDnsIdentityClientId", pulumi.ToSecret(externalDnsIdentity.UserAssignedIdentity.ClientId))

@@ -11,7 +11,42 @@ spec:
   commonName: "{{ .Values.hostedZoneName }}"
   dnsNames:
     - "{{ .Values.hostedZoneName }}"
-    - "*.{{ .Values.hostedZoneName }}"
+    - "43EHAJBKPOAH3GKAJ53C.{{ .Values.hostedZoneName }}"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-tls-ctf
+  namespace: traefik
+spec:
+  secretName: wildcard-tls-ctf
+  issuerRef:
+    name: letsencrypt-production
+    kind: ClusterIssuer
+  commonName: "XTF37CVY50TBZGKQVNRT.{{ .Values.hostedZoneName }}"
+  dnsNames:
+    - "XTF37CVY50TBZGKQVNRT.{{ .Values.hostedZoneName }}"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-config-tls
+  namespace: traefik
+spec:
+  secretName: wildcard-config-tls
+  issuerRef:
+    name: letsencrypt-production-config
+    kind: ClusterIssuer
+  commonName: "{{ .Values.hostedConfigZoneName }}"
+  dnsNames:
+    - "{{ .Values.hostedConfigZoneName }}"
+    - "*.{{ .Values.hostedConfigZoneName }}"
+  secretTemplate:
+    annotations:
+      reflector.v1.k8s.emberstack.com/reflection-allowed: "true"
+      reflector.v1.k8s.emberstack.com/reflection-allowed-namespaces: "monitoring"
+      reflector.v1.k8s.emberstack.com/reflection-auto-enabled: "true"
+      reflector.v1.k8s.emberstack.com/reflection-auto-namespaces: "monitoring"
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer

@@ -89,7 +89,7 @@ grafana:
     profiles.grafana.com/memory.port: "9094"
     profiles.grafana.com/goroutine.scrape: "true"
     profiles.grafana.com/goroutine.port: "9094"
-    
+
 mimir:
   enabled: true
   metaMonitoring:
@@ -192,3 +192,26 @@ loki:
     enabled: true
     labels:
       release: kube-prometheus-stack
+  compactor:
+    enabled: true
+    persistence:
+      enabled: true
+  distributor:
+    replicas: 3
+    maxUnavailable: 2
+  indexGateway:
+    enabled: true
+    maxUnavailable: 1
+    replicas: 2
+  ingester:
+    replicas: 3
+    maxUnavailable: 2
+  querier:
+    replicas: 3
+    maxUnavailable: 2
+  queryFrontend:
+    replicas: 2
+    maxUnavailable: 1
+  queryScheduler:
+    enabled: true
+    replicas: 2

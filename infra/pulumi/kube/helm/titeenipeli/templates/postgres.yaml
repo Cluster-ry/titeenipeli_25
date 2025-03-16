@@ -14,7 +14,6 @@ spec:
     enablePodMonitor: true
   storage:
     size: 10Gi
-    #storageClass: ultra-disk-sc
   managed:
     roles:
     - name: app
@@ -26,10 +25,6 @@ spec:
       shared_buffers: "512MB"
       max_connections: "1000"
       log_min_duration_statement: "3500"
-      "pgaudit.log": "all, -misc"
-      "pgaudit.log_catalog": "off"
-      "pgaudit.log_parameter": "on"
-      "pgaudit.log_relation": "on"
   backup:
     barmanObjectStore:
       destinationPath: {{ .Values.dbBackupContainer }}
@@ -45,12 +40,10 @@ spec:
 ---
 
 apiVersion: postgresql.cnpg.io/v1
-kind: ScheduledBackup
+kind: Backup
 metadata:
-  name: {{ include "titeenipeli.name" . }}-cluster
+  name: {{ include "titeenipeli.name" . }}-cluster-final
   labels: {{- include "titeenipeli.labels" . | nindent 4 }}
 spec:
-  schedule: "0 * * * * *" # every hour
-  backupOwnerReference: self
   cluster:
     name: {{ include "titeenipeli.name" . }}-cluster

@@ -10,7 +10,7 @@ import (
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
-func addDNSZoneContributorRoleToId(ctx *pulumi.Context, domain *dns.Zone, id *workloadIdentities, name pulumi.String) error {
+func addDNSZoneContributorRoleToId(ctx *pulumi.Context, domain *dns.Zone, id *workloadIdentities, name pulumi.String, mod pulumi.String) error {
 	primary, err := core.LookupSubscription(ctx, nil, nil)
 	if err != nil {
 		return err
@@ -19,7 +19,7 @@ func addDNSZoneContributorRoleToId(ctx *pulumi.Context, domain *dns.Zone, id *wo
 	// Role for DNS Zone Contributor
 	roleDefinitionId := pulumi.String(fmt.Sprintf("%s/providers/Microsoft.Authorization/roleDefinitions/befefa01-2a29-4197-83a8-272ff33ce314", primary.Id))
 
-	_, err = authorization.NewRoleAssignment(ctx, fmt.Sprintf("dnsZoneContributorAssignment_%s", name), &authorization.RoleAssignmentArgs{
+	_, err = authorization.NewRoleAssignment(ctx, fmt.Sprintf("dnsZoneContributorAssignment_%s_%s", name, mod), &authorization.RoleAssignmentArgs{
 		PrincipalId:      id.UserAssignedIdentity.PrincipalId,
 		PrincipalType:    pulumi.String("ServicePrincipal"),
 		RoleDefinitionId: roleDefinitionId,

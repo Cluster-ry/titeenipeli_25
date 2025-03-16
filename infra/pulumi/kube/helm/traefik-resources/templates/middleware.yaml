@@ -13,8 +13,18 @@ metadata:
   namespace: titeenipeli
 spec:
   rateLimit:
-    average: 30
-    burst: 45
-    period: 10s
+    average: 15
+    burst: 20
+    period: 1m
     sourceCriterion:
       requestHeaderName: "cookie"
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ipwhitelist
+  namespace: titeenipeli
+spec:
+  ipWhiteList:
+    sourceRange:
+      - 192.168.0.1

@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "titeenipeli.frontendLabels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
       {{- include "titeenipeli.frontendSelectorLabels" . | nindent 6 }}
@@ -97,7 +97,7 @@ spec:
             - name: SQLCONNSTR_Database
               value: Server=$(DB_ADDRESS);Port=5432;Userid=$(DB_USERNAME);Timeout=15;Database=$(DB_USERNAME);Password=$(DB_PASS);Pooling=true;Minimum Pool Size=0;Maximum Pool Size=1000;
             - name: CORECLR_ENABLE_PROFILING
-              value: "1"
+              value: "0"
             - name: CORECLR_PROFILER
               value: "{BD1A650D-AC5D-4896-B64F-D6FA25D6B26A}"
             - name: CORECLR_PROFILER_PATH
@@ -105,12 +105,12 @@ spec:
             - name: LD_PRELOAD
               value: "/dotnet/Pyroscope.Linux.ApiWrapper.x64.so"
             - name: PYROSCOPE_PROFILING_ENABLED
-              value: "1"
+              value: "0"
             - name: PYROSCOPE_APPLICATION_NAME
               value: titeenipeli.dotnet.app
             - name: PYROSCOPE_SERVER_ADDRESS
               value: http://pyroscope.pyroscope.svc.cluster.local.:4040/
-          image: titeenipelitacr.azurecr.io/backend@sha256:b348f2d56a90d80d67cfaefd15ec6f881c0e12bf03b6e7075bc2a36c7b97f034
+          image: titeenipelitacr.azurecr.io/backend@sha256:45133bda76d5c60f621025655b462dffaedc991df0142d7ebd1fd2b7f006357f
           name: backend
           volumeMounts:
             - name: certs
@@ -125,6 +125,15 @@ spec:
       - key: "dedicated"
         value: "node"
         effect: "NoSchedule"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: dedicated
+                  operator: In
+                  values:
+                  - titeenipeli
       volumes:
         - name: certs
           secret:
@@ -169,7 +178,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "titeenipeli.name" . }}-secret
                   key: tg-token
-          image: titeenipelitacr.azurecr.io/bot:latest
+          image: titeenipelitacr.azurecr.io/bot@sha256:c367a5a085b18a7512966e7cecce85b907d4af84b00f08a41f12198d7a93be4a
           command: ['sh', '-c', 'update-ca-certificates && dotnet Titeenipeli.Bot.dll']
           volumeMounts:
             - name: ca-cert-volume

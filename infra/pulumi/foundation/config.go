@@ -14,8 +14,11 @@ type Config struct {
 	AdminUserName    string
 	SshPublicKey     pulumi.StringInput
 	NodeCount        int
+	MaxNodeCount     int
 	NodeSize         string
+	BackNodeSize     string
 	BaseDomain       string
+	BaseConfigDomain string
 	ClusterName      string
 }
 
@@ -73,14 +76,29 @@ func configure(ctx *pulumi.Context) (Config, error) {
 		out.NodeCount = 1
 	}
 
+	out.MaxNodeCount = cfg.GetInt("MaxNodeCount")
+	if out.MaxNodeCount == 0 {
+		out.MaxNodeCount = 5
+	}
+
 	out.NodeSize = cfg.Get("nodeSize")
 	if out.NodeSize == "" {
-		out.NodeSize = "Standard_D2pds_v6"
+		out.NodeSize = "Standard_D4ads_v5"
+	}
+
+	out.BackNodeSize = cfg.Get("BackNodeSize")
+	if out.BackNodeSize == "" {
+		out.BackNodeSize = "Standard_F4s_v2"
 	}
 
 	out.BaseDomain = cfg.Get("domain")
 	if out.BaseDomain == "" {
-		out.BaseDomain = "cluster2017.fi"
+		out.BaseDomain = "titeen.it"
+	}
+
+	out.BaseConfigDomain = cfg.Get("configDomain")
+	if out.BaseConfigDomain == "" {
+		out.BaseConfigDomain = "cluster2017.fi"
 	}
 
 	out.ClusterName = cfg.Get("clusterName")
