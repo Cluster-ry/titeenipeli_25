@@ -8,12 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Titeenipeli.Common\Titeenipeli.Common.csproj"/>
+        <ProjectReference Include="..\Titeenipeli.Common\Titeenipeli.Common.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7"/>
-        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.5"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+        <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.5" />
     </ItemGroup>
 
     <ItemGroup>
